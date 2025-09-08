@@ -1,0 +1,132 @@
+.App {
+    text-align: center;
+}
+
+.App-header {
+    background-color: #282c34;
+    padding: 20px;
+    color: white;
+}
+
+.add-task-form {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.add-task-form input {
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.add-task-form select {
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.add-task-form button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    background-color: #282c34;
+    color: white;
+    cursor: pointer;
+}
+
+.task-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.task {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px;
+    width: 80%;
+    max-width: 500px;
+    text-align: left;
+}
+
+.task.completed {
+    background-color: #e0e0e0;
+    text-decoration: line-through;
+}
+
+.task h3 {
+    margin-top: 0;
+}
+
+.task.collapsed {
+    max-height: 60px;
+    overflow: hidden;
+}
+
+.task.drag-over {
+    border-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-controls button {
+    margin-left: 8px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+}
+
+.task-controls button:hover {
+    background: #f0f0f0;
+}
+
+.task ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.task li.completed {
+    text-decoration: line-through;
+}
+
+.edit-task-form {
+    display: flex;
+    align-items: center;
+}
+
+.edit-task-form input, .edit-task-form select {
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.add-subtask-form {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.add-subtask-form input {
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.task button {
+    margin-left: 10px;
+}
