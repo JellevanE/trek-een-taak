@@ -3,22 +3,37 @@
     {
       "id": 1,
       "description": "My very first task",
-      "priority": "medium",
+      "priority": "high",
       "sub_tasks": [
         {
           "id": 1,
           "description": "I want more tasks",
-          "completed": false
+          "completed": true
         },
         {
           "id": 2,
           "description": "This is finished",
           "completed": true
+        },
+        {
+          "id": 3,
+          "description": "Make this better readable",
+          "completed": true
+        },
+        {
+          "id": 4,
+          "description": "this should be draggable",
+          "completed": true
+        },
+        {
+          "id": 5,
+          "description": "add this task too",
+          "completed": true
         }
       ],
-      "nextSubtaskId": 3,
+      "nextSubtaskId": 6,
       "due_date": "2025-09-08",
-      "completed": false
+      "completed": true
     },
     {
       "id": 2,
@@ -27,17 +42,62 @@
       "sub_tasks": [],
       "nextSubtaskId": 1,
       "due_date": "2025-09-08",
-      "completed": false
+      "completed": true
     },
     {
       "id": 3,
       "description": "Updatdieteiad",
       "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "new task",
+          "completed": false
+        },
+        {
+          "id": 2,
+          "description": "second new task",
+          "completed": false
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-09-08",
+      "completed": false
+    },
+    {
+      "id": 4,
+      "description": "hardest taskt",
+      "priority": "high",
       "sub_tasks": [],
       "nextSubtaskId": 1,
       "due_date": "2025-09-08",
       "completed": false
+    },
+    {
+      "id": 5,
+      "description": "Make more than this",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "task 1 ",
+          "completed": false
+        },
+        {
+          "id": 2,
+          "description": "task 2",
+          "completed": false
+        },
+        {
+          "id": 3,
+          "description": "task 3",
+          "completed": false
+        }
+      ],
+      "nextSubtaskId": 4,
+      "due_date": "2025-09-08",
+      "completed": false
     }
   ],
-  "nextId": 4
+  "nextId": 6
 }

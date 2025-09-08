@@ -1,62 +1,122 @@
+
 .App {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
+    padding: 24px 12px 48px;
+    box-sizing: border-box;
 }
 
 .App-header {
-    background-color: #282c34;
-    padding: 20px;
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto 18px;
+    padding: 18px 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+    border: 1px solid rgba(255,255,255,0.03);
+    border-left: 3px solid var(--accent-pink);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 18px rgba(155,92,255,0.06) inset;
+    position: relative;
+}
+
+.App-header h1 {
+    margin: 0;
     color: white;
+    letter-spacing: 1px;
+    font-size: 18px;
+    text-shadow: 0 0 8px rgba(0,240,255,0.24), 0 0 16px rgba(255,46,196,0.08);
+}
+
+.App-header .subtitle {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
 }
 
 .add-task-form {
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    align-items:center;
+    margin: 12px 0 18px;
 }
 
-.add-task-form input {
-    margin-right: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.add-task-form select {
-    margin-right: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.add-task-form button {
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    background-color: #282c34;
+.add-task-form input,
+.add-task-form select,
+.edit-task-form input,
+.edit-task-form select,
+.add-subtask-form input{
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
     color: white;
+    padding: 10px 12px;
+    border-radius: 6px;
+    outline: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.6) inset;
+    min-width: 160px;
+}
+
+.add-task-form input::placeholder { color: rgba(255,255,255,0.28);} 
+
+.btn-primary {
+    background: linear-gradient(90deg,var(--accent-cyan),var(--accent-pink));
+    color: #001018;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,240,255,0.08), 0 0 14px rgba(255,46,196,0.06);
+    font-weight: 700;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px dashed rgba(255,255,255,0.04);
+    padding: 8px 10px;
+    border-radius: 6px;
     cursor: pointer;
 }
 
 .task-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 20px;
+    gap: 12px;
+    width:100%;
+    max-width:980px;
+    padding: 6px;
+    box-sizing:border-box;
 }
 
 .task {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 10px;
-    width: 80%;
-    max-width: 500px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
+    border-radius: 8px;
+    padding: 14px;
+    margin: 0;
     text-align: left;
+    border: 1px solid rgba(155,92,255,0.12);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 18px rgba(155,92,255,0.04) inset;
+}
+
+.task::before{
+    content: "";
+    position:absolute;
+    left:-40%;
+    top:-60%;
+    width:200%;
+    height:200%;
+    background: radial-gradient(circle at 20% 20%, rgba(0,240,255,0.03), transparent 10%), radial-gradient(circle at 80% 80%, rgba(255,46,196,0.02), transparent 15%);
+    pointer-events:none;
 }
 
 .task.completed {
-    background-color: #e0e0e0;
+    opacity: 0.6;
+    filter: grayscale(20%);
     text-decoration: line-through;
 }
 
@@ -65,46 +125,169 @@
 }
 
 .task.collapsed {
-    max-height: 60px;
+    max-height: 84px;
     overflow: hidden;
 }
 
 .task.drag-over {
-    border-color: #007bff;
-    box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+    outline: 2px solid rgba(0,240,255,0.14);
+    transform: translateY(-2px);
 }
 
 .task-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
 }
+
+.task-header .left{ display:flex; align-items:center; gap:8px; flex:1; min-width:0 }
+.task-header .right{ display:flex; align-items:center; justify-content:flex-end }
 
 .task-controls button {
     margin-left: 8px;
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    background: white;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 0;
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
     cursor: pointer;
 }
 
-.task-controls button:hover {
-    background: #f0f0f0;
+.task-controls .danger {
+    color: #ff7ea6;
 }
 
 .task ul {
     list-style-type: none;
-    padding-left: 20px;
+    padding-left: 12px;
+    margin: 8px 0 0;
 }
+
+.task-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+
+.subtask-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px }
+.subtask-desc.small{ font-size:12px }
+.task ul { padding-left: 8px }
+
+.task li { margin:8px 0; padding:6px 8px; border-radius:6px; }
+
+/* ensure top-level drag handle is visually quieter; override for top handle */
+.task > div > .drag-handle.top{ opacity:0; transform:translateX(-6px); }
+.task:hover > div > .drag-handle.top{ opacity:1; transform:translateX(0) }
+
+.btn-small{ padding:6px 8px; font-size:12px; border-radius:6px }
+
+/* provide a clear inset outline for grouped fields */
+.task .panel {
+    border: 1px solid rgba(255,255,255,0.03);
+    padding:8px;
+    border-radius:6px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
+}
+
+/* Base button styles to keep UI consistent */
+button{
+    font-family: inherit;
+    font-size: 13px;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform .06s ease, box-shadow .08s ease, opacity .08s ease;
+}
+
+/* utility classes available: .btn-primary, .btn-ghost, .btn-danger, .btn-small */
+
+.btn-primary{
+    background: linear-gradient(90deg,var(--accent-cyan),var(--accent-pink));
+    color: #001018;
+    box-shadow: 0 8px 24px rgba(0,240,255,0.06), 0 0 14px rgba(255,46,196,0.06);
+}
+
+.btn-ghost{
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+.btn-danger, .danger{ 
+    background: linear-gradient(90deg,#ff6b88,#ff2ec4);
+    color: #001018;
+}
+
+button:active{ transform: translateY(1px) }
+button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
+
+/* Task info hierarchy */
+.task h3{ color: white; font-size:16px; margin:0; line-height:1.1; text-overflow:ellipsis; white-space:nowrap; overflow:hidden }
+.priority-tag{ font-size:11px; padding:6px 10px; }
+.task-details{ margin-top:8px; display:flex; gap:12px; flex-wrap:wrap }
+.task-details .muted{ color:var(--muted); font-size:12px }
+.task-details .small{ font-size:11px; color:var(--muted) }
+
+/* Drag handle and insertion indicator */
+.drag-handle {
+    width:18px;
+    height:18px;
+    display:inline-block;
+    margin-right:8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06));
+    border-radius:4px;
+    border:1px solid rgba(255,255,255,0.03);
+    cursor:grab;
+    display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10px
+}
+
+/* hide the top-level task hamburger by default; show on hover to reduce visual clutter */
+.task > div > .drag-handle:first-child{ opacity:0; transform:translateX(-6px); transition:opacity .12s, transform .12s }
+.task:hover > div > .drag-handle:first-child{ opacity:1; transform:translateX(0) }
+
+.task[data-dragging="true"]{ opacity:0.5 }
+
+.insert-indicator {
+    height: 6px;
+    background: linear-gradient(90deg, rgba(0,240,255,0.16), rgba(255,46,196,0.14));
+    border-radius:3px;
+    margin:4px 0;
+    transition: opacity .12s;
+}
+
+.add-subtask-button.large{
+    padding: 10px 14px;
+    font-size:14px;
+    border-radius:10px;
+}
+
+.drag-handle[draggable]{ cursor:grab }
+.insert-indicator{ z-index:2 }
+
+.add-subtask-button{
+    background: linear-gradient(90deg,var(--accent-purple),var(--accent-pink));
+    color: #001018;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+}
+
+.add-subtask-form button{ padding:6px 8px }
 
 .task li.completed {
     text-decoration: line-through;
 }
 
 .edit-task-form {
-    display: flex;
-    align-items: center;
+    display:flex;
+    gap:8px;
+    align-items:center;
 }
 
 .edit-task-form input, .edit-task-form select {
@@ -115,8 +298,9 @@
 }
 
 .add-subtask-form {
-    display: flex;
-    align-items: center;
+    display:flex;
+    gap:8px;
+    align-items:center;
     margin-top: 10px;
 }
 
@@ -128,5 +312,18 @@
 }
 
 .task button {
-    margin-left: 10px;
+    margin-left: 8px;
 }
+
+/* small neon tag for priority */
+.priority-tag {
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:11px;
+    color:#001018;
+    font-weight:700;
+}
+.priority-low{ background: linear-gradient(90deg,#9b5cff,#6bf2ff);} 
+.priority-medium{ background: linear-gradient(90deg,#ffd36b,#ff6ad8);} 
+.priority-high{ background: linear-gradient(90deg,#ff6161,#ff2ec4);} 
