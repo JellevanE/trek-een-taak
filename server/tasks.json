@@ -1,0 +1,43 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "description": "My very first task",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "I want more tasks",
+          "completed": false
+        },
+        {
+          "id": 2,
+          "description": "This is finished",
+          "completed": true
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-09-08",
+      "completed": false
+    },
+    {
+      "id": 2,
+      "description": "My second task hurray",
+      "priority": "medium",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-09-08",
+      "completed": false
+    },
+    {
+      "id": 3,
+      "description": "Updatdieteiad",
+      "priority": "medium",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-09-08",
+      "completed": false
+    }
+  ],
+  "nextId": 4
+}
