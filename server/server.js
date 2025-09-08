@@ -181,6 +181,8 @@ app.patch('/api/tasks/:id/status', (req, res) => {
 
     const now = new Date().toISOString();
     task.status = status;
+    // maintain legacy `completed` boolean for backward compatibility
+    task.completed = (status === 'done');
     task.updated_at = now;
     if (!Array.isArray(task.status_history)) task.status_history = [];
     task.status_history.push({ status, at: now, note: note || null });
@@ -189,6 +191,36 @@ app.patch('/api/tasks/:id/status', (req, res) => {
         res.json(task);
     } catch (e) {
         res.status(500).send('Failed to persist status change');
+    }
+});
+
+// patch status for a subtask
+app.patch('/api/tasks/:id/subtasks/:subtask_id/status', (req, res) => {
+    const { status, note } = req.body || {};
+    const allowed = ['todo', 'in_progress', 'blocked', 'done'];
+    if (!status || !allowed.includes(status)) return res.status(400).send('Invalid status');
+
+    const tasks = readTasks();
+    const task = tasks.tasks.find(t => t.id === parseInt(req.params.id));
+    if (!task) return res.status(404).send('Task not found');
+
+    const subId = parseInt(req.params.subtask_id);
+    const subtask = (task.sub_tasks || []).find(s => s.id === subId);
+    if (!subtask) return res.status(404).send('Subtask not found');
+
+    const now = new Date().toISOString();
+    subtask.status = status;
+    // maintain legacy `completed` boolean
+    subtask.completed = (status === 'done');
+    subtask.updated_at = now;
+    if (!Array.isArray(subtask.status_history)) subtask.status_history = [];
+    subtask.status_history.push({ status, at: now, note: note || null });
+    try {
+        writeTasks(tasks);
+        // return the whole parent task for client convenience
+        res.json(task);
+    } catch (e) {
+        res.status(500).send('Failed to persist subtask status change');
     }
 });
 

@@ -5,7 +5,8 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 24px 12px 48px;
+    /* leave room for the fixed global progress bar at the top */
+    padding: 60px 12px 48px;
     box-sizing: border-box;
 }
 
@@ -20,6 +21,50 @@
     border-radius: 8px;
     box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 18px rgba(155,92,255,0.06) inset;
     position: relative;
+}
+
+/* Global sticky progress bar at the top of the app (always visible) */
+.global-progress-sticky{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    z-index: 1500;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events: none; /* allow clicks to pass through except on children */
+    background: linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.12));
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.global-progress-inner{
+    pointer-events: auto;
+    width: min(980px, 98%);
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.global-progress-label{ font-size:12px; color:var(--muted); min-width:72px }
+/* the track is a clear full-width bar to indicate daily completion */
+.global-progress-track{ flex:1; height:10px; background: rgba(255,255,255,0.03); border-radius: 999px; overflow:hidden; border: 1px solid rgba(255,255,255,0.03) }
+.global-progress-fill{ height:100%; background: linear-gradient(90deg,var(--accent-cyan),var(--accent-purple)); transition: width .28s ease }
+.global-progress-percent{ min-width:44px; text-align:right; font-weight:700; color:white }
+
+/* tooltips for progress bars */
+.global-progress-track, .task-progress-bar{ position:relative }
+.tooltip{ position:absolute; top:-36px; left:50%; transform:translateX(-50%) scale(.92); background: rgba(0,0,0,0.75); color:white; padding:6px 8px; border-radius:6px; font-size:12px; white-space:nowrap; opacity:0; pointer-events:none; transition: opacity .18s ease, transform .18s ease }
+.global-progress-track:hover .tooltip, .task-progress-bar:hover .tooltip{ opacity:1; transform:translateX(-50%) scale(1) }
+
+/* animated fill easing and micro bounce */
+.task-progress-fill, .global-progress-fill{ transition: width .5s cubic-bezier(.2,.9,.2,1), background .25s ease }
+.task-progress-fill{ box-shadow: 0 6px 18px rgba(0,0,0,0.45) inset }
+
+/* small responsive tweaks */
+@media (max-width:600px){
+    .global-progress-percent{ display:none }
+    .global-progress-label{ min-width:50px }
 }
 
 .App-header h1 {
@@ -223,6 +268,48 @@ button{
     color: #001018;
 }
 
+/* start and complete buttons distinct colors */
+.btn-start{ background: linear-gradient(90deg,#3b82f6,#60a5fa); color:#001018; }
+.btn-complete{ background: linear-gradient(90deg,#22c55e,#16a34a); color:#001018; }
+
+/* Visual cue when a task or subtask is started */
+.task.started{ box-shadow: 0 10px 30px rgba(66,153,225,0.08), 0 0 24px rgba(99,102,241,0.04) inset; border-color: rgba(59,130,246,0.12); transform: translateY(-2px); transition: transform .18s ease, box-shadow .22s ease }
+.task .subtask-desc.started{ font-weight:700; color:#fff }
+.task .subtask-desc.in-progress{ color: #bfe6ff }
+
+/* more pronounced progress fill animation */
+.task-progress-fill, .global-progress-fill{ transition: width .6s cubic-bezier(.2,.9,.2,1), background .3s ease }
+
+/* pulse animation for status change feedback */
+.pulse {
+    animation: pulse-anim .6s ease forwards;
+}
+.pulse-subtle {
+    animation: pulse-subtle-anim .34s cubic-bezier(.2,.9,.3,1) forwards;
+}
+@keyframes pulse-anim{
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+    30% { transform: scale(1.02); box-shadow: 0 10px 30px rgba(0,0,0,0.18); }
+    100% { transform: scale(1); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+}
+@keyframes pulse-subtle-anim{
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    30% { opacity: 0.98; transform: translateY(-2px) scale(1.005); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* glow for full task completion */
+.glow {
+    animation: glow-anim 1.2s cubic-bezier(.2,.9,.2,1) forwards;
+}
+@keyframes glow-anim {
+    0% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+    20% { box-shadow: 0 0 44px rgba(99,102,241,0.30), 0 10px 44px rgba(99,102,241,0.14) inset; }
+    50% { box-shadow: 0 0 38px rgba(155,92,255,0.28), 0 8px 30px rgba(99,102,241,0.12) inset; }
+    80% { box-shadow: 0 0 26px rgba(99,102,241,0.18), 0 4px 18px rgba(99,102,241,0.08) inset; }
+    100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+}
+
 button:active{ transform: translateY(1px) }
 button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 
@@ -232,6 +319,13 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 .task-details{ margin-top:8px; display:flex; gap:12px; flex-wrap:wrap }
 .task-details .muted{ color:var(--muted); font-size:12px }
 .task-details .small{ font-size:11px; color:var(--muted) }
+
+/* Per-task progress */
+.task-progress-wrap{ width:100%; margin-bottom:8px }
+.task-progress{ display:flex; align-items:center; gap:8px }
+.task-progress-bar{ flex:1; height:10px; background: rgba(255,255,255,0.03); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.03) }
+.task-progress-fill{ height:100%; background: linear-gradient(90deg,#9b5cff,#ff2ec4); transition: width .24s ease }
+.task-progress-meta{ min-width:44px; font-weight:700; color:var(--muted); font-size:13px }
 
 /* Drag handle and insertion indicator */
 .drag-handle {

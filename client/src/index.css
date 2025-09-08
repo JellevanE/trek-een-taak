@@ -7,6 +7,16 @@
   --muted: #9aa3b2;
 }
 
+/* light theme variables override */
+[data-theme="light"] :root, [data-theme="light"] {
+  --bg-dark: #f6fafc;
+  --panel-dark: #ffffff;
+  --accent-cyan: #0ea5e9;
+  --accent-pink: #e879f9;
+  --accent-purple: #7c3aed;
+  --muted: #415161;
+}
+
 html,body,#root{
   height:100%;
 }

@@ -2,6 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
+    // theme: 'dark' | 'light'
+    const [theme, setTheme] = useState(() => {
+        try { return localStorage.getItem('theme') || 'dark' } catch { return 'dark' }
+    });
+
+    useEffect(() => {
+        try { localStorage.setItem('theme', theme); } catch {}
+        // set data-theme on document body/root so CSS can react
+        try { document.documentElement.setAttribute('data-theme', theme); } catch {}
+    }, [theme]);
     const [tasks, setTasks] = useState([]);
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('medium');
@@ -23,6 +33,84 @@ function App() {
             .then(data => setTasks(data.tasks))
             .catch(error => console.error('Error fetching tasks:', error));
     }, []);
+
+    // weights by priority: low=1.0, medium=1.15, high=1.30 (approx +15% per grade)
+    const priorityWeight = (p) => {
+        if (!p) return 1.0;
+        const s = String(p).toLowerCase();
+        switch (s) {
+            case 'low': return 1.0;
+            case 'medium': return 1.15;
+            case 'high': return 1.30;
+            default: return 1.0;
+        }
+    };
+
+    // subtask weight: prefer numeric .weight, else sub.priority/difficulty, else parent priority
+    const subtaskWeight = (sub, parent) => {
+        if (!sub) return 1.0;
+        if (typeof sub.weight === 'number') return Math.max(0.1, sub.weight);
+        if (sub.priority) return priorityWeight(sub.priority);
+        if (sub.difficulty) return priorityWeight(sub.difficulty);
+        return priorityWeight(parent && parent.priority ? parent.priority : 'medium');
+    };
+
+    // compute weighted progress for a task (0-100). If subtasks exist, use their weights.
+    const getTaskProgress = (task) => {
+        if (!task) return 0;
+        const subs = Array.isArray(task.sub_tasks) ? task.sub_tasks : [];
+        if (subs.length > 0) {
+            let weightedDone = 0;
+            let weightSum = 0;
+            subs.forEach(sub => {
+                const w = subtaskWeight(sub, task);
+                weightSum += w;
+                const done = (sub.status === 'done' || sub.completed) ? 1 : 0;
+                weightedDone += done * w;
+            });
+            const pct = weightSum > 0 ? Math.round((weightedDone / weightSum) * 100) : 0;
+            return pct;
+        }
+        // fallback to status mapping for tasks without subtasks
+        switch (task.status) {
+            case 'done': return 100;
+            case 'in_progress': return 50;
+            case 'blocked': return 25;
+            default: return 0;
+        }
+    };
+
+    // compute weighted global progress for today's tasks (or all tasks if none match)
+    const getGlobalProgress = () => {
+        const today = new Date().toISOString().split('T')[0];
+        const dayTasks = tasks.filter(t => t && t.due_date === today);
+        const pool = dayTasks.length > 0 ? dayTasks : tasks;
+        if (!pool || pool.length === 0) return { percent: 0, count: 0 };
+        let weightSum = 0;
+        let weightedProgressSum = 0;
+        pool.forEach(t => {
+            // task base weight
+            const baseW = priorityWeight(t.priority);
+            // include subtask weights so tasks with many/heavy subtasks count more
+            const subs = Array.isArray(t.sub_tasks) ? t.sub_tasks : [];
+            let subWeights = 0;
+            subs.forEach(s => { subWeights += subtaskWeight(s, t); });
+            const taskTotalWeight = baseW + subWeights;
+            weightSum += taskTotalWeight;
+            weightedProgressSum += (getTaskProgress(t) || 0) * taskTotalWeight;
+        });
+        const percent = weightSum > 0 ? Math.round(weightedProgressSum / weightSum) : 0;
+        return { percent, count: pool.length };
+    };
+
+    // pick a 5-segment gradient or color by percentage
+    const progressColor = (pct) => {
+        if (pct >= 80) return 'linear-gradient(90deg, #23d160, #36d7b7)'; // green-teal
+        if (pct >= 60) return 'linear-gradient(90deg, #a0e39b, #bae637)'; // light green
+        if (pct >= 40) return 'linear-gradient(90deg, #ffd666, #ffb36b)'; // amber
+        if (pct >= 20) return 'linear-gradient(90deg, #ff7a45, #ff9278)'; // orange
+        return 'linear-gradient(90deg, #ff4d4f, #ff758f)'; // red
+    };
 
     const addTask = () => {
     if (!description || description.trim() === '') return;
@@ -224,22 +312,68 @@ function App() {
             .catch(error => console.error('Error updating task:', error));
     };
 
-    const completeTask = (id) => {
-        updateTask(id, { completed: true });
+    const [toasts, setToasts] = useState([]);
+    const [pulsingTasks, setPulsingTasks] = useState({}); // value: 'full' | 'subtle'
+    const [pulsingSubtasks, setPulsingSubtasks] = useState({});
+    const [glowTasks, setGlowTasks] = useState({});
+
+    const pushToast = (msg, type = 'info', timeout = 3000) => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, msg, type }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), timeout);
     };
 
-    const completeSubTask = (taskId, subTaskId) => {
-        // call the subtask-specific endpoint
-        fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}`, {
-            method: 'PUT',
+    const setTaskStatus = (id, status, note) => {
+        fetch(`/api/tasks/${id}/status`, {
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ completed: true })
+            body: JSON.stringify({ status, note }),
         })
             .then(res => res.json())
             .then(updatedTask => {
-                setTasks(tasks.map(task => (task.id === taskId ? updatedTask : task)));
+                setTasks(prev => prev.map(t => (t.id === id ? updatedTask : t)));
+                // pulse the task card to indicate direct change (bigger bump)
+                setPulsingTasks(prev => ({ ...prev, [id]: 'full' }));
+                setTimeout(() => setPulsingTasks(prev => { const c = { ...prev }; delete c[id]; return c }), 700);
+                // if the task completed, trigger a glow animation
+                if (status === 'done') {
+                    setGlowTasks(prev => ({ ...prev, [id]: true }));
+                    setTimeout(() => setGlowTasks(prev => { const c = { ...prev }; delete c[id]; return c }), 1400);
+                }
+                pushToast(`Task ${updatedTask.id} set to ${status.replace('_',' ')}`, 'success');
             })
-            .catch(error => console.error('Error completing sub-task:', error));
+            .catch(error => {
+                console.error('Error updating task status:', error);
+                pushToast('Failed to update task status', 'error');
+            });
+    };
+
+    const setSubtaskStatus = (taskId, subTaskId, status, note) => {
+        fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, note })
+        })
+            .then(res => res.json())
+            .then(updatedTask => {
+                setTasks(prev => prev.map(task => (task.id === taskId ? updatedTask : task)));
+                // subtle pulse on parent when a subtask changed
+                setPulsingTasks(prev => ({ ...prev, [taskId]: 'subtle' }));
+                setTimeout(() => setPulsingTasks(prev => { const c = { ...prev }; delete c[taskId]; return c }), 500);
+                // also pulse the specific subtask id for micro-feedback
+                setPulsingSubtasks(prev => ({ ...prev, [`${taskId}:${subTaskId}`]: true }));
+                setTimeout(() => setPulsingSubtasks(prev => { const c = { ...prev }; delete c[`${taskId}:${subTaskId}`]; return c }), 600);
+                // if the parent task is now done (subtask completed caused it), trigger glow
+                if (updatedTask && updatedTask.status === 'done') {
+                    setGlowTasks(prev => ({ ...prev, [taskId]: true }));
+                    setTimeout(() => setGlowTasks(prev => { const c = { ...prev }; delete c[taskId]; return c }), 1400);
+                }
+                pushToast(`Subtask ${subTaskId} updated to ${status.replace('_',' ')}`, 'success');
+            })
+            .catch(error => {
+                console.error('Error updating sub-task status:', error);
+                pushToast('Failed to update subtask status', 'error');
+            });
     };
 
     const handleEditChange = (e) => {
@@ -314,9 +448,30 @@ function App() {
 
     return (
         <div className="App container">
+            {/* Global sticky progress bar for the day */}
+            <div className="global-progress-sticky">
+                <div className="global-progress-inner">
+                    <div className="global-progress-label">Day progress</div>
+                    <div className="global-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={getGlobalProgress().percent} title={`${getGlobalProgress().percent}%`}>
+                        <div
+                            className="global-progress-fill"
+                            style={{ width: `${getGlobalProgress().percent}%`, background: progressColor(getGlobalProgress().percent) }}
+                        />
+                        <div className="tooltip">{getGlobalProgress().percent}%</div>
+                    </div>
+                    <div className="global-progress-percent">{getGlobalProgress().percent}%</div>
+                </div>
+            </div>
             <header className="App-header">
-                <h1>Task Tracker</h1>
-                <div className="subtitle">Task management made easy, but also way harder.</div>
+                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:12}}>
+                    <div>
+                        <h1>Task Tracker</h1>
+                        <div className="subtitle">Task management made easy, but also way harder.</div>
+                    </div>
+                    <div style={{display:'flex', alignItems:'center', gap:8}}>
+                        <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                    </div>
+                </div>
             </header>
             <div className="add-task-form">
                 <input
@@ -337,10 +492,10 @@ function App() {
                 {tasks.map(task => (
                                         <div key={task.id}>
                                             {dragOverTaskId === task.id && dragPosition === 'above' && <div className="insert-indicator" />}
-                                            <div
+                                                <div
                                                 data-dragging={draggedTaskId === task.id}
                                                 key={task.id}
-                                                className={`task ${task.completed ? 'completed' : ''} ${collapsedMap[task.id] ? 'collapsed' : ''} ${dragOverTaskId === task.id ? 'drag-over' : ''}`}
+                                                className={`task ${( (task.status || (task.completed ? 'done' : 'todo')) === 'done' ? 'completed' : '')} ${collapsedMap[task.id] ? 'collapsed' : ''} ${dragOverTaskId === task.id ? 'drag-over' : ''} ${(task.status === 'in_progress') ? 'started' : ''} ${(pulsingTasks[task.id] === 'full') ? 'pulse' : (pulsingTasks[task.id] === 'subtle' ? 'pulse-subtle' : '')} ${glowTasks[task.id] ? 'glow' : ''}`}
                                                 draggable
                                                 onDragStart={e => handleDragStart(e, task.id)}
                                                 onDragEnd={handleDragEnd}
@@ -375,17 +530,29 @@ function App() {
                                                                 </div>
                                                                 {!collapsedMap[task.id] && (
                                                                         <>
-                                                                                <div className="task-details">
+                                                                            <div className="task-progress-wrap">
+                                                                                <div className="task-progress">
+                                                                                        <div className="task-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={getTaskProgress(task)} title={`${getTaskProgress(task)}%`}>
+                                                                                            <div className="task-progress-fill" style={{ width: `${getTaskProgress(task)}%`, background: progressColor(getTaskProgress(task)) }} />
+                                                                                            <div className="tooltip">{getTaskProgress(task)}%</div>
+                                                                                        </div>
+                                                                                        <div className="task-progress-meta">{getTaskProgress(task)}%</div>
+                                                                                    </div>
+                                                                            </div>
+                                                                            <div className="task-details">
                                                                                     <div>
                                                                                         <div className="muted small">Due:</div>
                                                                                         <div className="muted">{task.due_date || '—'}</div>
                                                                                     </div>
                                                                                     <div>
                                                                                         <div className="muted small">Status:</div>
-                                                                                        <div className="muted">{task.completed ? 'Completed' : 'Pending'}</div>
+                                                                                        <div className="muted">{(task.status || (task.completed ? 'done' : 'todo')).replace('_', ' ')}</div>
                                                                                     </div>
                                                                                     <div style={{marginLeft:'auto'}}>
-                                                                                        {!task.completed && <button className="btn-primary btn-small" onClick={() => completeTask(task.id)}>Complete</button>}
+                                                                                        {/* show actions depending on current status */}
+                                                                                        {((task.status || (task.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(task.id, 'in_progress'); }}>Start</button>}
+                                                                                        {((task.status || (task.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(task.id, 'done'); }}>Complete</button>}
+                                                                                        {((task.status || (task.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(task.id, 'todo'); }}>Undo</button>}
                                                                                     </div>
                                                                                 </div>
                                                                         </>
@@ -395,7 +562,7 @@ function App() {
                                         <h4>Sub-tasks:</h4>
                                         <ul>
                                             {task.sub_tasks.map((sub) => (
-                                                <li key={sub.id} className={sub.completed ? 'completed' : ''}>
+                                                <li key={sub.id} className={((sub.status || (sub.completed ? 'done' : 'todo')) === 'done') ? 'completed' : ''}>
                                                     {subDragOver.taskId === task.id && subDragOver.subId === sub.id && subDragOver.position === 'above' && <div className="insert-indicator" />}
                                                     <div
                                                         className="task-row"
@@ -405,10 +572,12 @@ function App() {
                                                     >
                                                         <div style={{display:'flex', alignItems:'center', gap:8, flex:1}}>
                                                             <div className="drag-handle" style={{width:14,height:14,fontSize:9}} draggable onDragStart={e => handleSubDragStart(e, task.id, sub.id)} onDragEnd={handleSubDragEnd}>⋮</div>
-                                                            <div className="subtask-desc" style={{flex:1}}>{sub.description} <small className="small"> - {sub.completed ? 'Completed' : 'Pending'}</small></div>
+                                                            <div className={`subtask-desc ${(sub.status === 'in_progress') ? 'in-progress' : ''} ${(sub.status === 'done') ? 'started' : ''} ${pulsingSubtasks[`${task.id}:${sub.id}`] ? 'pulse-subtle' : ''}`} style={{flex:1}}>{sub.description} <small className="small"> - {(sub.status || (sub.completed ? 'done' : 'todo')).replace('_', ' ')}</small></div>
                                                         </div>
                                                         <div>
-                                                            {!sub.completed && <button className="btn-primary btn-small" onClick={() => completeSubTask(task.id, sub.id)}>Complete</button>}
+                                                            {(((sub.status) || (sub.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSubtaskStatus(task.id, sub.id, 'in_progress'); }}>Start</button>}
+                                                            {(((sub.status) || (sub.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSubtaskStatus(task.id, sub.id, 'done'); }}>Complete</button>}
+                                                            {(((sub.status) || (sub.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSubtaskStatus(task.id, sub.id, 'todo'); }}>Undo</button>}
                                                         </div>
                                                     </div>
                                                     {subDragOver.taskId === task.id && subDragOver.subId === sub.id && subDragOver.position === 'below' && <div className="insert-indicator" />}
@@ -432,6 +601,14 @@ function App() {
                                             </div>
                                             {dragOverTaskId === task.id && dragPosition === 'below' && <div className="insert-indicator" />}
                                         </div>
+                ))}
+            </div>
+            {/* Toasts */}
+            <div style={{position:'fixed', right:12, bottom:12, zIndex:2000}}>
+                {toasts.map(t => (
+                    <div key={t.id} style={{marginTop:8, padding:'8px 12px', borderRadius:6, backgroundColor: t.type === 'error' ? '#f8d7da' : t.type === 'success' ? '#d1e7dd' : '#e2e3e5', color: '#111'}}>
+                        {t.msg}
+                    </div>
                 ))}
             </div>
         </div>
