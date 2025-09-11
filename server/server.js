@@ -9,7 +9,42 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-const TASKS_FILE = path.join(__dirname, 'tasks.json');
+// auth deps and helpers
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+
+function signToken(user) {
+    // minimal token payload
+    return jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+}
+
+function authenticate(req, res, next) {
+    const auth = req.headers && req.headers.authorization;
+    if (!auth) return next(); // allow anonymous requests to fall back to default user
+    const parts = auth.split(' ');
+    if (parts.length !== 2 || parts[0] !== 'Bearer') return sendError(res, 401, 'Invalid auth format');
+    const token = parts[1];
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        // attach user to request
+        req.user = { id: payload.id, username: payload.username };
+        return next();
+    } catch (e) {
+        return sendError(res, 401, 'Invalid or expired token');
+    }
+}
+
+app.use(authenticate);
+
+function ensureAuth(req, res, next) {
+    if (!req.user || typeof req.user.id !== 'number') return sendError(res, 401, 'Authentication required');
+    return next();
+}
+
+// Allow overriding the tasks & users file paths via environment for tests and deployments
+const TASKS_FILE = process.env.TASKS_FILE || path.join(__dirname, 'tasks.json');
+const USERS_FILE = process.env.USERS_FILE || path.join(__dirname, 'users.json');
 
 function readTasks() {
     try {
@@ -18,6 +53,16 @@ function readTasks() {
         }
         const data = fs.readFileSync(TASKS_FILE);
         const parsed = JSON.parse(data);
+
+        // Load users to migrate/assign owner_id if missing
+        let usersData = { users: [], nextId: 1 };
+        try {
+            if (fs.existsSync(USERS_FILE)) {
+                usersData = JSON.parse(fs.readFileSync(USERS_FILE));
+            }
+        } catch (e) {
+            // ignore users read errors; will create default below if needed
+        }
 
         // Backwards-compat: ensure each task has expected fields, subtasks have unique ids and a nextSubtaskId counter
         if (Array.isArray(parsed.tasks)) {
@@ -70,6 +115,12 @@ function readTasks() {
 
                 const nextSubId = maxSubId + 1;
                 if (typeof task.nextSubtaskId !== 'number') task.nextSubtaskId = nextSubId;
+                // ensure owner exists; migrate to default user if missing
+                if (typeof task.owner_id !== 'number') {
+                    // pick the first user if available, otherwise default to 1
+                    const defaultUserId = (Array.isArray(usersData.users) && usersData.users[0] && typeof usersData.users[0].id === 'number') ? usersData.users[0].id : 1;
+                    task.owner_id = defaultUserId;
+                }
             });
         }
 
@@ -87,27 +138,127 @@ function readTasks() {
     }
 }
 
-function writeTasks(data) {
+function readUsers() {
     try {
-        fs.writeFileSync(TASKS_FILE, JSON.stringify(data, null, 2));
+        if (!fs.existsSync(USERS_FILE)) {
+            // create a default local user
+            const now = new Date().toISOString();
+            const defaultUser = {
+                id: 1,
+                username: 'local',
+                password_hash: '',
+                email: null,
+                created_at: now,
+                updated_at: now,
+                profile: { display_name: 'Local User', avatar: null, class: 'adventurer', bio: '' },
+                rpg: { level: 1, xp: 0, hp: 20, mp: 5, coins: 0, streak: 0, achievements: [], inventory: { items: [] } }
+            };
+            const initial = { users: [defaultUser], nextId: 2 };
+            fs.writeFileSync(USERS_FILE, JSON.stringify(initial, null, 2));
+            return initial;
+        }
+        const data = fs.readFileSync(USERS_FILE);
+        const parsed = JSON.parse(data);
+        // basic normalization
+        if (!Array.isArray(parsed.users)) parsed.users = [];
+        if (typeof parsed.nextId !== 'number') {
+            const maxId = parsed.users.reduce((m, u) => (u && typeof u.id === 'number' && u.id > m ? u.id : m), 0);
+            parsed.nextId = maxId + 1;
+        }
+        return parsed;
+    } catch (err) {
+        console.error('Error reading users file:', err);
+        return { users: [], nextId: 1 };
+    }
+}
+
+function writeUsers(data) {
+    const tmpPath = `${USERS_FILE}.tmp`;
+    try {
+        fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2));
+        fs.renameSync(tmpPath, USERS_FILE);
         return true;
     } catch (error) {
+        try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (e) {}
+        console.error('Error writing users file:', error);
+        throw error;
+    }
+}
+
+function sanitizeUser(user) {
+    if (!user) return null;
+    const { password_hash, ...rest } = user;
+    return rest;
+}
+
+// Profile endpoints
+app.get('/api/users/me', ensureAuth, (req, res) => {
+    const users = readUsers();
+    const user = users.users.find(u => u.id === req.user.id);
+    if (!user) return sendError(res, 404, 'User not found');
+    return res.json({ user: sanitizeUser(user) });
+});
+
+app.put('/api/users/me', ensureAuth, (req, res) => {
+    const users = readUsers();
+    const userIndex = users.users.findIndex(u => u.id === req.user.id);
+    if (userIndex === -1) return sendError(res, 404, 'User not found');
+
+    const allowedProfile = ['display_name', 'avatar', 'class', 'bio', 'prefs'];
+    const profile = users.users[userIndex].profile || {};
+    if (req.body && typeof req.body === 'object') {
+        allowedProfile.forEach(k => {
+            if (Object.prototype.hasOwnProperty.call(req.body, k)) {
+                profile[k] = req.body[k];
+            }
+        });
+    }
+    users.users[userIndex].profile = profile;
+    users.users[userIndex].updated_at = new Date().toISOString();
+    try {
+        writeUsers(users);
+        return res.json({ user: sanitizeUser(users.users[userIndex]) });
+    } catch (e) {
+        return sendError(res, 500, 'Failed to persist profile update');
+    }
+});
+
+function writeTasks(data) {
+    // atomic write: write to temp file then rename
+    const tmpPath = `${TASKS_FILE}.tmp`;
+    try {
+        fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2));
+        // rename is atomic on most filesystems when on same mount
+        fs.renameSync(tmpPath, TASKS_FILE);
+        return true;
+    } catch (error) {
+        // cleanup tmp file if it exists
+        try {
+            if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+        } catch (e) {
+            // ignore cleanup errors
+        }
         console.error('Error writing tasks file:', error);
         // throw so callers can surface a 500 to clients
         throw error;
     }
 }
 
-app.get('/api/tasks', (req, res) => {
+function sendError(res, status, message) {
+    return res.status(status).json({ error: message });
+}
+
+app.get('/api/tasks', ensureAuth, (req, res) => {
     const tasks = readTasks();
-    res.json(tasks);
+    const userTasks = (tasks.tasks || []).filter(t => t.owner_id === req.user.id);
+    return res.json({ tasks: userTasks, nextId: tasks.nextId });
 });
 
-app.post('/api/tasks', (req, res) => {
+app.post('/api/tasks', ensureAuth, (req, res) => {
     // basic validation
-    const { description, priority } = req.body || {};
+    const { description, priority, due_date } = req.body || {};
     if (!description || typeof description !== 'string' || !description.trim()) {
-        return res.status(400).send('Missing or invalid description');
+        return sendError(res, 400, 'Missing or invalid description');
     }
     const allowed = ['low', 'medium', 'high'];
     const prio = allowed.includes(priority) ? priority : 'medium';
@@ -120,32 +271,83 @@ app.post('/api/tasks', (req, res) => {
         priority: prio,
         sub_tasks: [],
         nextSubtaskId: 1,
-        due_date: new Date().toISOString().split('T')[0],
+        due_date: typeof due_date === 'string' && due_date ? due_date : new Date().toISOString().split('T')[0],
         status: 'todo',
         order: tasksData.tasks.length,
         created_at: now,
         updated_at: now,
         status_history: [{ status: 'todo', at: now, note: null }],
     };
+    // set owner from authenticated user or default to first user
+    if (req.user && typeof req.user.id === 'number') newTask.owner_id = req.user.id;
+    else {
+        const users = readUsers();
+        newTask.owner_id = (Array.isArray(users.users) && users.users[0] && typeof users.users[0].id === 'number') ? users.users[0].id : 1;
+    }
     tasksData.tasks.push(newTask);
     tasksData.nextId++;
     try {
         writeTasks(tasksData);
         res.status(201).json(newTask);
     } catch (e) {
-        res.status(500).send('Failed to persist new task');
+        res.status(500).json({ error: 'Failed to persist new task' });
     }
 });
 
-app.post('/api/tasks/:id/subtasks', (req, res) => {
+// Auth endpoints
+app.post('/api/users/register', (req, res) => {
+    const { username, password, email } = req.body || {};
+    if (!username || typeof username !== 'string' || !username.trim()) return sendError(res, 400, 'Invalid username');
+    if (!password || typeof password !== 'string' || password.length < 6) return sendError(res, 400, 'Password must be at least 6 characters');
+
+    const usersData = readUsers();
+    // ensure unique username
+    if (usersData.users.some(u => u.username === username.trim())) return sendError(res, 400, 'Username taken');
+
+    const now = new Date().toISOString();
+    const hash = bcrypt.hashSync(password, 10);
+    const user = {
+        id: usersData.nextId,
+        username: username.trim(),
+        password_hash: hash,
+        email: email || null,
+        created_at: now,
+        updated_at: now,
+        profile: { display_name: username.trim(), avatar: null, class: 'adventurer', bio: '' },
+        rpg: { level: 1, xp: 0, hp: 20, mp: 5, coins: 0, streak: 0, achievements: [], inventory: { items: [] } }
+    };
+    usersData.users.push(user);
+    usersData.nextId++;
+    try {
+        fs.writeFileSync(USERS_FILE, JSON.stringify(usersData, null, 2));
+        const token = signToken(user);
+        res.status(201).json({ token, user: { id: user.id, username: user.username, profile: user.profile, rpg: user.rpg } });
+    } catch (e) {
+        console.error('Failed to persist user', e);
+        return sendError(res, 500, 'Failed to create user');
+    }
+});
+
+app.post('/api/users/login', (req, res) => {
+    const { username, password } = req.body || {};
+    if (!username || !password) return sendError(res, 400, 'Missing credentials');
+    const usersData = readUsers();
+    const user = usersData.users.find(u => u.username === username);
+    if (!user) return sendError(res, 401, 'Invalid credentials');
+    if (!bcrypt.compareSync(password, user.password_hash)) return sendError(res, 401, 'Invalid credentials');
+    const token = signToken(user);
+    res.json({ token, user: { id: user.id, username: user.username, profile: user.profile, rpg: user.rpg } });
+});
+
+app.post('/api/tasks/:id/subtasks', ensureAuth, (req, res) => {
     const tasks = readTasks();
     const task = tasks.tasks.find(t => t.id === parseInt(req.params.id));
-    if (!task) return res.status(404).send('Task not found');
+    if (!task || task.owner_id !== req.user.id) return res.status(404).send('Task not found');
 
     // validation
     const { description } = req.body || {};
     if (!description || typeof description !== 'string' || !description.trim()) {
-        return res.status(400).send('Missing or invalid description for subtask');
+        return sendError(res, 400, 'Missing or invalid description for subtask');
     }
 
     if (typeof task.nextSubtaskId !== 'number') task.nextSubtaskId = 1;
@@ -163,21 +365,21 @@ app.post('/api/tasks/:id/subtasks', (req, res) => {
     task.updated_at = new Date().toISOString();
     try {
         writeTasks(tasks);
-        res.status(201).json(task);
+    res.status(201).json(task);
     } catch (e) {
-        res.status(500).send('Failed to persist subtask');
+    res.status(500).json({ error: 'Failed to persist subtask' });
     }
 });
 
 // patch status for a task
-app.patch('/api/tasks/:id/status', (req, res) => {
+app.patch('/api/tasks/:id/status', ensureAuth, (req, res) => {
     const { status, note } = req.body || {};
     const allowed = ['todo', 'in_progress', 'blocked', 'done'];
-    if (!status || !allowed.includes(status)) return res.status(400).send('Invalid status');
+    if (!status || !allowed.includes(status)) return sendError(res, 400, 'Invalid status');
 
     const tasks = readTasks();
     const task = tasks.tasks.find(t => t.id === parseInt(req.params.id));
-    if (!task) return res.status(404).send('Task not found');
+    if (!task || task.owner_id !== req.user.id) return res.status(404).send('Task not found');
 
     const now = new Date().toISOString();
     task.status = status;
@@ -188,21 +390,21 @@ app.patch('/api/tasks/:id/status', (req, res) => {
     task.status_history.push({ status, at: now, note: note || null });
     try {
         writeTasks(tasks);
-        res.json(task);
+    res.json(task);
     } catch (e) {
-        res.status(500).send('Failed to persist status change');
+    res.status(500).json({ error: 'Failed to persist status change' });
     }
 });
 
 // patch status for a subtask
-app.patch('/api/tasks/:id/subtasks/:subtask_id/status', (req, res) => {
+app.patch('/api/tasks/:id/subtasks/:subtask_id/status', ensureAuth, (req, res) => {
     const { status, note } = req.body || {};
     const allowed = ['todo', 'in_progress', 'blocked', 'done'];
-    if (!status || !allowed.includes(status)) return res.status(400).send('Invalid status');
+    if (!status || !allowed.includes(status)) return sendError(res, 400, 'Invalid status');
 
     const tasks = readTasks();
     const task = tasks.tasks.find(t => t.id === parseInt(req.params.id));
-    if (!task) return res.status(404).send('Task not found');
+    if (!task || task.owner_id !== req.user.id) return res.status(404).send('Task not found');
 
     const subId = parseInt(req.params.subtask_id);
     const subtask = (task.sub_tasks || []).find(s => s.id === subId);
@@ -218,74 +420,93 @@ app.patch('/api/tasks/:id/subtasks/:subtask_id/status', (req, res) => {
     try {
         writeTasks(tasks);
         // return the whole parent task for client convenience
-        res.json(task);
+    res.json(task);
     } catch (e) {
-        res.status(500).send('Failed to persist subtask status change');
+    res.status(500).json({ error: 'Failed to persist subtask status change' });
     }
 });
 
 // persist order
-app.put('/api/tasks/order', (req, res) => {
+app.put('/api/tasks/order', ensureAuth, (req, res) => {
     const { order } = req.body || {};
-    if (!Array.isArray(order)) return res.status(400).send('Order must be an array of ids');
+    if (!Array.isArray(order)) return sendError(res, 400, 'Order must be an array of ids');
     const tasksData = readTasks();
-    // validate all ids exist
-    const idSet = new Set(tasksData.tasks.map(t => t.id));
+    // filter to user's tasks only
+    const userTasks = tasksData.tasks.filter(t => t.owner_id === req.user.id);
+    // validate all ids exist and belong to user
+    const userTaskIds = new Set(userTasks.map(t => t.id));
     for (const id of order) {
-        if (!idSet.has(id)) return res.status(400).send('Invalid task id in order');
+        if (!userTaskIds.has(id)) return res.status(400).send('Invalid task id in order');
     }
-    // apply order: set order field to position in array
-    const idToTask = new Map(tasksData.tasks.map(t => [t.id, t]));
+    // apply order: set order field to position in array for user's tasks only
+    const idToTask = new Map(userTasks.map(t => [t.id, t]));
     order.forEach((id, idx) => {
         const task = idToTask.get(id);
         if (task) task.order = idx;
     });
-    // any tasks not included keep their relative order after provided ones
-    const remaining = tasksData.tasks.filter(t => !order.includes(t.id)).sort((a, b) => a.order - b.order);
+    // any user tasks not included keep their relative order after provided ones
+    const remaining = userTasks.filter(t => !order.includes(t.id)).sort((a, b) => a.order - b.order);
     remaining.forEach((t, idx) => { t.order = order.length + idx; });
-    tasksData.tasks.sort((a, b) => a.order - b.order);
+    // only sort user's tasks, leave other users' tasks unchanged
+    const otherUserTasks = tasksData.tasks.filter(t => t.owner_id !== req.user.id);
+    const sortedUserTasks = userTasks.sort((a, b) => a.order - b.order);
+    tasksData.tasks = [...otherUserTasks, ...sortedUserTasks];
     try {
         writeTasks(tasksData);
-        res.json({ tasks: tasksData.tasks });
+    res.json({ tasks: sortedUserTasks });
     } catch (e) {
-        res.status(500).send('Failed to persist order');
+    res.status(500).json({ error: 'Failed to persist order' });
     }
 });
 
 // get status history
-app.get('/api/tasks/:id/history', (req, res) => {
+app.get('/api/tasks/:id/history', ensureAuth, (req, res) => {
     const tasks = readTasks();
     const task = tasks.tasks.find(t => t.id === parseInt(req.params.id));
-    if (!task) return res.status(404).send('Task not found');
+    if (!task || task.owner_id !== req.user.id) return res.status(404).send('Task not found');
     res.json({ status_history: task.status_history || [] });
 });
 
-app.put('/api/tasks/:id', (req, res) => {
+app.put('/api/tasks/:id', ensureAuth, (req, res) => {
     const tasks = readTasks();
     const taskIndex = tasks.tasks.findIndex(t => t.id === parseInt(req.params.id));
-    if (taskIndex !== -1) {
+    if (taskIndex !== -1 && tasks.tasks[taskIndex].owner_id === req.user.id) {
         // allow updating description/priority/completed/due_date
         const allowed = ['description', 'priority', 'completed', 'due_date'];
-        allowed.forEach(k => {
-            if (req.body && Object.prototype.hasOwnProperty.call(req.body, k)) {
-                tasks.tasks[taskIndex][k] = req.body[k];
-            }
-        });
+        // validation
+        if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'description')) {
+            if (typeof req.body.description !== 'string' || !req.body.description.trim()) return sendError(res, 400, 'Invalid description');
+            tasks.tasks[taskIndex].description = req.body.description.trim();
+        }
+        if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'priority')) {
+            const allowedP = ['low', 'medium', 'high'];
+            if (!allowedP.includes(req.body.priority)) return sendError(res, 400, 'Invalid priority');
+            tasks.tasks[taskIndex].priority = req.body.priority;
+        }
+        if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'completed')) {
+            if (typeof req.body.completed !== 'boolean') return sendError(res, 400, 'Invalid completed flag');
+            tasks.tasks[taskIndex].completed = req.body.completed;
+            tasks.tasks[taskIndex].status = req.body.completed ? 'done' : tasks.tasks[taskIndex].status;
+        }
+        if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'due_date')) {
+            if (typeof req.body.due_date !== 'string') return sendError(res, 400, 'Invalid due_date');
+            tasks.tasks[taskIndex].due_date = req.body.due_date;
+        }
         try {
             writeTasks(tasks);
             res.json(tasks.tasks[taskIndex]);
         } catch (e) {
-            res.status(500).send('Failed to persist task update');
+            res.status(500).json({ error: 'Failed to persist task update' });
         }
     } else {
-        res.status(404).send('Task not found');
+        return sendError(res, 404, 'Task not found');
     }
 });
 
-app.delete('/api/tasks/:id', (req, res) => {
+app.delete('/api/tasks/:id', ensureAuth, (req, res) => {
     const tasks = readTasks();
     const taskIndex = tasks.tasks.findIndex(t => t.id === parseInt(req.params.id));
-    if (taskIndex !== -1) {
+    if (taskIndex !== -1 && tasks.tasks[taskIndex].owner_id === req.user.id) {
         tasks.tasks.splice(taskIndex, 1);
         try {
             writeTasks(tasks);
@@ -298,27 +519,34 @@ app.delete('/api/tasks/:id', (req, res) => {
     }
 });
 
-app.put('/api/tasks/:id/subtasks/:subtask_id', (req, res) => {
+app.put('/api/tasks/:id/subtasks/:subtask_id', ensureAuth, (req, res) => {
     const tasks = readTasks();
     const task = tasks.tasks.find(t => t.id === parseInt(req.params.id));
-    if (task) {
+    if (task && task.owner_id === req.user.id) {
         const subId = parseInt(req.params.subtask_id);
         const subtask = task.sub_tasks.find(s => s.id === subId);
         if (subtask) {
-            // merge allowed fields
-            if (typeof req.body.completed === 'boolean') subtask.completed = req.body.completed;
-            if (typeof req.body.description === 'string' && req.body.description.trim()) subtask.description = req.body.description.trim();
+            // merge allowed fields with validation
+            if (Object.prototype.hasOwnProperty.call(req.body, 'completed')) {
+                if (typeof req.body.completed !== 'boolean') return sendError(res, 400, 'Invalid completed flag for subtask');
+                subtask.completed = req.body.completed;
+                subtask.status = req.body.completed ? 'done' : subtask.status;
+            }
+            if (Object.prototype.hasOwnProperty.call(req.body, 'description')) {
+                if (typeof req.body.description !== 'string' || !req.body.description.trim()) return sendError(res, 400, 'Invalid description for subtask');
+                subtask.description = req.body.description.trim();
+            }
             try {
                 writeTasks(tasks);
                 res.json(task);
             } catch (e) {
-                res.status(500).send('Failed to persist subtask update');
+                res.status(500).json({ error: 'Failed to persist subtask update' });
             }
         } else {
-            res.status(404).send('Subtask not found');
+            return sendError(res, 404, 'Subtask not found');
         }
     } else {
-        res.status(404).send('Task not found');
+        return sendError(res, 404, 'Task not found');
     }
 });
 

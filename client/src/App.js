@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
+import Profile from './Profile';
 
 function App() {
     // theme: 'dark' | 'light'
@@ -27,12 +28,28 @@ function App() {
     const [subDragOver, setSubDragOver] = useState({ taskId: null, subId: null, position: null });
     const addInputRefs = useRef({});
 
+    const [token, setToken] = useState(() => {
+        try { return localStorage.getItem('auth_token') || null } catch { return null }
+    });
+    const [showProfile, setShowProfile] = useState(false);
+
     useEffect(() => {
-        fetch('/api/tasks')
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        fetch('/api/tasks', { headers })
             .then(res => res.json())
             .then(data => setTasks(data.tasks))
             .catch(error => console.error('Error fetching tasks:', error));
-    }, []);
+    }, [token]);
+
+    useEffect(() => {
+        try { if (token) localStorage.setItem('auth_token', token); else localStorage.removeItem('auth_token'); } catch {}
+    }, [token]);
+
+    const getAuthHeaders = (extra = {}) => {
+        const base = { 'Content-Type': 'application/json' };
+        if (token) base['Authorization'] = `Bearer ${token}`;
+        return { ...base, ...extra };
+    };
 
     // weights by priority: low=1.0, medium=1.15, high=1.30 (approx +15% per grade)
     const priorityWeight = (p) => {
@@ -114,11 +131,9 @@ function App() {
 
     const addTask = () => {
     if (!description || description.trim() === '') return;
-    fetch('/api/tasks', {
+        fetch('/api/tasks', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify({ description, priority }),
         })
             .then(res => res.json())
@@ -135,7 +150,7 @@ function App() {
     if (!description || description.trim() === '') return;
         fetch(`/api/tasks/${taskId}/subtasks`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify({ description }),
         })
             .then(res => res.json())
@@ -288,7 +303,7 @@ function App() {
     };
 
     const deleteTask = (id) => {
-        fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    fetch(`/api/tasks/${id}`, { method: 'DELETE', headers: getAuthHeaders() })
             .then(() => {
                 setTasks(tasks.filter(task => task.id !== id));
             })
@@ -296,14 +311,7 @@ function App() {
     };
 
     const updateTask = (id, updatedTask) => {
-        fetch(`/api/tasks/${id}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatedTask),
-            })
+    fetch(`/api/tasks/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(updatedTask) })
             .then(res => res.json())
             .then(updatedTask => {
                 setTasks(tasks.map(task => (task.id === id ? updatedTask : task)));
@@ -324,11 +332,7 @@ function App() {
     };
 
     const setTaskStatus = (id, status, note) => {
-        fetch(`/api/tasks/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status, note }),
-        })
+    fetch(`/api/tasks/${id}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
             .then(res => res.json())
             .then(updatedTask => {
                 setTasks(prev => prev.map(t => (t.id === id ? updatedTask : t)));
@@ -349,11 +353,7 @@ function App() {
     };
 
     const setSubtaskStatus = (taskId, subTaskId, status, note) => {
-        fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status, note })
-        })
+    fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
             .then(res => res.json())
             .then(updatedTask => {
                 setTasks(prev => prev.map(task => (task.id === taskId ? updatedTask : task)));
@@ -446,6 +446,36 @@ function App() {
         }
     }, [addingSubtaskTo]);
 
+    // Show authentication screen if not logged in
+    if (!token) {
+        return (
+            <div className="App container">
+                <header className="App-header">
+                    <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:12}}>
+                        <div>
+                            <h1>Task Tracker</h1>
+                            <div className="subtitle">Task management made easy, but also way harder.</div>
+                        </div>
+                        <div style={{display:'flex', alignItems:'center', gap:8}}>
+                            <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                        </div>
+                    </div>
+                </header>
+                <div style={{display:'flex', justifyContent:'center', marginTop:40}}>
+                    <div className="auth-required-screen">
+                        <div style={{textAlign:'center', marginBottom:24}}>
+                            <h2>Welcome to Task Tracker</h2>
+                            <p style={{color:'var(--text-muted)', marginBottom:32}}>
+                                Please sign in or create an account to start managing your tasks.
+                            </p>
+                        </div>
+                        <Profile token={token} onLogin={(t) => { setToken(t); }} onLogout={() => { setToken(null); }} />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="App container">
             {/* Global sticky progress bar for the day */}
@@ -470,9 +500,15 @@ function App() {
                     </div>
                     <div style={{display:'flex', alignItems:'center', gap:8}}>
                         <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                        <button className="btn-ghost" onClick={() => setShowProfile(s => !s)}>Profile</button>
                     </div>
                 </div>
             </header>
+            {showProfile && (
+                <div className="profile-modal">
+                    <Profile token={token} onLogin={(t) => { setToken(t); setShowProfile(false); }} onLogout={() => { setToken(null); setShowProfile(false); }} />
+                </div>
+            )}
             <div className="add-task-form">
                 <input
                     type="text"

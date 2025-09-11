@@ -398,6 +398,42 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     margin-top: 10px;
 }
 
+.profile-modal {
+    position: fixed;
+    right: 18px;
+    top: 70px;
+    z-index: 2000;
+}
+.profile-box {
+    background: linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4));
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 12px;
+    border-radius: 8px;
+    min-width: 260px;
+    color: white;
+}
+
+.auth-required-screen {
+    max-width: 400px;
+    padding: 32px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+    border: 1px solid rgba(255,255,255,0.03);
+    border-left: 3px solid var(--accent-pink);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(155,92,255,0.08) inset;
+}
+
+.auth-required-screen h2 {
+    margin: 0 0 12px 0;
+    color: var(--text-primary);
+    font-size: 24px;
+}
+
+.auth-required-screen .profile-box {
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
 .add-subtask-form input {
     margin-right: 10px;
     padding: 10px;

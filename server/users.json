@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "local",
+      "password_hash": "",
+      "email": null,
+      "created_at": "2025-09-11T16:09:02.202Z",
+      "updated_at": "2025-09-11T16:09:02.202Z",
+      "profile": {
+        "display_name": "Local User",
+        "avatar": null,
+        "class": "adventurer",
+        "bio": ""
+      },
+      "rpg": {
+        "level": 1,
+        "xp": 0,
+        "hp": 20,
+        "mp": 5,
+        "coins": 0,
+        "streak": 0,
+        "achievements": [],
+        "inventory": {
+          "items": []
+        }
+      }
+    },
+    {
+      "id": 2,
+      "username": "testuser_1757606942202",
+      "password_hash": "$2a$10$xTaFl74jozyHfPMuGlE8ouzUBhep7tpqZg4YoFzHRxTQa8ybYJ4na",
+      "email": null,
+      "created_at": "2025-09-11T16:09:02.202Z",
+      "updated_at": "2025-09-11T16:09:02.202Z",
+      "profile": {
+        "display_name": "testuser_1757606942202",
+        "avatar": null,
+        "class": "adventurer",
+        "bio": ""
+      },
+      "rpg": {
+        "level": 1,
+        "xp": 0,
+        "hp": 20,
+        "mp": 5,
+        "coins": 0,
+        "streak": 0,
+        "achievements": [],
+        "inventory": {
+          "items": []
+        }
+      }
+    }
+  ],
+  "nextId": 3
+}

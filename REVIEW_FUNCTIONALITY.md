@@ -36,79 +36,93 @@ Frontend issues and UX
 - No loading, error, or confirmation UI (e.g., for delete). No disabled state during network calls.
 
 Code quality, packaging, and dev tooling
----------------------------------------
-- `server/package.json` should set `main` to `server.js` and add a `start` script.
-- Add `proxy` to `client/package.json` (or use full backend URL). Add basic linting and CI pipeline later.
-- Add backend route tests (supertest) and small unit tests for critical behaviour.
 
-Why are there two README files?
---------------------------------
-This repository contains two README files:
+## Review & Refactor Plan — Task Tracker
 
-- `README.md` at the repository root: a high-level, repository-wide README that explains how to run both the `server` and `client`, troubleshooting tips, and notes about recent changes.
-- `client/README.md`: the Create React App scaffold's README which documents client-specific scripts (`npm start`, `npm test`, `npm run build`) and guidance for frontend development.
+Date: 2025-09-08
 
-Why it exists: CRA automatically generates `client/README.md` when the client app was created. Having both files is normal for mono-repos or multi-package repos where each package/app ships its own README.
+This document replaces the previous review and gives a compact, prioritized roadmap for refactors and immediate fixes. It focuses on safety, correctness, and small high-value changes that reduce technical debt.
 
-Recommendation: Keep both but make their scope explicit:
+Requirements (from your request)
+- Review the repository and identify important refactors.
+- Propose prioritized changes and rationale.
+- Overwrite `REVIEW_FUNCTIONALITY.md` with the result. 
 
-- Keep `README.md` at the repo root as the canonical "how to run the whole project" entry point. Make it concise and link to component READMEs.
-- Keep `client/README.md` for client-specific developer notes and `server/README.md` (create one) for backend-specific instructions. Alternatively, move client-specific instructions out of the root README and add a short pointer to `client/README.md`.
+Quick summary
+- The server is a small Express app that persists to `server/tasks.json`. It works for local single-user use but has fragile persistence error handling, inconsistent validation, and mixed responsibilities in `server.js`.
+- The client is a CRA app that mostly works but has some uncontrolled inputs, mixed update strategies, and lacking UX states (loading/errors).
 
-This reduces duplication and makes each README's intent clear to new contributors.
+Top priorities (what to do first)
+1) Make disk writes safe and surfaced (high, small):
+	- Refactor `server/writeTasks` to use atomic writes (write to temp + rename), or switch to `fs.promises` with a retry/lock strategy.
+	- Ensure write failures throw and endpoints return 500 so clients can react.
+	- Make `tasks.json` path configurable via ENV (e.g. `TASKS_FILE` env var) for tests and deployments.
 
-Security & operations
----------------------
-- `cors()` is wide open; restrict in production.
-- No auth — acceptable for single-user local app but note for production use.
-- Consider making `tasks.json` path configurable via env var.
+2) Server input validation and clear API shapes (high, small):
+	- Add server-side validation for endpoints (description required, priority in allowed set). Use lightweight validation (custom checks or `express-validator`).
+	- Return consistent JSON error responses { error: 'message' } and appropriate HTTP codes.
 
-Quick, concrete fixes (low-risk) — implemented where noted
-------------------------------------------------------
-1. Ensure client can reach server via CRA proxy — `client/package.json` already contains `proxy: http://localhost:3001` (no change needed).
-2. Server `main`/start: `server/package.json` could be updated to set `main` to `server.js` and ensure a `start` script; I did not change package.json in this pass.
-3. Test update: `client/src/App.test.js` still needs a small change to match the app header; left as next-step.
-4. Edit form: recommended to make fully controlled and clone editing objects; small improvements can be made in a follow-up.
-5. Server `writeTasks` error surfacing: still recommended to return 500 on write failure; I left that improvement for the next iteration.
+3) Separate responsibilities in the server (medium):
+	- Move persistence, normalization, and business logic into small modules: `lib/persist.js`, `lib/tasks.js` and keep `server.js` focused on routing.
+	- Add small unit tests for the normalization logic.
 
-Implemented fixes in this iteration:
-- `server/server.js`: safer top-level `nextId` computation in `readTasks` to avoid accidental id reuse.
-- `client/src/App.js`: replaced a single `subTaskDescription` with `subTaskDescriptionMap` (per-task inputs) and used functional `setTasks(prev => ...)` updates when integrating server responses. This fixes the add-subtask UI and prevents stale state/interference between forms.
+4) Improve subtask and ID handling (medium):
+	- Keep numeric stable ids for tasks and subtasks. If you want unique strings in future, use UUIDs.
+	- Ensure `nextId` / `nextSubtaskId` are always computed from data on load (defensive).
 
-Prioritized roadmap (recommended)
---------------------------------
-- Urgent (do first): add client proxy, add server start script, fix failing test, expose write errors, basic input validation.
-- Important (next): make edits controlled + clone edit objects, add unique IDs for subtasks and update API + client usage, allow client to set `due_date`.
-- Medium: atomic writes or small DB (lowdb/sqlite), add backend tests, add loading/error UI, confirmation modals.
-- Nice-to-have: filters/sorting, CI, eslint/prettier, Dockerfile for server and client.
+5) Client behavior and UX (medium):
+	- Make edit forms controlled and clone the task into local edit state before editing to avoid mutating global state.
+	- Use per-task subtask input state (already partially done) and show loading/disabled states when requests are in-flight.
+	- Ensure client accepts and sends `due_date` when creating/updating tasks.
 
-Checklist (track status here)
-----------------------------
-- [x] Add proxy to `client/package.json` — Already present
-- [ ] Add `start` script and correct `main` in `server/package.json` — Pending
-- [ ] Fix `client/src/App.test.js` — Pending
-- [ ] Return 500 on failed disk writes and surface write errors — Pending (recommended)
-- [ ] Accept `due_date` on task creation — Pending
-- [x] Give subtasks unique IDs and update endpoints + client — Partially done: server normalizes existing subtasks and assigns numeric ids for new subtasks; client updated to use per-task inputs and functional updates.
-- [ ] Make edit form controlled and clone task before editing — Pending (recommended)
-- [ ] Add input validation on server for required fields — Pending
-- [ ] Add loading/error UIs and disable buttons during requests — Pending
-- [ ] Add confirmation on delete — Pending
-- [ ] Add backend tests (supertest + jest) — Pending
-- [ ] Make `tasks.json` path configurable via env — Pending
+Lower priority / longer-term improvements
+- Replace file persistence with a tiny DB (lowdb or sqlite) for atomicity and concurrency.
+- Add CI (GitHub Actions) to run `npm test` for `server` and `client`.
+- Add ESLint + Prettier and a simple CONTRIBUTING.md.
 
-Next actions I can take (pick one or more)
-----------------------------------------
-1. Implement server error propagation: make `writeTasks` surface disk write failures and return 500 from endpoints when writes fail (small, high-value change).
-2. Make the edit form fully controlled and clone the task into `editingTask` to avoid accidental mutations (small, UX improvement).
-3. Add a tiny backend test suite (supertest) around subtask creation and update to prevent regressions (medium effort).
-4. Update `server/package.json` to have `main: server.js` and a `start` script; update client test to match header text (trivial changes).
+Concrete, actionable changes (small PR-sized items)
+1. server: make `TASKS_FILE` configurable via env; update `readTasks`/`writeTasks` to use `fs.promises` and atomic write (or `writeFileSync` to a tmp file + rename). Add tests that simulate write failures.
+2. server: return JSON errors; ensure all endpoints validate input and return 400 for invalid requests.
+3. server: split `server.js` into `routes/tasks.js` and `lib/persistence.js` (small refactor to improve testability).
+4. client: change edit modal/form to use a cloned `editingTask` object in local component state; use controlled inputs and `onSave` to send patch.
+5. repo: update `server/package.json` to include `main: server.js` and keep `start`/`test` scripts explicit. Add a minimal `server/README.md` describing the env var `TASKS_FILE`.
 
-If you'd like, I can implement option 1 and 2 now and add tests next. I verified the add-subtask flow manually by starting the server and POSTing subtasks; the server returns the updated task and `server/tasks.json` reflects the new subtask ids.
+Checklist (status)
+- [ ] Make writes atomic and surface write errors (recommended first change)
+- [ ] Add server-side validation + consistent error format
+- [ ] Refactor server into small modules (routes + persistence)
+- [ ] Make edit forms controlled on client and add loading/error states
+- [ ] Make `tasks.json` path configurable via env
+- [ ] Add backend tests for normalization and write failure handling
+- [ ] Consider swapping file persistence for lowdb/sqlite (later)
 
-Developer convenience
---------------------
-I added a `start-dev.sh` script at the repository root to start both server and client and tail their logs. The script will automatically run `npm install` in `server`/`client` if `node_modules` is missing or empty. Logs and installation output are written to `server.log`, `client.log`, `server-npm-install.log`, and `client-npm-install.log` as appropriate.
+Notes on risk and effort
+- Small, low-risk wins: atomic writes + error propagation, env-configurable path, consistent error JSON. Each is low LOC and high value.
+- Medium effort: splitting server into modules and adding tests — moderate but improves maintainability.
+- Bigger changes: DB migration — highest effort but pays off for multi-user or CI scenarios.
 
-----
-Generated by review on 2025-09-08.
+Suggested immediate next step (I can implement now)
+- Implement atomic write + error propagation in `server/server.js` and add one test that simulates a write failure. This is a focused, high-impact change.
+
+If you'd like I can open a PR that implements the immediate next step (atomic write + error handling) and follow up with the server split and client form changes.
+
+Files you may want to edit in the short term
+- `server/server.js` — split validation/persistence and improve writes
+- `server/package.json` — confirm `main` and `start` scripts
+- `server/__tests__/api.test.js` — add test for write failure and validation
+- `client/src/*` — make forms controlled and add loading state
+
+End of review.
+
+
+
+
+
+
+FOR SOUNDS
+
+https://www.bfxr.net/
+
+FOR VISUALS
+
+https://www.slynyrd.com/blog
