@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import RegistrationWizard from './RegistrationWizard';
 
 export default function Profile({ token, onLogin, onLogout }) {
     const [profile, setProfile] = useState({ display_name: '', avatar: '', class: '', bio: '' });
@@ -6,6 +7,7 @@ export default function Profile({ token, onLogin, onLogout }) {
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showRegistrationWizard, setShowRegistrationWizard] = useState(false);
 
     useEffect(() => {
         if (!token) return;
@@ -63,15 +65,51 @@ export default function Profile({ token, onLogin, onLogout }) {
     };
 
     if (!token) {
+        // Show registration wizard
+        if (showRegistrationWizard) {
+            return (
+                <RegistrationWizard
+                    onSuccess={(token, user) => {
+                        onLogin(token);
+                        setShowRegistrationWizard(false);
+                    }}
+                    onCancel={() => setShowRegistrationWizard(false)}
+                />
+            );
+        }
+
+        // Show simple login form
         return (
             <div className="profile-box">
-                <h3>Sign in / Register</h3>
-                <input placeholder="username" value={username} onChange={e => setUsername(e.target.value)} />
-                <input placeholder="password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-                <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={handleLogin} disabled={loading}>Login</button>
-                    <button onClick={handleRegister} disabled={loading}>Register</button>
+                <h3>Sign In</h3>
+                <div className="login-form">
+                    <input 
+                        placeholder="username" 
+                        value={username} 
+                        onChange={e => setUsername(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                    />
+                    <input 
+                        placeholder="password" 
+                        type="password" 
+                        value={password} 
+                        onChange={e => setPassword(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                    />
+                    <button onClick={handleLogin} disabled={loading} className="btn-primary">
+                        {loading ? 'Signing In...' : 'Sign In'}
+                    </button>
                 </div>
+                <div className="auth-divider">
+                    <span>Don't have an account?</span>
+                </div>
+                <button 
+                    onClick={() => setShowRegistrationWizard(true)} 
+                    className="btn-ghost btn-full-width"
+                    disabled={loading}
+                >
+                    Create Account
+                </button>
             </div>
         );
     }

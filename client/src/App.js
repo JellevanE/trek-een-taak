@@ -34,11 +34,31 @@ function App() {
     const [showProfile, setShowProfile] = useState(false);
 
     useEffect(() => {
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        fetch('/api/tasks', { headers })
-            .then(res => res.json())
-            .then(data => setTasks(data.tasks))
-            .catch(error => console.error('Error fetching tasks:', error));
+        if (token) {
+            const headers = { Authorization: `Bearer ${token}` };
+            fetch('/api/tasks', { headers })
+                .then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                    // If the token is invalid, the server returns 401
+                    // In that case, we should log out
+                    setToken(null);
+                    return null;
+                })
+                .then(data => {
+                    if (data) {
+                        setTasks(data.tasks || []);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching tasks:', error);
+                    setToken(null); // Also logout on network error
+                });
+        } else {
+            // No token, so clear tasks
+            setTasks([]);
+        }
     }, [token]);
 
     useEffect(() => {

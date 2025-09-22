@@ -1,4 +1,260 @@
 {
-  "tasks": [],
-  "nextId": 1
+  "tasks": [
+    {
+      "id": 1,
+      "description": "yeah first task",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "subusubus",
+          "status": "done",
+          "created_at": "2025-09-12T12:02:08.093Z",
+          "updated_at": "2025-09-12T12:07:23.849Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-09-12T12:02:08.093Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-09-12T12:02:36.462Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:07:16.589Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-09-12T12:07:19.130Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:07:23.849Z",
+              "note": null
+            }
+          ],
+          "completed": true
+        },
+        {
+          "id": 2,
+          "description": "bubibbub",
+          "status": "done",
+          "created_at": "2025-09-12T12:02:10.570Z",
+          "updated_at": "2025-09-12T12:07:22.693Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-09-12T12:02:10.570Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:05:02.987Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-09-12T12:07:20.357Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:07:22.693Z",
+              "note": null
+            }
+          ],
+          "completed": true
+        },
+        {
+          "id": 3,
+          "description": "buauub",
+          "status": "done",
+          "created_at": "2025-09-12T12:02:11.855Z",
+          "updated_at": "2025-09-12T12:07:22.170Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-09-12T12:02:11.855Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-09-12T12:02:39.237Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:02:40.391Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-09-12T12:07:21.266Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:07:22.170Z",
+              "note": null
+            }
+          ],
+          "completed": true
+        }
+      ],
+      "nextSubtaskId": 4,
+      "due_date": "2025-09-12",
+      "status": "done",
+      "order": 0,
+      "created_at": "2025-09-12T12:02:03.994Z",
+      "updated_at": "2025-09-12T12:07:29.485Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-09-12T12:02:03.994Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-09-12T12:05:05.828Z",
+          "note": null
+        },
+        {
+          "status": "in_progress",
+          "at": "2025-09-12T12:07:28.671Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-09-12T12:07:29.485Z",
+          "note": null
+        }
+      ],
+      "owner_id": 5,
+      "completed": true
+    },
+    {
+      "id": 2,
+      "description": "weight test",
+      "priority": "high",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-09-12",
+      "status": "done",
+      "order": 1,
+      "created_at": "2025-09-12T12:02:17.419Z",
+      "updated_at": "2025-09-12T12:02:45.207Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-09-12T12:02:17.419Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-09-12T12:02:45.207Z",
+          "note": null
+        }
+      ],
+      "owner_id": 5,
+      "completed": true
+    },
+    {
+      "id": 3,
+      "description": "test 3",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "bing",
+          "status": "done",
+          "created_at": "2025-09-12T12:02:28.053Z",
+          "updated_at": "2025-09-12T12:02:48.858Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-09-12T12:02:28.053Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:02:48.858Z",
+              "note": null
+            }
+          ],
+          "completed": true
+        },
+        {
+          "id": 2,
+          "description": "bing",
+          "status": "done",
+          "created_at": "2025-09-12T12:02:29.630Z",
+          "updated_at": "2025-09-12T12:07:13.622Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-09-12T12:02:29.630Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:07:13.622Z",
+              "note": null
+            }
+          ],
+          "completed": true
+        },
+        {
+          "id": 3,
+          "description": "bong",
+          "status": "done",
+          "created_at": "2025-09-12T12:02:30.422Z",
+          "updated_at": "2025-09-12T12:02:50.462Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-09-12T12:02:30.422Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-09-12T12:02:50.462Z",
+              "note": null
+            }
+          ],
+          "completed": true
+        }
+      ],
+      "nextSubtaskId": 4,
+      "due_date": "2025-09-12",
+      "status": "done",
+      "order": 2,
+      "created_at": "2025-09-12T12:02:24.462Z",
+      "updated_at": "2025-09-12T12:07:06.082Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-09-12T12:02:24.462Z",
+          "note": null
+        },
+        {
+          "status": "in_progress",
+          "at": "2025-09-12T12:07:03.591Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-09-12T12:07:06.082Z",
+          "note": null
+        }
+      ],
+      "owner_id": 5,
+      "completed": true
+    }
+  ],
+  "nextId": 4
 }

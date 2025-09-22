@@ -296,7 +296,7 @@ app.post('/api/tasks', ensureAuth, (req, res) => {
 
 // Auth endpoints
 app.post('/api/users/register', (req, res) => {
-    const { username, password, email } = req.body || {};
+    const { username, password, email, profile: profileData } = req.body || {};
     if (!username || typeof username !== 'string' || !username.trim()) return sendError(res, 400, 'Invalid username');
     if (!password || typeof password !== 'string' || password.length < 6) return sendError(res, 400, 'Password must be at least 6 characters');
 
@@ -306,6 +306,31 @@ app.post('/api/users/register', (req, res) => {
 
     const now = new Date().toISOString();
     const hash = bcrypt.hashSync(password, 10);
+    
+    // Build profile with defaults and provided data
+    const defaultProfile = {
+        display_name: username.trim(),
+        avatar: null,
+        class: 'adventurer',
+        bio: ''
+    };
+    
+    const profile = { ...defaultProfile };
+    if (profileData && typeof profileData === 'object') {
+        if (profileData.display_name && typeof profileData.display_name === 'string' && profileData.display_name.trim()) {
+            profile.display_name = profileData.display_name.trim();
+        }
+        if (profileData.class && typeof profileData.class === 'string') {
+            const allowedClasses = ['adventurer', 'warrior', 'mage', 'rogue'];
+            if (allowedClasses.includes(profileData.class)) {
+                profile.class = profileData.class;
+            }
+        }
+        if (typeof profileData.bio === 'string') {
+            profile.bio = profileData.bio.trim().substring(0, 200); // Limit bio length, allow empty
+        }
+    }
+    
     const user = {
         id: usersData.nextId,
         username: username.trim(),
@@ -313,7 +338,7 @@ app.post('/api/users/register', (req, res) => {
         email: email || null,
         created_at: now,
         updated_at: now,
-        profile: { display_name: username.trim(), avatar: null, class: 'adventurer', bio: '' },
+        profile: profile,
         rpg: { level: 1, xp: 0, hp: 20, mp: 5, coins: 0, streak: 0, achievements: [], inventory: { items: [] } }
     };
     usersData.users.push(user);
