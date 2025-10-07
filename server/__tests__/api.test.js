@@ -1,7 +1,7 @@
 const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
-const app = require('../server');
+const app = require('../app');
 
 const TASKS_FILE = path.join(__dirname, '..', 'tasks.json');
 const USERS_FILE = path.join(__dirname, '..', 'users.json');
@@ -69,6 +69,9 @@ test('create subtask returns 201 and task with subtask id', async () => {
   expect(resAuth.body).toHaveProperty('sub_tasks');
   expect(resAuth.body.sub_tasks.length).toBe(1);
   expect(typeof resAuth.body.sub_tasks[0].id).toBe('number');
+  expect(resAuth.body).toHaveProperty('side_quests');
+  expect(Array.isArray(resAuth.body.side_quests)).toBe(true);
+  expect(resAuth.body.side_quests.length).toBe(1);
 });
 
 test('create subtask with missing description returns 400', async () => {
@@ -108,6 +111,7 @@ test('patch status updates task and appends history', async () => {
   expect(res.body).toHaveProperty('status', 'in_progress');
   expect(Array.isArray(res.body.status_history)).toBe(true);
   expect(res.body.status_history[res.body.status_history.length - 1].status).toBe('in_progress');
+  expect(Array.isArray(res.body.side_quests)).toBe(true);
 });
 
 test('put order persists ordering and returns tasks', async () => {
@@ -129,6 +133,7 @@ test('put order persists ordering and returns tasks', async () => {
   expect(Array.isArray(res.body.tasks)).toBe(true);
   expect(res.body.tasks[0].id).toBe(id2);
   expect(res.body.tasks[1].id).toBe(id1);
+  expect(res.body.tasks.every(t => Array.isArray(t.side_quests))).toBe(true);
 });
 
 test('register, login, create task and owner-scoped GET', async () => {
@@ -158,6 +163,7 @@ test('register, login, create task and owner-scoped GET', async () => {
   expect(Array.isArray(get.body.tasks)).toBe(true);
   const found = get.body.tasks.find(t => t.description === 'User task');
   expect(found).toBeTruthy();
+  expect(Array.isArray(found.side_quests)).toBe(true);
 });
 
 test('get and update profile via /api/users/me', async () => {

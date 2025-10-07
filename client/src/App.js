@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './App.css';
 import Profile from './Profile';
 
@@ -142,24 +142,48 @@ function App() {
     // compute weighted global progress for today's tasks (or all tasks if none match)
     const getGlobalProgress = () => {
         const today = new Date().toISOString().split('T')[0];
+        if (!Array.isArray(quests) || quests.length === 0) {
+            return { percent: 0, count: 0, todayCount: 0, backlogCount: 0, totalCount: 0, weightingToday: false };
+        }
         const dayQuests = quests.filter(t => t && t.due_date === today);
-        const pool = dayQuests.length > 0 ? dayQuests : quests;
-        if (!pool || pool.length === 0) return { percent: 0, count: 0 };
+        const backlogQuests = quests.filter(t => t && t.due_date !== today);
+        const weightingToday = dayQuests.length > 0;
+
         let weightSum = 0;
         let weightedProgressSum = 0;
-        pool.forEach(t => {
-            // task base weight
-            const baseW = priorityWeight(t.priority);
-            // include subtask weights so tasks with many/heavy subtasks count more
-            const subs = Array.isArray(t.side_quests) ? t.side_quests : [];
+
+        const pushContribution = (task, multiplier = 1) => {
+            if (!task) return;
+            const baseW = priorityWeight(task.priority);
+            const subs = Array.isArray(task.side_quests) ? task.side_quests : [];
             let subWeights = 0;
-            subs.forEach(s => { subWeights += sideQuestWeight(s, t); });
-            const questTotalWeight = baseW + subWeights;
+            subs.forEach(s => { subWeights += sideQuestWeight(s, task); });
+            const questTotalWeight = (baseW + subWeights) * Math.max(multiplier, 0);
+            if (questTotalWeight <= 0) return;
             weightSum += questTotalWeight;
-            weightedProgressSum += (getQuestProgress(t) || 0) * questTotalWeight;
+            weightedProgressSum += (getQuestProgress(task) || 0) * questTotalWeight;
+        };
+
+        dayQuests.forEach(task => pushContribution(task, 1));
+        backlogQuests.forEach(task => {
+            const dueDate = task && typeof task.due_date === 'string' ? task.due_date : null;
+            let multiplier = 1;
+            if (weightingToday) {
+                if (dueDate && dueDate < today) multiplier = 0.75; // overdue but still matters
+                else multiplier = 0.4; // future/backlog quests get a lighter weight
+            }
+            pushContribution(task, multiplier);
         });
+
         const percent = weightSum > 0 ? Math.round(weightedProgressSum / weightSum) : 0;
-        return { percent, count: pool.length };
+        return {
+            percent,
+            count: weightingToday ? dayQuests.length : quests.length,
+            todayCount: dayQuests.length,
+            backlogCount: backlogQuests.length,
+            totalCount: quests.length,
+            weightingToday,
+        };
     };
 
     // pick a 5-segment gradient or color by percentage
@@ -507,6 +531,11 @@ function App() {
         }
     }, [addingSideQuestTo]);
 
+    const globalProgress = useMemo(() => getGlobalProgress(), [quests]);
+    const globalLabel = globalProgress.weightingToday
+        ? `Today (${globalProgress.todayCount} quest${globalProgress.todayCount === 1 ? '' : 's'}${globalProgress.backlogCount ? ` + ${globalProgress.backlogCount} backlog` : ''})`
+        : `All quests (${globalProgress.totalCount})`;
+
     // Show authentication screen if not logged in
     if (!token) {
         return (
@@ -542,15 +571,15 @@ function App() {
             {/* Global sticky progress bar for the day */}
             <div className="global-progress-sticky">
                 <div className="global-progress-inner">
-                    <div className="global-progress-label">Day progress</div>
-                    <div className="global-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={getGlobalProgress().percent} title={`${getGlobalProgress().percent}%`}>
+                    <div className="global-progress-label">{globalLabel}</div>
+                    <div className="global-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={globalProgress.percent} title={`${globalProgress.percent}%`}>
                         <div
                             className="global-progress-fill"
-                            style={{ width: `${getGlobalProgress().percent}%`, background: progressColor(getGlobalProgress().percent) }}
+                            style={{ width: `${globalProgress.percent}%`, background: progressColor(globalProgress.percent) }}
                         />
-                        <div className="tooltip">{getGlobalProgress().percent}%</div>
+                        <div className="tooltip">{globalProgress.percent}%</div>
                     </div>
-                    <div className="global-progress-percent">{getGlobalProgress().percent}%</div>
+                    <div className="global-progress-percent">{globalProgress.percent}%</div>
                 </div>
             </div>
             <header className="App-header">
