@@ -90,9 +90,7 @@
 }
 
 .add-task-form input,
-.add-task-form select,
 .edit-task-form input,
-.edit-task-form select,
 .add-subtask-form input{
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.06);
@@ -126,7 +124,8 @@
     cursor: pointer;
 }
 
-.task-container {
+.task-container,
+.quest-container {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -136,7 +135,8 @@
     box-sizing:border-box;
 }
 
-.task {
+.task,
+.quest {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
     border-radius: 8px;
     padding: 14px;
@@ -148,7 +148,8 @@
     box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 18px rgba(155,92,255,0.04) inset;
 }
 
-.task::before{
+.task::before,
+.quest::before{
     content: "";
     position:absolute;
     left:-40%;
@@ -159,37 +160,45 @@
     pointer-events:none;
 }
 
-.task.completed {
+.task.completed,
+.quest.completed {
     opacity: 0.6;
     filter: grayscale(20%);
     text-decoration: line-through;
 }
 
-.task h3 {
+.task h3,
+.quest h3 {
     margin-top: 0;
 }
 
-.task.collapsed {
+.task.collapsed,
+.quest.collapsed {
     max-height: 84px;
     overflow: hidden;
 }
 
-.task.drag-over {
+.task.drag-over,
+.quest.drag-over {
     outline: 2px solid rgba(0,240,255,0.14);
     transform: translateY(-2px);
 }
 
-.task-header {
+.task-header,
+.quest-header {
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:12px;
 }
 
-.task-header .left{ display:flex; align-items:center; gap:8px; flex:1; min-width:0 }
-.task-header .right{ display:flex; align-items:center; justify-content:flex-end }
+.task-header .left,
+.quest-header .left{ display:flex; align-items:center; gap:8px; flex:1; min-width:0 }
+.task-header .right,
+.quest-header .right{ display:flex; align-items:center; justify-content:flex-end }
 
-.task-controls button {
+.task-controls button,
+.quest-controls button {
     margin-left: 8px;
     padding: 6px 8px;
     border-radius: 6px;
@@ -199,11 +208,13 @@
     cursor: pointer;
 }
 
-.task-controls .danger {
+.task-controls .danger,
+.quest-controls .danger {
     color: #ff7ea6;
 }
 
-.task ul {
+.task ul,
+.quest ul {
     list-style-type: none;
     padding-left: 12px;
     margin: 8px 0 0;
@@ -218,18 +229,23 @@
 
 .subtask-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px }
 .subtask-desc.small{ font-size:12px }
-.task ul { padding-left: 8px }
-
+.side-quest-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px }
+.side-quest-desc.small{ font-size:12px }
+.quest ul { padding-left: 8px }
+.quest li,
 .task li { margin:8px 0; padding:6px 8px; border-radius:6px; }
 
 /* ensure top-level drag handle is visually quieter; override for top handle */
-.task > div > .drag-handle.top{ opacity:0; transform:translateX(-6px); }
-.task:hover > div > .drag-handle.top{ opacity:1; transform:translateX(0) }
+.task > div > .drag-handle.top,
+.quest > div > .drag-handle.top{ opacity:0; transform:translateX(-6px); }
+.task:hover > div > .drag-handle.top,
+.quest:hover > div > .drag-handle.top{ opacity:1; transform:translateX(0) }
 
 .btn-small{ padding:6px 8px; font-size:12px; border-radius:6px }
 
 /* provide a clear inset outline for grouped fields */
-.task .panel {
+.task .panel,
+.quest .panel {
     border: 1px solid rgba(255,255,255,0.03);
     padding:8px;
     border-radius:6px;
@@ -273,9 +289,12 @@ button{
 .btn-complete{ background: linear-gradient(90deg,#22c55e,#16a34a); color:#001018; }
 
 /* Visual cue when a task or subtask is started */
-.task.started{ box-shadow: 0 10px 30px rgba(66,153,225,0.08), 0 0 24px rgba(99,102,241,0.04) inset; border-color: rgba(59,130,246,0.12); transform: translateY(-2px); transition: transform .18s ease, box-shadow .22s ease }
-.task .subtask-desc.started{ font-weight:700; color:#fff }
-.task .subtask-desc.in-progress{ color: #bfe6ff }
+.task.started,
+.quest.started{ box-shadow: 0 10px 30px rgba(66,153,225,0.08), 0 0 24px rgba(99,102,241,0.04) inset; border-color: rgba(59,130,246,0.12); transform: translateY(-2px); transition: transform .18s ease, box-shadow .22s ease }
+.task .subtask-desc.started,
+.quest .side-quest-desc.started{ font-weight:700; color:#fff }
+.task .subtask-desc.in-progress,
+.quest .side-quest-desc.in-progress{ color: #bfe6ff }
 
 /* more pronounced progress fill animation */
 .task-progress-fill, .global-progress-fill{ transition: width .6s cubic-bezier(.2,.9,.2,1), background .3s ease }
@@ -314,18 +333,27 @@ button:active{ transform: translateY(1px) }
 button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 
 /* Task info hierarchy */
-.task h3{ color: white; font-size:16px; margin:0; line-height:1.1; text-overflow:ellipsis; white-space:nowrap; overflow:hidden }
+.task h3,
+.quest h3{ color: white; font-size:16px; margin:0; line-height:1.1; text-overflow:ellipsis; white-space:nowrap; overflow:hidden }
 .priority-tag{ font-size:11px; padding:6px 10px; }
-.task-details{ margin-top:8px; display:flex; gap:12px; flex-wrap:wrap }
-.task-details .muted{ color:var(--muted); font-size:12px }
-.task-details .small{ font-size:11px; color:var(--muted) }
+.task-details,
+.quest-details{ margin-top:8px; display:flex; gap:12px; flex-wrap:wrap }
+.task-details .muted,
+.quest-details .muted{ color:var(--muted); font-size:12px }
+.task-details .small,
+.quest-details .small{ font-size:11px; color:var(--muted) }
 
 /* Per-task progress */
-.task-progress-wrap{ width:100%; margin-bottom:8px }
-.task-progress{ display:flex; align-items:center; gap:8px }
-.task-progress-bar{ flex:1; height:10px; background: rgba(255,255,255,0.03); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.03) }
-.task-progress-fill{ height:100%; background: linear-gradient(90deg,#9b5cff,#ff2ec4); transition: width .24s ease }
-.task-progress-meta{ min-width:44px; font-weight:700; color:var(--muted); font-size:13px }
+.task-progress-wrap,
+.quest-progress-wrap{ width:100%; margin-bottom:8px }
+.task-progress,
+.quest-progress{ display:flex; align-items:center; gap:8px }
+.task-progress-bar,
+.quest-progress-bar{ flex:1; height:10px; background: rgba(255,255,255,0.03); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.03) }
+.task-progress-fill,
+.quest-progress-fill{ height:100%; background: linear-gradient(90deg,#9b5cff,#ff2ec4); transition: width .24s ease }
+.task-progress-meta,
+.quest-progress-meta{ min-width:44px; font-weight:700; color:var(--muted); font-size:13px }
 
 /* Drag handle and insertion indicator */
 .drag-handle {
@@ -341,10 +369,13 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 }
 
 /* hide the top-level task hamburger by default; show on hover to reduce visual clutter */
-.task > div > .drag-handle:first-child{ opacity:0; transform:translateX(-6px); transition:opacity .12s, transform .12s }
-.task:hover > div > .drag-handle:first-child{ opacity:1; transform:translateX(0) }
+.task > div > .drag-handle:first-child,
+.quest > div > .drag-handle:first-child{ opacity:0; transform:translateX(-6px); transition:opacity .12s, transform .12s }
+.task:hover > div > .drag-handle:first-child,
+.quest:hover > div > .drag-handle:first-child{ opacity:1; transform:translateX(0) }
 
-.task[data-dragging="true"]{ opacity:0.5 }
+.task[data-dragging="true"],
+.quest[data-dragging="true"]{ opacity:0.5 }
 
 .insert-indicator {
     height: 6px;
@@ -354,7 +385,8 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     transition: opacity .12s;
 }
 
-.add-subtask-button.large{
+.add-subtask-button.large,
+.add-side-quest-button.large{
     padding: 10px 14px;
     font-size:14px;
     border-radius:10px;
@@ -363,7 +395,8 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 .drag-handle[draggable]{ cursor:grab }
 .insert-indicator{ z-index:2 }
 
-.add-subtask-button{
+.add-subtask-button,
+.add-side-quest-button{
     background: linear-gradient(90deg,var(--accent-purple),var(--accent-pink));
     color: #001018;
     padding: 8px 10px;
@@ -384,7 +417,7 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     align-items:center;
 }
 
-.edit-task-form input, .edit-task-form select {
+.edit-task-form input, .add-subtask-form input{
     margin-right: 10px;
     padding: 10px;
     border-radius: 5px;
@@ -821,4 +854,132 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 }
 .priority-low{ background: linear-gradient(90deg,#9b5cff,#6bf2ff);} 
 .priority-medium{ background: linear-gradient(90deg,#ffd36b,#ff6ad8);} 
-.priority-high{ background: linear-gradient(90deg,#ff6161,#ff2ec4);} 
+.priority-high{ background: linear-gradient(90deg,#ff6161,#ff2ec4);}
+
+.profile-edit-form .form-group {
+    margin-bottom: 12px;
+}
+
+.profile-edit-form label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.profile-edit-form input,
+.profile-edit-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.profile-edit-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left-color: var(--accent-pink);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.saved-message {
+    color: #22c55e;
+    font-weight: bold;
+    text-align: center;
+    padding: 8px;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translateY(-10px); }
+    10%, 90% { opacity: 1; transform: translateY(0); }
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent-purple);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.close-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-button:hover {
+    color: var(--text-primary);
+}
+
+.add-task-form .custom-select,
+.edit-task-form .custom-select {
+    position: relative;
+    display: inline-block;
+}
+
+.add-task-form .custom-select select,
+.edit-task-form .custom-select select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 10px 32px 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.add-task-form .custom-select::after,
+.edit-task-form .custom-select::after {
+    content: '▼';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 10px;
+    pointer-events: none;
+} 

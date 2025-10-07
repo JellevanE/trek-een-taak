@@ -2,6 +2,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Profile from './Profile';
 
+const normalizeSideQuest = (raw) => {
+    if (!raw || typeof raw !== 'object') return raw;
+    const status = raw.status || (raw.completed ? 'done' : 'todo');
+    return { ...raw, status, completed: status === 'done' ? true : !!raw.completed };
+};
+
+const normalizeQuest = (task) => {
+    if (!task || typeof task !== 'object') return task;
+    const rawSubs = Array.isArray(task.side_quests)
+        ? task.side_quests
+        : Array.isArray(task.sub_tasks)
+            ? task.sub_tasks
+            : [];
+    const sideQuests = rawSubs.map(normalizeSideQuest);
+    return { ...task, side_quests: sideQuests };
+};
+
+const normalizeQuestList = (list) => Array.isArray(list) ? list.map(normalizeQuest) : [];
+
 function App() {
     // theme: 'dark' | 'light'
     const [theme, setTheme] = useState(() => {
@@ -13,19 +32,19 @@ function App() {
         // set data-theme on document body/root so CSS can react
         try { document.documentElement.setAttribute('data-theme', theme); } catch {}
     }, [theme]);
-    const [tasks, setTasks] = useState([]);
+    const [quests, setQuests] = useState([]);
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('medium');
-    const [editingTask, setEditingTask] = useState(null);
+    const [editingQuest, setEditingQuest] = useState(null);
     // store subtask descriptions per task id to allow multiple open forms
-    const [subTaskDescriptionMap, setSubTaskDescriptionMap] = useState({});
-    const [addingSubtaskTo, setAddingSubtaskTo] = useState(null);
+    const [sideQuestDescriptionMap, setSideQuestDescriptionMap] = useState({});
+    const [addingSideQuestTo, setAddingSideQuestTo] = useState(null);
     const [collapsedMap, setCollapsedMap] = useState({});
-    const [draggedTaskId, setDraggedTaskId] = useState(null);
-    const [dragOverTaskId, setDragOverTaskId] = useState(null);
+    const [draggedQuestId, setDraggedQuestId] = useState(null);
+    const [dragOverQuestId, setDragOverQuestId] = useState(null);
     const [dragPosition, setDragPosition] = useState(null); // 'above' | 'below'
-    const [draggedSubtask, setDraggedSubtask] = useState(null);
-    const [subDragOver, setSubDragOver] = useState({ taskId: null, subId: null, position: null });
+    const [draggedSideQuest, setDraggedSideQuest] = useState(null);
+    const [sideQuestDragOver, setSideQuestDragOver] = useState({ questId: null, sideQuestId: null, position: null });
     const addInputRefs = useRef({});
 
     const [token, setToken] = useState(() => {
@@ -48,16 +67,19 @@ function App() {
                 })
                 .then(data => {
                     if (data) {
-                        setTasks(data.tasks || []);
+                        const payload = data.tasks || data.quests || [];
+                        setQuests(normalizeQuestList(payload));
+                    } else {
+                        setQuests([]);
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching tasks:', error);
+                    console.error('Error fetching quests:', error);
                     setToken(null); // Also logout on network error
                 });
         } else {
             // No token, so clear tasks
-            setTasks([]);
+            setQuests([]);
         }
     }, [token]);
 
@@ -84,7 +106,7 @@ function App() {
     };
 
     // subtask weight: prefer numeric .weight, else sub.priority/difficulty, else parent priority
-    const subtaskWeight = (sub, parent) => {
+    const sideQuestWeight = (sub, parent) => {
         if (!sub) return 1.0;
         if (typeof sub.weight === 'number') return Math.max(0.1, sub.weight);
         if (sub.priority) return priorityWeight(sub.priority);
@@ -93,14 +115,14 @@ function App() {
     };
 
     // compute weighted progress for a task (0-100). If subtasks exist, use their weights.
-    const getTaskProgress = (task) => {
+    const getQuestProgress = (task) => {
         if (!task) return 0;
-        const subs = Array.isArray(task.sub_tasks) ? task.sub_tasks : [];
+        const subs = Array.isArray(task.side_quests) ? task.side_quests : [];
         if (subs.length > 0) {
             let weightedDone = 0;
             let weightSum = 0;
             subs.forEach(sub => {
-                const w = subtaskWeight(sub, task);
+                const w = sideQuestWeight(sub, task);
                 weightSum += w;
                 const done = (sub.status === 'done' || sub.completed) ? 1 : 0;
                 weightedDone += done * w;
@@ -120,8 +142,8 @@ function App() {
     // compute weighted global progress for today's tasks (or all tasks if none match)
     const getGlobalProgress = () => {
         const today = new Date().toISOString().split('T')[0];
-        const dayTasks = tasks.filter(t => t && t.due_date === today);
-        const pool = dayTasks.length > 0 ? dayTasks : tasks;
+        const dayQuests = quests.filter(t => t && t.due_date === today);
+        const pool = dayQuests.length > 0 ? dayQuests : quests;
         if (!pool || pool.length === 0) return { percent: 0, count: 0 };
         let weightSum = 0;
         let weightedProgressSum = 0;
@@ -129,12 +151,12 @@ function App() {
             // task base weight
             const baseW = priorityWeight(t.priority);
             // include subtask weights so tasks with many/heavy subtasks count more
-            const subs = Array.isArray(t.sub_tasks) ? t.sub_tasks : [];
+            const subs = Array.isArray(t.side_quests) ? t.side_quests : [];
             let subWeights = 0;
-            subs.forEach(s => { subWeights += subtaskWeight(s, t); });
-            const taskTotalWeight = baseW + subWeights;
-            weightSum += taskTotalWeight;
-            weightedProgressSum += (getTaskProgress(t) || 0) * taskTotalWeight;
+            subs.forEach(s => { subWeights += sideQuestWeight(s, t); });
+            const questTotalWeight = baseW + subWeights;
+            weightSum += questTotalWeight;
+            weightedProgressSum += (getQuestProgress(t) || 0) * questTotalWeight;
         });
         const percent = weightSum > 0 ? Math.round(weightedProgressSum / weightSum) : 0;
         return { percent, count: pool.length };
@@ -150,96 +172,104 @@ function App() {
     };
 
     const addTask = () => {
-    if (!description || description.trim() === '') return;
+        if (!description || description.trim() === '') return;
         fetch('/api/tasks', {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({ description, priority }),
         })
             .then(res => res.json())
-            .then(newTask => {
-                setTasks([...tasks, newTask]);
+            .then(newQuest => {
+                setQuests(prev => [...prev, normalizeQuest(newQuest)]);
                 setDescription('');
                 setPriority('medium');
             })
-            .catch(error => console.error('Error adding task:', error));
+            .catch(error => console.error('Error adding quest:', error));
     };
 
-    const addSubTask = (taskId) => {
-    const description = subTaskDescriptionMap[taskId] || '';
-    if (!description || description.trim() === '') return;
-        fetch(`/api/tasks/${taskId}/subtasks`, {
+    const addSideQuest = (questId) => {
+        const description = sideQuestDescriptionMap[questId] || '';
+        if (!description || description.trim() === '') return;
+        fetch(`/api/tasks/${questId}/subtasks`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({ description }),
         })
             .then(res => res.json())
             .then(updatedTask => {
-                // server returns the updated task; use functional update to avoid stale tasks
-                setTasks(prev => prev.map(task => (task.id === taskId ? updatedTask : task)));
+                const normalized = normalizeQuest(updatedTask);
+                setQuests(prev => prev.map(quest => (quest.id === questId ? normalized : quest)));
                 // clear the input state but keep the add form open for rapid entry
-                setSubTaskDescriptionMap(prev => ({ ...prev, [taskId]: '' }));
+                setSideQuestDescriptionMap(prev => ({ ...prev, [questId]: '' }));
                 // focus the input if available
                 setTimeout(() => {
-                    if (addInputRefs.current && addInputRefs.current[taskId]) {
-                        try { addInputRefs.current[taskId].focus(); } catch (err) {}
+                    if (addInputRefs.current && addInputRefs.current[questId]) {
+                        try { addInputRefs.current[questId].focus(); } catch (err) {}
                     }
                 }, 10);
             })
-            .catch(error => console.error('Error adding sub-task:', error));
+            .catch(error => console.error('Error adding side-quest:', error));
     };
 
-    const toggleCollapse = (taskId) => {
-        setCollapsedMap(prev => ({ ...prev, [taskId]: !prev[taskId] }));
+    const toggleCollapse = (questId) => {
+        setCollapsedMap(prev => ({ ...prev, [questId]: !prev[questId] }));
     };
 
-    const handleDragStart = (e, taskId) => {
-        setDraggedTaskId(taskId);
-        setDragOverTaskId(null);
+    const handleDragStart = (e, questId) => {
+        setDraggedQuestId(questId);
+        setDragOverQuestId(null);
         setDragPosition(null);
         e.dataTransfer.effectAllowed = 'move';
-        try { e.dataTransfer.setData('text/plain', String(taskId)); } catch (err) {}
+        try { e.dataTransfer.setData('text/plain', String(questId)); } catch (err) {}
     };
 
-    const handleDragEnd = (e) => {
-        setDraggedTaskId(null);
-        setDragOverTaskId(null);
+    const handleDragEnd = () => {
+        setDraggedQuestId(null);
+        setDragOverQuestId(null);
         setDragPosition(null);
     };
 
-    const handleDragOver = (e, taskId) => {
-    // if a subtask is being dragged, ignore parent dragover to avoid interference
-    if (draggedSubtask) return;
-    e.preventDefault();
+    const handleDragOver = (e, questId) => {
+        if (draggedSideQuest) return;
+        e.preventDefault();
         // compute whether the mouse is in upper or lower half
         const rect = e.currentTarget.getBoundingClientRect();
         const offsetY = e.clientY - rect.top;
-        const pos = offsetY < rect.height / 2 ? 'above' : 'below';
-        setDragOverTaskId(taskId);
-        setDragPosition(pos);
+
+        let pos = null;
+        if (offsetY < rect.height * 0.2) {
+            pos = 'above';
+        } else if (offsetY > rect.height * 0.8) {
+            pos = 'below';
+        }
+
+        if (pos) {
+            setDragOverQuestId(questId);
+            setDragPosition(pos);
+        }
     };
 
     const handleDragLeave = (e) => {
         // when leaving, clear position indicators
-        setDragOverTaskId(null);
+        setDragOverQuestId(null);
         setDragPosition(null);
     };
 
-    const handleDrop = (e, targetTaskId) => {
+    const handleDrop = (e, targetQuestId) => {
         e.preventDefault();
-    // ignore parent drops while a subtask is being dragged
-    if (draggedSubtask) return;
-        const sourceId = draggedTaskId || e.dataTransfer.getData('text/plain');
+        // ignore parent drops while a subtask is being dragged
+        if (draggedSideQuest) return;
+        const sourceId = draggedQuestId || e.dataTransfer.getData('text/plain');
         if (!sourceId) return;
         const src = String(sourceId);
-        const tgt = String(targetTaskId);
+        const tgt = String(targetQuestId);
         if (src === tgt) {
-            setDraggedTaskId(null);
-            setDragOverTaskId(null);
+            setDraggedQuestId(null);
+            setDragOverQuestId(null);
             setDragPosition(null);
             return;
         }
-        setTasks(prev => {
+        setQuests(prev => {
             const copy = [...prev];
             const fromIdx = copy.findIndex(t => String(t.id) === src);
             const toIdx = copy.findIndex(t => String(t.id) === tgt);
@@ -252,39 +282,46 @@ function App() {
             copy.splice(adjustedIndex, 0, moved);
             return copy;
         });
-        setDraggedTaskId(null);
-        setDragOverTaskId(null);
+        setDraggedQuestId(null);
+        setDragOverQuestId(null);
         setDragPosition(null);
     };
 
     // Subtask drag handlers (reorder subtasks within the same parent task)
-    const handleSubDragStart = (e, taskId, subId) => {
-    e.stopPropagation();
-    setDraggedSubtask({ taskId, subId });
-    setSubDragOver({ taskId: null, subId: null, position: null });
-    e.dataTransfer.effectAllowed = 'move';
-    try { e.dataTransfer.setData('text/plain', `${taskId}:${subId}`); } catch (err) {}
+    const handleSideQuestDragStart = (e, questId, sideQuestId) => {
+        setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
+        setDraggedSideQuest({ taskId: questId, subId: sideQuestId });
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', `${questId}:${sideQuestId}`); } catch (err) {}
     };
 
-    const handleSubDragEnd = () => {
-    // stopPropagation not available here; ensure we clear state
-    setDraggedSubtask(null);
-    setSubDragOver({ taskId: null, subId: null, position: null });
+    const handleSideQuestDragEnd = () => {
+        setDraggedSideQuest(null);
+        setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
     };
 
-    const handleSubDragOver = (e, taskId, subId) => {
-    e.preventDefault();
-    e.stopPropagation();
+    const handleSideQuestDragOver = (e, questId, sideQuestId) => {
+        e.preventDefault();
+        e.stopPropagation();
         const rect = e.currentTarget.getBoundingClientRect();
         const offsetY = e.clientY - rect.top;
-        const pos = offsetY < rect.height / 2 ? 'above' : 'below';
-        setSubDragOver({ taskId, subId, position: pos });
+
+        let pos = null;
+        if (offsetY < rect.height * 0.2) {
+            pos = 'above';
+        } else if (offsetY > rect.height * 0.8) {
+            pos = 'below';
+        }
+
+        if (pos) {
+            setSideQuestDragOver({ questId, sideQuestId, position: pos });
+        }
     };
 
-    const handleSubDrop = (e, taskId, subId) => {
-    e.preventDefault();
-    e.stopPropagation();
-        const srcData = draggedSubtask || (() => {
+    const handleSideQuestDrop = (e, questId, sideQuestId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const srcData = draggedSideQuest || (() => {
             try { return e.dataTransfer.getData('text/plain'); } catch { return null; }
         })();
         if (!srcData) return;
@@ -299,51 +336,51 @@ function App() {
         }
         if (!srcTaskId || !srcSubId) return;
         // only allow reordering within the same parent task for now
-        if (String(srcTaskId) !== String(taskId)) {
-            setDraggedSubtask(null);
-            setSubDragOver({ taskId: null, subId: null, position: null });
+        if (String(srcTaskId) !== String(questId)) {
+            setDraggedSideQuest(null);
+            setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
             return;
         }
 
-        setTasks(prev => prev.map(task => {
-            if (String(task.id) !== String(taskId)) return task;
-            const subs = Array.isArray(task.sub_tasks) ? [...task.sub_tasks] : [];
+        setQuests(prev => prev.map(task => {
+            if (String(task.id) !== String(questId)) return task;
+            const subs = Array.isArray(task.side_quests) ? [...task.side_quests] : [];
             const fromIdx = subs.findIndex(s => String(s.id) === String(srcSubId));
-            const toIdx = subs.findIndex(s => String(s.id) === String(subId));
+            const toIdx = subs.findIndex(s => String(s.id) === String(sideQuestId));
             if (fromIdx === -1 || toIdx === -1) return task;
             const [moved] = subs.splice(fromIdx, 1);
-            const insertAt = subDragOver.position === 'above' ? toIdx : toIdx + 1;
+            const insertAt = sideQuestDragOver.position === 'above' ? toIdx : toIdx + 1;
             const adjusted = fromIdx < insertAt ? insertAt - 1 : insertAt;
             subs.splice(adjusted, 0, moved);
-            return { ...task, sub_tasks: subs };
+            return { ...task, side_quests: subs };
         }));
-
-        setDraggedSubtask(null);
-        setSubDragOver({ taskId: null, subId: null, position: null });
+        setDraggedSideQuest(null);
+        setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
     };
 
     const deleteTask = (id) => {
-    fetch(`/api/tasks/${id}`, { method: 'DELETE', headers: getAuthHeaders() })
+        fetch(`/api/tasks/${id}`, { method: 'DELETE', headers: getAuthHeaders() })
             .then(() => {
-                setTasks(tasks.filter(task => task.id !== id));
+                setQuests(prev => prev.filter(quest => quest.id !== id));
             })
-            .catch(error => console.error('Error deleting task:', error));
+            .catch(error => console.error('Error deleting quest:', error));
     };
 
     const updateTask = (id, updatedTask) => {
-    fetch(`/api/tasks/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(updatedTask) })
+        fetch(`/api/tasks/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(updatedTask) })
             .then(res => res.json())
-            .then(updatedTask => {
-                setTasks(tasks.map(task => (task.id === id ? updatedTask : task)));
-                setEditingTask(null);
+            .then(updatedQuest => {
+                const normalized = normalizeQuest(updatedQuest);
+                setQuests(prev => prev.map(q => (q.id === id ? normalized : q)));
+                setEditingQuest(null);
             })
-            .catch(error => console.error('Error updating task:', error));
+            .catch(error => console.error('Error updating quest:', error));
     };
 
     const [toasts, setToasts] = useState([]);
-    const [pulsingTasks, setPulsingTasks] = useState({}); // value: 'full' | 'subtle'
-    const [pulsingSubtasks, setPulsingSubtasks] = useState({});
-    const [glowTasks, setGlowTasks] = useState({});
+    const [pulsingQuests, setPulsingQuests] = useState({}); // value: 'full' | 'subtle'
+    const [pulsingSideQuests, setPulsingSideQuests] = useState({});
+    const [glowQuests, setGlowQuests] = useState({});
 
     const pushToast = (msg, type = 'info', timeout = 3000) => {
         const id = Date.now() + Math.random();
@@ -352,119 +389,123 @@ function App() {
     };
 
     const setTaskStatus = (id, status, note) => {
-    fetch(`/api/tasks/${id}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
+        fetch(`/api/tasks/${id}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
             .then(res => res.json())
-            .then(updatedTask => {
-                setTasks(prev => prev.map(t => (t.id === id ? updatedTask : t)));
+            .then(updatedQuest => {
+                const normalized = normalizeQuest(updatedQuest);
+                setQuests(prev => prev.map(t => (t.id === id ? normalized : t)));
                 // pulse the task card to indicate direct change (bigger bump)
-                setPulsingTasks(prev => ({ ...prev, [id]: 'full' }));
-                setTimeout(() => setPulsingTasks(prev => { const c = { ...prev }; delete c[id]; return c }), 700);
+                setPulsingQuests(prev => ({ ...prev, [id]: 'full' }));
+                setTimeout(() => setPulsingQuests(prev => { const c = { ...prev }; delete c[id]; return c }), 700);
                 // if the task completed, trigger a glow animation
                 if (status === 'done') {
-                    setGlowTasks(prev => ({ ...prev, [id]: true }));
-                    setTimeout(() => setGlowTasks(prev => { const c = { ...prev }; delete c[id]; return c }), 1400);
+                    setGlowQuests(prev => ({ ...prev, [id]: true }));
+                    setTimeout(() => setGlowQuests(prev => { const c = { ...prev }; delete c[id]; return c }), 1400);
                 }
-                pushToast(`Task ${updatedTask.id} set to ${status.replace('_',' ')}`, 'success');
+                pushToast(`Quest ${updatedQuest.id} set to ${status.replace('_',' ')}`, 'success');
             })
             .catch(error => {
-                console.error('Error updating task status:', error);
-                pushToast('Failed to update task status', 'error');
+                console.error('Error updating quest status:', error);
+                pushToast('Failed to update quest status', 'error');
             });
     };
 
-    const setSubtaskStatus = (taskId, subTaskId, status, note) => {
-    fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
+    const setSideQuestStatus = (taskId, subTaskId, status, note) => {
+        fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
             .then(res => res.json())
-            .then(updatedTask => {
-                setTasks(prev => prev.map(task => (task.id === taskId ? updatedTask : task)));
+            .then(updatedQuest => {
+                const normalized = normalizeQuest(updatedQuest);
+                setQuests(prev => prev.map(quest => (quest.id === taskId ? normalized : quest)));
                 // subtle pulse on parent when a subtask changed
-                setPulsingTasks(prev => ({ ...prev, [taskId]: 'subtle' }));
-                setTimeout(() => setPulsingTasks(prev => { const c = { ...prev }; delete c[taskId]; return c }), 500);
+                setPulsingQuests(prev => ({ ...prev, [taskId]: 'subtle' }));
+                setTimeout(() => setPulsingQuests(prev => { const c = { ...prev }; delete c[taskId]; return c }), 500);
                 // also pulse the specific subtask id for micro-feedback
-                setPulsingSubtasks(prev => ({ ...prev, [`${taskId}:${subTaskId}`]: true }));
-                setTimeout(() => setPulsingSubtasks(prev => { const c = { ...prev }; delete c[`${taskId}:${subTaskId}`]; return c }), 600);
+                setPulsingSideQuests(prev => ({ ...prev, [`${taskId}:${subTaskId}`]: true }));
+                setTimeout(() => setPulsingSideQuests(prev => { const c = { ...prev }; delete c[`${taskId}:${subTaskId}`]; return c }), 600);
                 // if the parent task is now done (subtask completed caused it), trigger glow
-                if (updatedTask && updatedTask.status === 'done') {
-                    setGlowTasks(prev => ({ ...prev, [taskId]: true }));
-                    setTimeout(() => setGlowTasks(prev => { const c = { ...prev }; delete c[taskId]; return c }), 1400);
+                if (updatedQuest && updatedQuest.status === 'done') {
+                    setGlowQuests(prev => ({ ...prev, [taskId]: true }));
+                    setTimeout(() => setGlowQuests(prev => { const c = { ...prev }; delete c[taskId]; return c }), 1400);
                 }
-                pushToast(`Subtask ${subTaskId} updated to ${status.replace('_',' ')}`, 'success');
+                pushToast(`Side-quest ${subTaskId} updated to ${status.replace('_',' ')}`, 'success');
             })
             .catch(error => {
-                console.error('Error updating sub-task status:', error);
-                pushToast('Failed to update subtask status', 'error');
+                console.error('Error updating side-quest status:', error);
+                pushToast('Failed to update side-quest status', 'error');
             });
     };
 
     const handleEditChange = (e) => {
         const { name, value } = e.target;
-        setEditingTask(prevTask => ({
-            ...prevTask,
+        setEditingQuest(prevQuest => ({
+            ...prevQuest,
             [name]: value
         }));
     };
 
-    const renderEditForm = (task) => {
+    const renderEditForm = (quest) => {
         return (
-            <div className="edit-task-form" key={task.id}>
+            <div className="edit-quest-form" key={quest.id}>
                 <input
                     type="text"
                     name="description"
-                    value={editingTask?.description || ''}
+                    value={editingQuest?.description || ''}
                     onChange={handleEditChange}
                 />
-                <select
-                    name="priority"
-                    value={editingTask?.priority || 'medium'}
-                    onChange={handleEditChange}
-                >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
-                <button className="btn-primary" onClick={() => updateTask(task.id, { description: editingTask.description, priority: editingTask.priority })}>Save</button>
-                <button className="btn-ghost" onClick={() => setEditingTask(null)}>Cancel</button>
+                <div className="custom-select">
+                    <select
+                        name="priority"
+                        value={editingQuest?.priority || 'medium'}
+                        onChange={handleEditChange}
+                    >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <button className="btn-primary" onClick={() => updateTask(quest.id, { description: editingQuest.description, priority: editingQuest.priority })}>Save</button>
+                <button className="btn-ghost" onClick={() => setEditingQuest(null)}>Cancel</button>
             </div>
         );
     }
 
-    const renderAddSubtaskForm = (task) => {
+    const renderAddSideQuestForm = (quest) => {
         return (
             <div className="add-subtask-form">
                 <input
                     type="text"
-                    placeholder="Sub-task description"
-                    value={subTaskDescriptionMap[task.id] || ''}
-                    onChange={e => setSubTaskDescriptionMap(prev => ({ ...prev, [task.id]: e.target.value }))}
-                    ref={el => { if (!addInputRefs.current) addInputRefs.current = {}; addInputRefs.current[task.id] = el }}
+                    placeholder="Side-quest description"
+                    value={sideQuestDescriptionMap[quest.id] || ''}
+                    onChange={e => setSideQuestDescriptionMap(prev => ({ ...prev, [quest.id]: e.target.value }))}
+                    ref={el => { if (!addInputRefs.current) addInputRefs.current = {}; addInputRefs.current[quest.id] = el }}
                     onKeyDown={e => {
                         if (e.key === 'Enter') {
                             e.preventDefault();
-                            addSubTask(task.id);
+                            addSideQuest(quest.id);
                             // keep focus and clear input so user can type next subtask
                             setTimeout(() => {
-                                if (addInputRefs.current && addInputRefs.current[task.id]) {
-                                    addInputRefs.current[task.id].focus();
-                                    addInputRefs.current[task.id].value = '';
+                                if (addInputRefs.current && addInputRefs.current[quest.id]) {
+                                    addInputRefs.current[quest.id].focus();
+                                    addInputRefs.current[quest.id].value = '';
                                 }
                             }, 10);
                         }
                     }}
                 />
-                <button className="btn-primary" onClick={() => addSubTask(task.id)}>Add</button>
-                <button className="btn-ghost" onClick={() => setAddingSubtaskTo(null)}>Cancel</button>
+                <button className="btn-primary" onClick={() => addSideQuest(quest.id)}>Add Side Quest</button>
+                <button className="btn-ghost" onClick={() => setAddingSideQuestTo(null)}>Cancel</button>
             </div>
         );
-    }
+    } // keep within App scope (do not close App here)
 
     // focus the add-subtask input when the form opens
     useEffect(() => {
-        if (addingSubtaskTo && addInputRefs.current && addInputRefs.current[addingSubtaskTo]) {
+        if (addingSideQuestTo && addInputRefs.current && addInputRefs.current[addingSideQuestTo]) {
             setTimeout(() => {
-                try { addInputRefs.current[addingSubtaskTo].focus(); } catch (err) {}
+                try { addInputRefs.current[addingSideQuestTo].focus(); } catch (err) {}
             }, 20);
         }
-    }, [addingSubtaskTo]);
+    }, [addingSideQuestTo]);
 
     // Show authentication screen if not logged in
     if (!token) {
@@ -473,8 +514,8 @@ function App() {
                 <header className="App-header">
                     <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:12}}>
                         <div>
-                            <h1>Task Tracker</h1>
-                            <div className="subtitle">Task management made easy, but also way harder.</div>
+                            <h1>Quest Tracker</h1>
+                            <div className="subtitle">Quest management made easy, but also way harder.</div>
                         </div>
                         <div style={{display:'flex', alignItems:'center', gap:8}}>
                             <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
@@ -484,9 +525,9 @@ function App() {
                 <div style={{display:'flex', justifyContent:'center', marginTop:40}}>
                     <div className="auth-required-screen">
                         <div style={{textAlign:'center', marginBottom:24}}>
-                            <h2>Welcome to Task Tracker</h2>
+                            <h2>Welcome to Quest Tracker</h2>
                             <p style={{color:'var(--text-muted)', marginBottom:32}}>
-                                Please sign in or create an account to start managing your tasks.
+                                Please sign in or create an account to start managing your quests.
                             </p>
                         </div>
                         <Profile token={token} onLogin={(t) => { setToken(t); }} onLogout={() => { setToken(null); }} />
@@ -515,8 +556,8 @@ function App() {
             <header className="App-header">
                 <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:12}}>
                     <div>
-                        <h1>Task Tracker</h1>
-                        <div className="subtitle">Task management made easy, but also way harder.</div>
+                        <h1>Quest Tracker</h1>
+                        <div className="subtitle">Quest management made easy, but also way harder.</div>
                     </div>
                     <div style={{display:'flex', alignItems:'center', gap:8}}>
                         <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
@@ -526,137 +567,136 @@ function App() {
             </header>
             {showProfile && (
                 <div className="profile-modal">
-                    <Profile token={token} onLogin={(t) => { setToken(t); setShowProfile(false); }} onLogout={() => { setToken(null); setShowProfile(false); }} />
+                    <Profile token={token} onLogin={(t) => { setToken(t); setShowProfile(false); }} onLogout={() => { setToken(null); setShowProfile(false); }} onClose={() => setShowProfile(false)} />
                 </div>
             )}
             <div className="add-task-form">
                 <input
                     type="text"
-                    placeholder="Task description"
+                    placeholder="Quest description"
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTask(); } }}
                 />
-                <select value={priority} onChange={e => setPriority(e.target.value)}>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
-                <button className="btn-primary" onClick={addTask}>Add Task</button>
+                <div className="custom-select">
+                    <select value={priority} onChange={e => setPriority(e.target.value)}>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <button className="btn-primary" onClick={addTask}>Add Quest</button>
             </div>
-            <div className="task-container">
-                {tasks.map(task => (
-                                        <div key={task.id}>
-                                            {dragOverTaskId === task.id && dragPosition === 'above' && <div className="insert-indicator" />}
-                                                <div
-                                                data-dragging={draggedTaskId === task.id}
-                                                key={task.id}
-                                                className={`task ${( (task.status || (task.completed ? 'done' : 'todo')) === 'done' ? 'completed' : '')} ${collapsedMap[task.id] ? 'collapsed' : ''} ${dragOverTaskId === task.id ? 'drag-over' : ''} ${(task.status === 'in_progress') ? 'started' : ''} ${(pulsingTasks[task.id] === 'full') ? 'pulse' : (pulsingTasks[task.id] === 'subtle' ? 'pulse-subtle' : '')} ${glowTasks[task.id] ? 'glow' : ''}`}
-                                                draggable
-                                                onDragStart={e => handleDragStart(e, task.id)}
-                                                onDragEnd={handleDragEnd}
-                                                onDragOver={e => handleDragOver(e, task.id)}
-                                                onDragLeave={handleDragLeave}
-                                                onDrop={e => handleDrop(e, task.id)}
-                                            >
-                                                <div style={{display:'flex', alignItems:'center'}}>
-                                                    <div className="drag-handle top" draggable onDragStart={e => handleDragStart(e, task.id)} onDragEnd={handleDragEnd}>≡</div>
-                                                    <div style={{flex:1}}>
-                                                    {/* task content follows */}
+            <div className="quest-container">
+                {quests.map(quest => (
+                    <React.Fragment key={quest.id}>
+                        {dragOverQuestId === quest.id && dragPosition === 'above' && (
+                            <div className="insert-indicator" />
+                        )}
+                        <div
+                            data-dragging={draggedQuestId === quest.id}
+                            className={`quest ${((quest.status || (quest.completed ? 'done' : 'todo')) === 'done' ? 'completed' : '')} ${collapsedMap[quest.id] ? 'collapsed' : ''} ${dragOverQuestId === quest.id ? 'drag-over' : ''} ${(quest.status === 'in_progress') ? 'started' : ''} ${(pulsingQuests[quest.id] === 'full') ? 'pulse' : (pulsingQuests[quest.id] === 'subtle' ? 'pulse-subtle' : '')} ${glowQuests[quest.id] ? 'glow' : ''}`}
+                            draggable
+                            onDragStart={e => handleDragStart(e, quest.id)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={e => handleDragOver(e, quest.id)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={e => handleDrop(e, quest.id)}
+                        >
+                            <div style={{display:'flex', alignItems:'center'}}>
+                                <div className="drag-handle top" draggable onDragStart={e => handleDragStart(e, quest.id)} onDragEnd={handleDragEnd}>≡</div>
+                                <div style={{flex:1}}>{editingQuest && editingQuest.id === quest.id ? (
+                                        renderEditForm(quest)
+                                    ) : (
+                                        <>
+                                            <div className="quest-header">
+                                                <div className="left">
+                                                    <h3>{quest.description}</h3>
+                                                    <div style={{marginLeft:12}}><span className={`level-tag level-${quest.priority}`}>{quest.priority}</span></div>
                                                 </div>
+                                                <div className="right">
+                                                    <div className="quest-controls">
+                                                        <button className="btn-ghost" onClick={() => toggleCollapse(quest.id)} aria-label="toggle details">{collapsedMap[quest.id] ? 'Expand' : 'Minimize'}</button>
+                                                        <button className="btn-ghost" onClick={() => setEditingQuest({ ...quest })}>Edit</button>
+                                                        <button className="btn-danger" onClick={() => deleteTask(quest.id)}>Delete</button>
+                                                    </div>
                                                 </div>
-                        {editingTask && editingTask.id === task.id ? (
-                            renderEditForm(task)
-                        ) : (
-                            <>
-                                                                <div className="task-header">
-                                                                                                            <div className="left">
-                                                                                                                                                                            <h3>{task.description}</h3>
-                                                                                                                                                                            <div style={{marginLeft:12}}>
-                                                                                                                                                                                <span className={`priority-tag priority-${task.priority}`}>{task.priority}</span>
-                                                                                                                                                                            </div>
-                                                                                                                                                                    </div>
-                                                                    <div className="right">
-                                                                                                                                                <div className="task-controls">
-                                                                                                                                                        <button className="btn-ghost" onClick={() => toggleCollapse(task.id)} aria-label="toggle details">{collapsedMap[task.id] ? 'Expand' : 'Minimize'}</button>
-                                                                                                                                                        <button className="btn-ghost" onClick={() => setEditingTask({ ...task })}>Edit</button>
-                                                                                                                                                        <button className="btn-danger" onClick={() => deleteTask(task.id)}>Delete</button>
-                                                                                                                                                </div>
-                                                                    </div>
-                                                                </div>
-                                                                {!collapsedMap[task.id] && (
-                                                                        <>
-                                                                            <div className="task-progress-wrap">
-                                                                                <div className="task-progress">
-                                                                                        <div className="task-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={getTaskProgress(task)} title={`${getTaskProgress(task)}%`}>
-                                                                                            <div className="task-progress-fill" style={{ width: `${getTaskProgress(task)}%`, background: progressColor(getTaskProgress(task)) }} />
-                                                                                            <div className="tooltip">{getTaskProgress(task)}%</div>
-                                                                                        </div>
-                                                                                        <div className="task-progress-meta">{getTaskProgress(task)}%</div>
-                                                                                    </div>
-                                                                            </div>
-                                                                            <div className="task-details">
-                                                                                    <div>
-                                                                                        <div className="muted small">Due:</div>
-                                                                                        <div className="muted">{task.due_date || '—'}</div>
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <div className="muted small">Status:</div>
-                                                                                        <div className="muted">{(task.status || (task.completed ? 'done' : 'todo')).replace('_', ' ')}</div>
-                                                                                    </div>
-                                                                                    <div style={{marginLeft:'auto'}}>
-                                                                                        {/* show actions depending on current status */}
-                                                                                        {((task.status || (task.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(task.id, 'in_progress'); }}>Start</button>}
-                                                                                        {((task.status || (task.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(task.id, 'done'); }}>Complete</button>}
-                                                                                        {((task.status || (task.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(task.id, 'todo'); }}>Undo</button>}
-                                                                                    </div>
-                                                                                </div>
-                                                                        </>
-                                                                )}
-                                                                {task.sub_tasks && task.sub_tasks.length > 0 && (
-                                    <div>
-                                        <h4>Sub-tasks:</h4>
-                                        <ul>
-                                            {task.sub_tasks.map((sub) => (
-                                                <li key={sub.id} className={((sub.status || (sub.completed ? 'done' : 'todo')) === 'done') ? 'completed' : ''}>
-                                                    {subDragOver.taskId === task.id && subDragOver.subId === sub.id && subDragOver.position === 'above' && <div className="insert-indicator" />}
-                                                    <div
-                                                        className="task-row"
-                                                        onDragOver={e => handleSubDragOver(e, task.id, sub.id)}
-                                                        onDragLeave={() => setSubDragOver({ taskId: null, subId: null, position: null })}
-                                                        onDrop={e => handleSubDrop(e, task.id, sub.id)}
-                                                    >
-                                                        <div style={{display:'flex', alignItems:'center', gap:8, flex:1}}>
-                                                            <div className="drag-handle" style={{width:14,height:14,fontSize:9}} draggable onDragStart={e => handleSubDragStart(e, task.id, sub.id)} onDragEnd={handleSubDragEnd}>⋮</div>
-                                                            <div className={`subtask-desc ${(sub.status === 'in_progress') ? 'in-progress' : ''} ${(sub.status === 'done') ? 'started' : ''} ${pulsingSubtasks[`${task.id}:${sub.id}`] ? 'pulse-subtle' : ''}`} style={{flex:1}}>{sub.description} <small className="small"> - {(sub.status || (sub.completed ? 'done' : 'todo')).replace('_', ' ')}</small></div>
-                                                        </div>
-                                                        <div>
-                                                            {(((sub.status) || (sub.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSubtaskStatus(task.id, sub.id, 'in_progress'); }}>Start</button>}
-                                                            {(((sub.status) || (sub.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSubtaskStatus(task.id, sub.id, 'done'); }}>Complete</button>}
-                                                            {(((sub.status) || (sub.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSubtaskStatus(task.id, sub.id, 'todo'); }}>Undo</button>}
+                                            </div>
+                                            {!collapsedMap[quest.id] && (
+                                                <>
+                                                    <div className="quest-progress-wrap">
+                                                        <div className="quest-progress">
+                                                            <div className="quest-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={getQuestProgress(quest)} title={`${getQuestProgress(quest)}%`}>
+                                                                <div className="quest-progress-fill" style={{ width: `${getQuestProgress(quest)}%`, background: progressColor(getQuestProgress(quest)) }} />
+                                                                <div className="tooltip">{getQuestProgress(quest)}%</div>
+                                                            </div>
+                                                            <div className="quest-progress-meta">{getQuestProgress(quest)}%</div>
                                                         </div>
                                                     </div>
-                                                    {subDragOver.taskId === task.id && subDragOver.subId === sub.id && subDragOver.position === 'below' && <div className="insert-indicator" />}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                                                                                {/* Add-subtask area moved into card footer for clarity */}
-                                                                                                <div style={{marginTop:12}}>
-                                                                                                    {addingSubtaskTo === task.id ? (
-                                                                                                                renderAddSubtaskForm(task)
-                                                                                                    ) : (
-                                                                                                                <div style={{display:'flex', justifyContent:'flex-end'}}>
-                                                                                                                    <button className="add-subtask-button large" onClick={() => setAddingSubtaskTo(task.id)}>+ Add Sub-task</button>
-                                                                                                                </div>
-                                                                                                    )}
-                                                                                                </div>
-                            </>
+                                                    <div className="quest-details">
+                                                        <div>
+                                                            <div className="muted small">Due:</div>
+                                                            <div className="muted">{quest.due_date || '—'}</div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="muted small">Status:</div>
+                                                            <div className="muted">{(quest.status || (quest.completed ? 'done' : 'todo')).replace('_', ' ')}</div>
+                                                        </div>
+                                                        <div style={{marginLeft:'auto'}}>
+                                                            {/* show actions depending on current status */}
+                                                            {((quest.status || (quest.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'in_progress'); }}>Start</button>}
+                                                            {((quest.status || (quest.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'done'); }}>Complete</button>}
+                                                            {((quest.status || (quest.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'todo'); }}>Undo</button>}
+                                                        </div>
+                                                    </div>
+                                                    {quest.side_quests && quest.side_quests.length > 0 && (
+                                                        <div>
+                                                            <h4>Side-quests:</h4>
+                                                            <ul>
+                                                                {quest.side_quests.map(sideQuest => (
+                                                                    <li key={sideQuest.id} className={((sideQuest.status || (sideQuest.completed ? 'done' : 'todo')) === 'done') ? 'completed' : ''}>
+                                                                        {sideQuestDragOver.questId === quest.id && sideQuestDragOver.sideQuestId === sideQuest.id && sideQuestDragOver.position === 'above' && <div className="insert-indicator" />}
+                                                                        <div
+                                                                            className="task-row"
+                                                                            onDragOver={e => handleSideQuestDragOver(e, quest.id, sideQuest.id)}
+                                                                            onDragLeave={() => setSideQuestDragOver({ questId: null, sideQuestId: null, position: null })}
+                                                                            onDrop={e => handleSideQuestDrop(e, quest.id, sideQuest.id)}
+                                                                        >
+                                                                            <div style={{display:'flex', alignItems:'center', gap:8, flex:1}}>
+                                                                                <div className="drag-handle" style={{width:14,height:14,fontSize:9}} draggable onDragStart={e => handleSideQuestDragStart(e, quest.id, sideQuest.id)} onDragEnd={handleSideQuestDragEnd}>⋮</div>
+                                                                                <div className={`side-quest-desc ${(sideQuest.status === 'in_progress') ? 'in-progress' : ''} ${(sideQuest.status === 'done') ? 'started' : ''} ${pulsingSideQuests[`${quest.id}:${sideQuest.id}`] ? 'pulse-subtle' : ''}`} style={{flex:1}}>{sideQuest.description} <small className="small"> - {(sideQuest.status || (sideQuest.completed ? 'done' : 'todo')).replace('_', ' ')}</small></div>
+                                                                            </div>
+                                                                            <div>
+                                                                                {(((sideQuest.status) || (sideQuest.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'in_progress'); }}>Start</button>}
+                                                                                {(((sideQuest.status) || (sideQuest.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'done'); }}>Complete</button>}
+                                                                                {(((sideQuest.status) || (sideQuest.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'todo'); }}>Undo</button>}
+                                                                            </div>
+                                                                        </div>
+                                                                        {sideQuestDragOver.questId === quest.id && sideQuestDragOver.sideQuestId === sideQuest.id && sideQuestDragOver.position === 'below' && <div className="insert-indicator" />}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+                                                    {/* Add-side-quest area moved into card footer for clarity */}
+                                                    <div style={{marginTop:12}}>
+                                                        {addingSideQuestTo === quest.id ? (
+                                                            renderAddSideQuestForm(quest)
+                                                        ) : (
+                                                            <div style={{display:'flex', justifyContent:'flex-end'}}><button className="add-side-quest-button large" onClick={() => setAddingSideQuestTo(quest.id)}>+ Add Side Quest</button></div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        {dragOverQuestId === quest.id && dragPosition === 'below' && (
+                            <div className="insert-indicator" />
                         )}
-                                            </div>
-                                            {dragOverTaskId === task.id && dragPosition === 'below' && <div className="insert-indicator" />}
-                                        </div>
+                    </React.Fragment>
                 ))}
             </div>
             {/* Toasts */}
