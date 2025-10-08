@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import RegistrationWizard from './RegistrationWizard';
 
-export default function Profile({ token, onLogin, onLogout }) {
+export default function Profile({ token, onLogin, onLogout, onClose }) {
     const [profile, setProfile] = useState({ display_name: '', avatar: '', class: '', bio: '' });
     const [editing, setEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showRegistrationWizard, setShowRegistrationWizard] = useState(false);
+    const [saved, setSaved] = useState(false);
 
     useEffect(() => {
         if (!token) return;
@@ -33,6 +34,8 @@ export default function Profile({ token, onLogin, onLogout }) {
             .then(data => {
                 setProfile(data.user.profile || {});
                 setEditing(false);
+                setSaved(true);
+                setTimeout(() => setSaved(false), 2000);
             })
             .catch(() => {})
             .finally(() => setLoading(false));
@@ -116,36 +119,41 @@ export default function Profile({ token, onLogin, onLogout }) {
 
     return (
         <div className="profile-box">
+            <button onClick={onClose} className="close-button">X</button>
+            {saved && <div className="saved-message">Saved!</div>}
             <h3>Profile</h3>
-            {loading ? <div>Loading...</div> : (
+            {loading ? <div className="spinner"></div> : (
                 <div>
                     {!editing ? (
                         <div>
-                            <div><strong>Name:</strong> {profile.display_name || ''}</div>
+                            <div className="profile-header">
+                                <div className="avatar-placeholder">{profile.display_name ? profile.display_name.charAt(0).toUpperCase() : 'U'}</div>
+                                <div><strong>Name:</strong> {profile.display_name || ''}</div>
+                            </div>
                             <div><strong>Class:</strong> {profile.class || ''}</div>
                             <div><strong>Bio:</strong> {profile.bio || ''}</div>
                             <div style={{ marginTop: 8 }}>
-                                <button onClick={() => setEditing(true)}>Edit</button>
-                                <button onClick={() => { onLogout(); }}>Logout</button>
+                                <button onClick={() => setEditing(true)} className="btn-ghost">Edit</button>
+                                <button onClick={() => { onLogout(); }} className="btn-ghost">Logout</button>
                             </div>
                         </div>
                     ) : (
-                        <div>
-                            <div>
+                        <div className="profile-edit-form">
+                            <div className="form-group">
                                 <label>Name</label>
                                 <input value={profile.display_name || ''} onChange={e => setProfile(p => ({ ...p, display_name: e.target.value }))} />
                             </div>
-                            <div>
+                            <div className="form-group">
                                 <label>Class</label>
                                 <input value={profile.class || ''} onChange={e => setProfile(p => ({ ...p, class: e.target.value }))} />
                             </div>
-                            <div>
+                            <div className="form-group">
                                 <label>Bio</label>
                                 <textarea value={profile.bio || ''} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} />
                             </div>
-                            <div style={{ marginTop: 8 }}>
-                                <button onClick={handleSave} disabled={loading}>Save</button>
-                                <button onClick={() => setEditing(false)}>Cancel</button>
+                            <div className="form-actions">
+                                <button onClick={() => setEditing(false)} className="btn-ghost">Cancel</button>
+                                <button onClick={handleSave} disabled={loading} className="btn-primary">Save</button>
                             </div>
                         </div>
                     )}

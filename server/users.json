@@ -5,8 +5,8 @@
       "username": "local",
       "password_hash": "",
       "email": null,
-      "created_at": "2025-09-11T16:16:32.080Z",
-      "updated_at": "2025-09-11T16:16:32.080Z",
+      "created_at": "2025-10-07T12:59:31.654Z",
+      "updated_at": "2025-10-07T12:59:31.654Z",
       "profile": {
         "display_name": "Local User",
         "avatar": null,
@@ -28,94 +28,16 @@
     },
     {
       "id": 2,
-      "username": "testuser_1757607392080",
-      "password_hash": "$2a$10$LbSQdkuEYNhZDBEsMIA60.S5kLRhKclq2Uz3sF5B27D0TUyp/pL6q",
+      "username": "feafy",
+      "password_hash": "$2a$10$WPJcPzrnEKojCg3GISAsxejgn8v8NYQDRi7qn8nPoWgoGjBhpt3s6",
       "email": null,
-      "created_at": "2025-09-11T16:16:32.081Z",
-      "updated_at": "2025-09-11T16:16:32.081Z",
+      "created_at": "2025-10-08T15:18:15.067Z",
+      "updated_at": "2025-10-08T15:18:15.067Z",
       "profile": {
-        "display_name": "testuser_1757607392080",
+        "display_name": "feafy",
         "avatar": null,
-        "class": "adventurer",
-        "bio": ""
-      },
-      "rpg": {
-        "level": 1,
-        "xp": 0,
-        "hp": 20,
-        "mp": 5,
-        "coins": 0,
-        "streak": 0,
-        "achievements": [],
-        "inventory": {
-          "items": []
-        }
-      }
-    },
-    {
-      "id": 3,
-      "username": "wizarduser",
-      "password_hash": "$2a$10$696/nCYHDDuWefyz.4JceO3ui6ffSLmBXiP/xEJwqHWi.cTzuhQAG",
-      "email": "test@example.com",
-      "created_at": "2025-09-11T16:16:52.982Z",
-      "updated_at": "2025-09-11T16:16:52.982Z",
-      "profile": {
-        "display_name": "wizarduser",
-        "avatar": null,
-        "class": "adventurer",
-        "bio": ""
-      },
-      "rpg": {
-        "level": 1,
-        "xp": 0,
-        "hp": 20,
-        "mp": 5,
-        "coins": 0,
-        "streak": 0,
-        "achievements": [],
-        "inventory": {
-          "items": []
-        }
-      }
-    },
-    {
-      "id": 4,
-      "username": "mageuser",
-      "password_hash": "$2a$10$RL424eM1xBeGiODpIFq7VuVehct.dQQKVYYz.fWGBJMxd8i/flNBG",
-      "email": "mage@example.com",
-      "created_at": "2025-09-11T16:17:31.856Z",
-      "updated_at": "2025-09-11T16:17:31.856Z",
-      "profile": {
-        "display_name": "mageuser",
-        "avatar": null,
-        "class": "adventurer",
-        "bio": ""
-      },
-      "rpg": {
-        "level": 1,
-        "xp": 0,
-        "hp": 20,
-        "mp": 5,
-        "coins": 0,
-        "streak": 0,
-        "achievements": [],
-        "inventory": {
-          "items": []
-        }
-      }
-    },
-    {
-      "id": 5,
-      "username": "bingobongo",
-      "password_hash": "$2a$10$bSGr8.JmR5A7ro0BYhwTC.gnxheCwXPMgR2vzSPDYW9BEX/HCltOi",
-      "email": null,
-      "created_at": "2025-09-11T21:12:54.159Z",
-      "updated_at": "2025-09-11T21:12:54.159Z",
-      "profile": {
-        "display_name": "bingobongo",
-        "avatar": null,
-        "class": "adventurer",
-        "bio": ""
+        "class": "rogue",
+        "bio": "So quick"
       },
       "rpg": {
         "level": 1,
@@ -131,5 +53,5 @@
       }
     }
   ],
-  "nextId": 6
+  "nextId": 3
 }
