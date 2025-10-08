@@ -11,11 +11,23 @@ app.use(express.json());
 // auth deps and helpers
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+const { primaryJwtSecret, jwtSecrets } = require('./config');
 
 function signToken(user) {
     // minimal token payload
-    return jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    return jwt.sign({ id: user.id, username: user.username }, primaryJwtSecret, { expiresIn: '7d' });
+}
+
+function verifyToken(token) {
+    let lastError = null;
+    for (const secret of jwtSecrets) {
+        try {
+            return jwt.verify(token, secret);
+        } catch (err) {
+            lastError = err;
+        }
+    }
+    throw lastError || new Error('Invalid or expired token');
 }
 
 function authenticate(req, res, next) {
@@ -25,7 +37,7 @@ function authenticate(req, res, next) {
     if (parts.length !== 2 || parts[0] !== 'Bearer') return sendError(res, 401, 'Invalid auth format');
     const token = parts[1];
     try {
-        const payload = jwt.verify(token, JWT_SECRET);
+        const payload = verifyToken(token);
         // attach user to request
         req.user = { id: payload.id, username: payload.username };
         return next();

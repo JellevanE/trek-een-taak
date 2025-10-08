@@ -22,6 +22,12 @@ if [ ! -d "node_modules" ] || [ -z "$(ls -A node_modules 2>/dev/null)" ]; then
   log "server dependencies installed"
 fi
 
+# ensure JWT secret for local dev; allow override via existing env
+if [ -z "${JWT_SECRET:-}" ]; then
+  export JWT_SECRET="dev-local-secret"
+  log "JWT_SECRET not set — using development fallback (override in env for custom secret)"
+fi
+
 # start server and redirect logs
 node server.js > "$ROOT_DIR/server.log" 2>&1 &
 SERVER_PID=$!
