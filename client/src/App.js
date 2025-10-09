@@ -16,10 +16,14 @@ const normalizeQuest = (task) => {
             ? task.sub_tasks
             : [];
     const sideQuests = rawSubs.map(normalizeSideQuest);
-    return { ...task, side_quests: sideQuests };
+    const taskLevel = typeof task.task_level === 'number' ? task.task_level : 1;
+    return { ...task, side_quests: sideQuests, task_level: taskLevel };
 };
 
 const normalizeQuestList = (list) => Array.isArray(list) ? list.map(normalizeQuest) : [];
+
+const PRIORITY_ORDER = ['low', 'medium', 'high'];
+const LEVEL_OPTIONS = [1, 2, 3, 4, 5];
 
 function App() {
     // theme: 'dark' | 'light'
@@ -35,6 +39,11 @@ function App() {
     const [quests, setQuests] = useState([]);
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('medium');
+    const [taskLevel, setTaskLevel] = useState(1);
+    const [playerStats, setPlayerStats] = useState(null);
+    const [dailyLoading, setDailyLoading] = useState(false);
+    const [debugBusy, setDebugBusy] = useState(false);
+    const [showDebugTools, setShowDebugTools] = useState(false);
     const [editingQuest, setEditingQuest] = useState(null);
     // store subtask descriptions per task id to allow multiple open forms
     const [sideQuestDescriptionMap, setSideQuestDescriptionMap] = useState({});
@@ -63,6 +72,7 @@ function App() {
                     // If the token is invalid, the server returns 401
                     // In that case, we should log out
                     setToken(null);
+                    setPlayerStats(null);
                     return null;
                 })
                 .then(data => {
@@ -76,11 +86,31 @@ function App() {
                 .catch(error => {
                     console.error('Error fetching quests:', error);
                     setToken(null); // Also logout on network error
+                    setPlayerStats(null);
                 });
         } else {
             // No token, so clear tasks
             setQuests([]);
+            setPlayerStats(null);
         }
+    }, [token]);
+
+    useEffect(() => {
+        if (!token) {
+            setPlayerStats(null);
+            return;
+        }
+        const headers = { Authorization: `Bearer ${token}` };
+        fetch('/api/users/me', { headers })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && data.user && data.user.rpg) {
+                    setPlayerStats(data.user.rpg);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching player stats:', error);
+            });
     }, [token]);
 
     useEffect(() => {
@@ -195,18 +225,45 @@ function App() {
         return 'linear-gradient(90deg, #ff4d4f, #ff758f)'; // red
     };
 
+    const getProgressAura = (pct) => {
+        if (pct >= 90) return { emoji: '🌟', mood: 'Legendary focus', fillClass: 'progress-legend' };
+        if (pct >= 70) return { emoji: '🚀', mood: 'Momentum rising', fillClass: 'progress-heroic' };
+        if (pct >= 40) return { emoji: '⚔️', mood: 'Battle ready', fillClass: 'progress-ready' };
+        if (pct >= 15) return { emoji: '🛠️', mood: 'Forge in progress', fillClass: 'progress-building' };
+        return { emoji: '💤', mood: 'Boot sequence idle', fillClass: 'progress-idle' };
+    };
+
     const addTask = () => {
         if (!description || description.trim() === '') return;
         fetch('/api/tasks', {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ description, priority }),
+            body: JSON.stringify({ description, priority, task_level: taskLevel }),
         })
             .then(res => res.json())
             .then(newQuest => {
-                setQuests(prev => [...prev, normalizeQuest(newQuest)]);
+                const normalized = normalizeQuest(newQuest);
+                setQuests(prev => [normalized, ...prev]);
+                if (normalized && normalized.id !== undefined && normalized.id !== null) {
+                    const questId = normalized.id;
+                    setSpawnQuests(prev => ({ ...prev, [questId]: true }));
+                    setPulsingQuests(prev => ({ ...prev, [questId]: 'spawn' }));
+                    setTimeout(() => {
+                        setSpawnQuests(prev => {
+                            const copy = { ...prev };
+                            delete copy[questId];
+                            return copy;
+                        });
+                        setPulsingQuests(prev => {
+                            const copy = { ...prev };
+                            delete copy[questId];
+                            return copy;
+                        });
+                    }, 650);
+                }
                 setDescription('');
                 setPriority('medium');
+                setTaskLevel(1);
             })
             .catch(error => console.error('Error adding quest:', error));
     };
@@ -391,7 +448,11 @@ function App() {
     };
 
     const updateTask = (id, updatedTask) => {
-        fetch(`/api/tasks/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(updatedTask) })
+        const payload = { ...updatedTask };
+        if (Object.prototype.hasOwnProperty.call(payload, 'task_level')) {
+            payload.task_level = Number(payload.task_level) || 1;
+        }
+        fetch(`/api/tasks/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(updatedQuest => {
                 const normalized = normalizeQuest(updatedQuest);
@@ -402,9 +463,11 @@ function App() {
     };
 
     const [toasts, setToasts] = useState([]);
-    const [pulsingQuests, setPulsingQuests] = useState({}); // value: 'full' | 'subtle'
+    const [pulsingQuests, setPulsingQuests] = useState({}); // value: 'full' | 'subtle' | 'spawn'
     const [pulsingSideQuests, setPulsingSideQuests] = useState({});
     const [glowQuests, setGlowQuests] = useState({});
+    const [celebratingQuests, setCelebratingQuests] = useState({});
+    const [spawnQuests, setSpawnQuests] = useState({});
 
     const pushToast = (msg, type = 'info', timeout = 3000) => {
         const id = Date.now() + Math.random();
@@ -412,10 +475,145 @@ function App() {
         setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), timeout);
     };
 
+    const reloadTasks = () => {
+        if (!token) return Promise.resolve();
+        const headers = { Authorization: `Bearer ${token}` };
+        return fetch('/api/tasks', { headers })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data) {
+                    const payload = data.tasks || data.quests || [];
+                    setQuests(normalizeQuestList(payload));
+                }
+            })
+            .catch(err => {
+                console.error('Error reloading quests:', err);
+                pushToast('Failed to refresh quests', 'error');
+            });
+    };
+
+    const handleXpPayload = (payload) => {
+        if (!payload) return;
+        if (payload.player_rpg) {
+            setPlayerStats(payload.player_rpg);
+        }
+        const events = Array.isArray(payload.xp_events)
+            ? payload.xp_events
+            : (payload.xp_event ? [payload.xp_event] : []);
+        events.forEach(event => {
+            if (!event) return;
+            const message = event.message || `Gained ${event.amount} XP`;
+            pushToast(message, 'success', 4000);
+            if (event.leveled_up && event.level_after) {
+                pushToast(`Level up! Reached level ${event.level_after}`, 'success', 5000);
+            }
+        });
+    };
+
+    const claimDailyReward = () => {
+        if (dailyLoading) return;
+        setDailyLoading(true);
+        fetch('/api/rpg/daily-reward', { method: 'POST', headers: getAuthHeaders() })
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const message = data && data.error ? data.error : 'Unable to claim daily reward';
+                    pushToast(message, 'error', 4000);
+                    return null;
+                }
+                return data;
+            })
+            .then(data => {
+                if (!data) return;
+                handleXpPayload(data);
+            })
+            .catch(error => {
+                console.error('Error claiming daily reward:', error);
+                pushToast('Failed to claim daily reward', 'error', 4000);
+            })
+            .finally(() => setDailyLoading(false));
+    };
+
+    const clearAllQuests = () => {
+        if (debugBusy) return;
+        setDebugBusy(true);
+        fetch('/api/debug/clear-tasks', { method: 'POST', headers: getAuthHeaders() })
+            .then(res => res.json())
+            .then(data => {
+                setQuests([]);
+                pushToast(`Cleared ${data.removed || 0} quests`, 'success');
+            })
+            .catch(err => {
+                console.error('Error clearing quests:', err);
+                pushToast('Failed to clear quests', 'error');
+            })
+            .finally(() => setDebugBusy(false));
+    };
+
+    const seedDemoQuests = (count = 5) => {
+        if (debugBusy) return;
+        setDebugBusy(true);
+        fetch('/api/debug/seed-tasks', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ count })
+        })
+            .then(res => res.json())
+            .then(data => {
+                pushToast(`Seeded ${data.created || 0} demo quests`, 'success');
+                return reloadTasks();
+            })
+            .catch(err => {
+                console.error('Error seeding quests:', err);
+                pushToast('Failed to seed quests', 'error');
+            })
+            .finally(() => setDebugBusy(false));
+    };
+
+    const grantXp = (amount) => {
+        if (debugBusy) return;
+        setDebugBusy(true);
+        fetch('/api/debug/grant-xp', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ amount })
+        })
+            .then(res => res.json())
+            .then(data => {
+                handleXpPayload(data);
+                const msg = data && data.xp_event && data.xp_event.message
+                    ? data.xp_event.message
+                    : `Adjusted XP by ${amount}`;
+                pushToast(msg, 'success');
+            })
+            .catch(err => {
+                console.error('Error granting XP:', err);
+                pushToast('Failed to grant XP', 'error');
+            })
+            .finally(() => setDebugBusy(false));
+    };
+
+    const resetRpgStats = () => {
+        if (debugBusy) return;
+        setDebugBusy(true);
+        fetch('/api/debug/reset-rpg', { method: 'POST', headers: getAuthHeaders() })
+            .then(res => res.json())
+            .then(data => {
+                handleXpPayload(data);
+                pushToast('Reset RPG stats', 'success');
+            })
+            .catch(err => {
+                console.error('Error resetting RPG stats:', err);
+                pushToast('Failed to reset RPG stats', 'error');
+            })
+            .finally(() => setDebugBusy(false));
+    };
+
     const setTaskStatus = (id, status, note) => {
         fetch(`/api/tasks/${id}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
             .then(res => res.json())
             .then(updatedQuest => {
+                handleXpPayload(updatedQuest);
                 const normalized = normalizeQuest(updatedQuest);
                 setQuests(prev => prev.map(t => (t.id === id ? normalized : t)));
                 // pulse the task card to indicate direct change (bigger bump)
@@ -425,6 +623,12 @@ function App() {
                 if (status === 'done') {
                     setGlowQuests(prev => ({ ...prev, [id]: true }));
                     setTimeout(() => setGlowQuests(prev => { const c = { ...prev }; delete c[id]; return c }), 1400);
+                    setCelebratingQuests(prev => ({ ...prev, [id]: true }));
+                    setTimeout(() => setCelebratingQuests(prev => {
+                        const copy = { ...prev };
+                        delete copy[id];
+                        return copy;
+                    }), 1400);
                 }
                 pushToast(`Quest ${updatedQuest.id} set to ${status.replace('_',' ')}`, 'success');
             })
@@ -438,6 +642,7 @@ function App() {
         fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
             .then(res => res.json())
             .then(updatedQuest => {
+                handleXpPayload(updatedQuest);
                 const normalized = normalizeQuest(updatedQuest);
                 setQuests(prev => prev.map(quest => (quest.id === taskId ? normalized : quest)));
                 // subtle pulse on parent when a subtask changed
@@ -450,6 +655,12 @@ function App() {
                 if (updatedQuest && updatedQuest.status === 'done') {
                     setGlowQuests(prev => ({ ...prev, [taskId]: true }));
                     setTimeout(() => setGlowQuests(prev => { const c = { ...prev }; delete c[taskId]; return c }), 1400);
+                    setCelebratingQuests(prev => ({ ...prev, [taskId]: true }));
+                    setTimeout(() => setCelebratingQuests(prev => {
+                        const copy = { ...prev };
+                        delete copy[taskId];
+                        return copy;
+                    }), 1400);
                 }
                 pushToast(`Side-quest ${subTaskId} updated to ${status.replace('_',' ')}`, 'success');
             })
@@ -463,11 +674,41 @@ function App() {
         const { name, value } = e.target;
         setEditingQuest(prevQuest => ({
             ...prevQuest,
-            [name]: value
+            [name]: name === 'task_level' ? Number(value) : value
         }));
     };
 
+    const getNextPriority = (current) => {
+        const index = PRIORITY_ORDER.indexOf(current);
+        const nextIndex = index === -1 ? 0 : (index + 1) % PRIORITY_ORDER.length;
+        return PRIORITY_ORDER[nextIndex];
+    };
+
+    const getNextLevel = (current) => {
+        const idx = LEVEL_OPTIONS.indexOf(Number(current));
+        const nextIdx = idx === -1 ? 0 : (idx + 1) % LEVEL_OPTIONS.length;
+        return LEVEL_OPTIONS[nextIdx];
+    };
+
+    const cyclePriority = () => {
+        setPriority(prev => getNextPriority(prev));
+    };
+
+    const cycleTaskLevel = () => {
+        setTaskLevel(prev => getNextLevel(prev));
+    };
+
+    const cycleEditingPriority = () => {
+        setEditingQuest(prev => prev ? { ...prev, priority: getNextPriority(prev.priority || 'low') } : prev);
+    };
+
+    const cycleEditingLevel = () => {
+        setEditingQuest(prev => prev ? { ...prev, task_level: getNextLevel(prev.task_level || 1) } : prev);
+    };
+
     const renderEditForm = (quest) => {
+        const currentPriority = editingQuest?.priority || 'medium';
+        const currentLevel = editingQuest?.task_level || 1;
         return (
             <div className="edit-quest-form" key={quest.id}>
                 <input
@@ -476,18 +717,32 @@ function App() {
                     value={editingQuest?.description || ''}
                     onChange={handleEditChange}
                 />
-                <div className="custom-select">
-                    <select
-                        name="priority"
-                        value={editingQuest?.priority || 'medium'}
-                        onChange={handleEditChange}
-                    >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </select>
-                </div>
-                <button className="btn-primary" onClick={() => updateTask(quest.id, { description: editingQuest.description, priority: editingQuest.priority })}>Save</button>
+                <button
+                    type="button"
+                    className="cycle-toggle priority-toggle"
+                    onClick={cycleEditingPriority}
+                    title="Cycle quest urgency"
+                >
+                    Urgency: <span className={`priority-pill ${currentPriority}`}>{currentPriority}</span>
+                </button>
+                <button
+                    type="button"
+                    className="cycle-toggle level-toggle"
+                    onClick={cycleEditingLevel}
+                    title="Cycle quest level"
+                >
+                    Lv. {currentLevel}
+                </button>
+                <button
+                    className="btn-primary"
+                    onClick={() => updateTask(quest.id, {
+                        description: editingQuest.description,
+                        priority: currentPriority,
+                        task_level: currentLevel || 1
+                    })}
+                >
+                    Save
+                </button>
                 <button className="btn-ghost" onClick={() => setEditingQuest(null)}>Cancel</button>
             </div>
         );
@@ -532,9 +787,13 @@ function App() {
     }, [addingSideQuestTo]);
 
     const globalProgress = useMemo(() => getGlobalProgress(), [quests]);
+    const globalAura = useMemo(() => getProgressAura(globalProgress.percent), [globalProgress.percent]);
     const globalLabel = globalProgress.weightingToday
         ? `Today (${globalProgress.todayCount} quest${globalProgress.todayCount === 1 ? '' : 's'}${globalProgress.backlogCount ? ` + ${globalProgress.backlogCount} backlog` : ''})`
         : `All quests (${globalProgress.totalCount})`;
+    const todayKey = new Date().toISOString().split('T')[0];
+    const dailyClaimed = !!(playerStats && playerStats.last_daily_reward_at === todayKey);
+    const xpPercent = playerStats ? Math.round((playerStats.xp_progress || 0) * 100) : 0;
 
     // Show authentication screen if not logged in
     if (!token) {
@@ -559,7 +818,17 @@ function App() {
                                 Please sign in or create an account to start managing your quests.
                             </p>
                         </div>
-                        <Profile token={token} onLogin={(t) => { setToken(t); }} onLogout={() => { setToken(null); }} />
+                        <Profile
+                            token={token}
+                            onLogin={(t, user) => {
+                                setToken(t);
+                                if (user && user.rpg) setPlayerStats(user.rpg);
+                            }}
+                            onLogout={() => {
+                                setToken(null);
+                                setPlayerStats(null);
+                            }}
+                        />
                     </div>
                 </div>
             </div>
@@ -574,10 +843,14 @@ function App() {
                     <div className="global-progress-label">{globalLabel}</div>
                     <div className="global-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={globalProgress.percent} title={`${globalProgress.percent}%`}>
                         <div
-                            className="global-progress-fill"
+                            className={`global-progress-fill ${globalAura.fillClass}`}
                             style={{ width: `${globalProgress.percent}%`, background: progressColor(globalProgress.percent) }}
                         />
                         <div className="tooltip">{globalProgress.percent}%</div>
+                    </div>
+                    <div className="global-progress-mood" aria-hidden="true">
+                        <span className="mood-emoji">{globalAura.emoji}</span>
+                        <span className="mood-label">{globalAura.mood}</span>
                     </div>
                     <div className="global-progress-percent">{globalProgress.percent}%</div>
                 </div>
@@ -590,13 +863,95 @@ function App() {
                     </div>
                     <div style={{display:'flex', alignItems:'center', gap:8}}>
                         <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                        <button className="btn-ghost" onClick={() => setShowDebugTools(s => !s)}>{showDebugTools ? 'Hide Debug' : 'Debug Tools'}</button>
                         <button className="btn-ghost" onClick={() => setShowProfile(s => !s)}>Profile</button>
                     </div>
                 </div>
             </header>
+            {playerStats && (
+                <div
+                    className="player-rpg-card"
+                    style={{
+                        margin: '16px 0',
+                        padding: '12px 16px',
+                        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                        borderRadius: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 16,
+                        flexWrap: 'wrap'
+                    }}
+                >
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                        <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, color: 'var(--text-muted)' }}>
+                            Adventurer Progress
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 4 }}>
+                            <div style={{ fontSize: 24, fontWeight: 600 }}>Level {playerStats.level}</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>Total XP {playerStats.xp}</div>
+                        </div>
+                        <div style={{ marginTop: 8 }}>
+                            <div style={{ height: 8, borderRadius: 6, background: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                                <div
+                                    style={{
+                                        width: `${Math.max(0, Math.min(100, xpPercent))}%`,
+                                        height: '100%',
+                                        background: 'linear-gradient(90deg, #36d1dc, #5b86e5)',
+                                        transition: 'width 0.4s ease'
+                                    }}
+                                />
+                            </div>
+                            <div style={{ marginTop: 6, fontSize: 12, color: 'var(--text-muted)' }}>
+                                {playerStats.xp_into_level} / {playerStats.xp_for_level} XP ({xpPercent}%)
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                        <button
+                            className="btn-primary"
+                            onClick={claimDailyReward}
+                            disabled={dailyClaimed || dailyLoading}
+                        >
+                            {dailyClaimed ? 'Daily Bonus Claimed' : dailyLoading ? 'Claiming...' : 'Claim Daily Bonus'}
+                        </button>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'right' }}>
+                            {dailyClaimed ? 'Come back tomorrow for more XP.' : 'Log your focus each day for bonus XP.'}
+                        </div>
+                    </div>
+                </div>
+            )}
             {showProfile && (
                 <div className="profile-modal">
-                    <Profile token={token} onLogin={(t) => { setToken(t); setShowProfile(false); }} onLogout={() => { setToken(null); setShowProfile(false); }} onClose={() => setShowProfile(false)} />
+                    <Profile
+                        token={token}
+                        onLogin={(t, user) => {
+                            setToken(t);
+                            if (user && user.rpg) setPlayerStats(user.rpg);
+                            setShowProfile(false);
+                        }}
+                        onLogout={() => {
+                            setToken(null);
+                            setPlayerStats(null);
+                            setShowProfile(false);
+                        }}
+                        onClose={() => setShowProfile(false)}
+                    />
+                </div>
+            )}
+            {showDebugTools && (
+                <div className="debug-panel">
+                    <div className="debug-title">Debug Utilities</div>
+                    <div className="debug-actions">
+                        <button className="btn-ghost" onClick={clearAllQuests} disabled={debugBusy}>Clear Quests</button>
+                        <button className="btn-ghost" onClick={() => seedDemoQuests(5)} disabled={debugBusy}>Seed 5 Quests</button>
+                        <button className="btn-ghost" onClick={() => seedDemoQuests(8)} disabled={debugBusy}>Seed 8 Quests</button>
+                        <button className="btn-ghost" onClick={() => grantXp(250)} disabled={debugBusy}>+250 XP</button>
+                        <button className="btn-ghost" onClick={() => grantXp(1000)} disabled={debugBusy}>+1000 XP</button>
+                        <button className="btn-ghost" onClick={() => grantXp(-150)} disabled={debugBusy}>-150 XP</button>
+                        <button className="btn-ghost" onClick={resetRpgStats} disabled={debugBusy}>Reset RPG</button>
+                    </div>
+                    {debugBusy && <div className="debug-status">Working…</div>}
                 </div>
             )}
             <div className="add-task-form">
@@ -607,13 +962,22 @@ function App() {
                     onChange={e => setDescription(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTask(); } }}
                 />
-                <div className="custom-select">
-                    <select value={priority} onChange={e => setPriority(e.target.value)}>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </select>
-                </div>
+                <button
+                    type="button"
+                    className="cycle-toggle priority-toggle"
+                    onClick={cyclePriority}
+                    title="Cycle quest urgency"
+                >
+                    Urgency: <span className={`priority-pill ${priority}`}>{priority}</span>
+                </button>
+                <button
+                    type="button"
+                    className="cycle-toggle level-toggle"
+                    onClick={cycleTaskLevel}
+                    title="Cycle quest level"
+                >
+                    Lv. {taskLevel}
+                </button>
                 <button className="btn-primary" onClick={addTask}>Add Quest</button>
             </div>
             <div className="quest-container">
@@ -624,7 +988,7 @@ function App() {
                         )}
                         <div
                             data-dragging={draggedQuestId === quest.id}
-                            className={`quest ${((quest.status || (quest.completed ? 'done' : 'todo')) === 'done' ? 'completed' : '')} ${collapsedMap[quest.id] ? 'collapsed' : ''} ${dragOverQuestId === quest.id ? 'drag-over' : ''} ${(quest.status === 'in_progress') ? 'started' : ''} ${(pulsingQuests[quest.id] === 'full') ? 'pulse' : (pulsingQuests[quest.id] === 'subtle' ? 'pulse-subtle' : '')} ${glowQuests[quest.id] ? 'glow' : ''}`}
+                            className={`quest ${((quest.status || (quest.completed ? 'done' : 'todo')) === 'done' ? 'completed' : '')} ${collapsedMap[quest.id] ? 'collapsed' : ''} ${dragOverQuestId === quest.id ? 'drag-over' : ''} ${(quest.status === 'in_progress') ? 'started' : ''} ${pulsingQuests[quest.id] === 'full' ? 'pulse' : pulsingQuests[quest.id] === 'subtle' ? 'pulse-subtle' : pulsingQuests[quest.id] === 'spawn' ? 'pulse-spawn' : ''} ${glowQuests[quest.id] ? 'glow' : ''} ${spawnQuests[quest.id] ? 'spawn' : ''}`}
                             draggable
                             onDragStart={e => handleDragStart(e, quest.id)}
                             onDragEnd={handleDragEnd}
@@ -641,7 +1005,10 @@ function App() {
                                             <div className="quest-header">
                                                 <div className="left">
                                                     <h3>{quest.description}</h3>
-                                                    <div style={{marginLeft:12}}><span className={`level-tag level-${quest.priority}`}>{quest.priority}</span></div>
+                                                    <div style={{marginLeft:12, display:'flex', alignItems:'center', gap:8}}>
+                                                        <span className={`priority-pill ${quest.priority}`}>{quest.priority}</span>
+                                                        <span className="level-pill">Lv. {quest.task_level || 1}</span>
+                                                    </div>
                                                 </div>
                                                 <div className="right">
                                                     <div className="quest-controls">
@@ -721,6 +1088,15 @@ function App() {
                                     )}
                                 </div>
                             </div>
+                            {celebratingQuests[quest.id] && (
+                                <div className="level-up-burst" aria-hidden="true">
+                                    <div className="burst-ring" />
+                                    <div className="burst-copy">
+                                        <span className="burst-emoji">✦</span>
+                                        <span className="burst-text">Level Up!</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         {dragOverQuestId === quest.id && dragPosition === 'below' && (
                             <div className="insert-indicator" />

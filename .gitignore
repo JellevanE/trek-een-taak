@@ -1,3 +1,11 @@
+# genai
+
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+client.log
+inspiration.html
+
 # Node
 node_modules/
 npm-debug.log*
@@ -22,6 +30,8 @@ coverage/
 
 # Logs
 *.log
+client.log
+server.log
 
 # IDEs
 .vscode/

@@ -5,8 +5,8 @@
       "username": "local",
       "password_hash": "",
       "email": null,
-      "created_at": "2025-09-11T16:16:32.080Z",
-      "updated_at": "2025-09-11T16:16:32.080Z",
+      "created_at": "2025-10-09T08:32:48.824Z",
+      "updated_at": "2025-10-09T08:32:48.824Z",
       "profile": {
         "display_name": "Local User",
         "avatar": null,
@@ -23,25 +23,35 @@
         "achievements": [],
         "inventory": {
           "items": []
-        }
+        },
+        "xp_log": [],
+        "last_daily_reward_at": null,
+        "last_xp_award_at": null,
+        "counters": {
+          "tasks_completed": 0,
+          "subtasks_completed": 0,
+          "daily_rewards_claimed": 0
+        },
+        "flags": {},
+        "metrics": {}
       }
     },
     {
       "id": 2,
-      "username": "testuser_1757607392080",
-      "password_hash": "$2a$10$LbSQdkuEYNhZDBEsMIA60.S5kLRhKclq2Uz3sF5B27D0TUyp/pL6q",
+      "username": "Willy123",
+      "password_hash": "$2a$10$iIMoKOczGcBqwDkq4mm27Oy4FvqSlcPlBU3BaffXCN096ZHlc0yX2",
       "email": null,
-      "created_at": "2025-09-11T16:16:32.081Z",
-      "updated_at": "2025-09-11T16:16:32.081Z",
+      "created_at": "2025-10-09T09:48:39.881Z",
+      "updated_at": "2025-10-09T09:48:39.881Z",
       "profile": {
-        "display_name": "testuser_1757607392080",
+        "display_name": "Willy123",
         "avatar": null,
-        "class": "adventurer",
-        "bio": ""
+        "class": "warrior",
+        "bio": "STRONG WILLY"
       },
       "rpg": {
-        "level": 1,
-        "xp": 0,
+        "level": 11,
+        "xp": 3000,
         "hp": 20,
         "mp": 5,
         "coins": 0,
@@ -49,87 +59,71 @@
         "achievements": [],
         "inventory": {
           "items": []
-        }
-      }
-    },
-    {
-      "id": 3,
-      "username": "wizarduser",
-      "password_hash": "$2a$10$696/nCYHDDuWefyz.4JceO3ui6ffSLmBXiP/xEJwqHWi.cTzuhQAG",
-      "email": "test@example.com",
-      "created_at": "2025-09-11T16:16:52.982Z",
-      "updated_at": "2025-09-11T16:16:52.982Z",
-      "profile": {
-        "display_name": "wizarduser",
-        "avatar": null,
-        "class": "adventurer",
-        "bio": ""
-      },
-      "rpg": {
-        "level": 1,
-        "xp": 0,
-        "hp": 20,
-        "mp": 5,
-        "coins": 0,
-        "streak": 0,
-        "achievements": [],
-        "inventory": {
-          "items": []
-        }
-      }
-    },
-    {
-      "id": 4,
-      "username": "mageuser",
-      "password_hash": "$2a$10$RL424eM1xBeGiODpIFq7VuVehct.dQQKVYYz.fWGBJMxd8i/flNBG",
-      "email": "mage@example.com",
-      "created_at": "2025-09-11T16:17:31.856Z",
-      "updated_at": "2025-09-11T16:17:31.856Z",
-      "profile": {
-        "display_name": "mageuser",
-        "avatar": null,
-        "class": "adventurer",
-        "bio": ""
-      },
-      "rpg": {
-        "level": 1,
-        "xp": 0,
-        "hp": 20,
-        "mp": 5,
-        "coins": 0,
-        "streak": 0,
-        "achievements": [],
-        "inventory": {
-          "items": []
-        }
-      }
-    },
-    {
-      "id": 5,
-      "username": "bingobongo",
-      "password_hash": "$2a$10$bSGr8.JmR5A7ro0BYhwTC.gnxheCwXPMgR2vzSPDYW9BEX/HCltOi",
-      "email": null,
-      "created_at": "2025-09-11T21:12:54.159Z",
-      "updated_at": "2025-09-11T21:12:54.159Z",
-      "profile": {
-        "display_name": "bingobongo",
-        "avatar": null,
-        "class": "adventurer",
-        "bio": ""
-      },
-      "rpg": {
-        "level": 1,
-        "xp": 0,
-        "hp": 20,
-        "mp": 5,
-        "coins": 0,
-        "streak": 0,
-        "achievements": [],
-        "inventory": {
-          "items": []
-        }
+        },
+        "xp_log": [
+          {
+            "amount": 1000,
+            "reason": "debug_adjustment",
+            "message": "Gained +1000 XP",
+            "metadata": {
+              "amount": 1000
+            },
+            "at": "2025-10-09T09:49:55.547Z",
+            "level_before": 9,
+            "level_after": 11,
+            "xp_before": 2000,
+            "xp_after": 3000,
+            "xp_into_level": 200,
+            "xp_for_level": 500,
+            "xp_to_next": 300,
+            "leveled_up": true
+          },
+          {
+            "amount": 1000,
+            "reason": "debug_adjustment",
+            "message": "Gained +1000 XP",
+            "metadata": {
+              "amount": 1000
+            },
+            "at": "2025-10-09T09:49:54.880Z",
+            "level_before": 6,
+            "level_after": 9,
+            "xp_before": 1000,
+            "xp_after": 2000,
+            "xp_into_level": 80,
+            "xp_for_level": 420,
+            "xp_to_next": 340,
+            "leveled_up": true
+          },
+          {
+            "amount": 1000,
+            "reason": "debug_adjustment",
+            "message": "Gained +1000 XP",
+            "metadata": {
+              "amount": 1000
+            },
+            "at": "2025-10-09T09:49:53.681Z",
+            "level_before": 1,
+            "level_after": 6,
+            "xp_before": 0,
+            "xp_after": 1000,
+            "xp_into_level": 100,
+            "xp_for_level": 300,
+            "xp_to_next": 200,
+            "leveled_up": true
+          }
+        ],
+        "last_daily_reward_at": null,
+        "last_xp_award_at": "2025-10-09T09:49:55.547Z",
+        "counters": {
+          "tasks_completed": 0,
+          "subtasks_completed": 0,
+          "daily_rewards_claimed": 0
+        },
+        "flags": {},
+        "metrics": {}
       }
     }
   ],
-  "nextId": 6
+  "nextId": 3
 }
