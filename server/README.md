@@ -43,3 +43,5 @@ Notes
   - `POST /api/debug/seed-tasks` (optional body `{ count: number }`) fills the current user with demo quests.
   - `POST /api/debug/grant-xp` (body `{ amount }`) adjusts XP directly; negative numbers subtract.
   - `POST /api/debug/reset-rpg` resets the player RPG state back to level 1.
+- JWT signing requires you to provide secrets via environment variables. Set `JWT_SECRET` for a single secret or `JWT_SECRETS` (comma-separated) to support rotation. You can also point `JWT_SECRET_FILE` at a file containing the primary secret. The server refuses to start if no secret is configured (except in tests).
+- When using `./start-dev.sh`, a fallback `JWT_SECRET=dev-local-secret` is exported automatically if none is supplied; override it in your environment for custom values.
