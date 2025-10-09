@@ -3,6 +3,7 @@ import RegistrationWizard from './RegistrationWizard';
 
 export default function Profile({ token, onLogin, onLogout, onClose }) {
     const [profile, setProfile] = useState({ display_name: '', avatar: '', class: '', bio: '' });
+    const [rpg, setRpg] = useState(null);
     const [editing, setEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
@@ -11,12 +12,16 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
     const [saved, setSaved] = useState(false);
 
     useEffect(() => {
-        if (!token) return;
+        if (!token) {
+            setRpg(null);
+            return;
+        }
         setLoading(true);
         fetch('/api/users/me', { headers: { Authorization: `Bearer ${token}` } })
             .then(r => r.json())
             .then(data => {
                 setProfile(data.user.profile || {});
+                setRpg(data.user.rpg || null);
             })
             .catch(() => {})
             .finally(() => setLoading(false));
@@ -33,6 +38,7 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
             .then(r => r.json())
             .then(data => {
                 setProfile(data.user.profile || {});
+                setRpg(data.user.rpg || rpg);
                 setEditing(false);
                 setSaved(true);
                 setTimeout(() => setSaved(false), 2000);
@@ -49,7 +55,12 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
             body: JSON.stringify({ username, password })
         })
             .then(r => r.json())
-            .then(data => { if (data.token) onLogin(data.token); })
+            .then(data => {
+                if (data.token) {
+                    if (data.user && data.user.rpg) setRpg(data.user.rpg);
+                    onLogin(data.token, data.user);
+                }
+            })
             .catch(() => {})
             .finally(() => setLoading(false));
     };
@@ -62,7 +73,12 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
             body: JSON.stringify({ username, password })
         })
             .then(r => r.json())
-            .then(data => { if (data.token) onLogin(data.token); })
+            .then(data => {
+                if (data.token) {
+                    if (data.user && data.user.rpg) setRpg(data.user.rpg);
+                    onLogin(data.token, data.user);
+                }
+            })
             .catch(() => {})
             .finally(() => setLoading(false));
     };
@@ -73,7 +89,8 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
             return (
                 <RegistrationWizard
                     onSuccess={(token, user) => {
-                        onLogin(token);
+                        if (user && user.rpg) setRpg(user.rpg);
+                        onLogin(token, user);
                         setShowRegistrationWizard(false);
                     }}
                     onCancel={() => setShowRegistrationWizard(false)}
@@ -132,9 +149,23 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
                             </div>
                             <div><strong>Class:</strong> {profile.class || ''}</div>
                             <div><strong>Bio:</strong> {profile.bio || ''}</div>
+                            {rpg && (
+                                <div className="profile-rpg-stats" style={{marginTop:12}}>
+                                    <div style={{marginBottom:4}}><strong>Level:</strong> {rpg.level}</div>
+                                    <div style={{fontSize:12, color:'var(--text-muted)'}}>
+                                        {rpg.xp_into_level} / {rpg.xp_for_level} XP toward next level
+                                    </div>
+                                    <div style={{marginTop:6, height:6, borderRadius:4, background:'var(--border-soft, rgba(255,255,255,0.12))', overflow:'hidden'}}>
+                                        <div style={{width: `${Math.max(0, Math.min(100, Math.round((rpg.xp_progress || 0) * 100)))}%`, height:'100%', background:'linear-gradient(90deg, #6dd5fa, #2980b9)'}} />
+                                    </div>
+                                    <div style={{marginTop:6, fontSize:11, color:'var(--text-muted)'}}>
+                                        Last daily bonus: {rpg.last_daily_reward_at ? rpg.last_daily_reward_at : '—'}
+                                    </div>
+                                </div>
+                            )}
                             <div style={{ marginTop: 8 }}>
                                 <button onClick={() => setEditing(true)} className="btn-ghost">Edit</button>
-                                <button onClick={() => { onLogout(); }} className="btn-ghost">Logout</button>
+                                <button onClick={() => { setRpg(null); onLogout(); }} className="btn-ghost">Logout</button>
                             </div>
                         </div>
                     ) : (

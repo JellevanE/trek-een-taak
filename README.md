@@ -50,5 +50,7 @@ Notes and maintenance
 ---------------------
 - The backend stores data in `server/tasks.json` (file-backed). For anything beyond single-user local development you should migrate to a tiny DB (sqlite/lowdb) or implement atomic writes.
 - Tests are present for backend routes (jest + supertest). Run them from the `server` folder with `npm test`.
+- RPG progression (levels, XP rewards, daily bonuses) is handled on the server; responses include XP payloads so the client can stay in sync without extra requests.
+- Debug helpers (`/api/debug/*`) let you clear/seed quests or tweak XP while prototyping.
 
 If you'd like, I can further split the root README into a short landing page and detailed docs per-package.

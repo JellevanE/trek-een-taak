@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const experience = require('./rpg/experience');
 
 const app = express();
 
@@ -110,6 +111,14 @@ function readTasks() {
                     if (!Array.isArray(sub.status_history) || sub.status_history.length === 0) {
                         sub.status_history = [{ status: sub.status, at: sub.updated_at, note: null }];
                     }
+                    // migrate old xp_awarded flag if present at root
+                    if (typeof sub.xp_awarded === 'boolean') {
+                        if (!sub.rpg || typeof sub.rpg !== 'object') sub.rpg = {};
+                        if (typeof sub.rpg.xp_awarded !== 'boolean') sub.rpg.xp_awarded = sub.xp_awarded;
+                        delete sub.xp_awarded;
+                    }
+                    if (!sub.rpg || typeof sub.rpg !== 'object') sub.rpg = {};
+                    if (typeof sub.rpg.xp_awarded !== 'boolean') sub.rpg.xp_awarded = (sub.status === 'done');
                 });
 
                 const nextSubId = maxSubId + 1;
@@ -120,6 +129,20 @@ function readTasks() {
                     const defaultUserId = (Array.isArray(usersData.users) && usersData.users[0] && typeof usersData.users[0].id === 'number') ? usersData.users[0].id : 1;
                     task.owner_id = defaultUserId;
                 }
+
+                // migrate old xp flag
+                if (typeof task.xp_awarded === 'boolean') {
+                    if (!task.rpg || typeof task.rpg !== 'object') task.rpg = {};
+                    if (typeof task.rpg.xp_awarded !== 'boolean') task.rpg.xp_awarded = task.xp_awarded;
+                    delete task.xp_awarded;
+                }
+                if (!task.rpg || typeof task.rpg !== 'object') task.rpg = {};
+                if (typeof task.rpg.xp_awarded !== 'boolean') task.rpg.xp_awarded = (task.status === 'done');
+                if (!Array.isArray(task.rpg.history)) task.rpg.history = [];
+                if (!task.rpg.last_reward_at) task.rpg.last_reward_at = null;
+
+                if (typeof task.task_level !== 'number' || !Number.isFinite(task.task_level)) task.task_level = 1;
+                task.task_level = experience.clampTaskLevel(task.task_level);
             });
         }
 
@@ -150,7 +173,7 @@ function readUsers() {
                 created_at: now,
                 updated_at: now,
                 profile: { display_name: 'Local User', avatar: null, class: 'adventurer', bio: '' },
-                rpg: { level: 1, xp: 0, hp: 20, mp: 5, coins: 0, streak: 0, achievements: [], inventory: { items: [] } }
+                rpg: experience.createInitialRpgState()
             };
             const initial = { users: [defaultUser], nextId: 2 };
             fs.writeFileSync(USERS_FILE, JSON.stringify(initial, null, 2));
@@ -164,6 +187,7 @@ function readUsers() {
             const maxId = parsed.users.reduce((m, u) => (u && typeof u.id === 'number' && u.id > m ? u.id : m), 0);
             parsed.nextId = maxId + 1;
         }
+        parsed.users.forEach(user => experience.ensureUserRpg(user));
         return parsed;
     } catch (err) {
         console.error('Error reading users file:', err);
@@ -187,12 +211,21 @@ function writeUsers(data) {
 function sanitizeUser(user) {
     if (!user) return null;
     const { password_hash, ...rest } = user;
-    return rest;
+    return { ...rest, rpg: experience.buildPublicRpgState(user.rpg) };
 }
 
 function serializeSubtask(subtask) {
     if (!subtask || typeof subtask !== 'object') return subtask;
-    return { ...subtask };
+    const base = { ...subtask };
+    if (subtask.rpg && typeof subtask.rpg === 'object') {
+        base.rpg = {
+            xp_awarded: !!subtask.rpg.xp_awarded,
+            last_reward_at: subtask.rpg.last_reward_at || null
+        };
+    } else {
+        base.rpg = { xp_awarded: false, last_reward_at: null };
+    }
+    return base;
 }
 
 function serializeTask(task) {
@@ -201,8 +234,110 @@ function serializeTask(task) {
     const sideQuests = Array.isArray(task.side_quests)
         ? task.side_quests.map(serializeSubtask)
         : subTasks;
-    const base = { ...task, sub_tasks: subTasks };
+    const rpgData = task.rpg && typeof task.rpg === 'object'
+        ? {
+            xp_awarded: !!task.rpg.xp_awarded,
+            last_reward_at: task.rpg.last_reward_at || null
+        }
+        : { xp_awarded: false, last_reward_at: null };
+    const base = { ...task, sub_tasks: subTasks, rpg: rpgData };
     return { ...base, side_quests: sideQuests };
+}
+
+function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function buildDemoTasks(options) {
+    const {
+        count = 5,
+        nextId,
+        ownerId,
+        startingOrder = 0
+    } = options;
+
+    const descriptions = [
+        'Brew restorative potions',
+        'Scout the northern ridge',
+        'Upgrade camp defenses',
+        'Interview guild recruits',
+        'Refine spell catalysts',
+        'Chart forgotten ruins',
+        'Calibrate the chrono-compass',
+        'Train with sparring golems',
+        'Draft trading manifests',
+        'Decode ancient glyphs'
+    ];
+
+    const sideQuestPool = [
+        'Gather components',
+        'Meet with ally',
+        'Write expedition log',
+        'Sharpen gear',
+        'Meditate before battle',
+        'Update quest board',
+        'Visit quartermaster'
+    ];
+
+    const priorities = ['low', 'medium', 'high'];
+    const statuses = ['todo', 'in_progress', 'blocked', 'done'];
+    const today = new Date();
+    const isoToday = today.toISOString().split('T')[0];
+
+    const tasks = [];
+    let idCounter = nextId;
+    let order = startingOrder;
+
+    for (let i = 0; i < count; i++) {
+        const description = randomChoice(descriptions);
+        const priority = randomChoice(priorities);
+        const status = randomChoice(statuses);
+        const level = Math.floor(Math.random() * 5) + 1;
+        const dueDate = new Date(today);
+        dueDate.setDate(today.getDate() + (Math.floor(Math.random() * 6) - 2));
+        const dueDateIso = dueDate.toISOString().split('T')[0];
+
+        const now = new Date().toISOString();
+        const taskId = idCounter++;
+        const subTaskCount = Math.floor(Math.random() * 3);
+        const subTasks = [];
+        let nextSubId = 1;
+        for (let s = 0; s < subTaskCount; s++) {
+            const subStatus = randomChoice(['todo', 'in_progress', 'done']);
+            const subNow = new Date().toISOString();
+            subTasks.push({
+                id: nextSubId++,
+                description: randomChoice(sideQuestPool),
+                status: subStatus,
+                created_at: subNow,
+                updated_at: subNow,
+                status_history: [{ status: subStatus, at: subNow, note: null }],
+                completed: subStatus === 'done',
+                rpg: { xp_awarded: subStatus === 'done', last_reward_at: null }
+            });
+        }
+
+        const task = {
+            id: taskId,
+            description,
+            priority,
+            sub_tasks: subTasks,
+            nextSubtaskId: nextSubId,
+            due_date: dueDateIso,
+            status,
+            completed: status === 'done',
+            order: order++,
+            created_at: now,
+            updated_at: now,
+            status_history: [{ status, at: now, note: null }],
+            owner_id: ownerId,
+            task_level: level,
+            rpg: { xp_awarded: status === 'done', last_reward_at: null, history: [] }
+        };
+        tasks.push(task);
+    }
+
+    return { tasks, nextId: idCounter };
 }
 
 function serializeTaskList(list) {
@@ -292,12 +427,14 @@ app.get('/api/tasks', ensureAuth, (req, res) => {
 
 app.post('/api/tasks', ensureAuth, (req, res) => {
     // basic validation
-    const { description, priority, due_date } = req.body || {};
+    const { description, priority, due_date, task_level } = req.body || {};
     if (!description || typeof description !== 'string' || !description.trim()) {
         return sendError(res, 400, 'Missing or invalid description');
     }
     const allowed = ['low', 'medium', 'high'];
     const prio = allowed.includes(priority) ? priority : 'medium';
+    const levelValue = Number(task_level);
+    const questLevel = Number.isFinite(levelValue) ? experience.clampTaskLevel(levelValue) : 1;
 
     const tasksData = readTasks();
     const now = new Date().toISOString();
@@ -312,7 +449,9 @@ app.post('/api/tasks', ensureAuth, (req, res) => {
         order: tasksData.tasks.length,
         created_at: now,
         updated_at: now,
+        task_level: questLevel,
         status_history: [{ status: 'todo', at: now, note: null }],
+        rpg: { xp_awarded: false, last_reward_at: null }
     };
     // set owner from authenticated user or default to first user
     if (req.user && typeof req.user.id === 'number') newTask.owner_id = req.user.id;
@@ -375,14 +514,15 @@ app.post('/api/users/register', (req, res) => {
         created_at: now,
         updated_at: now,
         profile: profile,
-        rpg: { level: 1, xp: 0, hp: 20, mp: 5, coins: 0, streak: 0, achievements: [], inventory: { items: [] } }
+        rpg: experience.createInitialRpgState()
     };
     usersData.users.push(user);
     usersData.nextId++;
     try {
-        fs.writeFileSync(USERS_FILE, JSON.stringify(usersData, null, 2));
+        writeUsers(usersData);
+        const safeUser = sanitizeUser(user);
         const token = signToken(user);
-        res.status(201).json({ token, user: { id: user.id, username: user.username, profile: user.profile, rpg: user.rpg } });
+        res.status(201).json({ token, user: safeUser });
     } catch (e) {
         console.error('Failed to persist user', e);
         return sendError(res, 500, 'Failed to create user');
@@ -396,8 +536,9 @@ app.post('/api/users/login', (req, res) => {
     const user = usersData.users.find(u => u.username === username);
     if (!user) return sendError(res, 401, 'Invalid credentials');
     if (!bcrypt.compareSync(password, user.password_hash)) return sendError(res, 401, 'Invalid credentials');
+    experience.ensureUserRpg(user);
     const token = signToken(user);
-    res.json({ token, user: { id: user.id, username: user.username, profile: user.profile, rpg: user.rpg } });
+    res.json({ token, user: sanitizeUser(user) });
 });
 
 app.post('/api/tasks/:id/subtasks', ensureAuth, (req, res) => {
@@ -420,6 +561,7 @@ app.post('/api/tasks/:id/subtasks', ensureAuth, (req, res) => {
         created_at: now,
         updated_at: now,
         status_history: [{ status: 'todo', at: now, note: null }],
+        rpg: { xp_awarded: false, last_reward_at: null }
     };
     task.sub_tasks.push(newSubTask);
     task.nextSubtaskId++;
@@ -442,6 +584,21 @@ app.patch('/api/tasks/:id/status', ensureAuth, (req, res) => {
     const task = tasks.tasks.find(t => t.id === parseInt(req.params.id));
     if (!task || task.owner_id !== req.user.id) return res.status(404).send('Task not found');
 
+    if (!task.rpg || typeof task.rpg !== 'object') task.rpg = { xp_awarded: false, last_reward_at: null, history: [] };
+    if (!Array.isArray(task.rpg.history)) task.rpg.history = [];
+    const willComplete = (status === 'done') && (task.status !== 'done') && (!task.rpg.xp_awarded);
+
+    let usersData = null;
+    let userIndex = -1;
+    let userRecord = null;
+    if (willComplete) {
+        usersData = readUsers();
+        userIndex = usersData.users.findIndex(u => u.id === req.user.id);
+        if (userIndex === -1) return sendError(res, 404, 'User not found');
+        userRecord = usersData.users[userIndex];
+        experience.ensureUserRpg(userRecord);
+    }
+
     const now = new Date().toISOString();
     task.status = status;
     // maintain legacy `completed` boolean for backward compatibility
@@ -449,9 +606,42 @@ app.patch('/api/tasks/:id/status', ensureAuth, (req, res) => {
     task.updated_at = now;
     if (!Array.isArray(task.status_history)) task.status_history = [];
     task.status_history.push({ status, at: now, note: note || null });
+
+    const xpEvents = [];
+    let playerSnapshot = null;
+
+    if (willComplete && userRecord) {
+        const reward = experience.computeTaskXp(task);
+        if (reward.amount > 0) {
+            const xpEvent = experience.applyXp(userRecord, reward.amount, 'task_complete', {
+                task_id: task.id,
+                task_level: task.task_level,
+                priority: task.priority
+            });
+            if (xpEvent) {
+                experience.incrementCounter(userRecord.rpg, 'tasks_completed');
+                task.rpg.xp_awarded = true;
+                task.rpg.last_reward_at = xpEvent.at;
+                task.rpg.history.unshift({ at: xpEvent.at, amount: xpEvent.amount, reason: xpEvent.reason });
+                if (task.rpg.history.length > 10) task.rpg.history.length = 10;
+                xpEvents.push(experience.toPublicXpEvent(xpEvent));
+                playerSnapshot = experience.buildPublicRpgState(userRecord.rpg);
+            }
+        }
+    }
+
     try {
         writeTasks(tasks);
-        res.json(serializeTask(task));
+        if (usersData && userRecord && xpEvents.length > 0) {
+            usersData.users[userIndex] = userRecord;
+            writeUsers(usersData);
+        }
+        const payload = serializeTask(task);
+        if (xpEvents.length > 0) {
+            payload.xp_events = xpEvents;
+            if (playerSnapshot) payload.player_rpg = playerSnapshot;
+        }
+        res.json(payload);
     } catch (e) {
         res.status(500).json({ error: 'Failed to persist status change' });
     }
@@ -471,19 +661,199 @@ app.patch('/api/tasks/:id/subtasks/:subtask_id/status', ensureAuth, (req, res) =
     const subtask = (task.sub_tasks || []).find(s => s.id === subId);
     if (!subtask) return res.status(404).send('Subtask not found');
 
+    if (!task.rpg || typeof task.rpg !== 'object') task.rpg = { xp_awarded: false, last_reward_at: null, history: [] };
+    if (!Array.isArray(task.rpg.history)) task.rpg.history = [];
+    if (!subtask.rpg || typeof subtask.rpg !== 'object') subtask.rpg = { xp_awarded: false, last_reward_at: null };
+    const willComplete = (status === 'done') && (subtask.status !== 'done') && (!subtask.rpg.xp_awarded);
+
+    let usersData = null;
+    let userIndex = -1;
+    let userRecord = null;
+    if (willComplete) {
+        usersData = readUsers();
+        userIndex = usersData.users.findIndex(u => u.id === req.user.id);
+        if (userIndex === -1) return sendError(res, 404, 'User not found');
+        userRecord = usersData.users[userIndex];
+        experience.ensureUserRpg(userRecord);
+    }
+
     const now = new Date().toISOString();
     subtask.status = status;
     // maintain legacy `completed` boolean
     subtask.completed = (status === 'done');
     subtask.updated_at = now;
+    task.updated_at = now;
     if (!Array.isArray(subtask.status_history)) subtask.status_history = [];
     subtask.status_history.push({ status, at: now, note: note || null });
+
+    const xpEvents = [];
+    let playerSnapshot = null;
+
+    if (willComplete && userRecord) {
+        const reward = experience.computeSubtaskXp(task, subtask);
+        if (reward.amount > 0) {
+            const xpEvent = experience.applyXp(userRecord, reward.amount, 'subtask_complete', {
+                task_id: task.id,
+                subtask_id: subtask.id,
+                task_level: task.task_level,
+                priority: subtask.priority || task.priority
+            });
+            if (xpEvent) {
+                experience.incrementCounter(userRecord.rpg, 'subtasks_completed');
+                subtask.rpg.xp_awarded = true;
+                subtask.rpg.last_reward_at = xpEvent.at;
+                if (task.rpg && Array.isArray(task.rpg.history)) {
+                    task.rpg.history.unshift({ at: xpEvent.at, amount: xpEvent.amount, reason: 'subtask_complete', subtask_id: subtask.id });
+                    if (task.rpg.history.length > 10) task.rpg.history.length = 10;
+                }
+                xpEvents.push(experience.toPublicXpEvent(xpEvent));
+                playerSnapshot = experience.buildPublicRpgState(userRecord.rpg);
+            }
+        }
+    }
+
     try {
         writeTasks(tasks);
         // return the whole parent task for client convenience
-        res.json(serializeTask(task));
+        if (usersData && userRecord && xpEvents.length > 0) {
+            usersData.users[userIndex] = userRecord;
+            writeUsers(usersData);
+        }
+        const payload = serializeTask(task);
+        if (xpEvents.length > 0) {
+            payload.xp_events = xpEvents;
+            if (playerSnapshot) payload.player_rpg = playerSnapshot;
+        }
+        res.json(payload);
     } catch (e) {
         res.status(500).json({ error: 'Failed to persist subtask status change' });
+    }
+});
+
+app.post('/api/rpg/daily-reward', ensureAuth, (req, res) => {
+    const usersData = readUsers();
+    const userIndex = usersData.users.findIndex(u => u.id === req.user.id);
+    if (userIndex === -1) return sendError(res, 404, 'User not found');
+
+    const user = usersData.users[userIndex];
+    experience.ensureUserRpg(user);
+
+    const now = new Date();
+    const todayKey = now.toISOString().split('T')[0];
+    if (user.rpg.last_daily_reward_at === todayKey) {
+        return sendError(res, 400, 'Daily reward already claimed');
+    }
+
+    const reward = experience.computeDailyBaseXp();
+    const xpEvent = experience.applyXp(user, reward.amount, 'daily_focus', { date: todayKey });
+    if (!xpEvent) {
+        return sendError(res, 500, 'Failed to grant daily reward');
+    }
+    experience.incrementCounter(user.rpg, 'daily_rewards_claimed');
+    user.rpg.last_daily_reward_at = todayKey;
+
+    try {
+        usersData.users[userIndex] = user;
+        writeUsers(usersData);
+        res.json({
+            xp_event: experience.toPublicXpEvent(xpEvent),
+            player_rpg: experience.buildPublicRpgState(user.rpg)
+        });
+    } catch (e) {
+        console.error('Failed to persist daily reward', e);
+        return sendError(res, 500, 'Failed to persist daily reward');
+    }
+});
+
+app.post('/api/debug/clear-tasks', ensureAuth, (req, res) => {
+    const tasksData = readTasks();
+    const before = tasksData.tasks.length;
+    tasksData.tasks = tasksData.tasks.filter(task => task.owner_id !== req.user.id);
+    const removed = before - tasksData.tasks.length;
+    try {
+        writeTasks(tasksData);
+        res.json({ removed });
+    } catch (e) {
+        console.error('Failed to clear tasks', e);
+        return sendError(res, 500, 'Failed to clear tasks');
+    }
+});
+
+app.post('/api/debug/seed-tasks', ensureAuth, (req, res) => {
+    const { count } = req.body || {};
+    const tasksData = readTasks();
+    const existing = tasksData.tasks.filter(task => task.owner_id !== req.user.id);
+    const userTasksRemoved = tasksData.tasks.length - existing.length;
+    const orderStart = existing.reduce((max, task) => task.order > max ? task.order : max, -1) + 1;
+    const seedCount = Number.isFinite(count) ? Math.max(1, Math.min(10, Math.floor(count))) : 5;
+    const demo = buildDemoTasks({
+        count: seedCount,
+        nextId: tasksData.nextId,
+        ownerId: req.user.id,
+        startingOrder: orderStart
+    });
+
+    tasksData.tasks = [...existing, ...demo.tasks];
+    tasksData.nextId = demo.nextId;
+    try {
+        writeTasks(tasksData);
+        res.json({
+            created: demo.tasks.length,
+            removedBeforeSeed: userTasksRemoved,
+            tasks: serializeTaskList(demo.tasks)
+        });
+    } catch (e) {
+        console.error('Failed to seed tasks', e);
+        return sendError(res, 500, 'Failed to seed tasks');
+    }
+});
+
+app.post('/api/debug/grant-xp', ensureAuth, (req, res) => {
+    const { amount } = req.body || {};
+    const xpAmount = Number(amount);
+    if (!Number.isFinite(xpAmount)) return sendError(res, 400, 'Amount must be numeric');
+    if (xpAmount === 0) return sendError(res, 400, 'Amount cannot be zero');
+
+    const usersData = readUsers();
+    const userIndex = usersData.users.findIndex(u => u.id === req.user.id);
+    if (userIndex === -1) return sendError(res, 404, 'User not found');
+    const user = usersData.users[userIndex];
+    experience.ensureUserRpg(user);
+
+    const event = experience.applyXp(user, xpAmount, 'debug_adjustment', { amount: xpAmount });
+    if (!event) return sendError(res, 400, 'No XP applied');
+
+    try {
+        usersData.users[userIndex] = user;
+        writeUsers(usersData);
+        res.json({
+            xp_event: experience.toPublicXpEvent(event),
+            player_rpg: experience.buildPublicRpgState(user.rpg)
+        });
+    } catch (e) {
+        console.error('Failed to grant xp', e);
+        return sendError(res, 500, 'Failed to grant XP');
+    }
+});
+
+app.post('/api/debug/reset-rpg', ensureAuth, (req, res) => {
+    const usersData = readUsers();
+    const userIndex = usersData.users.findIndex(u => u.id === req.user.id);
+    if (userIndex === -1) return sendError(res, 404, 'User not found');
+    const user = usersData.users[userIndex];
+
+    const baseState = experience.createInitialRpgState();
+    // preserve certain cosmetic fields if desired
+    user.rpg = { ...baseState };
+    try {
+        usersData.users[userIndex] = user;
+        writeUsers(usersData);
+        res.json({
+            player_rpg: experience.buildPublicRpgState(user.rpg)
+        });
+    } catch (e) {
+        console.error('Failed to reset rpg', e);
+        return sendError(res, 500, 'Failed to reset RPG stats');
     }
 });
 
@@ -543,6 +913,11 @@ app.put('/api/tasks/:id', ensureAuth, (req, res) => {
             const allowedP = ['low', 'medium', 'high'];
             if (!allowedP.includes(req.body.priority)) return sendError(res, 400, 'Invalid priority');
             tasks.tasks[taskIndex].priority = req.body.priority;
+        }
+        if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'task_level')) {
+            const levelValue = Number(req.body.task_level);
+            if (!Number.isFinite(levelValue)) return sendError(res, 400, 'Invalid task_level');
+            tasks.tasks[taskIndex].task_level = experience.clampTaskLevel(levelValue);
         }
         if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'completed')) {
             if (typeof req.body.completed !== 'boolean') return sendError(res, 400, 'Invalid completed flag');

@@ -30,6 +30,8 @@ coverage/
 
 # Logs
 *.log
+client.log
+server.log
 
 # IDEs
 .vscode/

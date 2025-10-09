@@ -1,529 +1,508 @@
 {
   "tasks": [
     {
-      "id": 1,
-      "description": "BGRWO",
-      "priority": "high",
+      "id": 10,
+      "description": "Decode ancient glyphs",
+      "priority": "medium",
       "sub_tasks": [
         {
           "id": 1,
-          "description": "dfaaf",
+          "description": "Gather components",
           "status": "done",
-          "created_at": "2025-10-07T13:34:16.660Z",
-          "updated_at": "2025-10-07T13:34:24.561Z",
+          "created_at": "2025-10-09T09:49:01.758Z",
+          "updated_at": "2025-10-09T09:49:06.692Z",
           "status_history": [
             {
-              "status": "todo",
-              "at": "2025-10-07T13:34:16.660Z",
-              "note": null
-            },
-            {
               "status": "in_progress",
-              "at": "2025-10-07T13:34:23.162Z",
+              "at": "2025-10-09T09:49:01.758Z",
               "note": null
             },
             {
               "status": "done",
-              "at": "2025-10-07T13:34:24.561Z",
+              "at": "2025-10-09T09:49:06.692Z",
               "note": null
             }
           ],
-          "completed": true
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-10-09T09:49:06.692Z"
+          }
         },
         {
           "id": 2,
-          "description": "fdadfaggggg",
+          "description": "Write expedition log",
           "status": "done",
-          "created_at": "2025-10-07T13:34:18.388Z",
-          "updated_at": "2025-10-07T13:38:33.707Z",
+          "created_at": "2025-10-09T09:49:01.758Z",
+          "updated_at": "2025-10-09T09:49:01.758Z",
           "status_history": [
             {
-              "status": "todo",
-              "at": "2025-10-07T13:34:18.388Z",
-              "note": null
-            },
-            {
               "status": "done",
-              "at": "2025-10-07T13:38:33.707Z",
+              "at": "2025-10-09T09:49:01.758Z",
               "note": null
             }
           ],
-          "completed": true
-        },
-        {
-          "id": 3,
-          "description": "g",
-          "status": "done",
-          "created_at": "2025-10-07T13:34:19.366Z",
-          "updated_at": "2025-10-07T13:34:21.549Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:19.366Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:34:21.549Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 4,
-          "description": "g",
-          "status": "done",
-          "created_at": "2025-10-07T13:34:19.779Z",
-          "updated_at": "2025-10-07T13:38:35.668Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:19.779Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:38:35.668Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 5,
-          "description": "g",
-          "status": "done",
-          "created_at": "2025-10-07T13:34:20.035Z",
-          "updated_at": "2025-10-07T13:38:32.040Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:20.035Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:38:32.040Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 6,
-          "description": "g",
-          "status": "done",
-          "created_at": "2025-10-07T13:34:20.274Z",
-          "updated_at": "2025-10-07T13:38:34.913Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:20.274Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:38:34.913Z",
-              "note": null
-            }
-          ],
-          "completed": true
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
         }
       ],
-      "nextSubtaskId": 7,
-      "due_date": "2025-10-07",
+      "nextSubtaskId": 3,
+      "due_date": "2025-10-12",
       "status": "done",
+      "completed": true,
       "order": 0,
-      "created_at": "2025-10-07T13:34:04.340Z",
-      "updated_at": "2025-10-07T13:38:37.398Z",
+      "created_at": "2025-10-09T09:49:01.758Z",
+      "updated_at": "2025-10-09T09:49:08.819Z",
       "status_history": [
         {
           "status": "todo",
-          "at": "2025-10-07T13:34:04.340Z",
+          "at": "2025-10-09T09:49:01.758Z",
           "note": null
         },
         {
           "status": "done",
-          "at": "2025-10-07T13:38:37.398Z",
-          "note": null
-        }
-      ],
-      "owner_id": 6,
-      "completed": true
-    },
-    {
-      "id": 2,
-      "description": "GGJ",
-      "priority": "medium",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "affae",
-          "status": "todo",
-          "created_at": "2025-10-07T13:34:28.259Z",
-          "updated_at": "2025-10-07T13:34:28.259Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:28.259Z",
-              "note": null
-            }
-          ]
-        },
-        {
-          "id": 2,
-          "description": "ffgg",
-          "status": "done",
-          "created_at": "2025-10-07T13:34:29.977Z",
-          "updated_at": "2025-10-07T13:34:35.196Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:29.977Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:34:35.196Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 3,
-          "description": "g",
-          "status": "done",
-          "created_at": "2025-10-07T13:34:30.312Z",
-          "updated_at": "2025-10-07T13:34:34.305Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:30.312Z",
-              "note": null
-            },
-            {
-              "status": "in_progress",
-              "at": "2025-10-07T13:34:33.806Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:34:34.305Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 4,
-          "description": "g",
-          "status": "in_progress",
-          "created_at": "2025-10-07T13:34:30.521Z",
-          "updated_at": "2025-10-07T13:34:32.360Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:30.521Z",
-              "note": null
-            },
-            {
-              "status": "in_progress",
-              "at": "2025-10-07T13:34:32.360Z",
-              "note": null
-            }
-          ],
-          "completed": false
-        },
-        {
-          "id": 5,
-          "description": "g",
-          "status": "todo",
-          "created_at": "2025-10-07T13:34:30.709Z",
-          "updated_at": "2025-10-07T13:34:30.709Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:30.709Z",
-              "note": null
-            }
-          ]
-        },
-        {
-          "id": 6,
-          "description": "g",
-          "status": "todo",
-          "created_at": "2025-10-07T13:34:30.892Z",
-          "updated_at": "2025-10-07T13:34:30.892Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:34:30.892Z",
-              "note": null
-            }
-          ]
-        },
-        {
-          "id": 7,
-          "description": "g",
-          "status": "todo",
-          "created_at": "2025-10-07T13:38:13.533Z",
-          "updated_at": "2025-10-07T13:38:13.533Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:38:13.533Z",
-              "note": null
-            }
-          ]
-        }
-      ],
-      "nextSubtaskId": 8,
-      "due_date": "2025-10-07",
-      "status": "todo",
-      "order": 1,
-      "created_at": "2025-10-07T13:34:05.679Z",
-      "updated_at": "2025-10-07T13:38:13.533Z",
-      "status_history": [
-        {
-          "status": "todo",
-          "at": "2025-10-07T13:34:05.679Z",
-          "note": null
-        }
-      ],
-      "owner_id": 6
-    },
-    {
-      "id": 3,
-      "description": "bob",
-      "priority": "low",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "bobo",
-          "status": "done",
-          "created_at": "2025-10-07T13:38:25.126Z",
-          "updated_at": "2025-10-07T13:38:28.643Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:38:25.126Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:38:28.643Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 2,
-          "description": "bobobob",
-          "status": "done",
-          "created_at": "2025-10-07T13:38:26.131Z",
-          "updated_at": "2025-10-07T13:38:40.127Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:38:26.131Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:38:40.127Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 3,
-          "description": "bobobbo",
-          "status": "done",
-          "created_at": "2025-10-07T13:38:27.230Z",
-          "updated_at": "2025-10-07T13:38:40.589Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-07T13:38:27.230Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-07T13:38:40.589Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        }
-      ],
-      "nextSubtaskId": 4,
-      "due_date": "2025-10-07",
-      "status": "done",
-      "order": 2,
-      "created_at": "2025-10-07T13:38:19.120Z",
-      "updated_at": "2025-10-07T13:38:42.040Z",
-      "status_history": [
-        {
-          "status": "todo",
-          "at": "2025-10-07T13:38:19.120Z",
-          "note": null
-        },
-        {
-          "status": "done",
-          "at": "2025-10-07T13:38:42.040Z",
-          "note": null
-        }
-      ],
-      "owner_id": 6,
-      "completed": true
-    },
-    {
-      "id": 4,
-      "description": "blrugao",
-      "priority": "medium",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "sides for days",
-          "status": "todo",
-          "created_at": "2025-10-08T15:18:38.242Z",
-          "updated_at": "2025-10-08T15:18:38.242Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-08T15:18:38.242Z",
-              "note": null
-            }
-          ]
-        },
-        {
-          "id": 2,
-          "description": "big o'l g",
-          "status": "done",
-          "created_at": "2025-10-08T15:18:46.615Z",
-          "updated_at": "2025-10-08T15:18:49.305Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-08T15:18:46.615Z",
-              "note": null
-            },
-            {
-              "status": "in_progress",
-              "at": "2025-10-08T15:18:48.299Z",
-              "note": null
-            },
-            {
-              "status": "done",
-              "at": "2025-10-08T15:18:49.305Z",
-              "note": null
-            }
-          ],
-          "completed": true
-        },
-        {
-          "id": 3,
-          "description": "sag",
-          "status": "todo",
-          "created_at": "2025-10-08T15:18:51.879Z",
-          "updated_at": "2025-10-08T15:18:51.879Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-08T15:18:51.879Z",
-              "note": null
-            }
-          ]
-        },
-        {
-          "id": 4,
-          "description": "agggg",
-          "status": "todo",
-          "created_at": "2025-10-08T15:18:53.598Z",
-          "updated_at": "2025-10-08T15:18:53.598Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-08T15:18:53.598Z",
-              "note": null
-            }
-          ]
-        },
-        {
-          "id": 5,
-          "description": "gg",
-          "status": "todo",
-          "created_at": "2025-10-08T15:18:54.651Z",
-          "updated_at": "2025-10-08T15:18:54.651Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-08T15:18:54.651Z",
-              "note": null
-            }
-          ]
-        }
-      ],
-      "nextSubtaskId": 6,
-      "due_date": "2025-10-08",
-      "status": "todo",
-      "order": 3,
-      "created_at": "2025-10-08T15:18:21.979Z",
-      "updated_at": "2025-10-08T15:18:54.651Z",
-      "status_history": [
-        {
-          "status": "todo",
-          "at": "2025-10-08T15:18:21.979Z",
-          "note": null
-        }
-      ],
-      "owner_id": 2
-    },
-    {
-      "id": 5,
-      "description": "so highhhh",
-      "priority": "high",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "gaeg",
-          "status": "todo",
-          "created_at": "2025-10-08T15:18:56.561Z",
-          "updated_at": "2025-10-08T15:18:56.561Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-10-08T15:18:56.561Z",
-              "note": null
-            }
-          ]
-        }
-      ],
-      "nextSubtaskId": 2,
-      "due_date": "2025-10-08",
-      "status": "in_progress",
-      "order": 4,
-      "created_at": "2025-10-08T15:18:32.882Z",
-      "updated_at": "2025-10-08T15:18:57.282Z",
-      "status_history": [
-        {
-          "status": "todo",
-          "at": "2025-10-08T15:18:32.882Z",
-          "note": null
-        },
-        {
-          "status": "in_progress",
-          "at": "2025-10-08T15:18:57.282Z",
+          "at": "2025-10-09T09:49:08.819Z",
           "note": null
         }
       ],
       "owner_id": 2,
-      "completed": false
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-10-09T09:49:08.819Z",
+        "history": [
+          {
+            "at": "2025-10-09T09:49:08.819Z",
+            "amount": 86,
+            "reason": "task_complete"
+          },
+          {
+            "at": "2025-10-09T09:49:06.692Z",
+            "amount": 36,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "description": "Draft trading manifests",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Visit quartermaster",
+          "status": "todo",
+          "created_at": "2025-10-09T09:49:01.758Z",
+          "updated_at": "2025-10-09T09:49:01.758Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-10-09T09:49:01.758Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-10-07",
+      "status": "done",
+      "completed": true,
+      "order": 1,
+      "created_at": "2025-10-09T09:49:01.758Z",
+      "updated_at": "2025-10-09T09:49:15.225Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-10-09T09:49:01.758Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-10-09T09:49:15.225Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-10-09T09:49:15.225Z",
+        "history": [
+          {
+            "at": "2025-10-09T09:49:15.225Z",
+            "amount": 99,
+            "reason": "task_complete"
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "description": "Upgrade camp defenses",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Meet with ally",
+          "status": "done",
+          "created_at": "2025-10-09T09:49:01.758Z",
+          "updated_at": "2025-10-09T09:49:33.974Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-10-09T09:49:01.758Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-10-09T09:49:20.510Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-10-09T09:49:33.974Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-10-09T09:49:33.974Z"
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meet with ally",
+          "status": "done",
+          "created_at": "2025-10-09T09:49:01.759Z",
+          "updated_at": "2025-10-09T09:49:36.785Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-10-09T09:49:01.759Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-10-09T09:49:36.785Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-10-09T09:49:36.785Z"
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-10-09",
+      "status": "done",
+      "completed": true,
+      "order": 2,
+      "created_at": "2025-10-09T09:49:01.758Z",
+      "updated_at": "2025-10-09T09:49:38.266Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-10-09T09:49:01.758Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-10-09T09:49:38.266Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 1,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-10-09T09:49:38.266Z",
+        "history": [
+          {
+            "at": "2025-10-09T09:49:38.266Z",
+            "amount": 50,
+            "reason": "task_complete"
+          },
+          {
+            "at": "2025-10-09T09:49:36.785Z",
+            "amount": 18,
+            "reason": "subtask_complete",
+            "subtask_id": 2
+          },
+          {
+            "at": "2025-10-09T09:49:33.974Z",
+            "amount": 18,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "description": "Interview guild recruits",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "todo",
+          "created_at": "2025-10-09T09:49:01.759Z",
+          "updated_at": "2025-10-09T09:49:01.759Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-10-09T09:49:01.759Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meet with ally",
+          "status": "done",
+          "created_at": "2025-10-09T09:49:01.759Z",
+          "updated_at": "2025-10-09T09:49:01.759Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-10-09T09:49:01.759Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-10-09",
+      "status": "done",
+      "completed": true,
+      "order": 3,
+      "created_at": "2025-10-09T09:49:01.759Z",
+      "updated_at": "2025-10-09T09:49:01.759Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-10-09T09:49:01.759Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      }
+    },
+    {
+      "id": 14,
+      "description": "Refine spell catalysts",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Visit quartermaster",
+          "status": "done",
+          "created_at": "2025-10-09T09:49:01.759Z",
+          "updated_at": "2025-10-09T09:49:01.759Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-10-09T09:49:01.759Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "done",
+          "created_at": "2025-10-09T09:49:01.759Z",
+          "updated_at": "2025-10-09T09:49:01.759Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-10-09T09:49:01.759Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-10-09",
+      "status": "done",
+      "completed": true,
+      "order": 4,
+      "created_at": "2025-10-09T09:49:01.759Z",
+      "updated_at": "2025-10-09T09:49:01.759Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-10-09T09:49:01.759Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      }
+    },
+    {
+      "id": 15,
+      "description": "Refine spell catalysts",
+      "priority": "medium",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-10-12",
+      "status": "in_progress",
+      "completed": false,
+      "order": 5,
+      "created_at": "2025-10-09T09:49:01.759Z",
+      "updated_at": "2025-10-09T09:49:01.759Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-10-09T09:49:01.759Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      }
+    },
+    {
+      "id": 16,
+      "description": "Chart forgotten ruins",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Meet with ally",
+          "status": "in_progress",
+          "created_at": "2025-10-09T09:49:01.759Z",
+          "updated_at": "2025-10-09T09:49:01.759Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-10-09T09:49:01.759Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-10-09",
+      "status": "todo",
+      "completed": false,
+      "order": 6,
+      "created_at": "2025-10-09T09:49:01.759Z",
+      "updated_at": "2025-10-09T09:49:01.759Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-10-09T09:49:01.759Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 5,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      }
+    },
+    {
+      "id": 17,
+      "description": "Decode ancient glyphs",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "done",
+          "created_at": "2025-10-09T09:49:01.759Z",
+          "updated_at": "2025-10-09T09:49:01.759Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-10-09T09:49:01.759Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-10-08",
+      "status": "todo",
+      "completed": false,
+      "order": 7,
+      "created_at": "2025-10-09T09:49:01.759Z",
+      "updated_at": "2025-10-09T09:49:01.759Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-10-09T09:49:01.759Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      }
     }
   ],
-  "nextId": 6
+  "nextId": 18
 }
