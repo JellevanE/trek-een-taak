@@ -3,6 +3,6 @@ import App from './App';
 
 test('renders app header', () => {
   render(<App />);
-  const header = screen.getByText(/Task Tracker/i);
+  const header = screen.getByRole('heading', { level: 1, name: /Quest Tracker/i });
   expect(header).toBeInTheDocument();
 });

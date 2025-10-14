@@ -487,9 +487,14 @@ app.post('/api/users/register', (req, res) => {
     if (!username || typeof username !== 'string' || !username.trim()) return sendError(res, 400, 'Invalid username');
     if (!password || typeof password !== 'string' || password.length < 6) return sendError(res, 400, 'Password must be at least 6 characters');
 
+    const trimmedUsername = username.trim();
+    const normalizedUsername = trimmedUsername.toLowerCase();
+
     const usersData = readUsers();
-    // ensure unique username
-    if (usersData.users.some(u => u.username === username.trim())) return sendError(res, 400, 'Username taken');
+    // ensure unique username (case-insensitive to match availability checks and login expectations)
+    if (usersData.users.some(u => typeof u.username === 'string' && u.username.toLowerCase() === normalizedUsername)) {
+        return sendError(res, 400, 'Username taken');
+    }
 
     const now = new Date().toISOString();
     const hash = bcrypt.hashSync(password, 10);
@@ -520,7 +525,7 @@ app.post('/api/users/register', (req, res) => {
     
     const user = {
         id: usersData.nextId,
-        username: username.trim(),
+        username: trimmedUsername,
         password_hash: hash,
         email: email || null,
         created_at: now,
@@ -545,7 +550,9 @@ app.post('/api/users/login', (req, res) => {
     const { username, password } = req.body || {};
     if (!username || !password) return sendError(res, 400, 'Missing credentials');
     const usersData = readUsers();
-    const user = usersData.users.find(u => u.username === username);
+    const trimmedUsername = typeof username === 'string' ? username.trim() : '';
+    const normalizedUsername = trimmedUsername.toLowerCase();
+    const user = usersData.users.find(u => typeof u.username === 'string' && u.username.toLowerCase() === normalizedUsername);
     if (!user) return sendError(res, 401, 'Invalid credentials');
     if (!bcrypt.compareSync(password, user.password_hash)) return sendError(res, 401, 'Invalid credentials');
     experience.ensureUserRpg(user);
