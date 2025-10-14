@@ -45,6 +45,10 @@ function App() {
     const [debugBusy, setDebugBusy] = useState(false);
     const [showDebugTools, setShowDebugTools] = useState(false);
     const [editingQuest, setEditingQuest] = useState(null);
+    const editingQuestInputRef = useRef(null);
+    const [selectedQuestId, setSelectedQuestId] = useState(null);
+    const [selectedSideQuest, setSelectedSideQuest] = useState(null); // { questId, sideQuestId }
+    const [editingSideQuest, setEditingSideQuest] = useState(null);
     // store subtask descriptions per task id to allow multiple open forms
     const [sideQuestDescriptionMap, setSideQuestDescriptionMap] = useState({});
     const [addingSideQuestTo, setAddingSideQuestTo] = useState(null);
@@ -55,6 +59,8 @@ function App() {
     const [draggedSideQuest, setDraggedSideQuest] = useState(null);
     const [sideQuestDragOver, setSideQuestDragOver] = useState({ questId: null, sideQuestId: null, position: null });
     const addInputRefs = useRef({});
+    const undoTimersRef = useRef({});
+    const [undoQueue, setUndoQueue] = useState([]);
 
     const [token, setToken] = useState(() => {
         try { return localStorage.getItem('auth_token') || null } catch { return null }
@@ -300,6 +306,73 @@ function App() {
         setCollapsedMap(prev => ({ ...prev, [questId]: !prev[questId] }));
     };
 
+    const ensureQuestExpanded = (questId) => {
+        setCollapsedMap(prev => {
+            if (!prev || !prev[questId]) return prev;
+            const copy = { ...prev };
+            copy[questId] = false;
+            return copy;
+        });
+    };
+
+    const handleSelectQuest = (questId) => {
+        if (questId === undefined || questId === null) return;
+        setSelectedQuestId(questId);
+        setSelectedSideQuest(null);
+        setEditingSideQuest(null);
+        ensureQuestExpanded(questId);
+    };
+
+    const handleSelectSideQuest = (questId, sideQuestId) => {
+        if (questId === undefined || questId === null || sideQuestId === undefined || sideQuestId === null) return;
+        setSelectedQuestId(questId);
+        setSelectedSideQuest({ questId, sideQuestId });
+        ensureQuestExpanded(questId);
+    };
+
+    const clearSelection = () => {
+        setSelectedQuestId(null);
+        setSelectedSideQuest(null);
+        setEditingSideQuest(null);
+    };
+
+    const findQuestById = (questId) => {
+        if (questId === undefined || questId === null) return null;
+        return quests.find(q => String(q.id) === String(questId)) || null;
+    };
+
+    const moveQuestSelection = (offset) => {
+        if (!Array.isArray(quests) || quests.length === 0) return false;
+        const currentIndex = selectedQuestId !== null
+            ? quests.findIndex(q => String(q.id) === String(selectedQuestId))
+            : -1;
+        let nextIndex;
+        if (currentIndex === -1) {
+            nextIndex = offset >= 0 ? 0 : quests.length - 1;
+        } else {
+            nextIndex = currentIndex + offset;
+            if (nextIndex < 0) nextIndex = 0;
+            if (nextIndex >= quests.length) nextIndex = quests.length - 1;
+        }
+        if (nextIndex === currentIndex || nextIndex < 0 || nextIndex >= quests.length) return false;
+        const nextQuest = quests[nextIndex];
+        if (nextQuest) {
+            handleSelectQuest(nextQuest.id);
+            return true;
+        }
+        return false;
+    };
+
+    const selectFirstSideQuest = (questId) => {
+        const quest = findQuestById(questId);
+        if (!quest || !Array.isArray(quest.side_quests) || quest.side_quests.length === 0) return;
+        ensureQuestExpanded(questId);
+        const first = quest.side_quests[0];
+        if (first) {
+            handleSelectSideQuest(questId, first.id);
+        }
+    };
+
     const handleDragStart = (e, questId) => {
         setDraggedQuestId(questId);
         setDragOverQuestId(null);
@@ -443,10 +516,113 @@ function App() {
         setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
     };
 
+    const scheduleQuestUndo = (quest) => {
+        if (!quest) return;
+        const snapshot = JSON.parse(JSON.stringify(quest));
+        const entryId = `${quest.id}-${Date.now()}`;
+        if (typeof window === 'undefined') return;
+        const timer = window.setTimeout(() => {
+            setUndoQueue(prev => prev.filter(entry => entry.id !== entryId));
+            if (undoTimersRef.current && undoTimersRef.current[entryId]) {
+                delete undoTimersRef.current[entryId];
+            }
+        }, 7000);
+        if (!undoTimersRef.current) undoTimersRef.current = {};
+        undoTimersRef.current[entryId] = timer;
+        setUndoQueue(prev => [...prev, { id: entryId, quest: snapshot }]);
+    };
+
+    const dismissUndoEntry = (entryId) => {
+        if (undoTimersRef.current && undoTimersRef.current[entryId]) {
+            clearTimeout(undoTimersRef.current[entryId]);
+            delete undoTimersRef.current[entryId];
+        }
+        setUndoQueue(prev => prev.filter(entry => entry.id !== entryId));
+    };
+
+    const restoreQuestFromSnapshot = async (snapshot) => {
+        if (!snapshot) return;
+        try {
+            const basePayload = {
+                description: snapshot.description,
+                priority: snapshot.priority || 'medium',
+                task_level: snapshot.task_level || 1
+            };
+            if (snapshot.due_date) basePayload.due_date = snapshot.due_date;
+            const createRes = await fetch('/api/tasks', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(basePayload)
+            });
+            if (!createRes.ok) throw new Error('Failed to recreate quest');
+            let createdQuest = normalizeQuest(await createRes.json());
+            const newQuestId = createdQuest.id;
+            const originalSideQuests = Array.isArray(snapshot.side_quests) ? snapshot.side_quests : [];
+            for (const sub of originalSideQuests) {
+                if (!sub || !sub.description) continue;
+                const subRes = await fetch(`/api/tasks/${newQuestId}/subtasks`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ description: sub.description })
+                });
+                if (!subRes.ok) throw new Error('Failed to recreate subtask');
+                createdQuest = normalizeQuest(await subRes.json());
+                const latestSub = Array.isArray(createdQuest.side_quests) ? createdQuest.side_quests[createdQuest.side_quests.length - 1] : null;
+                const desiredStatus = sub.status || (sub.completed ? 'done' : 'todo');
+                if (latestSub && desiredStatus && desiredStatus !== 'todo') {
+                    const statusRes = await fetch(`/api/tasks/${newQuestId}/subtasks/${latestSub.id}/status`, {
+                        method: 'PATCH',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ status: desiredStatus })
+                    });
+                    if (!statusRes.ok) throw new Error('Failed to restore subtask status');
+                }
+            }
+            const questStatus = snapshot.status || (snapshot.completed ? 'done' : 'todo');
+            if (questStatus && questStatus !== 'todo') {
+                const questStatusRes = await fetch(`/api/tasks/${newQuestId}/status`, {
+                    method: 'PATCH',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ status: questStatus })
+                });
+                if (!questStatusRes.ok) throw new Error('Failed to restore quest status');
+            }
+            await reloadTasks();
+            setTimeout(() => handleSelectQuest(newQuestId), 10);
+            pushToast('Quest restored', 'success');
+        } catch (error) {
+            console.error('Error restoring quest:', error);
+            pushToast('Failed to restore quest', 'error');
+            try { await reloadTasks(); } catch {}
+        }
+    };
+
+    const handleUndoDelete = (entryId) => {
+        const entry = undoQueue.find(item => item.id === entryId);
+        if (!entry) return;
+        dismissUndoEntry(entryId);
+        restoreQuestFromSnapshot(entry.quest);
+    };
+
     const deleteTask = (id) => {
+        const questToDelete = findQuestById(id);
         fetch(`/api/tasks/${id}`, { method: 'DELETE', headers: getAuthHeaders() })
             .then(() => {
                 setQuests(prev => prev.filter(quest => quest.id !== id));
+                setCelebratingQuests(prev => {
+                    if (!prev || !prev[id]) return prev;
+                    const copy = { ...prev };
+                    delete copy[id];
+                    return copy;
+                });
+                if (selectedQuestId !== null && String(selectedQuestId) === String(id)) {
+                    setSelectedQuestId(null);
+                    setSelectedSideQuest(null);
+                }
+                if (editingQuest && String(editingQuest.id) === String(id)) {
+                    setEditingQuest(null);
+                }
+                if (questToDelete) scheduleQuestUndo(questToDelete);
             })
             .catch(error => console.error('Error deleting quest:', error));
     };
@@ -674,6 +850,116 @@ function App() {
             });
     };
 
+    const updateSideQuest = (taskId, subTaskId, payload) => {
+        return fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload) })
+            .then(res => {
+                if (!res.ok) {
+                    const err = new Error('Failed to update side-quest');
+                    err.status = res.status;
+                    throw err;
+                }
+                return res.json();
+            })
+            .then(updatedQuest => {
+                const normalized = normalizeQuest(updatedQuest);
+                setQuests(prev => prev.map(quest => (quest.id === taskId ? normalized : quest)));
+                return normalized;
+            });
+    };
+
+    const deleteSideQuest = (taskId, subTaskId) => {
+        const parentQuest = findQuestById(taskId);
+        let fallbackSideQuestId = null;
+        if (parentQuest && Array.isArray(parentQuest.side_quests)) {
+            const subs = parentQuest.side_quests;
+            const currentIdx = subs.findIndex(sub => String(sub.id) === String(subTaskId));
+            if (currentIdx !== -1) {
+                const next = subs[currentIdx + 1] || subs[currentIdx - 1] || null;
+                if (next) fallbackSideQuestId = next.id;
+            }
+        }
+        fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}`, { method: 'DELETE', headers: getAuthHeaders() })
+            .then(res => {
+                if (res.status === 204) {
+                    return { id: taskId };
+                }
+                if (!res.ok) {
+                    const err = new Error('Failed to delete side-quest');
+                    err.status = res.status;
+                    throw err;
+                }
+                return res.json();
+            })
+            .then(updatedQuest => {
+                if (updatedQuest && updatedQuest.id !== undefined) {
+                    const normalized = normalizeQuest(updatedQuest);
+                    setQuests(prev => prev.map(quest => {
+                        if (quest.id === taskId) return normalized;
+                        return quest;
+                    }));
+                } else {
+                    setQuests(prev => prev.map(quest => {
+                        if (quest.id !== taskId) return quest;
+                        const subs = Array.isArray(quest.side_quests) ? quest.side_quests.filter(sub => String(sub.id) !== String(subTaskId)) : [];
+                        return { ...quest, side_quests: subs };
+                    }));
+                }
+                if (selectedSideQuest && String(selectedSideQuest.questId) === String(taskId) && String(selectedSideQuest.sideQuestId) === String(subTaskId)) {
+                    if (fallbackSideQuestId) {
+                        setSelectedSideQuest({ questId: taskId, sideQuestId: fallbackSideQuestId });
+                    } else {
+                        setSelectedSideQuest(null);
+                    }
+                }
+                if (editingSideQuest && String(editingSideQuest.questId) === String(taskId) && String(editingSideQuest.sideQuestId) === String(subTaskId)) {
+                    setEditingSideQuest(null);
+                }
+                pushToast('Side-quest deleted', 'success');
+            })
+            .catch(error => {
+                console.error('Error deleting side-quest:', error);
+                pushToast('Failed to delete side-quest', 'error');
+            });
+    };
+
+    const startEditingSideQuest = (questId, sideQuest) => {
+        if (!sideQuest) return;
+        setEditingSideQuest({ questId, sideQuestId: sideQuest.id, description: sideQuest.description || '' });
+        handleSelectSideQuest(questId, sideQuest.id);
+        setTimeout(() => {
+            try {
+                const input = document.querySelector(`input[data-subtask-edit="${questId}:${sideQuest.id}"]`);
+                if (input) input.focus();
+            } catch {}
+        }, 30);
+    };
+
+    const handleSideQuestEditChange = (value) => {
+        setEditingSideQuest(prev => prev ? { ...prev, description: value } : prev);
+    };
+
+    const cancelSideQuestEdit = () => {
+        setEditingSideQuest(null);
+    };
+
+    const saveSideQuestEdit = (questId, subTaskId) => {
+        if (!editingSideQuest || String(editingSideQuest.questId) !== String(questId) || String(editingSideQuest.sideQuestId) !== String(subTaskId)) return;
+        const nextDescription = (editingSideQuest.description || '').trim();
+        if (!nextDescription) {
+            pushToast('Description cannot be empty', 'error');
+            return;
+        }
+        updateSideQuest(questId, subTaskId, { description: nextDescription })
+            .then(() => {
+                setEditingSideQuest(null);
+                pushToast('Side-quest updated', 'success');
+            })
+            .catch(error => {
+                console.error('Error updating side-quest:', error);
+                pushToast('Failed to update side-quest', 'error');
+            });
+    };
+
     const handleEditChange = (e) => {
         const { name, value } = e.target;
         setEditingQuest(prevQuest => ({
@@ -720,6 +1006,22 @@ function App() {
                     name="description"
                     value={editingQuest?.description || ''}
                     onChange={handleEditChange}
+                    ref={editingQuestInputRef}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const currentPriority = editingQuest?.priority || 'medium';
+                            const currentLevel = editingQuest?.task_level || 1;
+                            updateTask(quest.id, {
+                                description: editingQuest?.description,
+                                priority: currentPriority,
+                                task_level: currentLevel || 1
+                            });
+                        } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            setEditingQuest(null);
+                        }
+                    }}
                 />
                 <button
                     type="button"
@@ -789,6 +1091,177 @@ function App() {
             }, 20);
         }
     }, [addingSideQuestTo]);
+
+    useEffect(() => {
+        if (selectedQuestId !== null) {
+            const questExists = quests.some(q => String(q.id) === String(selectedQuestId));
+            if (!questExists) {
+                setSelectedQuestId(null);
+            }
+        }
+        if (selectedSideQuest) {
+            const parentQuest = quests.find(q => String(q.id) === String(selectedSideQuest.questId));
+            const hasSideQuest = parentQuest && Array.isArray(parentQuest.side_quests)
+                ? parentQuest.side_quests.some(s => String(s.id) === String(selectedSideQuest.sideQuestId))
+                : false;
+            if (!hasSideQuest) {
+                setSelectedSideQuest(null);
+            }
+        }
+    }, [quests, selectedQuestId, selectedSideQuest]);
+
+    useEffect(() => {
+        if (!editingSideQuest) return;
+        const matchesSelection = selectedSideQuest
+            && String(selectedSideQuest.questId) === String(editingSideQuest.questId)
+            && String(selectedSideQuest.sideQuestId) === String(editingSideQuest.sideQuestId);
+        if (!matchesSelection) {
+            setEditingSideQuest(null);
+        }
+    }, [selectedSideQuest, editingSideQuest]);
+
+    useEffect(() => {
+        if (editingQuest && editingQuestInputRef.current) {
+            try {
+                editingQuestInputRef.current.focus();
+                editingQuestInputRef.current.select();
+            } catch {}
+        }
+    }, [editingQuest]);
+
+    useEffect(() => {
+        return () => {
+            if (!undoTimersRef.current) return;
+            Object.values(undoTimersRef.current).forEach(timer => {
+                if (typeof timer === 'number') {
+                    clearTimeout(timer);
+                }
+            });
+        };
+    }, []);
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            const target = e.target;
+            const tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || (target && target.isContentEditable)) return;
+            const skipShortcuts = target && (
+                (target.dataset && target.dataset.skipShortcuts === 'true') ||
+                (typeof target.closest === 'function' && target.closest('[data-skip-shortcuts="true"]'))
+            );
+            if (skipShortcuts) return;
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+            if (!Array.isArray(quests) || quests.length === 0) return;
+
+            const currentQuestIndex = selectedQuestId !== null
+                ? quests.findIndex(q => String(q.id) === String(selectedQuestId))
+                : -1;
+            const currentQuest = currentQuestIndex >= 0 ? quests[currentQuestIndex] : null;
+
+            switch (e.key) {
+                case 'ArrowDown': {
+                    e.preventDefault();
+                    if (selectedSideQuest && currentQuest) {
+                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
+                        const idx = subs.findIndex(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        if (idx !== -1 && idx < subs.length - 1) {
+                            handleSelectSideQuest(currentQuest.id, subs[idx + 1].id);
+                            return;
+                        }
+                        setSelectedSideQuest(null);
+                    }
+                    moveQuestSelection(1);
+                    break;
+                }
+                case 'ArrowUp': {
+                    e.preventDefault();
+                    if (selectedSideQuest && currentQuest) {
+                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
+                        const idx = subs.findIndex(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        if (idx > 0) {
+                            handleSelectSideQuest(currentQuest.id, subs[idx - 1].id);
+                            return;
+                        }
+                        setSelectedSideQuest(null);
+                        handleSelectQuest(currentQuest.id);
+                        return;
+                    }
+                    moveQuestSelection(-1);
+                    break;
+                }
+                case 'ArrowRight': {
+                    if (selectedSideQuest) break;
+                    if (currentQuest) {
+                        ensureQuestExpanded(currentQuest.id);
+                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
+                        if (subs.length > 0) {
+                            e.preventDefault();
+                            selectFirstSideQuest(currentQuest.id);
+                        }
+                    }
+                    break;
+                }
+                case 'ArrowLeft': {
+                    if (selectedSideQuest) {
+                        e.preventDefault();
+                        setSelectedSideQuest(null);
+                        if (currentQuest) handleSelectQuest(currentQuest.id);
+                    }
+                    break;
+                }
+                case 'Delete':
+                case 'Backspace': {
+                    if (selectedSideQuest && currentQuest) {
+                        e.preventDefault();
+                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
+                        const match = subs.find(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        const label = match && match.description ? match.description : 'this side-quest';
+                        if (window.confirm(`Delete ${label}?`)) {
+                            deleteSideQuest(selectedSideQuest.questId, selectedSideQuest.sideQuestId);
+                        }
+                    } else if (selectedQuestId !== null && currentQuest) {
+                        e.preventDefault();
+                        const label = currentQuest.description || 'this quest';
+                        if (window.confirm(`Delete ${label}?`)) {
+                            deleteTask(currentQuest.id);
+                        }
+                    }
+                    break;
+                }
+                case 'Enter': {
+                    if (selectedSideQuest && currentQuest) {
+                        e.preventDefault();
+                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
+                        const match = subs.find(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        if (match) {
+                            startEditingSideQuest(currentQuest.id, match);
+                        }
+                    } else if (currentQuest) {
+                        e.preventDefault();
+                        setEditingQuest({ ...currentQuest });
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [
+        quests,
+        selectedQuestId,
+        selectedSideQuest,
+        moveQuestSelection,
+        ensureQuestExpanded,
+        selectFirstSideQuest,
+        handleSelectQuest,
+        handleSelectSideQuest,
+        deleteSideQuest,
+        deleteTask
+    ]);
 
     const globalProgress = useMemo(() => getGlobalProgress(), [quests]);
     const globalAura = useMemo(() => getProgressAura(globalProgress.percent), [globalProgress.percent]);
@@ -867,7 +1340,7 @@ function App() {
                     </div>
                     <div style={{display:'flex', alignItems:'center', gap:8}}>
                         <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
-                        <button className="btn-ghost" onClick={() => setShowDebugTools(s => !s)}>{showDebugTools ? 'Hide Debug' : 'Debug Tools'}</button>
+                        <button className="btn-ghost" data-skip-shortcuts="true" onClick={() => setShowDebugTools(s => !s)}>{showDebugTools ? 'Hide Debug' : 'Debug Tools'}</button>
                         <button className="btn-ghost" onClick={() => setShowProfile(s => !s)}>Profile</button>
                     </div>
                 </div>
@@ -944,7 +1417,7 @@ function App() {
                 </div>
             )}
             {showDebugTools && (
-                <div className="debug-panel">
+                <div className="debug-panel" data-skip-shortcuts="true">
                     <div className="debug-title">Debug Utilities</div>
                     <div className="debug-actions">
                         <button className="btn-ghost" onClick={clearAllQuests} disabled={debugBusy}>Clear Quests</button>
@@ -985,133 +1458,388 @@ function App() {
                 <button className="btn-primary" onClick={addTask}>Add Quest</button>
             </div>
             <div className="quest-container">
-                {quests.map(quest => (
-                    <React.Fragment key={quest.id}>
-                        {dragOverQuestId === quest.id && dragPosition === 'above' && (
-                            <div className="insert-indicator" />
-                        )}
-                        <div
-                            data-dragging={draggedQuestId === quest.id}
-                            className={`quest ${((quest.status || (quest.completed ? 'done' : 'todo')) === 'done' ? 'completed' : '')} ${collapsedMap[quest.id] ? 'collapsed' : ''} ${dragOverQuestId === quest.id ? 'drag-over' : ''} ${(quest.status === 'in_progress') ? 'started' : ''} ${pulsingQuests[quest.id] === 'full' ? 'pulse' : pulsingQuests[quest.id] === 'subtle' ? 'pulse-subtle' : pulsingQuests[quest.id] === 'spawn' ? 'pulse-spawn' : ''} ${glowQuests[quest.id] ? 'glow' : ''} ${spawnQuests[quest.id] ? 'spawn' : ''}`}
-                            draggable
-                            onDragStart={e => handleDragStart(e, quest.id)}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={e => handleDragOver(e, quest.id)}
-                            onDragLeave={handleDragLeave}
-                            onDrop={e => handleDrop(e, quest.id)}
-                        >
-                            <div style={{display:'flex', alignItems:'center'}}>
-                                <div className="drag-handle top" draggable onDragStart={e => handleDragStart(e, quest.id)} onDragEnd={handleDragEnd}>≡</div>
-                                <div style={{flex:1}}>{editingQuest && editingQuest.id === quest.id ? (
-                                        renderEditForm(quest)
-                                    ) : (
-                                        <>
-                                            <div className="quest-header">
-                                                <div className="left">
-                                                    <h3>{quest.description}</h3>
-                                                    <div style={{marginLeft:12, display:'flex', alignItems:'center', gap:8}}>
-                                                        <span className={`priority-pill ${quest.priority}`}>{quest.priority}</span>
-                                                        <span className="level-pill">Lv. {quest.task_level || 1}</span>
+                {quests.map(quest => {
+                    const questStatus = (quest.status || (quest.completed ? 'done' : 'todo'));
+                    const questStatusLabel = questStatus.replace('_', ' ');
+                    const questSelected = selectedQuestId !== null && String(selectedQuestId) === String(quest.id);
+                    const questSideQuests = Array.isArray(quest.side_quests) ? quest.side_quests : [];
+                    const questProgress = getQuestProgress(quest);
+                    const questClassName = [
+                        'quest',
+                        questStatus === 'done' ? 'completed' : '',
+                        collapsedMap[quest.id] ? 'collapsed' : '',
+                        dragOverQuestId === quest.id ? 'drag-over' : '',
+                        (quest.status === 'in_progress') ? 'started' : '',
+                        pulsingQuests[quest.id] === 'full' ? 'pulse' : '',
+                        pulsingQuests[quest.id] === 'subtle' ? 'pulse-subtle' : '',
+                        pulsingQuests[quest.id] === 'spawn' ? 'pulse-spawn' : '',
+                        glowQuests[quest.id] ? 'glow' : '',
+                        spawnQuests[quest.id] ? 'spawn' : '',
+                        questSelected ? 'selected' : ''
+                    ].filter(Boolean).join(' ');
+                    return (
+                        <React.Fragment key={quest.id}>
+                            {dragOverQuestId === quest.id && dragPosition === 'above' && (
+                                <div className="insert-indicator" />
+                            )}
+                            <div
+                                role="button"
+                                tabIndex={0}
+                                data-dragging={draggedQuestId === quest.id}
+                                className={questClassName}
+                                draggable
+                                onClick={e => {
+                                    if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                    handleSelectQuest(quest.id);
+                                }}
+                                onFocus={e => {
+                                    if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                    handleSelectQuest(quest.id);
+                                }}
+                                onKeyDown={e => {
+                                    const target = e.target;
+                                    if (target && typeof target.closest === 'function' && target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        handleSelectQuest(quest.id);
+                                    }
+                                }}
+                                onDragStart={e => handleDragStart(e, quest.id)}
+                                onDragEnd={handleDragEnd}
+                                onDragOver={e => handleDragOver(e, quest.id)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={e => handleDrop(e, quest.id)}
+                            >
+                                <div style={{display:'flex', alignItems:'center'}}>
+                                    <div className="drag-handle top" draggable onDragStart={e => handleDragStart(e, quest.id)} onDragEnd={handleDragEnd}>≡</div>
+                                    <div style={{flex:1}}>
+                                        {editingQuest && editingQuest.id === quest.id ? (
+                                            renderEditForm(quest)
+                                        ) : (
+                                            <>
+                                                <div className="quest-header">
+                                                    <div className="left">
+                                                        <h3>{quest.description}</h3>
+                                                        <div style={{marginLeft:12, display:'flex', alignItems:'center', gap:8}}>
+                                                            <span className={`priority-pill ${quest.priority}`}>{quest.priority}</span>
+                                                            <span className="level-pill">Lv. {quest.task_level || 1}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="right">
+                                                        <div className="quest-controls">
+                                                            <button
+                                                                className="btn-ghost"
+                                                                onClick={e => { e.stopPropagation(); toggleCollapse(quest.id); }}
+                                                                aria-label="toggle details"
+                                                            >
+                                                                {collapsedMap[quest.id] ? 'Expand' : 'Minimize'}
+                                                            </button>
+                                                            {questSelected && (
+                                                                <>
+                                                                    <button
+                                                                        className="btn-ghost"
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setEditingQuest({ ...quest });
+                                                                        }}
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn-danger"
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            deleteTask(quest.id);
+                                                                        }}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="right">
-                                                    <div className="quest-controls">
-                                                        <button className="btn-ghost" onClick={() => toggleCollapse(quest.id)} aria-label="toggle details">{collapsedMap[quest.id] ? 'Expand' : 'Minimize'}</button>
-                                                        <button className="btn-ghost" onClick={() => setEditingQuest({ ...quest })}>Edit</button>
-                                                        <button className="btn-danger" onClick={() => deleteTask(quest.id)}>Delete</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {!collapsedMap[quest.id] && (
-                                                <>
-                                                    <div className="quest-progress-wrap">
-                                                        <div className="quest-progress">
-                                                            <div className="quest-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={getQuestProgress(quest)} title={`${getQuestProgress(quest)}%`}>
-                                                                <div className="quest-progress-fill" style={{ width: `${getQuestProgress(quest)}%`, background: progressColor(getQuestProgress(quest)) }} />
-                                                                <div className="tooltip">{getQuestProgress(quest)}%</div>
+                                                {!collapsedMap[quest.id] && (
+                                                    <>
+                                                        <div className="quest-progress-wrap">
+                                                            <div className="quest-progress">
+                                                                <div className="quest-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={questProgress} title={`${questProgress}%`}>
+                                                                    <div className="quest-progress-fill" style={{ width: `${questProgress}%`, background: progressColor(questProgress) }} />
+                                                                    <div className="tooltip">{questProgress}%</div>
+                                                                </div>
+                                                                <div className="quest-progress-meta">{questProgress}%</div>
                                                             </div>
-                                                            <div className="quest-progress-meta">{getQuestProgress(quest)}%</div>
+                                                        </div>
+                                                        <div className="quest-details">
+                                                            <div>
+                                                                <div className="muted small">Due:</div>
+                                                                <div className="muted">{quest.due_date || '—'}</div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="muted small">Status:</div>
+                                                                <div className="muted">{questStatusLabel}</div>
+                                                            </div>
+                                                        <div style={{marginLeft:'auto', display:'flex', gap:6, flexWrap:'wrap'}}>
+                                                            {questSelected && (
+                                                                <>
+                                                                    <button
+                                                                        className="btn-ghost btn-small"
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setEditingQuest({ ...quest });
+                                                                        }}
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn-danger btn-small"
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            deleteTask(quest.id);
+                                                                        }}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                            {questStatus !== 'in_progress' && (
+                                                                <button
+                                                                    className="btn-start btn-small"
+                                                                    onMouseDown={e => e.stopPropagation()}
+                                                                    onDragStart={e => e.stopPropagation()}
+                                                                    onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'in_progress'); }}
+                                                                >
+                                                                    Start
+                                                                </button>
+                                                            )}
+                                                            {questStatus !== 'done' && (
+                                                                <button
+                                                                    className="btn-complete btn-small"
+                                                                    onMouseDown={e => e.stopPropagation()}
+                                                                    onDragStart={e => e.stopPropagation()}
+                                                                    onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'done'); }}
+                                                                >
+                                                                    Complete
+                                                                </button>
+                                                            )}
+                                                            {questStatus === 'done' && (
+                                                                <button
+                                                                    className="btn-ghost btn-small"
+                                                                    onMouseDown={e => e.stopPropagation()}
+                                                                    onDragStart={e => e.stopPropagation()}
+                                                                    onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'todo'); }}
+                                                                >
+                                                                    Undo
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                    <div className="quest-details">
-                                                        <div>
-                                                            <div className="muted small">Due:</div>
-                                                            <div className="muted">{quest.due_date || '—'}</div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="muted small">Status:</div>
-                                                            <div className="muted">{(quest.status || (quest.completed ? 'done' : 'todo')).replace('_', ' ')}</div>
-                                                        </div>
-                                                        <div style={{marginLeft:'auto'}}>
-                                                            {/* show actions depending on current status */}
-                                                            {((quest.status || (quest.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'in_progress'); }}>Start</button>}
-                                                            {((quest.status || (quest.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'done'); }}>Complete</button>}
-                                                            {((quest.status || (quest.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTaskStatus(quest.id, 'todo'); }}>Undo</button>}
-                                                        </div>
-                                                    </div>
-                                                    {quest.side_quests && quest.side_quests.length > 0 && (
-                                                        <div>
-                                                            <h4>Side-quests:</h4>
-                                                            <ul>
-                                                                {quest.side_quests.map(sideQuest => (
-                                                                    <li key={sideQuest.id} className={((sideQuest.status || (sideQuest.completed ? 'done' : 'todo')) === 'done') ? 'completed' : ''}>
-                                                                        {sideQuestDragOver.questId === quest.id && sideQuestDragOver.sideQuestId === sideQuest.id && sideQuestDragOver.position === 'above' && <div className="insert-indicator" />}
-                                                                        <div
-                                                                            className="task-row"
-                                                                            onDragOver={e => handleSideQuestDragOver(e, quest.id, sideQuest.id)}
-                                                                            onDragLeave={() => setSideQuestDragOver({ questId: null, sideQuestId: null, position: null })}
-                                                                            onDrop={e => handleSideQuestDrop(e, quest.id, sideQuest.id)}
-                                                                        >
-                                                                            <div style={{display:'flex', alignItems:'center', gap:8, flex:1}}>
-                                                                                <div className="drag-handle" style={{width:14,height:14,fontSize:9}} draggable onDragStart={e => handleSideQuestDragStart(e, quest.id, sideQuest.id)} onDragEnd={handleSideQuestDragEnd}>⋮</div>
-                                                                                <div className={`side-quest-desc ${(sideQuest.status === 'in_progress') ? 'in-progress' : ''} ${(sideQuest.status === 'done') ? 'started' : ''} ${pulsingSideQuests[`${quest.id}:${sideQuest.id}`] ? 'pulse-subtle' : ''}`} style={{flex:1}}>{sideQuest.description} <small className="small"> - {(sideQuest.status || (sideQuest.completed ? 'done' : 'todo')).replace('_', ' ')}</small></div>
-                                                                            </div>
-                                                                            <div>
-                                                                                {(((sideQuest.status) || (sideQuest.completed ? 'done' : 'todo')) !== 'in_progress') && <button className="btn-start btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'in_progress'); }}>Start</button>}
-                                                                                {(((sideQuest.status) || (sideQuest.completed ? 'done' : 'todo')) !== 'done') && <button className="btn-complete btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'done'); }}>Complete</button>}
-                                                                                {(((sideQuest.status) || (sideQuest.completed ? 'done' : 'todo')) === 'done') && <button className="btn-ghost btn-small" onMouseDown={e => e.stopPropagation()} onDragStart={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'todo'); }}>Undo</button>}
-                                                                            </div>
-                                                                        </div>
-                                                                        {sideQuestDragOver.questId === quest.id && sideQuestDragOver.sideQuestId === sideQuest.id && sideQuestDragOver.position === 'below' && <div className="insert-indicator" />}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    )}
-                                                    {/* Add-side-quest area moved into card footer for clarity */}
-                                                    <div style={{marginTop:12}}>
-                                                        {addingSideQuestTo === quest.id ? (
-                                                            renderAddSideQuestForm(quest)
-                                                        ) : (
-                                                            <div style={{display:'flex', justifyContent:'flex-end'}}><button className="add-side-quest-button large" onClick={() => setAddingSideQuestTo(quest.id)}>+ Add Side Quest</button></div>
+                                                        {questSideQuests.length > 0 && (
+                                                            <div>
+                                                                <h4>Side-quests:</h4>
+                                                                <ul>
+                                                                    {questSideQuests.map(sideQuest => {
+                                                                        const sideStatus = (sideQuest.status || (sideQuest.completed ? 'done' : 'todo'));
+                                                                        const sideStatusLabel = sideStatus.replace('_', ' ');
+                                                                        const sideSelected = selectedSideQuest
+                                                                            && String(selectedSideQuest.questId) === String(quest.id)
+                                                                            && String(selectedSideQuest.sideQuestId) === String(sideQuest.id);
+                                                                        const sideEditing = editingSideQuest
+                                                                            && String(editingSideQuest.questId) === String(quest.id)
+                                                                            && String(editingSideQuest.sideQuestId) === String(sideQuest.id);
+                                                                        const sideKey = `${quest.id}:${sideQuest.id}`;
+                                                                        return (
+                                                                            <li
+                                                                                key={sideQuest.id}
+                                                                                className={`${sideStatus === 'done' ? 'completed' : ''} ${sideSelected ? 'selected' : ''}`}
+                                                                            >
+                                                                                {sideQuestDragOver.questId === quest.id && sideQuestDragOver.sideQuestId === sideQuest.id && sideQuestDragOver.position === 'above' && <div className="insert-indicator" />}
+                                                                                <div
+                                                                                    className={`task-row ${sideEditing ? 'editing' : ''}`}
+                                                                                    role="button"
+                                                                                    tabIndex={0}
+                                                                                    onClick={e => {
+                                                                                        e.stopPropagation();
+                                                                                        if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                                                                        handleSelectSideQuest(quest.id, sideQuest.id);
+                                                                                    }}
+                                                                                    onFocus={e => {
+                                                                                        e.stopPropagation();
+                                                                                        if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                                                                        handleSelectSideQuest(quest.id, sideQuest.id);
+                                                                                    }}
+                                                                                    onKeyDown={e => {
+                                                                                        const target = e.target;
+                                                                                        if (target && typeof target.closest === 'function' && target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                                                            e.preventDefault();
+                                                                                            e.stopPropagation();
+                                                                                            handleSelectSideQuest(quest.id, sideQuest.id);
+                                                                                        }
+                                                                                    }}
+                                                                                    onDragOver={e => handleSideQuestDragOver(e, quest.id, sideQuest.id)}
+                                                                                    onDragLeave={() => setSideQuestDragOver({ questId: null, sideQuestId: null, position: null })}
+                                                                                    onDrop={e => handleSideQuestDrop(e, quest.id, sideQuest.id)}
+                                                                                >
+                                                                                    <div style={{display:'flex', alignItems:'center', gap:8, flex:1}}>
+                                                                                        <div className="drag-handle" style={{width:14,height:14,fontSize:9}} draggable onDragStart={e => handleSideQuestDragStart(e, quest.id, sideQuest.id)} onDragEnd={handleSideQuestDragEnd}>⋮</div>
+                                                                                        {sideEditing ? (
+                                                                                            <div className="side-quest-edit">
+                                                                                                <input
+                                                                                                    type="text"
+                                                                                                    data-subtask-edit={sideKey}
+                                                                                                    value={editingSideQuest?.description || ''}
+                                                                                                    onChange={e => handleSideQuestEditChange(e.target.value)}
+                                                                                                    onClick={e => e.stopPropagation()}
+                                                                                                    onKeyDown={e => {
+                                                                                                        if (e.key === 'Enter') {
+                                                                                                            e.preventDefault();
+                                                                                                            saveSideQuestEdit(quest.id, sideQuest.id);
+                                                                                                        } else if (e.key === 'Escape') {
+                                                                                                            e.preventDefault();
+                                                                                                            cancelSideQuestEdit();
+                                                                                                        }
+                                                                                                    }}
+                                                                                                />
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <div className={`side-quest-desc ${(sideStatus === 'in_progress') ? 'in-progress' : ''} ${(sideStatus === 'done') ? 'started' : ''} ${pulsingSideQuests[sideKey] ? 'pulse-subtle' : ''}`} style={{flex:1}}>
+                                                                                                {sideQuest.description}
+                                                                                                <small className="small"> - {sideStatusLabel}</small>
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        {sideEditing ? (
+                                                                                            <>
+                                                                                                <button
+                                                                                                    className="btn-primary btn-small"
+                                                                                                    onClick={e => {
+                                                                                                        e.stopPropagation();
+                                                                                                        saveSideQuestEdit(quest.id, sideQuest.id);
+                                                                                                    }}
+                                                                                                >
+                                                                                                    Save
+                                                                                                </button>
+                                                                                                <button
+                                                                                                    className="btn-ghost btn-small"
+                                                                                                    onClick={e => {
+                                                                                                        e.stopPropagation();
+                                                                                                        cancelSideQuestEdit();
+                                                                                                    }}
+                                                                                                >
+                                                                                                    Cancel
+                                                                                                </button>
+                                                                                            </>
+                                                                                        ) : sideSelected ? (
+                                                                                            <>
+                                                                                                <button
+                                                                                                    className="btn-ghost btn-small"
+                                                                                                    onClick={e => {
+                                                                                                        e.stopPropagation();
+                                                                                                        startEditingSideQuest(quest.id, sideQuest);
+                                                                                                    }}
+                                                                                                >
+                                                                                                    Edit
+                                                                                                </button>
+                                                                                                <button
+                                                                                                    className="btn-danger btn-small"
+                                                                                                    onClick={e => {
+                                                                                                        e.stopPropagation();
+                                                                                                        deleteSideQuest(quest.id, sideQuest.id);
+                                                                                                    }}
+                                                                                                >
+                                                                                                    Delete
+                                                                                                </button>
+                                                                                            </>
+                                                                                        ) : (
+                                                                                            <>
+                                                                                                {sideStatus !== 'in_progress' && (
+                                                                                                    <button
+                                                                                                        className="btn-start btn-small"
+                                                                                                        onMouseDown={e => e.stopPropagation()}
+                                                                                                        onDragStart={e => e.stopPropagation()}
+                                                                                                        onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'in_progress'); }}
+                                                                                                    >
+                                                                                                        Start
+                                                                                                    </button>
+                                                                                                )}
+                                                                                                {sideStatus !== 'done' && (
+                                                                                                    <button
+                                                                                                        className="btn-complete btn-small"
+                                                                                                        onMouseDown={e => e.stopPropagation()}
+                                                                                                        onDragStart={e => e.stopPropagation()}
+                                                                                                        onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'done'); }}
+                                                                                                    >
+                                                                                                        Complete
+                                                                                                    </button>
+                                                                                                )}
+                                                                                                {sideStatus === 'done' && (
+                                                                                                    <button
+                                                                                                        className="btn-ghost btn-small"
+                                                                                                        onMouseDown={e => e.stopPropagation()}
+                                                                                                        onDragStart={e => e.stopPropagation()}
+                                                                                                        onClick={e => { e.stopPropagation(); setSideQuestStatus(quest.id, sideQuest.id, 'todo'); }}
+                                                                                                    >
+                                                                                                        Undo
+                                                                                                    </button>
+                                                                                                )}
+                                                                                            </>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                                {sideQuestDragOver.questId === quest.id && sideQuestDragOver.sideQuestId === sideQuest.id && sideQuestDragOver.position === 'below' && <div className="insert-indicator" />}
+                                                                            </li>
+                                                                        );
+                                                                    })}
+                                                                </ul>
+                                                            </div>
                                                         )}
-                                                    </div>
-                                                </>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                            {celebratingQuests[quest.id] && (
-                                <div className="level-up-burst" aria-hidden="true">
-                                    <div className="burst-ring" />
-                                    <div className="burst-copy">
-                                        <span className="burst-emoji">✦</span>
-                                        <span className="burst-text">Level Up!</span>
+                                                        <div style={{marginTop:12}}>
+                                                            {addingSideQuestTo === quest.id ? (
+                                                                renderAddSideQuestForm(quest)
+                                                            ) : (
+                                                                <div style={{display:'flex', justifyContent:'flex-end'}}>
+                                                                    <button className="add-side-quest-button large" onClick={() => { handleSelectQuest(quest.id); setAddingSideQuestTo(quest.id); }}>
+                                                                        + Add Side Quest
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
+                                {celebratingQuests[quest.id] && (
+                                    <div className="level-up-burst" aria-hidden="true">
+                                        <div className="burst-ring" />
+                                        <div className="burst-copy">
+                                            <span className="burst-emoji">✦</span>
+                                            <span className="burst-text">Level Up!</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {dragOverQuestId === quest.id && dragPosition === 'below' && (
+                                <div className="insert-indicator" />
                             )}
-                        </div>
-                        {dragOverQuestId === quest.id && dragPosition === 'below' && (
-                            <div className="insert-indicator" />
-                        )}
-                    </React.Fragment>
-                ))}
+                        </React.Fragment>
+                    );
+                })}
             </div>
-            {/* Toasts */}
-            <div style={{position:'fixed', right:12, bottom:12, zIndex:2000}}>
+            {/* Toasts & Undo */}
+            <div className="toast-zone">
+                {undoQueue.map(entry => (
+                    <div key={entry.id} className="undo-toast">
+                        <div className="undo-text">Deleted "{entry.quest?.description || 'quest'}"</div>
+                        <button className="btn-primary btn-small" onClick={() => handleUndoDelete(entry.id)}>Undo</button>
+                        <button className="btn-ghost btn-small" onClick={() => dismissUndoEntry(entry.id)}>Dismiss</button>
+                    </div>
+                ))}
                 {toasts.map(t => (
-                    <div key={t.id} style={{marginTop:8, padding:'8px 12px', borderRadius:6, backgroundColor: t.type === 'error' ? '#f8d7da' : t.type === 'success' ? '#d1e7dd' : '#e2e3e5', color: '#111'}}>
+                    <div key={t.id} className={`toast ${t.type}`}>
                         {t.msg}
                     </div>
                 ))}

@@ -2,9 +2,68 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 const experience = require('./rpg/experience');
 
 const app = express();
+
+const originalListen = app.listen.bind(app);
+app.listen = function patchedListen(port, host, ...rest) {
+    if (process.env.JEST_WORKER_ID !== undefined) {
+        let callback = null;
+        let backlog;
+        if (typeof host === 'function') {
+            callback = host;
+            host = undefined;
+        }
+        if (rest.length > 0) {
+            if (typeof rest[0] === 'function') {
+                callback = rest[0];
+            } else {
+                backlog = rest[0];
+                if (rest.length > 1 && typeof rest[1] === 'function') {
+                    callback = rest[1];
+                }
+            }
+        }
+        const shouldOverrideHost = !host || host === '0.0.0.0' || host === '::';
+        if (shouldOverrideHost) {
+            const safeHost = process.env.BIND_ADDRESS || process.env.HOST || '127.0.0.1';
+            return originalListen(port, safeHost, backlog, callback);
+        }
+        return originalListen(port, host, backlog, callback);
+    }
+    return originalListen(port, host, ...rest);
+};
+
+const originalHttpListen = http.Server.prototype.listen;
+http.Server.prototype.listen = function patchedHttpListen(port, host, ...rest) {
+    if (process.env.JEST_WORKER_ID !== undefined) {
+        let callback = null;
+        let backlog;
+        if (typeof host === 'function') {
+            callback = host;
+            host = undefined;
+        }
+        if (rest.length > 0) {
+            if (typeof rest[0] === 'function') {
+                callback = rest[0];
+            } else {
+                backlog = rest[0];
+                if (rest.length > 1 && typeof rest[1] === 'function') {
+                    callback = rest[1];
+                }
+            }
+        }
+        const shouldOverrideHost = !host || host === '0.0.0.0' || host === '::';
+        if (shouldOverrideHost) {
+            const safeHost = process.env.BIND_ADDRESS || process.env.HOST || '127.0.0.1';
+            return originalHttpListen.call(this, port, safeHost, backlog, callback);
+        }
+        return originalHttpListen.call(this, port, host, backlog, callback);
+    }
+    return originalHttpListen.call(this, port, host, ...rest);
+};
 
 app.use(cors());
 app.use(express.json());
@@ -1002,6 +1061,26 @@ app.put('/api/tasks/:id/subtasks/:subtask_id', ensureAuth, (req, res) => {
         }
     } else {
         return sendError(res, 404, 'Task not found');
+    }
+});
+
+app.delete('/api/tasks/:id/subtasks/:subtask_id', ensureAuth, (req, res) => {
+    const tasks = readTasks();
+    const taskIndex = tasks.tasks.findIndex(t => t.id === parseInt(req.params.id));
+    if (taskIndex === -1) return sendError(res, 404, 'Task not found');
+    const task = tasks.tasks[taskIndex];
+    if (task.owner_id !== req.user.id) return sendError(res, 404, 'Task not found');
+    if (!Array.isArray(task.sub_tasks)) task.sub_tasks = [];
+    const subId = parseInt(req.params.subtask_id);
+    const subIndex = task.sub_tasks.findIndex(s => s.id === subId);
+    if (subIndex === -1) return sendError(res, 404, 'Subtask not found');
+    task.sub_tasks.splice(subIndex, 1);
+    try {
+        writeTasks(tasks);
+        res.json(serializeTask(task));
+    } catch (e) {
+        console.error('Failed to delete subtask', e);
+        res.status(500).json({ error: 'Failed to persist subtask deletion' });
     }
 });
 
