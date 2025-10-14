@@ -69,24 +69,28 @@ function App() {
                     if (res.ok) {
                         return res.json();
                     }
-                    // If the token is invalid, the server returns 401
-                    // In that case, we should log out
-                    setToken(null);
-                    setPlayerStats(null);
-                    return null;
+                    if (res.status === 401) {
+                        // 401 means the token is no longer valid, so log out
+                        setToken(null);
+                        setPlayerStats(null);
+                        setQuests([]);
+                        return null;
+                    }
+                    const error = new Error('Failed to fetch quests');
+                    error.status = res.status;
+                    throw error;
                 })
                 .then(data => {
                     if (data) {
                         const payload = data.tasks || data.quests || [];
                         setQuests(normalizeQuestList(payload));
-                    } else {
-                        setQuests([]);
                     }
                 })
                 .catch(error => {
+                    if (error && error.status === 401) {
+                        return;
+                    }
                     console.error('Error fetching quests:', error);
-                    setToken(null); // Also logout on network error
-                    setPlayerStats(null);
                 });
         } else {
             // No token, so clear tasks
