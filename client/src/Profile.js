@@ -16,16 +16,53 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
             setRpg(null);
             return;
         }
-        setLoading(true);
-        fetch('/api/users/me', { headers: { Authorization: `Bearer ${token}` } })
-            .then(r => r.json())
-            .then(data => {
-                setProfile(data.user.profile || {});
-                setRpg(data.user.rpg || null);
-            })
-            .catch(() => {})
-            .finally(() => setLoading(false));
-    }, [token]);
+
+        let cancelled = false;
+        const defaultProfile = { display_name: '', avatar: '', class: '', bio: '' };
+
+        const loadProfile = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch('/api/users/me', { headers: { Authorization: `Bearer ${token}` } });
+                let payload = null;
+                try {
+                    payload = await res.json();
+                } catch (err) {
+                    payload = null;
+                }
+
+                if (!res.ok) {
+                    if (res.status === 401 && typeof onLogout === 'function') {
+                        onLogout();
+                    }
+                    const message = payload && payload.error ? payload.error : `Failed to load profile (${res.status})`;
+                    throw new Error(message);
+                }
+
+                if (!payload || !payload.user) {
+                    throw new Error('Profile payload missing user');
+                }
+
+                if (!cancelled) {
+                    setProfile(payload.user.profile || defaultProfile);
+                    setRpg(payload.user.rpg || null);
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                if (!cancelled) {
+                    setProfile(defaultProfile);
+                    setRpg(null);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        loadProfile();
+        return () => { cancelled = true; };
+    }, [token, onLogout]);
 
     const handleSave = () => {
         if (!token) return;
