@@ -1,13 +1,14 @@
-const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
 const app = require('../app');
 const experience = require('../rpg/experience');
+const { createTestClient } = require('../utils/testClient');
 
 const TASKS_FILE = path.join(__dirname, '..', 'tasks.json');
 const USERS_FILE = path.join(__dirname, '..', 'users.json');
 
 let authToken = null;
+let client = null;
 
 beforeEach(() => {
   // reset tasks.json to empty state - tasks will be created by authenticated users in tests
@@ -30,14 +31,15 @@ beforeEach(() => {
   };
   const usersInitial = { users: [defaultUser], nextId: 2 };
   fs.writeFileSync(USERS_FILE, JSON.stringify(usersInitial, null, 2));
+  client = createTestClient(app);
 });
 
 beforeEach(async () => {
   // register a fresh user and store token for authenticated requests
-  const res = await request(app)
-    .post('/api/users/register')
-    .send({ username: `testuser_${Date.now()}`, password: 'password123' })
-    .set('Accept', 'application/json');
+  const res = await client.post('/api/users/register', {
+    body: { username: `testuser_${Date.now()}`, password: 'password123' },
+    headers: { accept: 'application/json' }
+  });
   authToken = res.body && res.body.token;
 });
 
@@ -52,19 +54,18 @@ afterAll(() => {
 
 test('create subtask returns 201 and task with subtask id', async () => {
   // first create a task that belongs to the authenticated user
-  const taskRes = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'Parent task', priority: 'medium' })
-    .set('Authorization', `Bearer ${authToken}`);
+  const taskRes = await client.post('/api/tasks', {
+    body: { description: 'Parent task', priority: 'medium' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   
   const taskId = taskRes.body.id;
   
   // endpoint requires auth; include token
-  const resAuth = await request(app)
-    .post(`/api/tasks/${taskId}/subtasks`)
-    .send({ description: 'sub 1' })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const resAuth = await client.post(`/api/tasks/${taskId}/subtasks`, {
+    body: { description: 'sub 1' },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
 
   expect(resAuth.status).toBe(201);
   expect(resAuth.body).toHaveProperty('sub_tasks');
@@ -77,36 +78,34 @@ test('create subtask returns 201 and task with subtask id', async () => {
 
 test('create subtask with missing description returns 400', async () => {
   // first create a task that belongs to the authenticated user
-  const taskRes = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'Parent task', priority: 'medium' })
-    .set('Authorization', `Bearer ${authToken}`);
+  const taskRes = await client.post('/api/tasks', {
+    body: { description: 'Parent task', priority: 'medium' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   
   const taskId = taskRes.body.id;
   
-  const res = await request(app)
-    .post(`/api/tasks/${taskId}/subtasks`)
-    .send({ description: '' })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const res = await client.post(`/api/tasks/${taskId}/subtasks`, {
+    body: { description: '' },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
 
   expect(res.status).toBe(400);
 });
 
 test('patch status updates task and appends history', async () => {
   // first create a task that belongs to the authenticated user
-  const taskRes = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'Test task', priority: 'medium' })
-    .set('Authorization', `Bearer ${authToken}`);
+  const taskRes = await client.post('/api/tasks', {
+    body: { description: 'Test task', priority: 'medium' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   
   const taskId = taskRes.body.id;
   
-  const res = await request(app)
-    .patch(`/api/tasks/${taskId}/status`)
-    .send({ status: 'in_progress', note: 'working' })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const res = await client.patch(`/api/tasks/${taskId}/status`, {
+    body: { status: 'in_progress', note: 'working' },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
 
   expect(res.status).toBe(200);
   expect(res.body).toHaveProperty('status', 'in_progress');
@@ -116,18 +115,17 @@ test('patch status updates task and appends history', async () => {
 });
 
 test('completing a task awards XP and returns player snapshot', async () => {
-  const taskRes = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'XP quest', priority: 'medium', task_level: 2 })
-    .set('Authorization', `Bearer ${authToken}`);
+  const taskRes = await client.post('/api/tasks', {
+    body: { description: 'XP quest', priority: 'medium', task_level: 2 },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
 
   const taskId = taskRes.body.id;
 
-  const completeRes = await request(app)
-    .patch(`/api/tasks/${taskId}/status`)
-    .send({ status: 'done' })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const completeRes = await client.patch(`/api/tasks/${taskId}/status`, {
+    body: { status: 'done' },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
 
   expect(completeRes.status).toBe(200);
   expect(Array.isArray(completeRes.body.xp_events)).toBe(true);
@@ -139,32 +137,30 @@ test('completing a task awards XP and returns player snapshot', async () => {
   expect(completeRes.body).toHaveProperty('player_rpg');
   expect(completeRes.body.player_rpg.xp).toBeGreaterThan(0);
 
-  const profileRes = await request(app)
-    .get('/api/users/me')
-    .set('Authorization', `Bearer ${authToken}`);
+  const profileRes = await client.get('/api/users/me', {
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(profileRes.status).toBe(200);
   expect(profileRes.body.user.rpg.xp).toBeGreaterThan(0);
 });
 
 test('completing a subtask grants XP once', async () => {
-  const taskRes = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'Parent XP quest', priority: 'high', task_level: 3 })
-    .set('Authorization', `Bearer ${authToken}`);
+  const taskRes = await client.post('/api/tasks', {
+    body: { description: 'Parent XP quest', priority: 'high', task_level: 3 },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   const taskId = taskRes.body.id;
 
-  const subRes = await request(app)
-    .post(`/api/tasks/${taskId}/subtasks`)
-    .send({ description: 'earn xp side quest' })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const subRes = await client.post(`/api/tasks/${taskId}/subtasks`, {
+    body: { description: 'earn xp side quest' },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
   const subId = subRes.body.sub_tasks[0].id;
 
-  const subComplete = await request(app)
-    .patch(`/api/tasks/${taskId}/subtasks/${subId}/status`)
-    .send({ status: 'done' })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const subComplete = await client.patch(`/api/tasks/${taskId}/subtasks/${subId}/status`, {
+    body: { status: 'done' },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
 
   expect(subComplete.status).toBe(200);
   expect(Array.isArray(subComplete.body.xp_events)).toBe(true);
@@ -177,76 +173,72 @@ test('completing a subtask grants XP once', async () => {
 });
 
 test('daily reward grants XP once per day', async () => {
-  const dailyReward = await request(app)
-    .post('/api/rpg/daily-reward')
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const dailyReward = await client.post('/api/rpg/daily-reward', {
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
   expect(dailyReward.status).toBe(200);
   expect(dailyReward.body).toHaveProperty('xp_event');
   expect(dailyReward.body.xp_event.reason).toBe('daily_focus');
   expect(dailyReward.body.xp_event.amount).toBeGreaterThan(0);
   expect(dailyReward.body.player_rpg.xp).toBeGreaterThan(0);
 
-  const secondClaim = await request(app)
-    .post('/api/rpg/daily-reward')
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const secondClaim = await client.post('/api/rpg/daily-reward', {
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
   expect(secondClaim.status).toBe(400);
   expect(secondClaim.body.error).toMatch(/already claimed/i);
 });
 
 test('debug clear tasks removes all user quests', async () => {
-  const taskRes = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'To clear', priority: 'medium' })
-    .set('Authorization', `Bearer ${authToken}`);
+  const taskRes = await client.post('/api/tasks', {
+    body: { description: 'To clear', priority: 'medium' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(taskRes.status).toBe(201);
   const ownerId = taskRes.body.owner_id;
 
-  const clearRes = await request(app)
-    .post('/api/debug/clear-tasks')
-    .set('Authorization', `Bearer ${authToken}`);
+  const clearRes = await client.post('/api/debug/clear-tasks', {
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(clearRes.status).toBe(200);
   expect(clearRes.body.removed).toBeGreaterThanOrEqual(1);
 
-  const getRes = await request(app)
-    .get('/api/tasks')
-    .set('Authorization', `Bearer ${authToken}`);
+  const getRes = await client.get('/api/tasks', {
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(getRes.status).toBe(200);
   const ownedTasks = getRes.body.tasks.filter(t => t.owner_id === ownerId);
   expect(ownedTasks.length).toBe(0);
 });
 
 test('debug seed tasks populates demo quests', async () => {
-  const seedRes = await request(app)
-    .post('/api/debug/seed-tasks')
-    .send({ count: 3 })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const seedRes = await client.post('/api/debug/seed-tasks', {
+    body: { count: 3 },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
   expect(seedRes.status).toBe(200);
   expect(seedRes.body.created).toBeGreaterThan(0);
 
-  const listRes = await request(app)
-    .get('/api/tasks')
-    .set('Authorization', `Bearer ${authToken}`);
+  const listRes = await client.get('/api/tasks', {
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(listRes.status).toBe(200);
   expect(Array.isArray(listRes.body.tasks)).toBe(true);
   expect(listRes.body.tasks.length).toBeGreaterThanOrEqual(seedRes.body.created);
 });
 
 test('debug grant and reset xp adjust the player rpg', async () => {
-  const grantRes = await request(app)
-    .post('/api/debug/grant-xp')
-    .send({ amount: 250 })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const grantRes = await client.post('/api/debug/grant-xp', {
+    body: { amount: 250 },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
   expect(grantRes.status).toBe(200);
   expect(grantRes.body.xp_event.amount).toBe(250);
   expect(grantRes.body.player_rpg.xp).toBeGreaterThanOrEqual(250);
 
-  const resetRes = await request(app)
-    .post('/api/debug/reset-rpg')
-    .set('Authorization', `Bearer ${authToken}`);
+  const resetRes = await client.post('/api/debug/reset-rpg', {
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(resetRes.status).toBe(200);
   expect(resetRes.body.player_rpg.level).toBe(1);
   expect(resetRes.body.player_rpg.xp).toBe(0);
@@ -254,17 +246,22 @@ test('debug grant and reset xp adjust the player rpg', async () => {
 
 test('put order persists ordering and returns tasks', async () => {
   // create two tasks for reordering
-  const task1 = await request(app).post('/api/tasks').send({ description: 'First', priority: 'high' }).set('Authorization', `Bearer ${authToken}`);
-  const task2 = await request(app).post('/api/tasks').send({ description: 'Second', priority: 'low' }).set('Authorization', `Bearer ${authToken}`);
+  const task1 = await client.post('/api/tasks', {
+    body: { description: 'First', priority: 'high' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
+  const task2 = await client.post('/api/tasks', {
+    body: { description: 'Second', priority: 'low' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   
   const id1 = task1.body.id;
   const id2 = task2.body.id;
   
-  const res = await request(app)
-    .put('/api/tasks/order')
-    .send({ order: [id2, id1] })  // reverse order
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${authToken}`);
+  const res = await client.put('/api/tasks/order', {
+    body: { order: [id2, id1] },
+    headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+  });
 
   expect(res.status).toBe(200);
   expect(res.body).toHaveProperty('tasks');
@@ -276,27 +273,26 @@ test('put order persists ordering and returns tasks', async () => {
 
 test('register, login, create task and owner-scoped GET', async () => {
   // register
-  const reg = await request(app)
-    .post('/api/users/register')
-    .send({ username: 'tester1', password: 'password123' })
-    .set('Accept', 'application/json');
+  const reg = await client.post('/api/users/register', {
+    body: { username: 'tester1', password: 'password123' },
+    headers: { accept: 'application/json' }
+  });
   expect(reg.status).toBe(201);
   expect(reg.body).toHaveProperty('token');
   const token = reg.body.token;
 
   // create a task as tester1
-  const create = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'User task', priority: 'low' })
-    .set('Accept', 'application/json')
-    .set('Authorization', `Bearer ${token}`);
+  const create = await client.post('/api/tasks', {
+    body: { description: 'User task', priority: 'low' },
+    headers: { authorization: `Bearer ${token}`, accept: 'application/json' }
+  });
   expect(create.status).toBe(201);
   expect(create.body).toHaveProperty('owner_id');
 
   // get tasks as tester1 -> should include the new task
-  const get = await request(app)
-    .get('/api/tasks')
-    .set('Authorization', `Bearer ${token}`);
+  const get = await client.get('/api/tasks', {
+    headers: { authorization: `Bearer ${token}` }
+  });
   expect(get.status).toBe(200);
   expect(Array.isArray(get.body.tasks)).toBe(true);
   const found = get.body.tasks.find(t => t.description === 'User task');
@@ -306,16 +302,16 @@ test('register, login, create task and owner-scoped GET', async () => {
 
 test('get and update profile via /api/users/me', async () => {
   // use authToken from beforeEach
-  const get = await request(app)
-    .get('/api/users/me')
-    .set('Authorization', `Bearer ${authToken}`);
+  const get = await client.get('/api/users/me', {
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(get.status).toBe(200);
   expect(get.body.user).toHaveProperty('profile');
 
-  const updated = await request(app)
-    .put('/api/users/me')
-    .send({ display_name: 'Updated Name', bio: 'I like quests' })
-    .set('Authorization', `Bearer ${authToken}`);
+  const updated = await client.put('/api/users/me', {
+    body: { display_name: 'Updated Name', bio: 'I like quests' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   expect(updated.status).toBe(200);
   expect(updated.body.user.profile.display_name).toBe('Updated Name');
   expect(updated.body.user.profile.bio).toBe('I like quests');
@@ -324,10 +320,10 @@ test('get and update profile via /api/users/me', async () => {
 // simulate write failure by making the file read-only and attempting to write
 test('server returns 500 when write fails', async () => {
   // first create a task that belongs to the authenticated user
-  const taskRes = await request(app)
-    .post('/api/tasks')
-    .send({ description: 'Parent task', priority: 'medium' })
-    .set('Authorization', `Bearer ${authToken}`);
+  const taskRes = await client.post('/api/tasks', {
+    body: { description: 'Parent task', priority: 'medium' },
+    headers: { authorization: `Bearer ${authToken}` }
+  });
   
   const taskId = taskRes.body.id;
   
@@ -338,11 +334,10 @@ test('server returns 500 when write fails', async () => {
     fs.writeFileSync = () => { /* allow writing tmp file */ };
     fs.renameSync = () => { throw new Error('simulated rename failure'); };
 
-    const res = await request(app)
-      .post(`/api/tasks/${taskId}/subtasks`)
-      .send({ description: 'sub 2' })
-      .set('Accept', 'application/json')
-      .set('Authorization', `Bearer ${authToken}`);
+    const res = await client.post(`/api/tasks/${taskId}/subtasks`, {
+      body: { description: 'sub 2' },
+      headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+    });
 
     expect(res.status).toBe(500);
   } finally {
