@@ -25,6 +25,37 @@ const normalizeQuestList = (list) => Array.isArray(list) ? list.map(normalizeQue
 const PRIORITY_ORDER = ['low', 'medium', 'high'];
 const LEVEL_OPTIONS = [1, 2, 3, 4, 5];
 
+const getQuestStatus = (quest) => {
+    if (!quest) return 'todo';
+    return quest.status || (quest.completed ? 'done' : 'todo');
+};
+
+const getQuestStatusLabel = (quest) => getQuestStatus(quest).replace('_', ' ');
+
+const getQuestSideQuests = (quest) => {
+    if (!quest || !Array.isArray(quest.side_quests)) return [];
+    return quest.side_quests;
+};
+
+const getSideQuestStatus = (sideQuest, parent) => {
+    if (!sideQuest) return parent ? getQuestStatus(parent) : 'todo';
+    return sideQuest.status || (sideQuest.completed ? 'done' : 'todo');
+};
+
+const getSideQuestStatusLabel = (sideQuest, parent) => getSideQuestStatus(sideQuest, parent).replace('_', ' ');
+
+const idsMatch = (a, b) => String(a) === String(b);
+
+const cloneQuestSnapshot = (quest) => {
+    if (!quest) return null;
+    return JSON.parse(JSON.stringify(quest));
+};
+
+const findSideQuestById = (quest, sideQuestId) => getQuestSideQuests(quest).find(sub => idsMatch(sub?.id, sideQuestId)) || null;
+
+const isInteractiveTarget = (target) => target && typeof target.closest === 'function'
+    && target.closest('input,textarea,button,select,[contenteditable="true"]');
+
 function App() {
     // theme: 'dark' | 'light'
     const [theme, setTheme] = useState(() => {
@@ -60,6 +91,7 @@ function App() {
     const [sideQuestDragOver, setSideQuestDragOver] = useState({ questId: null, sideQuestId: null, position: null });
     const addInputRefs = useRef({});
     const undoTimersRef = useRef({});
+    const completedCollapseTimersRef = useRef({});
     const [undoQueue, setUndoQueue] = useState([]);
 
     const [token, setToken] = useState(() => {
@@ -338,13 +370,13 @@ function App() {
 
     const findQuestById = (questId) => {
         if (questId === undefined || questId === null) return null;
-        return quests.find(q => String(q.id) === String(questId)) || null;
+        return quests.find(q => idsMatch(q.id, questId)) || null;
     };
 
     const moveQuestSelection = (offset) => {
         if (!Array.isArray(quests) || quests.length === 0) return false;
         const currentIndex = selectedQuestId !== null
-            ? quests.findIndex(q => String(q.id) === String(selectedQuestId))
+            ? quests.findIndex(q => idsMatch(q.id, selectedQuestId))
             : -1;
         let nextIndex;
         if (currentIndex === -1) {
@@ -365,9 +397,10 @@ function App() {
 
     const selectFirstSideQuest = (questId) => {
         const quest = findQuestById(questId);
-        if (!quest || !Array.isArray(quest.side_quests) || quest.side_quests.length === 0) return;
+        const subs = getQuestSideQuests(quest);
+        if (!quest || subs.length === 0) return;
         ensureQuestExpanded(questId);
-        const first = quest.side_quests[0];
+        const first = subs[0];
         if (first) {
             handleSelectSideQuest(questId, first.id);
         }
@@ -419,9 +452,7 @@ function App() {
         if (draggedSideQuest) return;
         const sourceId = draggedQuestId || e.dataTransfer.getData('text/plain');
         if (!sourceId) return;
-        const src = String(sourceId);
-        const tgt = String(targetQuestId);
-        if (src === tgt) {
+        if (idsMatch(sourceId, targetQuestId)) {
             setDraggedQuestId(null);
             setDragOverQuestId(null);
             setDragPosition(null);
@@ -429,8 +460,8 @@ function App() {
         }
         setQuests(prev => {
             const copy = [...prev];
-            const fromIdx = copy.findIndex(t => String(t.id) === src);
-            const toIdx = copy.findIndex(t => String(t.id) === tgt);
+            const fromIdx = copy.findIndex(t => idsMatch(t.id, sourceId));
+            const toIdx = copy.findIndex(t => idsMatch(t.id, targetQuestId));
             if (fromIdx === -1 || toIdx === -1) return prev;
             const [moved] = copy.splice(fromIdx, 1);
             // insert either before (above) or after (below) the target
@@ -494,17 +525,17 @@ function App() {
         }
         if (!srcTaskId || !srcSubId) return;
         // only allow reordering within the same parent task for now
-        if (String(srcTaskId) !== String(questId)) {
+        if (!idsMatch(srcTaskId, questId)) {
             setDraggedSideQuest(null);
             setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
             return;
         }
 
         setQuests(prev => prev.map(task => {
-            if (String(task.id) !== String(questId)) return task;
+            if (!idsMatch(task.id, questId)) return task;
             const subs = Array.isArray(task.side_quests) ? [...task.side_quests] : [];
-            const fromIdx = subs.findIndex(s => String(s.id) === String(srcSubId));
-            const toIdx = subs.findIndex(s => String(s.id) === String(sideQuestId));
+            const fromIdx = subs.findIndex(s => idsMatch(s.id, srcSubId));
+            const toIdx = subs.findIndex(s => idsMatch(s.id, sideQuestId));
             if (fromIdx === -1 || toIdx === -1) return task;
             const [moved] = subs.splice(fromIdx, 1);
             const insertAt = sideQuestDragOver.position === 'above' ? toIdx : toIdx + 1;
@@ -518,7 +549,8 @@ function App() {
 
     const scheduleQuestUndo = (quest) => {
         if (!quest) return;
-        const snapshot = JSON.parse(JSON.stringify(quest));
+        const snapshot = cloneQuestSnapshot(quest);
+        if (!snapshot) return;
         const entryId = `${quest.id}-${Date.now()}`;
         if (typeof window === 'undefined') return;
         const timer = window.setTimeout(() => {
@@ -578,7 +610,7 @@ function App() {
                     if (!statusRes.ok) throw new Error('Failed to restore subtask status');
                 }
             }
-            const questStatus = snapshot.status || (snapshot.completed ? 'done' : 'todo');
+            const questStatus = getQuestStatus(snapshot);
             if (questStatus && questStatus !== 'todo') {
                 const questStatusRes = await fetch(`/api/tasks/${newQuestId}/status`, {
                     method: 'PATCH',
@@ -615,11 +647,11 @@ function App() {
                     delete copy[id];
                     return copy;
                 });
-                if (selectedQuestId !== null && String(selectedQuestId) === String(id)) {
+                if (selectedQuestId !== null && idsMatch(selectedQuestId, id)) {
                     setSelectedQuestId(null);
                     setSelectedSideQuest(null);
                 }
-                if (editingQuest && String(editingQuest.id) === String(id)) {
+                if (editingQuest && idsMatch(editingQuest.id, id)) {
                     setEditingQuest(null);
                 }
                 if (questToDelete) scheduleQuestUndo(questToDelete);
@@ -688,6 +720,41 @@ function App() {
                 pushToast(`Level up! Reached level ${event.level_after}`, 'success', 5000);
             }
         });
+    };
+
+    const scheduleCollapseAndMove = (questId, delay = 600) => {
+        const ensureAtBottomCollapsed = () => {
+            let shouldCollapse = false;
+            setQuests(prev => {
+                const index = prev.findIndex(q => idsMatch(q.id, questId));
+                if (index === -1) return prev;
+                const quest = prev[index];
+                if (getQuestStatus(quest) !== 'done') return prev;
+                shouldCollapse = true;
+                const next = [...prev];
+                const [item] = next.splice(index, 1);
+                next.push(item);
+                return next;
+            });
+            if (shouldCollapse) {
+                setCollapsedMap(prev => ({ ...prev, [questId]: true }));
+            }
+        };
+        if (typeof window !== 'undefined') {
+            if (completedCollapseTimersRef.current && typeof completedCollapseTimersRef.current[questId] === 'number') {
+                clearTimeout(completedCollapseTimersRef.current[questId]);
+                delete completedCollapseTimersRef.current[questId];
+            }
+            if (!completedCollapseTimersRef.current) completedCollapseTimersRef.current = {};
+            completedCollapseTimersRef.current[questId] = window.setTimeout(() => {
+                ensureAtBottomCollapsed();
+                if (completedCollapseTimersRef.current) {
+                    delete completedCollapseTimersRef.current[questId];
+                }
+            }, delay);
+        } else {
+            ensureAtBottomCollapsed();
+        }
     };
 
     const claimDailyReward = () => {
@@ -809,6 +876,7 @@ function App() {
                         delete copy[id];
                         return copy;
                     }), 1400);
+                    scheduleCollapseAndMove(id);
                 }
                 pushToast(`Quest ${updatedQuest.id} set to ${status.replace('_',' ')}`, 'success');
             })
@@ -841,6 +909,7 @@ function App() {
                         delete copy[taskId];
                         return copy;
                     }), 1400);
+                    scheduleCollapseAndMove(taskId);
                 }
                 pushToast(`Side-quest ${subTaskId} updated to ${status.replace('_',' ')}`, 'success');
             })
@@ -872,7 +941,7 @@ function App() {
         let fallbackSideQuestId = null;
         if (parentQuest && Array.isArray(parentQuest.side_quests)) {
             const subs = parentQuest.side_quests;
-            const currentIdx = subs.findIndex(sub => String(sub.id) === String(subTaskId));
+            const currentIdx = subs.findIndex(sub => idsMatch(sub.id, subTaskId));
             if (currentIdx !== -1) {
                 const next = subs[currentIdx + 1] || subs[currentIdx - 1] || null;
                 if (next) fallbackSideQuestId = next.id;
@@ -900,18 +969,18 @@ function App() {
                 } else {
                     setQuests(prev => prev.map(quest => {
                         if (quest.id !== taskId) return quest;
-                        const subs = Array.isArray(quest.side_quests) ? quest.side_quests.filter(sub => String(sub.id) !== String(subTaskId)) : [];
+                        const subs = getQuestSideQuests(quest).filter(sub => !idsMatch(sub.id, subTaskId));
                         return { ...quest, side_quests: subs };
                     }));
                 }
-                if (selectedSideQuest && String(selectedSideQuest.questId) === String(taskId) && String(selectedSideQuest.sideQuestId) === String(subTaskId)) {
+                if (selectedSideQuest && idsMatch(selectedSideQuest.questId, taskId) && idsMatch(selectedSideQuest.sideQuestId, subTaskId)) {
                     if (fallbackSideQuestId) {
                         setSelectedSideQuest({ questId: taskId, sideQuestId: fallbackSideQuestId });
                     } else {
                         setSelectedSideQuest(null);
                     }
                 }
-                if (editingSideQuest && String(editingSideQuest.questId) === String(taskId) && String(editingSideQuest.sideQuestId) === String(subTaskId)) {
+                if (editingSideQuest && idsMatch(editingSideQuest.questId, taskId) && idsMatch(editingSideQuest.sideQuestId, subTaskId)) {
                     setEditingSideQuest(null);
                 }
                 pushToast('Side-quest deleted', 'success');
@@ -943,7 +1012,7 @@ function App() {
     };
 
     const saveSideQuestEdit = (questId, subTaskId) => {
-        if (!editingSideQuest || String(editingSideQuest.questId) !== String(questId) || String(editingSideQuest.sideQuestId) !== String(subTaskId)) return;
+        if (!editingSideQuest || !idsMatch(editingSideQuest.questId, questId) || !idsMatch(editingSideQuest.sideQuestId, subTaskId)) return;
         const nextDescription = (editingSideQuest.description || '').trim();
         if (!nextDescription) {
             pushToast('Description cannot be empty', 'error');
@@ -1094,16 +1163,14 @@ function App() {
 
     useEffect(() => {
         if (selectedQuestId !== null) {
-            const questExists = quests.some(q => String(q.id) === String(selectedQuestId));
+            const questExists = quests.some(q => idsMatch(q.id, selectedQuestId));
             if (!questExists) {
                 setSelectedQuestId(null);
             }
         }
         if (selectedSideQuest) {
-            const parentQuest = quests.find(q => String(q.id) === String(selectedSideQuest.questId));
-            const hasSideQuest = parentQuest && Array.isArray(parentQuest.side_quests)
-                ? parentQuest.side_quests.some(s => String(s.id) === String(selectedSideQuest.sideQuestId))
-                : false;
+            const parentQuest = quests.find(q => idsMatch(q.id, selectedSideQuest.questId));
+            const hasSideQuest = !!findSideQuestById(parentQuest, selectedSideQuest.sideQuestId);
             if (!hasSideQuest) {
                 setSelectedSideQuest(null);
             }
@@ -1113,8 +1180,8 @@ function App() {
     useEffect(() => {
         if (!editingSideQuest) return;
         const matchesSelection = selectedSideQuest
-            && String(selectedSideQuest.questId) === String(editingSideQuest.questId)
-            && String(selectedSideQuest.sideQuestId) === String(editingSideQuest.sideQuestId);
+            && idsMatch(selectedSideQuest.questId, editingSideQuest.questId)
+            && idsMatch(selectedSideQuest.sideQuestId, editingSideQuest.sideQuestId);
         if (!matchesSelection) {
             setEditingSideQuest(null);
         }
@@ -1131,12 +1198,20 @@ function App() {
 
     useEffect(() => {
         return () => {
-            if (!undoTimersRef.current) return;
-            Object.values(undoTimersRef.current).forEach(timer => {
-                if (typeof timer === 'number') {
-                    clearTimeout(timer);
-                }
-            });
+            if (undoTimersRef.current) {
+                Object.values(undoTimersRef.current).forEach(timer => {
+                    if (typeof timer === 'number') {
+                        clearTimeout(timer);
+                    }
+                });
+            }
+            if (completedCollapseTimersRef.current) {
+                Object.values(completedCollapseTimersRef.current).forEach(timer => {
+                    if (typeof timer === 'number') {
+                        clearTimeout(timer);
+                    }
+                });
+            }
         };
     }, []);
 
@@ -1155,7 +1230,7 @@ function App() {
             if (!Array.isArray(quests) || quests.length === 0) return;
 
             const currentQuestIndex = selectedQuestId !== null
-                ? quests.findIndex(q => String(q.id) === String(selectedQuestId))
+                ? quests.findIndex(q => idsMatch(q.id, selectedQuestId))
                 : -1;
             const currentQuest = currentQuestIndex >= 0 ? quests[currentQuestIndex] : null;
 
@@ -1163,8 +1238,8 @@ function App() {
                 case 'ArrowDown': {
                     e.preventDefault();
                     if (selectedSideQuest && currentQuest) {
-                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
-                        const idx = subs.findIndex(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        const subs = getQuestSideQuests(currentQuest);
+                        const idx = subs.findIndex(s => idsMatch(s.id, selectedSideQuest.sideQuestId));
                         if (idx !== -1 && idx < subs.length - 1) {
                             handleSelectSideQuest(currentQuest.id, subs[idx + 1].id);
                             return;
@@ -1177,8 +1252,8 @@ function App() {
                 case 'ArrowUp': {
                     e.preventDefault();
                     if (selectedSideQuest && currentQuest) {
-                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
-                        const idx = subs.findIndex(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        const subs = getQuestSideQuests(currentQuest);
+                        const idx = subs.findIndex(s => idsMatch(s.id, selectedSideQuest.sideQuestId));
                         if (idx > 0) {
                             handleSelectSideQuest(currentQuest.id, subs[idx - 1].id);
                             return;
@@ -1214,8 +1289,8 @@ function App() {
                 case 'Backspace': {
                     if (selectedSideQuest && currentQuest) {
                         e.preventDefault();
-                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
-                        const match = subs.find(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        const subs = getQuestSideQuests(currentQuest);
+                        const match = subs.find(s => idsMatch(s.id, selectedSideQuest.sideQuestId));
                         const label = match && match.description ? match.description : 'this side-quest';
                         if (window.confirm(`Delete ${label}?`)) {
                             deleteSideQuest(selectedSideQuest.questId, selectedSideQuest.sideQuestId);
@@ -1232,8 +1307,8 @@ function App() {
                 case 'Enter': {
                     if (selectedSideQuest && currentQuest) {
                         e.preventDefault();
-                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
-                        const match = subs.find(s => String(s.id) === String(selectedSideQuest.sideQuestId));
+                        const subs = getQuestSideQuests(currentQuest);
+                        const match = subs.find(s => idsMatch(s.id, selectedSideQuest.sideQuestId));
                         if (match) {
                             startEditingSideQuest(currentQuest.id, match);
                         }
@@ -1459,17 +1534,17 @@ function App() {
             </div>
             <div className="quest-container">
                 {quests.map(quest => {
-                    const questStatus = (quest.status || (quest.completed ? 'done' : 'todo'));
-                    const questStatusLabel = questStatus.replace('_', ' ');
-                    const questSelected = selectedQuestId !== null && String(selectedQuestId) === String(quest.id);
-                    const questSideQuests = Array.isArray(quest.side_quests) ? quest.side_quests : [];
+                    const questStatus = getQuestStatus(quest);
+                    const questStatusLabel = getQuestStatusLabel(quest);
+                    const questSelected = selectedQuestId !== null && idsMatch(selectedQuestId, quest.id);
+                    const questSideQuests = getQuestSideQuests(quest);
                     const questProgress = getQuestProgress(quest);
                     const questClassName = [
                         'quest',
                         questStatus === 'done' ? 'completed' : '',
                         collapsedMap[quest.id] ? 'collapsed' : '',
                         dragOverQuestId === quest.id ? 'drag-over' : '',
-                        (quest.status === 'in_progress') ? 'started' : '',
+                        questStatus === 'in_progress' ? 'started' : '',
                         pulsingQuests[quest.id] === 'full' ? 'pulse' : '',
                         pulsingQuests[quest.id] === 'subtle' ? 'pulse-subtle' : '',
                         pulsingQuests[quest.id] === 'spawn' ? 'pulse-spawn' : '',
@@ -1489,16 +1564,15 @@ function App() {
                                 className={questClassName}
                                 draggable
                                 onClick={e => {
-                                    if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                    if (isInteractiveTarget(e.target)) return;
                                     handleSelectQuest(quest.id);
                                 }}
                                 onFocus={e => {
-                                    if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                    if (isInteractiveTarget(e.target)) return;
                                     handleSelectQuest(quest.id);
                                 }}
                                 onKeyDown={e => {
-                                    const target = e.target;
-                                    if (target && typeof target.closest === 'function' && target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                    if (isInteractiveTarget(e.target)) return;
                                     if (e.key === 'Enter' || e.key === ' ') {
                                         e.preventDefault();
                                         handleSelectQuest(quest.id);
@@ -1534,28 +1608,6 @@ function App() {
                                                             >
                                                                 {collapsedMap[quest.id] ? 'Expand' : 'Minimize'}
                                                             </button>
-                                                            {questSelected && (
-                                                                <>
-                                                                    <button
-                                                                        className="btn-ghost"
-                                                                        onClick={e => {
-                                                                            e.stopPropagation();
-                                                                            setEditingQuest({ ...quest });
-                                                                        }}
-                                                                    >
-                                                                        Edit
-                                                                    </button>
-                                                                    <button
-                                                                        className="btn-danger"
-                                                                        onClick={e => {
-                                                                            e.stopPropagation();
-                                                                            deleteTask(quest.id);
-                                                                        }}
-                                                                    >
-                                                                        Delete
-                                                                    </button>
-                                                                </>
-                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1639,14 +1691,14 @@ function App() {
                                                                 <h4>Side-quests:</h4>
                                                                 <ul>
                                                                     {questSideQuests.map(sideQuest => {
-                                                                        const sideStatus = (sideQuest.status || (sideQuest.completed ? 'done' : 'todo'));
-                                                                        const sideStatusLabel = sideStatus.replace('_', ' ');
+                                                                        const sideStatus = getSideQuestStatus(sideQuest, quest);
+                                                                        const sideStatusLabel = getSideQuestStatusLabel(sideQuest, quest);
                                                                         const sideSelected = selectedSideQuest
-                                                                            && String(selectedSideQuest.questId) === String(quest.id)
-                                                                            && String(selectedSideQuest.sideQuestId) === String(sideQuest.id);
+                                                                            && idsMatch(selectedSideQuest.questId, quest.id)
+                                                                            && idsMatch(selectedSideQuest.sideQuestId, sideQuest.id);
                                                                         const sideEditing = editingSideQuest
-                                                                            && String(editingSideQuest.questId) === String(quest.id)
-                                                                            && String(editingSideQuest.sideQuestId) === String(sideQuest.id);
+                                                                            && idsMatch(editingSideQuest.questId, quest.id)
+                                                                            && idsMatch(editingSideQuest.sideQuestId, sideQuest.id);
                                                                         const sideKey = `${quest.id}:${sideQuest.id}`;
                                                                         return (
                                                                             <li
@@ -1660,17 +1712,16 @@ function App() {
                                                                                     tabIndex={0}
                                                                                     onClick={e => {
                                                                                         e.stopPropagation();
-                                                                                        if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                                                                        if (isInteractiveTarget(e.target)) return;
                                                                                         handleSelectSideQuest(quest.id, sideQuest.id);
                                                                                     }}
                                                                                     onFocus={e => {
                                                                                         e.stopPropagation();
-                                                                                        if (e.target && typeof e.target.closest === 'function' && e.target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                                                                        if (isInteractiveTarget(e.target)) return;
                                                                                         handleSelectSideQuest(quest.id, sideQuest.id);
                                                                                     }}
                                                                                     onKeyDown={e => {
-                                                                                        const target = e.target;
-                                                                                        if (target && typeof target.closest === 'function' && target.closest('input,textarea,button,select,[contenteditable="true"]')) return;
+                                                                                        if (isInteractiveTarget(e.target)) return;
                                                                                         if (e.key === 'Enter' || e.key === ' ') {
                                                                                             e.preventDefault();
                                                                                             e.stopPropagation();
