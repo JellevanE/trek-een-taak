@@ -1,0 +1,41 @@
+{
+    "$schema": "https://deno.land/x/deno/schemas/config-file.v1.json",
+    "fmt": {
+        "files": {
+            "include": [
+                "client/src",
+                "server",
+                "tools",
+                "README.md"
+            ],
+            "exclude": [
+                "client/build",
+                "client/node_modules",
+                "server/node_modules"
+            ]
+        },
+        "options": {
+            "indentWidth": 4,
+            "lineWidth": 100,
+            "singleQuote": true,
+            "proseWrap": "preserve"
+        }
+    },
+    "lint": {
+        "files": {
+            "include": [
+                "tools"
+            ]
+        }
+    },
+    "tasks": {
+        "validate": "deno run --allow-env --allow-read --allow-run tools/validate.ts",
+        "validate:ci": "deno run --allow-env --allow-read --allow-run tools/validate.ts ci",
+        "test:server": "deno run --allow-env --allow-read --allow-run tools/validate.ts server:test",
+        "test:client": "deno run --allow-env --allow-read --allow-run tools/validate.ts client:test",
+        "build:client": "deno run --allow-env --allow-read --allow-run tools/validate.ts client:build",
+        "backup": "deno run --allow-env --allow-read --allow-write tools/backup.ts",
+        "backup:list": "deno run --allow-env --allow-read --allow-write tools/backup.ts --list",
+        "backup:keep": "deno run --allow-env --allow-read --allow-write tools/backup.ts --keep 10"
+    }
+}

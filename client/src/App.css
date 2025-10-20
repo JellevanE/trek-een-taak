@@ -99,19 +99,22 @@
 }
 
 .board-layout{
-    width:100%;
-    max-width:1080px;
-    margin:0 auto;
     position:relative;
+    width:100%;
+    max-width:1280px;
+    margin:0 auto;
     display:flex;
     justify-content:center;
+    padding:0 12px;
+    box-sizing:border-box;
 }
 
 .campaign-sidebar{
-    position:absolute;
-    top:0;
-    left:-84px;
-    width:260px;
+    position: fixed;
+    left: 24px;
+    top: 50vh;
+    transform: translateY(-50%);
+    width: 280px;
     background: rgba(12,16,26,0.98);
     border:1px solid rgba(0,0,0,0.6);
     border-radius:12px;
@@ -124,7 +127,7 @@
 }
 
 .campaign-sidebar.collapsed{
-    width:68px;
+    width: 72px;
     padding:14px 8px;
     align-items:center;
     gap:8px;
@@ -404,32 +407,137 @@
 .add-task-form input::placeholder { color: rgba(255,255,255,0.28);} 
 
 .campaign-select{
-    min-width:160px;
+    position:relative;
+    min-width:180px;
 }
 
 .campaign-select select{
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.06);
-    color:#fff;
-    padding:10px 12px;
-    border-radius:6px;
+    width:100%;
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.2));
+    border: 1px solid rgba(0,240,255,0.16);
+    color:#f4fbff;
+    padding:10px 36px 10px 14px;
+    border-radius:8px;
     outline:none;
+    font-size:13px;
+    transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    cursor:pointer;
+}
+
+.campaign-select select:hover{
+    border-color: rgba(0,240,255,0.28);
 }
 
 .campaign-select select:focus{
-    border-color: rgba(0,240,255,0.35);
+    border-color: rgba(0,240,255,0.45);
     box-shadow:0 0 0 1px rgba(0,240,255,0.25);
+}
+
+.campaign-select::after{
+    content:"v";
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:rgba(255,255,255,0.7);
+    pointer-events:none;
+    font-size:12px;
+    font-weight:700;
+}
+
+.campaign-select.compact{
+    min-width:160px;
+}
+
+.campaign-select.compact select{
+    padding:8px 32px 8px 12px;
+    font-size:12px;
 }
 
 .edit-quest-form{
     display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    align-items:center;
+    flex-direction:column;
+    gap:12px;
+    padding:14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:10px;
+    box-shadow:0 14px 32px rgba(0,0,0,0.55);
 }
 
-.edit-quest-form .cycle-toggle{
-    flex:0 0 auto;
+.edit-quest-form input{
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.08);
+    background: rgba(4,12,24,0.6);
+    color:#ffffff;
+    font-size:14px;
+    transition:border-color .15s ease, box-shadow .15s ease;
+}
+
+.edit-quest-form input:focus{
+    outline:none;
+    border-color: rgba(0,240,255,0.35);
+    box-shadow:0 0 0 1px rgba(0,240,255,0.25);
+}
+
+.edit-quest-footer{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+
+.edit-quest-meta{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.edit-quest-toggles{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.edit-quest-campaign{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:11px;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    color:var(--muted);
+}
+
+.edit-quest-campaign span{
+    font-weight:600;
+}
+
+.edit-quest-footer .btn-ghost{
+    border-style:solid;
+    border-color: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color:#f1f9ff;
+}
+
+.edit-quest-footer .btn-ghost:hover{
+    border-color: rgba(0,240,255,0.35);
+    color:#ffffff;
+}
+
+.edit-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-left:auto;
 }
 
 .btn-primary {
@@ -450,6 +558,39 @@
     padding: 8px 10px;
     border-radius: 6px;
     cursor: pointer;
+}
+
+.btn-secondary{
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color:#f2fbff;
+    padding: 8px 12px;
+    border-radius:8px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+}
+
+.btn-secondary:hover{
+    border-color: rgba(0,240,255,0.35);
+    color:#ffffff;
+}
+
+.btn-secondary:disabled{
+    opacity:0.55;
+    cursor:not-allowed;
+}
+
+.btn-link{
+    background:none;
+    border:0;
+    padding:0;
+    color: var(--accent-cyan);
+    font-weight:600;
+    letter-spacing:0.4px;
+}
+
+.btn-link:hover{
+    color:#ffffff;
+    text-decoration:underline;
 }
 
 .task-container,
@@ -555,59 +696,68 @@
     flex:0 0 auto;
 }
 
-.campaign-tag{
-    margin-top:4px;
+.campaign-chip{
     display:inline-flex;
     align-items:center;
-    gap:8px;
-    padding:6px 10px;
+    gap:6px;
+    padding:6px 12px;
     border-radius:999px;
-    background: rgba(0,240,255,0.08);
-    border:1px solid rgba(0,240,255,0.18);
-    color:#e5fbff;
-    width:fit-content;
+    background: rgba(0,240,255,0.12);
+    border:1px solid rgba(0,240,255,0.25);
+    color:#e6fbff;
+    font-size:12px;
+    font-weight:600;
+    line-height:1;
+    letter-spacing:0.4px;
 }
 
-.campaign-tag.unassigned{
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.08);
-    color:var(--muted);
-}
-
-.campaign-tag-avatar{
-    width:20px;
-    height:20px;
+.campaign-chip .chip-avatar{
+    width:18px;
+    height:18px;
     border-radius:50%;
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.14);
     display:flex;
     align-items:center;
     justify-content:center;
     font-size:11px;
     font-weight:600;
     overflow:hidden;
-    color:#fff;
+    color:#02121c;
+    box-shadow:0 2px 6px rgba(0,0,0,0.35);
 }
 
-.campaign-tag-avatar img{
+.campaign-chip .chip-avatar img{
     width:100%;
     height:100%;
     object-fit:cover;
 }
 
-.campaign-tag-text{
+.campaign-chip .chip-content{
     display:flex;
     align-items:center;
     gap:6px;
 }
 
-.campaign-tag-name{
+.campaign-chip .chip-name{
     font-size:12px;
     font-weight:600;
 }
 
-.campaign-tag-progress{
+.campaign-chip .chip-progress{
     font-size:11px;
-    color:rgba(255,255,255,0.7);
+    color:rgba(255,255,255,0.72);
+}
+
+.campaign-chip.unassigned{
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.14);
+    color:var(--muted);
+}
+
+.campaign-chip.archived{
+    background: rgba(255,118,118,0.12);
+    border-color: rgba(255,118,118,0.26);
+    color:#ffb4c1;
 }
 
 .task-controls button,
@@ -946,6 +1096,33 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     transition: opacity .12s;
 }
 
+.add-side-quest{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+}
+
+.add-side-quest input{
+    flex:1;
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.04);
+    color:#ffffff;
+    transition:border-color .15s ease, box-shadow .15s ease;
+}
+
+.add-side-quest input::placeholder{
+    color: rgba(255,255,255,0.34);
+}
+
+.add-side-quest input:focus{
+    outline:none;
+    border-color: rgba(0,240,255,0.35);
+    box-shadow:0 0 0 1px rgba(0,240,255,0.2);
+}
+
 .add-subtask-button.large,
 .add-side-quest-button.large{
     padding: 10px 14px;
@@ -990,6 +1167,129 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     gap:8px;
     align-items:center;
     margin-top: 10px;
+}
+
+.shortcuts-overlay{
+    position:fixed;
+    inset:0;
+    z-index:2500;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background: rgba(4,8,16,0.75);
+    backdrop-filter: blur(6px);
+}
+
+.shortcuts-panel{
+    width:min(520px, 100%);
+    background: linear-gradient(180deg, rgba(18,26,40,0.96), rgba(6,12,24,0.94));
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;
+    box-shadow:0 28px 50px rgba(0,0,0,0.65), 0 0 30px rgba(0,240,255,0.1);
+    padding:26px 30px;
+    color:#ffffff;
+    outline:none;
+}
+
+.shortcuts-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+}
+
+.shortcuts-header h2{
+    margin:0;
+    font-size:18px;
+    letter-spacing:0.8px;
+    color:#ffffff;
+}
+
+.shortcuts-description{
+    margin:0 0 20px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
+}
+
+.shortcuts-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.shortcut-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    padding:12px 16px;
+    background: rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;
+}
+
+.shortcut-keys{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.shortcut-combo{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.shortcut-plus,
+.shortcut-divider{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.shortcut-divider{
+    margin-left:4px;
+}
+
+.shortcuts-panel kbd{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:30px;
+    padding:6px 8px;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08);
+    color:#f2f8ff;
+    font-size:12px;
+    letter-spacing:0.4px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.35);
+}
+
+.shortcut-description{
+    flex:1;
+    text-align:left;
+    color:#dce7ff;
+    font-size:13px;
+}
+
+@media (max-width: 540px){
+    .shortcut-row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+    .shortcuts-overlay{
+        padding:16px;
+    }
+    .shortcuts-panel{
+        padding:22px 20px;
+    }
 }
 
 .profile-modal {
@@ -1617,11 +1917,14 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 @media (max-width: 960px){
     .board-layout{
         max-width:100%;
-        justify-content:flex-start;
+        padding:0 16px;
     }
     .campaign-sidebar{
         position:relative;
+        top:auto;
+        transform:none;
         left:0;
+        max-width:100%;
         width:100%;
         box-shadow:0 12px 32px rgba(0,0,0,0.45);
     }
@@ -1643,6 +1946,9 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     .campaign-select,
     .campaign-select select{
         width:100%;
+    }
+    .campaign-select{
+        min-width:100%;
     }
     .quest-title-row{
         flex-direction:column;

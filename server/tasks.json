@@ -1,4 +1,336 @@
 {
-  "tasks": [],
-  "nextId": 1
+  "tasks": [
+    {
+      "id": 14,
+      "description": "Train with sparring golems",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Visit quartermaster",
+          "status": "todo",
+          "created_at": "2025-10-20T09:28:48.932Z",
+          "updated_at": "2025-10-20T09:28:48.932Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-10-20T09:28:48.932Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-10-18",
+      "status": "in_progress",
+      "completed": false,
+      "order": 0,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T14:37:32.559Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 15,
+      "description": "Refine spell catalysts",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "in_progress",
+          "created_at": "2025-10-20T09:28:48.932Z",
+          "updated_at": "2025-10-20T09:28:48.932Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-10-20T09:28:48.932Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-10-21",
+      "status": "blocked",
+      "completed": false,
+      "order": 1,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T09:28:48.932Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 16,
+      "description": "Decode ancient glyphs",
+      "priority": "high",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-10-19",
+      "status": "done",
+      "completed": true,
+      "order": 2,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T09:28:48.932Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 17,
+      "description": "Chart forgotten ruins",
+      "priority": "high",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-10-18",
+      "status": "blocked",
+      "completed": false,
+      "order": 3,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T09:28:48.932Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 18,
+      "description": "Decode ancient glyphs",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Meet with ally",
+          "status": "todo",
+          "created_at": "2025-10-20T09:28:48.932Z",
+          "updated_at": "2025-10-20T09:28:48.932Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-10-20T09:28:48.932Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-10-23",
+      "status": "in_progress",
+      "completed": false,
+      "order": 4,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T09:28:48.932Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 19,
+      "description": "Draft trading manifests",
+      "priority": "low",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-10-19",
+      "status": "done",
+      "completed": true,
+      "order": 5,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T09:28:48.932Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 20,
+      "description": "Chart forgotten ruins",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Update quest board",
+          "status": "todo",
+          "created_at": "2025-10-20T09:28:48.932Z",
+          "updated_at": "2025-10-20T09:28:48.932Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-10-20T09:28:48.932Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-10-18",
+      "status": "todo",
+      "completed": false,
+      "order": 6,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T09:28:48.932Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 21,
+      "description": "Decode ancient glyphs",
+      "priority": "medium",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-10-19",
+      "status": "done",
+      "completed": true,
+      "order": 7,
+      "created_at": "2025-10-20T09:28:48.932Z",
+      "updated_at": "2025-10-20T09:28:48.932Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-10-20T09:28:48.932Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 1,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 22,
+      "description": "bingus",
+      "priority": "high",
+      "sub_tasks": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-10-20",
+      "status": "todo",
+      "order": 8,
+      "created_at": "2025-10-20T14:40:45.246Z",
+      "updated_at": "2025-10-20T14:41:03.454Z",
+      "task_level": 4,
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-10-20T14:40:45.246Z",
+          "note": null
+        }
+      ],
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": 1,
+      "owner_id": 2
+    }
+  ],
+  "nextId": 23
 }
