@@ -72,6 +72,10 @@ function App() {
     const [campaignSidebarCollapsed, setCampaignSidebarCollapsed] = useState(false);
     const [activeCampaignFilter, setActiveCampaignFilter] = useState(null); // null=all, 'uncategorized'=no campaign, number=campaign id
     const [taskCampaignSelection, setTaskCampaignSelection] = useState(null);
+    const [campaignFormMode, setCampaignFormMode] = useState(null); // 'create' | 'edit' | null
+    const [campaignFormValues, setCampaignFormValues] = useState({ name: '', description: '', image_url: '' });
+    const [campaignFormBusy, setCampaignFormBusy] = useState(false);
+    const [campaignFormError, setCampaignFormError] = useState(null);
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('medium');
     const [taskLevel, setTaskLevel] = useState(1);
@@ -349,6 +353,120 @@ function App() {
         if (pct >= 40) return { emoji: '⚔️', mood: 'Battle ready', fillClass: 'progress-ready' };
         if (pct >= 15) return { emoji: '🛠️', mood: 'Forge in progress', fillClass: 'progress-building' };
         return { emoji: '💤', mood: 'Boot sequence idle', fillClass: 'progress-idle' };
+    };
+
+    const openCampaignCreateForm = () => {
+        setCampaignSidebarCollapsed(false);
+        setCampaignFormMode('create');
+        setCampaignFormValues({ name: '', description: '', image_url: '' });
+        setCampaignFormError(null);
+        setCampaignFormBusy(false);
+    };
+
+    const openCampaignEditForm = () => {
+        if (!selectedCampaign) return;
+        setCampaignSidebarCollapsed(false);
+        setCampaignFormMode('edit');
+        setCampaignFormValues({
+            name: selectedCampaign.name || '',
+            description: selectedCampaign.description || '',
+            image_url: selectedCampaign.image_url || ''
+        });
+        setCampaignFormError(null);
+        setCampaignFormBusy(false);
+    };
+
+    const closeCampaignForm = () => {
+        setCampaignFormMode(null);
+        setCampaignFormError(null);
+        setCampaignFormBusy(false);
+    };
+
+    const handleCampaignFieldChange = (field, value) => {
+        setCampaignFormValues(prev => ({ ...prev, [field]: value }));
+    };
+
+    const submitCampaignForm = (event) => {
+        event.preventDefault();
+        if (!campaignFormMode) return;
+        const name = (campaignFormValues.name || '').trim();
+        if (!name) {
+            setCampaignFormError('Campaign name is required');
+            return;
+        }
+        const payload = {
+            name,
+            description: (campaignFormValues.description || '').trim(),
+            image_url: (campaignFormValues.image_url || '').trim()
+        };
+        if (!payload.description) delete payload.description;
+        if (!payload.image_url) payload.image_url = null;
+
+        setCampaignFormBusy(true);
+        setCampaignFormError(null);
+
+        const handleError = (status, body) => {
+            const message = (body && body.error) ? body.error : `Failed to ${campaignFormMode === 'create' ? 'create' : 'update'} campaign`;
+            setCampaignFormError(message);
+            setCampaignFormBusy(false);
+        };
+
+        if (campaignFormMode === 'create') {
+            fetch('/api/campaigns', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            })
+                .then(async res => {
+                    if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        handleError(res.status, body);
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(async created => {
+                    if (!created) return;
+                    closeCampaignForm();
+                    pushToast('Campaign created', 'success');
+                    await refreshCampaigns();
+                    if (created.id) {
+                        setActiveCampaignFilter(created.id);
+                        setTaskCampaignSelection(created.id);
+                        await reloadTasks();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error creating campaign:', err);
+                    setCampaignFormError('Failed to create campaign');
+                    setCampaignFormBusy(false);
+                });
+        } else if (campaignFormMode === 'edit' && selectedCampaign) {
+            fetch(`/api/campaigns/${selectedCampaign.id}`, {
+                method: 'PATCH',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            })
+                .then(async res => {
+                    if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        handleError(res.status, body);
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(async updated => {
+                    if (!updated) return;
+                    closeCampaignForm();
+                    pushToast('Campaign updated', 'success');
+                    await refreshCampaigns();
+                })
+                .catch(err => {
+                    console.error('Error updating campaign:', err);
+                    setCampaignFormError('Failed to update campaign');
+                    setCampaignFormBusy(false);
+                });
+        }
     };
 
     const addTask = () => {
@@ -1469,6 +1587,27 @@ function App() {
         return map;
     }, [campaigns]);
     const hasCampaigns = campaigns.length > 0;
+    const selectedCampaign = useMemo(() => {
+        if (typeof activeCampaignFilter === 'number') {
+            return campaignLookup.get(activeCampaignFilter) || null;
+        }
+        return null;
+    }, [activeCampaignFilter, campaignLookup]);
+
+    useEffect(() => {
+        if (campaignFormMode === 'edit') {
+            if (selectedCampaign) {
+                setCampaignFormValues({
+                    name: selectedCampaign.name || '',
+                    description: selectedCampaign.description || '',
+                    image_url: selectedCampaign.image_url || ''
+                });
+            } else {
+                setCampaignFormMode(null);
+                setCampaignFormError(null);
+            }
+        }
+    }, [campaignFormMode, selectedCampaign]);
 
     const globalProgress = useMemo(() => getGlobalProgress(), [quests]);
     const globalAura = useMemo(() => getProgressAura(globalProgress.percent), [globalProgress.percent]);
@@ -1645,7 +1784,11 @@ function App() {
                         <button
                             type="button"
                             className="collapse-toggle"
-                            onClick={() => setCampaignSidebarCollapsed(prev => !prev)}
+                            onClick={() => setCampaignSidebarCollapsed(prev => {
+                                const next = !prev;
+                                if (next && campaignFormMode) closeCampaignForm();
+                                return next;
+                            })}
                             aria-label={campaignSidebarCollapsed ? 'Expand campaigns panel' : 'Collapse campaigns panel'}
                         >
                             {campaignSidebarCollapsed ? '»' : '«'}
@@ -1656,6 +1799,14 @@ function App() {
                     </div>
                     {campaignSidebarCollapsed ? (
                         <div className="campaign-sidebar-collapsed">
+                            <button
+                                type="button"
+                                className="campaign-pill create"
+                                onClick={openCampaignCreateForm}
+                                aria-label="Create campaign"
+                            >
+                                +
+                            </button>
                             <button
                                 type="button"
                                 className={`campaign-pill ${activeCampaignFilter === null ? 'active' : ''}`}
@@ -1693,6 +1844,79 @@ function App() {
                         </div>
                     ) : (
                         <div className="campaign-sidebar-content">
+                            <div className="campaign-actions">
+                                <button
+                                    type="button"
+                                    className="btn-primary btn-small"
+                                    onClick={openCampaignCreateForm}
+                                >
+                                    New Campaign
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-ghost btn-small"
+                                    onClick={openCampaignEditForm}
+                                    disabled={!selectedCampaign}
+                                >
+                                    Edit Selected
+                                </button>
+                            </div>
+                            {campaignFormMode && (
+                                <form className="campaign-form" onSubmit={submitCampaignForm}>
+                                    <div className="campaign-form-title">
+                                        {campaignFormMode === 'create' ? 'Create Campaign' : 'Edit Campaign'}
+                                    </div>
+                                    <label className="campaign-form-field">
+                                        <span>Name</span>
+                                        <input
+                                            type="text"
+                                            value={campaignFormValues.name}
+                                            onChange={e => handleCampaignFieldChange('name', e.target.value)}
+                                            disabled={campaignFormBusy}
+                                            required
+                                        />
+                                    </label>
+                                    <label className="campaign-form-field">
+                                        <span>Description</span>
+                                        <textarea
+                                            value={campaignFormValues.description}
+                                            onChange={e => handleCampaignFieldChange('description', e.target.value)}
+                                            disabled={campaignFormBusy}
+                                            rows={2}
+                                        />
+                                    </label>
+                                    <label className="campaign-form-field">
+                                        <span>Image URL</span>
+                                        <input
+                                            type="url"
+                                            value={campaignFormValues.image_url}
+                                            onChange={e => handleCampaignFieldChange('image_url', e.target.value)}
+                                            disabled={campaignFormBusy}
+                                            placeholder="https://example.com/banner.png"
+                                        />
+                                    </label>
+                                    {campaignFormError && (
+                                        <div className="campaign-form-error">{campaignFormError}</div>
+                                    )}
+                                    <div className="campaign-form-actions">
+                                        <button
+                                            type="submit"
+                                            className="btn-primary btn-small"
+                                            disabled={campaignFormBusy}
+                                        >
+                                            {campaignFormMode === 'create' ? 'Create' : 'Save'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn-ghost btn-small"
+                                            onClick={closeCampaignForm}
+                                            disabled={campaignFormBusy}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
                             <button
                                 type="button"
                                 className={`campaign-filter ${activeCampaignFilter === null ? 'active' : ''}`}

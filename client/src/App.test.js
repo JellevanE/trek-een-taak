@@ -110,3 +110,117 @@ test('creating a quest submits selected campaign id', async () => {
     campaign_id: 1
   });
 });
+
+test('allows creating a campaign from the sidebar', async () => {
+  let campaigns = [];
+  const quests = [];
+  let createdPayload = null;
+
+  setupAuthenticatedApp((url, options = {}) => {
+    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 1 } } });
+    if (url === '/api/campaigns' && (!options.method || options.method === 'GET')) {
+      return okResponse({ campaigns });
+    }
+    if (url === '/api/tasks' && (!options.method || options.method === 'GET')) {
+      return okResponse({ tasks: quests });
+    }
+    if (url.startsWith('/api/tasks?')) {
+      return okResponse({ tasks: [] });
+    }
+    if (url === '/api/campaigns' && options.method === 'POST') {
+      createdPayload = JSON.parse(options.body);
+      const newCampaign = {
+        id: 5,
+        name: createdPayload.name,
+        description: createdPayload.description || '',
+        image_url: createdPayload.image_url || null,
+        progress_summary: '0/0',
+        stats: { quests_completed: 0, quests_total: 0 }
+      };
+      campaigns = [...campaigns, newCampaign];
+      return okResponse(newCampaign);
+    }
+    if (url.startsWith('/api/tasks?campaign_id=')) {
+      return okResponse({ tasks: [] });
+    }
+    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
+  });
+
+  await waitFor(() => expect(screen.getByRole('button', { name: /New Campaign/i })).toBeInTheDocument());
+
+  fireEvent.click(screen.getByRole('button', { name: /New Campaign/i }));
+
+  fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'Skyward League' } });
+  fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test description' } });
+  fireEvent.change(screen.getByLabelText(/Image URL/i), { target: { value: 'https://example.com/banner.png' } });
+
+  fireEvent.click(screen.getByRole('button', { name: /Create$/i }));
+
+  await waitFor(() => {
+    const campaignButton = screen.getByRole('button', { name: /Skyward League/i });
+    expect(campaignButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  expect(createdPayload).toMatchObject({
+    name: 'Skyward League',
+    description: 'Test description',
+    image_url: 'https://example.com/banner.png'
+  });
+
+  expect(screen.queryByText(/Create Campaign/i)).not.toBeInTheDocument();
+});
+
+test('allows editing the selected campaign', async () => {
+  let campaigns = [
+    { id: 3, name: 'Original Name', description: 'Initial', image_url: null, progress_summary: '0/1', stats: { quests_completed: 0, quests_total: 1 } }
+  ];
+  const quests = [{ id: 30, description: 'Quest', status: 'todo', priority: 'medium', task_level: 1, campaign_id: 3 }];
+  let updatedPayload = null;
+
+  setupAuthenticatedApp((url, options = {}) => {
+    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 1 } } });
+    if (url === '/api/campaigns' && (!options.method || options.method === 'GET')) {
+      return okResponse({ campaigns });
+    }
+    if (url === '/api/tasks' && (!options.method || options.method === 'GET')) {
+      return okResponse({ tasks: quests });
+    }
+    if (url.startsWith('/api/tasks?')) {
+      return okResponse({ tasks: quests.filter(q => String(q.campaign_id) === url.split('=').pop()) });
+    }
+    if (url === '/api/campaigns/3' && options.method === 'PATCH') {
+      updatedPayload = JSON.parse(options.body);
+      campaigns = [{
+        ...campaigns[0],
+        name: updatedPayload.name,
+        description: updatedPayload.description || '',
+        image_url: updatedPayload.image_url || null
+      }];
+      return okResponse(campaigns[0]);
+    }
+    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
+  });
+
+  await waitFor(() => expect(screen.getByRole('button', { name: /Campaigns/i })).toBeInTheDocument());
+
+  const sidebar = screen.getByText('Campaigns').closest('aside');
+  expect(sidebar).toBeTruthy();
+  const campaignButton = within(sidebar).getByRole('button', { name: /Original Name/i });
+  fireEvent.click(campaignButton);
+
+  fireEvent.click(screen.getByRole('button', { name: /Edit Selected/i }));
+
+  const nameInput = screen.getByLabelText(/Name/i);
+  fireEvent.change(nameInput, { target: { value: 'Renamed Campaign' } });
+
+  fireEvent.click(screen.getByRole('button', { name: /^Save$/i }));
+
+  await waitFor(() => {
+    const renamedButton = within(sidebar).getByRole('button', { name: /Renamed Campaign/i });
+    expect(renamedButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  expect(updatedPayload).toMatchObject({
+    name: 'Renamed Campaign'
+  });
+});
