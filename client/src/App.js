@@ -429,12 +429,14 @@ function App() {
                     if (!created) return;
                     closeCampaignForm();
                     pushToast('Campaign created', 'success');
-                    await refreshCampaigns();
                     if (created.id) {
                         setActiveCampaignFilter(created.id);
                         setTaskCampaignSelection(created.id);
+                        await reloadTasks(created.id);
+                    } else {
                         await reloadTasks();
                     }
+                    setCampaignFormBusy(false);
                 })
                 .catch(err => {
                     console.error('Error creating campaign:', err);
@@ -459,7 +461,8 @@ function App() {
                     if (!updated) return;
                     closeCampaignForm();
                     pushToast('Campaign updated', 'success');
-                    await refreshCampaigns();
+                    await reloadTasks(activeCampaignFilter);
+                    setCampaignFormBusy(false);
                 })
                 .catch(err => {
                     console.error('Error updating campaign:', err);
@@ -912,10 +915,10 @@ function App() {
         setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), timeout);
     };
 
-    const reloadTasks = () => {
+    const reloadTasks = (filterOverride = activeCampaignFilter) => {
         if (!token) return Promise.resolve();
         const headers = { Authorization: `Bearer ${token}` };
-        const url = getTasksEndpoint();
+        const url = getTasksEndpoint(filterOverride);
         return fetch(url, { headers })
             .then(res => {
                 if (res.ok) return res.json();
