@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import './App.css';
 import Profile from './Profile';
 
@@ -68,6 +68,14 @@ function App() {
         try { document.documentElement.setAttribute('data-theme', theme); } catch {}
     }, [theme]);
     const [quests, setQuests] = useState([]);
+    const [campaigns, setCampaigns] = useState([]);
+    const [campaignSidebarCollapsed, setCampaignSidebarCollapsed] = useState(false);
+    const [activeCampaignFilter, setActiveCampaignFilter] = useState(null); // null=all, 'uncategorized'=no campaign, number=campaign id
+    const [taskCampaignSelection, setTaskCampaignSelection] = useState(null);
+    const [campaignFormMode, setCampaignFormMode] = useState(null); // 'create' | 'edit' | null
+    const [campaignFormValues, setCampaignFormValues] = useState({ name: '', description: '', image_url: '' });
+    const [campaignFormBusy, setCampaignFormBusy] = useState(false);
+    const [campaignFormError, setCampaignFormError] = useState(null);
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('medium');
     const [taskLevel, setTaskLevel] = useState(1);
@@ -100,44 +108,6 @@ function App() {
     const [showProfile, setShowProfile] = useState(false);
 
     useEffect(() => {
-        if (token) {
-            const headers = { Authorization: `Bearer ${token}` };
-            fetch('/api/tasks', { headers })
-                .then(res => {
-                    if (res.ok) {
-                        return res.json();
-                    }
-                    if (res.status === 401) {
-                        // 401 means the token is no longer valid, so log out
-                        setToken(null);
-                        setPlayerStats(null);
-                        setQuests([]);
-                        return null;
-                    }
-                    const error = new Error('Failed to fetch quests');
-                    error.status = res.status;
-                    throw error;
-                })
-                .then(data => {
-                    if (data) {
-                        const payload = data.tasks || data.quests || [];
-                        setQuests(normalizeQuestList(payload));
-                    }
-                })
-                .catch(error => {
-                    if (error && error.status === 401) {
-                        return;
-                    }
-                    console.error('Error fetching quests:', error);
-                });
-        } else {
-            // No token, so clear tasks
-            setQuests([]);
-            setPlayerStats(null);
-        }
-    }, [token]);
-
-    useEffect(() => {
         if (!token) {
             setPlayerStats(null);
             return;
@@ -159,11 +129,121 @@ function App() {
         try { if (token) localStorage.setItem('auth_token', token); else localStorage.removeItem('auth_token'); } catch {}
     }, [token]);
 
+    useEffect(() => {
+        if (!token) {
+            setActiveCampaignFilter(null);
+            setTaskCampaignSelection(null);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        if (typeof activeCampaignFilter === 'number') {
+            const exists = campaigns.some(c => c && c.id === activeCampaignFilter);
+            if (!exists) {
+                setActiveCampaignFilter(null);
+            }
+        }
+    }, [campaigns, activeCampaignFilter]);
+
+    useEffect(() => {
+        if (typeof activeCampaignFilter === 'number') {
+            setTaskCampaignSelection(activeCampaignFilter);
+        } else if (activeCampaignFilter === 'uncategorized') {
+            setTaskCampaignSelection(null);
+        }
+    }, [activeCampaignFilter]);
+
+    useEffect(() => {
+        if (selectedQuestId !== null) {
+            const exists = quests.some(quest => idsMatch(quest.id, selectedQuestId));
+            if (!exists) {
+                setSelectedQuestId(null);
+                setSelectedSideQuest(null);
+            }
+        }
+    }, [quests, selectedQuestId]);
+
     const getAuthHeaders = (extra = {}) => {
         const base = { 'Content-Type': 'application/json' };
         if (token) base['Authorization'] = `Bearer ${token}`;
         return { ...base, ...extra };
     };
+
+    const getTasksEndpoint = useCallback((filterValue = activeCampaignFilter) => {
+        if (filterValue === null) return '/api/tasks';
+        if (filterValue === 'uncategorized') return '/api/tasks?campaign_id=null';
+        return `/api/tasks?campaign_id=${encodeURIComponent(filterValue)}`;
+    }, [activeCampaignFilter]);
+
+    const refreshCampaigns = useCallback(() => {
+        if (!token) {
+            setCampaigns([]);
+            return Promise.resolve(null);
+        }
+        const headers = { Authorization: `Bearer ${token}` };
+        return fetch('/api/campaigns', { headers })
+            .then(res => {
+                if (res.status === 401) {
+                    setToken(null);
+                    setPlayerStats(null);
+                    setCampaigns([]);
+                    return null;
+                }
+                if (!res.ok) {
+                    throw new Error(`Failed to load campaigns: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && Array.isArray(data.campaigns)) {
+                    setCampaigns(data.campaigns);
+                } else {
+                    setCampaigns([]);
+                }
+                return data;
+            })
+            .catch(err => {
+                console.error('Error fetching campaigns:', err);
+                return null;
+            });
+    }, [token, setToken, setPlayerStats]);
+
+    useEffect(() => {
+        if (token) {
+            const headers = { Authorization: `Bearer ${token}` };
+            const url = getTasksEndpoint();
+            fetch(url, { headers })
+                .then(res => {
+                    if (res.ok) return res.json();
+                    if (res.status === 401) {
+                        setToken(null);
+                        setPlayerStats(null);
+                        setQuests([]);
+                        return null;
+                    }
+                    const error = new Error(`Failed to fetch quests: ${res.status}`);
+                    error.status = res.status;
+                    throw error;
+                })
+                .then(data => {
+                    if (data) {
+                        const payload = data.tasks || data.quests || [];
+                        setQuests(normalizeQuestList(payload));
+                    }
+                })
+                .catch(error => {
+                    if (error && error.status === 401) return;
+                    console.error('Error fetching quests:', error);
+                });
+        } else {
+            setQuests([]);
+            setPlayerStats(null);
+        }
+    }, [token, getTasksEndpoint, setToken]);
+
+    useEffect(() => {
+        refreshCampaigns();
+    }, [refreshCampaigns]);
 
     // weights by priority: low=1.0, medium=1.15, high=1.30 (approx +15% per grade)
     const priorityWeight = (p) => {
@@ -275,34 +355,180 @@ function App() {
         return { emoji: '💤', mood: 'Boot sequence idle', fillClass: 'progress-idle' };
     };
 
+    const openCampaignCreateForm = () => {
+        setCampaignSidebarCollapsed(false);
+        setCampaignFormMode('create');
+        setCampaignFormValues({ name: '', description: '', image_url: '' });
+        setCampaignFormError(null);
+        setCampaignFormBusy(false);
+    };
+
+    const openCampaignEditForm = () => {
+        if (!selectedCampaign) return;
+        setCampaignSidebarCollapsed(false);
+        setCampaignFormMode('edit');
+        setCampaignFormValues({
+            name: selectedCampaign.name || '',
+            description: selectedCampaign.description || '',
+            image_url: selectedCampaign.image_url || ''
+        });
+        setCampaignFormError(null);
+        setCampaignFormBusy(false);
+    };
+
+    const closeCampaignForm = () => {
+        setCampaignFormMode(null);
+        setCampaignFormError(null);
+        setCampaignFormBusy(false);
+    };
+
+    const handleCampaignFieldChange = (field, value) => {
+        setCampaignFormValues(prev => ({ ...prev, [field]: value }));
+    };
+
+    const submitCampaignForm = (event) => {
+        event.preventDefault();
+        if (!campaignFormMode) return;
+        const name = (campaignFormValues.name || '').trim();
+        if (!name) {
+            setCampaignFormError('Campaign name is required');
+            return;
+        }
+        const payload = {
+            name,
+            description: (campaignFormValues.description || '').trim(),
+            image_url: (campaignFormValues.image_url || '').trim()
+        };
+        if (!payload.description) delete payload.description;
+        if (!payload.image_url) payload.image_url = null;
+
+        setCampaignFormBusy(true);
+        setCampaignFormError(null);
+
+        const handleError = (status, body) => {
+            const message = (body && body.error) ? body.error : `Failed to ${campaignFormMode === 'create' ? 'create' : 'update'} campaign`;
+            setCampaignFormError(message);
+            setCampaignFormBusy(false);
+        };
+
+        if (campaignFormMode === 'create') {
+            fetch('/api/campaigns', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            })
+                .then(async res => {
+                    if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        handleError(res.status, body);
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(async created => {
+                    if (!created) return;
+                    closeCampaignForm();
+                    pushToast('Campaign created', 'success');
+                    if (created.id) {
+                        setActiveCampaignFilter(created.id);
+                        setTaskCampaignSelection(created.id);
+                        await reloadTasks(created.id);
+                    } else {
+                        await reloadTasks();
+                    }
+                    setCampaignFormBusy(false);
+                })
+                .catch(err => {
+                    console.error('Error creating campaign:', err);
+                    setCampaignFormError('Failed to create campaign');
+                    setCampaignFormBusy(false);
+                });
+        } else if (campaignFormMode === 'edit' && selectedCampaign) {
+            fetch(`/api/campaigns/${selectedCampaign.id}`, {
+                method: 'PATCH',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            })
+                .then(async res => {
+                    if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        handleError(res.status, body);
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(async updated => {
+                    if (!updated) return;
+                    closeCampaignForm();
+                    pushToast('Campaign updated', 'success');
+                    await reloadTasks(activeCampaignFilter);
+                    setCampaignFormBusy(false);
+                })
+                .catch(err => {
+                    console.error('Error updating campaign:', err);
+                    setCampaignFormError('Failed to update campaign');
+                    setCampaignFormBusy(false);
+                });
+        }
+    };
+
     const addTask = () => {
         if (!description || description.trim() === '') return;
+        const payload = { description, priority, task_level: taskLevel };
+        if (taskCampaignSelection !== null) {
+            payload.campaign_id = taskCampaignSelection;
+        }
         fetch('/api/tasks', {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ description, priority, task_level: taskLevel }),
+            body: JSON.stringify(payload),
         })
-            .then(res => res.json())
-            .then(newQuest => {
-                const normalized = normalizeQuest(newQuest);
-                setQuests(prev => [normalized, ...prev]);
-                if (normalized && normalized.id !== undefined && normalized.id !== null) {
-                    const questId = normalized.id;
-                    setSpawnQuests(prev => ({ ...prev, [questId]: true }));
-                    setPulsingQuests(prev => ({ ...prev, [questId]: 'spawn' }));
-                    setTimeout(() => {
-                        setSpawnQuests(prev => {
-                            const copy = { ...prev };
-                            delete copy[questId];
-                            return copy;
-                        });
-                        setPulsingQuests(prev => {
-                            const copy = { ...prev };
-                            delete copy[questId];
-                            return copy;
-                        });
-                    }, 650);
+            .then(res => {
+                if (res.ok) return res.json();
+                if (res.status === 401) {
+                    setToken(null);
+                    setPlayerStats(null);
+                    setQuests([]);
+                    throw new Error('Authentication expired');
                 }
+                return res.json()
+                    .catch(() => ({}))
+                    .then(body => {
+                        const error = new Error(body && body.error ? body.error : 'Failed to add quest');
+                        error.status = res.status;
+                        throw error;
+                    });
+            })
+            .then(newQuest => {
+                if (!newQuest) return;
+                const normalized = normalizeQuest(newQuest);
+                const matchesFilter =
+                    activeCampaignFilter === null
+                        || (activeCampaignFilter === 'uncategorized' && !normalized.campaign_id)
+                        || (typeof activeCampaignFilter === 'number' && normalized.campaign_id === activeCampaignFilter);
+                if (matchesFilter) {
+                    setQuests(prev => [normalized, ...prev]);
+                    if (normalized && normalized.id !== undefined && normalized.id !== null) {
+                        const questId = normalized.id;
+                        setSpawnQuests(prev => ({ ...prev, [questId]: true }));
+                        setPulsingQuests(prev => ({ ...prev, [questId]: 'spawn' }));
+                        setTimeout(() => {
+                            setSpawnQuests(prev => {
+                                const copy = { ...prev };
+                                delete copy[questId];
+                                return copy;
+                            });
+                            setPulsingQuests(prev => {
+                                const copy = { ...prev };
+                                delete copy[questId];
+                                return copy;
+                            });
+                        }, 650);
+                    }
+                } else {
+                    reloadTasks();
+                }
+                refreshCampaigns();
                 setDescription('');
                 setPriority('medium');
                 setTaskLevel(1);
@@ -655,6 +881,7 @@ function App() {
                     setEditingQuest(null);
                 }
                 if (questToDelete) scheduleQuestUndo(questToDelete);
+                refreshCampaigns();
             })
             .catch(error => console.error('Error deleting quest:', error));
     };
@@ -670,6 +897,7 @@ function App() {
                 const normalized = normalizeQuest(updatedQuest);
                 setQuests(prev => prev.map(q => (q.id === id ? normalized : q)));
                 setEditingQuest(null);
+                refreshCampaigns();
             })
             .catch(error => console.error('Error updating quest:', error));
     };
@@ -687,15 +915,26 @@ function App() {
         setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), timeout);
     };
 
-    const reloadTasks = () => {
+    const reloadTasks = (filterOverride = activeCampaignFilter) => {
         if (!token) return Promise.resolve();
         const headers = { Authorization: `Bearer ${token}` };
-        return fetch('/api/tasks', { headers })
-            .then(res => res.ok ? res.json() : null)
+        const url = getTasksEndpoint(filterOverride);
+        return fetch(url, { headers })
+            .then(res => {
+                if (res.ok) return res.json();
+                if (res.status === 401) {
+                    setToken(null);
+                    setPlayerStats(null);
+                    setQuests([]);
+                    return null;
+                }
+                throw new Error(`Failed to refresh quests: ${res.status}`);
+            })
             .then(data => {
                 if (data) {
                     const payload = data.tasks || data.quests || [];
                     setQuests(normalizeQuestList(payload));
+                    refreshCampaigns();
                 }
             })
             .catch(err => {
@@ -789,6 +1028,7 @@ function App() {
             .then(data => {
                 setQuests([]);
                 pushToast(`Cleared ${data.removed || 0} quests`, 'success');
+                refreshCampaigns();
             })
             .catch(err => {
                 console.error('Error clearing quests:', err);
@@ -879,6 +1119,7 @@ function App() {
                     scheduleCollapseAndMove(id);
                 }
                 pushToast(`Quest ${updatedQuest.id} set to ${status.replace('_',' ')}`, 'success');
+                refreshCampaigns();
             })
             .catch(error => {
                 console.error('Error updating quest status:', error);
@@ -912,6 +1153,7 @@ function App() {
                     scheduleCollapseAndMove(taskId);
                 }
                 pushToast(`Side-quest ${subTaskId} updated to ${status.replace('_',' ')}`, 'success');
+                refreshCampaigns();
             })
             .catch(error => {
                 console.error('Error updating side-quest status:', error);
@@ -1338,6 +1580,38 @@ function App() {
         deleteTask
     ]);
 
+    const campaignLookup = useMemo(() => {
+        const map = new Map();
+        campaigns.forEach(campaign => {
+            if (campaign && typeof campaign.id === 'number') {
+                map.set(campaign.id, campaign);
+            }
+        });
+        return map;
+    }, [campaigns]);
+    const hasCampaigns = campaigns.length > 0;
+    const selectedCampaign = useMemo(() => {
+        if (typeof activeCampaignFilter === 'number') {
+            return campaignLookup.get(activeCampaignFilter) || null;
+        }
+        return null;
+    }, [activeCampaignFilter, campaignLookup]);
+
+    useEffect(() => {
+        if (campaignFormMode === 'edit') {
+            if (selectedCampaign) {
+                setCampaignFormValues({
+                    name: selectedCampaign.name || '',
+                    description: selectedCampaign.description || '',
+                    image_url: selectedCampaign.image_url || ''
+                });
+            } else {
+                setCampaignFormMode(null);
+                setCampaignFormError(null);
+            }
+        }
+    }, [campaignFormMode, selectedCampaign]);
+
     const globalProgress = useMemo(() => getGlobalProgress(), [quests]);
     const globalAura = useMemo(() => getProgressAura(globalProgress.percent), [globalProgress.percent]);
     const globalLabel = globalProgress.weightingToday
@@ -1464,6 +1738,7 @@ function App() {
                             className="btn-primary"
                             onClick={claimDailyReward}
                             disabled={dailyClaimed || dailyLoading}
+                            aria-expanded={!campaignSidebarCollapsed}
                         >
                             {dailyClaimed ? 'Daily Bonus Claimed' : dailyLoading ? 'Claiming...' : 'Claim Daily Bonus'}
                         </button>
@@ -1506,6 +1781,196 @@ function App() {
                     {debugBusy && <div className="debug-status">Working…</div>}
                 </div>
             )}
+            <div className="board-layout">
+                <aside className={`campaign-sidebar ${campaignSidebarCollapsed ? 'collapsed' : ''}`}>
+                    <div className="campaign-sidebar-header">
+                        <button
+                            type="button"
+                            className="collapse-toggle"
+                            onClick={() => setCampaignSidebarCollapsed(prev => {
+                                const next = !prev;
+                                if (next && campaignFormMode) closeCampaignForm();
+                                return next;
+                            })}
+                            aria-label={campaignSidebarCollapsed ? 'Expand campaigns panel' : 'Collapse campaigns panel'}
+                        >
+                            {campaignSidebarCollapsed ? '»' : '«'}
+                        </button>
+                        {!campaignSidebarCollapsed && (
+                            <span className="campaign-sidebar-title">Campaigns</span>
+                        )}
+                    </div>
+                    {campaignSidebarCollapsed ? (
+                        <div className="campaign-sidebar-collapsed">
+                            <button
+                                type="button"
+                                className="campaign-pill create"
+                                onClick={openCampaignCreateForm}
+                                aria-label="Create campaign"
+                            >
+                                +
+                            </button>
+                            <button
+                                type="button"
+                                className={`campaign-pill ${activeCampaignFilter === null ? 'active' : ''}`}
+                                onClick={() => setActiveCampaignFilter(null)}
+                                aria-label="Show all quests"
+                                aria-pressed={activeCampaignFilter === null}
+                            >
+                                ◎
+                            </button>
+                            <button
+                                type="button"
+                                className={`campaign-pill ${activeCampaignFilter === 'uncategorized' ? 'active' : ''}`}
+                                onClick={() => setActiveCampaignFilter('uncategorized')}
+                                aria-label="Show unassigned quests"
+                                aria-pressed={activeCampaignFilter === 'uncategorized'}
+                            >
+                                ∅
+                            </button>
+                            {campaigns.map(campaign => (
+                                <button
+                                    type="button"
+                                    key={campaign.id}
+                                    className={`campaign-pill ${activeCampaignFilter === campaign.id ? 'active' : ''}`}
+                                    onClick={() => setActiveCampaignFilter(campaign.id)}
+                                    title={campaign.name}
+                                    aria-pressed={activeCampaignFilter === campaign.id}
+                                >
+                                    {campaign.image_url ? (
+                                        <img src={campaign.image_url} alt="" />
+                                    ) : (
+                                        (campaign.name || '?').charAt(0).toUpperCase()
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="campaign-sidebar-content">
+                            <div className="campaign-actions">
+                                <button
+                                    type="button"
+                                    className="btn-primary btn-small"
+                                    onClick={openCampaignCreateForm}
+                                >
+                                    New Campaign
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-ghost btn-small"
+                                    onClick={openCampaignEditForm}
+                                    disabled={!selectedCampaign}
+                                >
+                                    Edit Selected
+                                </button>
+                            </div>
+                            {campaignFormMode && (
+                                <form className="campaign-form" onSubmit={submitCampaignForm}>
+                                    <div className="campaign-form-title">
+                                        {campaignFormMode === 'create' ? 'Create Campaign' : 'Edit Campaign'}
+                                    </div>
+                                    <label className="campaign-form-field">
+                                        <span>Name</span>
+                                        <input
+                                            type="text"
+                                            value={campaignFormValues.name}
+                                            onChange={e => handleCampaignFieldChange('name', e.target.value)}
+                                            disabled={campaignFormBusy}
+                                            required
+                                        />
+                                    </label>
+                                    <label className="campaign-form-field">
+                                        <span>Description</span>
+                                        <textarea
+                                            value={campaignFormValues.description}
+                                            onChange={e => handleCampaignFieldChange('description', e.target.value)}
+                                            disabled={campaignFormBusy}
+                                            rows={2}
+                                        />
+                                    </label>
+                                    <label className="campaign-form-field">
+                                        <span>Image URL</span>
+                                        <input
+                                            type="url"
+                                            value={campaignFormValues.image_url}
+                                            onChange={e => handleCampaignFieldChange('image_url', e.target.value)}
+                                            disabled={campaignFormBusy}
+                                            placeholder="https://example.com/banner.png"
+                                        />
+                                    </label>
+                                    {campaignFormError && (
+                                        <div className="campaign-form-error">{campaignFormError}</div>
+                                    )}
+                                    <div className="campaign-form-actions">
+                                        <button
+                                            type="submit"
+                                            className="btn-primary btn-small"
+                                            disabled={campaignFormBusy}
+                                        >
+                                            {campaignFormMode === 'create' ? 'Create' : 'Save'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn-ghost btn-small"
+                                            onClick={closeCampaignForm}
+                                            disabled={campaignFormBusy}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                            <button
+                                type="button"
+                                className={`campaign-filter ${activeCampaignFilter === null ? 'active' : ''}`}
+                                onClick={() => setActiveCampaignFilter(null)}
+                                aria-pressed={activeCampaignFilter === null}
+                            >
+                                <div className="campaign-filter-label">All quests</div>
+                            </button>
+                            <button
+                                type="button"
+                                className={`campaign-filter ${activeCampaignFilter === 'uncategorized' ? 'active' : ''}`}
+                                onClick={() => setActiveCampaignFilter('uncategorized')}
+                                aria-pressed={activeCampaignFilter === 'uncategorized'}
+                            >
+                                <div className="campaign-filter-label">Unassigned</div>
+                            </button>
+                            <div className="campaign-list">
+                                {hasCampaigns ? (
+                                    campaigns.map(campaign => (
+                                        <button
+                                            type="button"
+                                            key={campaign.id}
+                                            className={`campaign-item ${activeCampaignFilter === campaign.id ? 'active' : ''}`}
+                                            onClick={() => setActiveCampaignFilter(campaign.id)}
+                                            aria-pressed={activeCampaignFilter === campaign.id}
+                                        >
+                                            <div className="campaign-avatar">
+                                                {campaign.image_url ? (
+                                                    <img src={campaign.image_url} alt="" />
+                                                ) : (
+                                                    <span>{(campaign.name || '?').charAt(0).toUpperCase()}</span>
+                                                )}
+                                            </div>
+                                            <div className="campaign-meta">
+                                                <span className="campaign-name">{campaign.name}</span>
+                                                <span className="campaign-progress">
+                                                    {campaign.progress_summary || `${campaign.stats?.quests_completed || 0}/${campaign.stats?.quests_total || 0}`}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="campaign-empty">
+                                        No campaigns yet. Create one from the backend to start grouping quests.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </aside>
+                <div className="board-main">
             <div className="add-task-form">
                 <input
                     type="text"
@@ -1530,6 +1995,28 @@ function App() {
                 >
                     Lv. {taskLevel}
                 </button>
+                <div className="campaign-select">
+                    <select
+                        value={taskCampaignSelection === null ? '' : String(taskCampaignSelection)}
+                        onChange={e => {
+                            const next = e.target.value;
+                            if (next === '') {
+                                setTaskCampaignSelection(null);
+                            } else {
+                                const parsed = Number(next);
+                                setTaskCampaignSelection(Number.isNaN(parsed) ? null : parsed);
+                            }
+                        }}
+                        aria-label="Assign quest to campaign"
+                    >
+                        <option value="">{hasCampaigns ? 'No campaign' : 'No campaigns yet'}</option>
+                        {campaigns.map(campaign => (
+                            <option key={campaign.id} value={campaign.id}>
+                                {campaign.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <button className="btn-primary" onClick={addTask}>Add Quest</button>
             </div>
             <div className="quest-container">
@@ -1539,6 +2026,10 @@ function App() {
                     const questSelected = selectedQuestId !== null && idsMatch(selectedQuestId, quest.id);
                     const questSideQuests = getQuestSideQuests(quest);
                     const questProgress = getQuestProgress(quest);
+                    const questHasCampaign = quest.campaign_id !== null && quest.campaign_id !== undefined;
+                    const campaign = questHasCampaign && typeof quest.campaign_id === 'number'
+                        ? (campaignLookup.get(quest.campaign_id) || null)
+                        : null;
                     const questClassName = [
                         'quest',
                         questStatus === 'done' ? 'completed' : '',
@@ -1593,11 +2084,38 @@ function App() {
                                             <>
                                                 <div className="quest-header">
                                                     <div className="left">
-                                                        <h3>{quest.description}</h3>
-                                                        <div style={{marginLeft:12, display:'flex', alignItems:'center', gap:8}}>
-                                                            <span className={`priority-pill ${quest.priority}`}>{quest.priority}</span>
-                                                            <span className="level-pill">Lv. {quest.task_level || 1}</span>
+                                                        <div className="quest-title-row">
+                                                            <h3>{quest.description}</h3>
+                                                            <div className="quest-meta-tags">
+                                                                <span className={`priority-pill ${quest.priority}`}>{quest.priority}</span>
+                                                                <span className="level-pill">Lv. {quest.task_level || 1}</span>
+                                                            </div>
                                                         </div>
+                                                        {questHasCampaign && campaign && (
+                                                            <div className="campaign-tag">
+                                                                <div className="campaign-tag-avatar">
+                                                                    {campaign.image_url ? (
+                                                                        <img src={campaign.image_url} alt="" />
+                                                                    ) : (
+                                                                        (campaign.name || '?').charAt(0).toUpperCase()
+                                                                    )}
+                                                                </div>
+                                                                <div className="campaign-tag-text">
+                                                                    <span className="campaign-tag-name">{campaign.name}</span>
+                                                                    {(campaign.progress_summary || (campaign.stats && typeof campaign.stats.quests_total === 'number')) && (
+                                                                        <span className="campaign-tag-progress">
+                                                                            {campaign.progress_summary || `${campaign.stats?.quests_completed || 0}/${campaign.stats?.quests_total || 0}`}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {questHasCampaign && !campaign && (
+                                                            <div className="campaign-tag unassigned">Campaign archived</div>
+                                                        )}
+                                                        {!questHasCampaign && hasCampaigns && (
+                                                            <div className="campaign-tag unassigned">No campaign</div>
+                                                        )}
                                                     </div>
                                                     <div className="right">
                                                         <div className="quest-controls">
@@ -1879,6 +2397,8 @@ function App() {
                         </React.Fragment>
                     );
                 })}
+            </div>
+                </div>
             </div>
             {/* Toasts & Undo */}
             <div className="toast-zone">

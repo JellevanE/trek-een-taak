@@ -91,6 +91,13 @@ function readTasks() {
 
                 if (typeof task.task_level !== 'number' || !Number.isFinite(task.task_level)) task.task_level = 1;
                 task.task_level = experience.clampTaskLevel(task.task_level);
+
+                if (task.campaign_id === undefined || task.campaign_id === null) {
+                    task.campaign_id = null;
+                } else {
+                    const campaignId = Number(task.campaign_id);
+                    task.campaign_id = Number.isInteger(campaignId) && campaignId > 0 ? campaignId : null;
+                }
             });
         }
 
@@ -151,6 +158,9 @@ function serializeTask(task) {
         }
         : { xp_awarded: false, last_reward_at: null };
     const base = { ...task, sub_tasks: subTasks, rpg: rpgData };
+    base.campaign_id = (typeof task.campaign_id === 'number' && Number.isInteger(task.campaign_id) && task.campaign_id > 0)
+        ? task.campaign_id
+        : null;
     return { ...base, side_quests: sideQuests };
 }
 
@@ -259,4 +269,3 @@ module.exports = {
     serializeTaskList,
     buildDemoTasks
 };
-

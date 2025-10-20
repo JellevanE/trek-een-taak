@@ -2,17 +2,29 @@
 
 const experience = require('../rpg/experience');
 const { readTasks, writeTasks, serializeTask, serializeTaskList } = require('../data/taskStore');
+const { readCampaigns } = require('../data/campaignStore');
 const { readUsers, writeUsers } = require('../data/userStore');
 const { sendError } = require('../utils/http');
 
 function listTasks(req, res) {
     const tasks = readTasks();
     const userTasks = (tasks.tasks || []).filter(t => t.owner_id === req.user.id);
-    return res.json({ tasks: serializeTaskList(userTasks), nextId: tasks.nextId });
+    let filteredTasks = userTasks;
+    if (req.query && Object.prototype.hasOwnProperty.call(req.query, 'campaign_id')) {
+        const rawCampaignId = req.query.campaign_id;
+        if (rawCampaignId === 'null' || rawCampaignId === 'none') {
+            filteredTasks = userTasks.filter(task => !task.campaign_id);
+        } else {
+            const campaignId = Number(rawCampaignId);
+            if (!Number.isInteger(campaignId) || campaignId <= 0) return sendError(res, 400, 'Invalid campaign filter');
+            filteredTasks = userTasks.filter(task => task.campaign_id === campaignId);
+        }
+    }
+    return res.json({ tasks: serializeTaskList(filteredTasks), nextId: tasks.nextId });
 }
 
 function createTask(req, res) {
-    const { description, priority, due_date, task_level } = req.body || {};
+    const { description, priority, due_date, task_level, campaign_id } = req.body || {};
     if (!description || typeof description !== 'string' || !description.trim()) {
         return sendError(res, 400, 'Missing or invalid description');
     }
@@ -20,6 +32,16 @@ function createTask(req, res) {
     const prio = allowed.includes(priority) ? priority : 'medium';
     const levelValue = Number(task_level);
     const questLevel = Number.isFinite(levelValue) ? experience.clampTaskLevel(levelValue) : 1;
+
+    let campaignId = null;
+    if (campaign_id !== undefined && campaign_id !== null) {
+        const numericCampaignId = Number(campaign_id);
+        if (!Number.isInteger(numericCampaignId) || numericCampaignId <= 0) return sendError(res, 400, 'Invalid campaign_id');
+        const campaignsData = readCampaigns();
+        const campaign = campaignsData.campaigns.find(c => c.id === numericCampaignId && c.owner_id === req.user.id && !c.archived);
+        if (!campaign) return sendError(res, 404, 'Campaign not found');
+        campaignId = numericCampaignId;
+    }
 
     const tasksData = readTasks();
     const now = new Date().toISOString();
@@ -36,7 +58,8 @@ function createTask(req, res) {
         updated_at: now,
         task_level: questLevel,
         status_history: [{ status: 'todo', at: now, note: null }],
-        rpg: { xp_awarded: false, last_reward_at: null }
+        rpg: { xp_awarded: false, last_reward_at: null },
+        campaign_id: campaignId
     };
     if (req.user && typeof req.user.id === 'number') newTask.owner_id = req.user.id;
     else {
@@ -299,6 +322,20 @@ function updateTask(req, res) {
         if (typeof req.body.due_date !== 'string') return sendError(res, 400, 'Invalid due_date');
         target.due_date = req.body.due_date;
     }
+    if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'campaign_id')) {
+        const rawCampaign = req.body.campaign_id;
+        if (rawCampaign === null) {
+            target.campaign_id = null;
+        } else {
+            const numericCampaign = Number(rawCampaign);
+            if (!Number.isInteger(numericCampaign) || numericCampaign <= 0) return sendError(res, 400, 'Invalid campaign_id');
+            const campaignsData = readCampaigns();
+            const campaign = campaignsData.campaigns.find(c => c.id === numericCampaign && c.owner_id === req.user.id && !c.archived);
+            if (!campaign) return sendError(res, 404, 'Campaign not found');
+            target.campaign_id = numericCampaign;
+        }
+    }
+    target.updated_at = new Date().toISOString();
     try {
         writeTasks(tasks);
         res.json(serializeTask(target));
