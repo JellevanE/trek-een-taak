@@ -18,6 +18,7 @@ import {
     getNextPriority,
     getNextLevel
 } from './questHelpers';
+import { useSmoothDragQuests } from './useSmoothDragQuests';
 
 export const useQuests = ({
     token,
@@ -52,11 +53,6 @@ export const useQuests = ({
     const [sideQuestDescriptionMap, setSideQuestDescriptionMap] = useState({});
     const [addingSideQuestTo, setAddingSideQuestTo] = useState(null);
     const [collapsedMap, setCollapsedMap] = useState({});
-    const [draggedQuestId, setDraggedQuestId] = useState(null);
-    const [dragOverQuestId, setDragOverQuestId] = useState(null);
-    const [dragPosition, setDragPosition] = useState(null);
-    const [draggedSideQuest, setDraggedSideQuest] = useState(null);
-    const [sideQuestDragOver, setSideQuestDragOver] = useState({ questId: null, sideQuestId: null, position: null });
     const addInputRefs = useRef({});
     const undoTimersRef = useRef({});
     const completedCollapseTimersRef = useRef({});
@@ -66,6 +62,7 @@ export const useQuests = ({
     const [glowQuests, setGlowQuests] = useState({});
     const [celebratingQuests, setCelebratingQuests] = useState({});
     const [spawnQuests, setSpawnQuests] = useState({});
+    const smoothDrag = useSmoothDragQuests({ quests, setQuests });
 
     useEffect(() => {
         if (selectedQuestId !== null) {
@@ -311,153 +308,6 @@ export const useQuests = ({
         }
     }, [ensureQuestExpanded, findQuestById, handleSelectSideQuest]);
 
-    const handleDragStart = useCallback((event, questId) => {
-        setDraggedQuestId(questId);
-        setDragOverQuestId(null);
-        setDragPosition(null);
-        event.dataTransfer.effectAllowed = 'move';
-        try {
-            event.dataTransfer.setData('text/plain', String(questId));
-        } catch (error) {
-            console.error(error);
-        }
-    }, []);
-
-    const handleDragEnd = useCallback(() => {
-        setDraggedQuestId(null);
-        setDragOverQuestId(null);
-        setDragPosition(null);
-    }, []);
-
-    const handleDragOver = useCallback((event, questId) => {
-        if (draggedSideQuest) return;
-        event.preventDefault();
-        const rect = event.currentTarget.getBoundingClientRect();
-        const offsetY = event.clientY - rect.top;
-
-        let pos = null;
-        if (offsetY < rect.height * 0.2) {
-            pos = 'above';
-        } else if (offsetY > rect.height * 0.8) {
-            pos = 'below';
-        }
-
-        if (pos) {
-            setDragOverQuestId(questId);
-            setDragPosition(pos);
-        }
-    }, [draggedSideQuest]);
-
-    const handleDragLeave = useCallback(() => {
-        setDragOverQuestId(null);
-        setDragPosition(null);
-    }, []);
-
-    const handleDrop = useCallback((event, targetQuestId) => {
-        event.preventDefault();
-        if (draggedSideQuest) return;
-        const sourceId = draggedQuestId || event.dataTransfer.getData('text/plain');
-        if (!sourceId) return;
-        if (idsMatch(sourceId, targetQuestId)) {
-            setDraggedQuestId(null);
-            setDragOverQuestId(null);
-            setDragPosition(null);
-            return;
-        }
-        setQuests((prev) => {
-            const copy = [...prev];
-            const fromIdx = copy.findIndex((task) => idsMatch(task.id, sourceId));
-            const toIdx = copy.findIndex((task) => idsMatch(task.id, targetQuestId));
-            if (fromIdx === -1 || toIdx === -1) return prev;
-            const [moved] = copy.splice(fromIdx, 1);
-            const insertAt = dragPosition === 'above' ? toIdx : toIdx + 1;
-            const adjustedIndex = fromIdx < insertAt ? insertAt - 1 : insertAt;
-            copy.splice(adjustedIndex, 0, moved);
-            return copy;
-        });
-        setDraggedQuestId(null);
-        setDragOverQuestId(null);
-        setDragPosition(null);
-    }, [dragPosition, draggedQuestId, draggedSideQuest]);
-
-    const handleSideQuestDragStart = useCallback((event, questId, sideQuestId) => {
-        setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
-        setDraggedSideQuest({ taskId: questId, subId: sideQuestId });
-        event.dataTransfer.effectAllowed = 'move';
-        try {
-            event.dataTransfer.setData('text/plain', `${questId}:${sideQuestId}`);
-        } catch (error) {
-            console.error(error);
-        }
-    }, []);
-
-    const handleSideQuestDragEnd = useCallback(() => {
-        setDraggedSideQuest(null);
-        setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
-    }, []);
-
-    const handleSideQuestDragOver = useCallback((event, questId, sideQuestId) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const rect = event.currentTarget.getBoundingClientRect();
-        const offsetY = event.clientY - rect.top;
-
-        let pos = null;
-        if (offsetY < rect.height * 0.2) {
-            pos = 'above';
-        } else if (offsetY > rect.height * 0.8) {
-            pos = 'below';
-        }
-
-        if (pos) {
-            setSideQuestDragOver({ questId, sideQuestId, position: pos });
-        }
-    }, []);
-
-    const handleSideQuestDrop = useCallback((event, questId, sideQuestId) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const srcData = draggedSideQuest || (() => {
-            try {
-                return event.dataTransfer.getData('text/plain');
-            } catch {
-                return null;
-            }
-        })();
-        if (!srcData) return;
-        let srcTaskId;
-        let srcSubId;
-        if (typeof srcData === 'object' && srcData.taskId) {
-            srcTaskId = srcData.taskId;
-            srcSubId = srcData.subId;
-        } else if (typeof srcData === 'string') {
-            const parts = srcData.split(':');
-            srcTaskId = parts[0];
-            srcSubId = parts[1];
-        }
-        if (!srcTaskId || !srcSubId) return;
-        if (!idsMatch(srcTaskId, questId)) {
-            setDraggedSideQuest(null);
-            setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
-            return;
-        }
-
-        setQuests((prev) => prev.map((task) => {
-            if (!idsMatch(task.id, questId)) return task;
-            const subs = Array.isArray(task.side_quests) ? [...task.side_quests] : [];
-            const fromIdx = subs.findIndex((s) => idsMatch(s.id, srcSubId));
-            const toIdx = subs.findIndex((s) => idsMatch(s.id, sideQuestId));
-            if (fromIdx === -1 || toIdx === -1) return task;
-            const [moved] = subs.splice(fromIdx, 1);
-            const insertAt = sideQuestDragOver.position === 'above' ? toIdx : toIdx + 1;
-            const adjusted = fromIdx < insertAt ? insertAt - 1 : insertAt;
-            subs.splice(adjusted, 0, moved);
-            return { ...task, side_quests: subs };
-        }));
-        setDraggedSideQuest(null);
-        setSideQuestDragOver({ questId: null, sideQuestId: null, position: null });
-    }, [draggedSideQuest, sideQuestDragOver]);
-
     const scheduleQuestUndo = useCallback((quest) => {
         if (!quest) return;
         const snapshot = cloneQuestSnapshot(quest);
@@ -674,9 +524,11 @@ export const useQuests = ({
         }, 0);
     }, []);
 
-    const handleSideQuestEditChange = useCallback((event) => {
-        const { value } = event.target;
-        setEditingSideQuest((prev) => (prev ? { ...prev, description: value } : prev));
+    const handleSideQuestEditChange = useCallback((input) => {
+        const nextValue = typeof input === 'string'
+            ? input
+            : (input && input.target ? input.target.value : '');
+        setEditingSideQuest((prev) => (prev ? { ...prev, description: nextValue } : prev));
     }, []);
 
     const cancelSideQuestEdit = useCallback(() => {
@@ -1090,16 +942,6 @@ export const useQuests = ({
         setAddingSideQuestTo,
         collapsedMap,
         setCollapsedMap,
-        draggedQuestId,
-        setDraggedQuestId,
-        dragOverQuestId,
-        setDragOverQuestId,
-        dragPosition,
-        setDragPosition,
-        draggedSideQuest,
-        setDraggedSideQuest,
-        sideQuestDragOver,
-        setSideQuestDragOver,
         addInputRefs,
         undoTimersRef,
         completedCollapseTimersRef,
@@ -1115,6 +957,7 @@ export const useQuests = ({
         setCelebratingQuests,
         spawnQuests,
         setSpawnQuests,
+        smoothDrag,
         addTask,
         addSideQuest,
         toggleCollapse,
@@ -1125,15 +968,6 @@ export const useQuests = ({
         findQuestById,
         moveQuestSelection,
         selectFirstSideQuest,
-        handleDragStart,
-        handleDragEnd,
-        handleDragOver,
-        handleDragLeave,
-        handleDrop,
-        handleSideQuestDragStart,
-        handleSideQuestDragEnd,
-        handleSideQuestDragOver,
-        handleSideQuestDrop,
         scheduleQuestUndo,
         dismissUndoEntry,
         restoreQuestFromSnapshot,

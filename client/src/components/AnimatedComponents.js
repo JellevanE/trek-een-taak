@@ -1,4 +1,5 @@
-import { useSpring, animated, config } from '@react-spring/web';
+import { useEffect } from 'react';
+import { useSpring, animated, config, to } from '@react-spring/web';
 
 /**
  * AnimatedQuestCard - Wraps quest cards with entrance/exit animations
@@ -9,34 +10,46 @@ import { useSpring, animated, config } from '@react-spring/web';
  * </AnimatedQuestCard>
  */
 export const AnimatedQuestCard = ({ children, isNew = false, isCompleting = false }) => {
-    // Entrance animation for new quests
-    const entranceSpring = useSpring({
-        from: { 
-            opacity: 0, 
-            transform: 'scale(0.85) translateY(-20px)',
-        },
-        to: { 
-            opacity: 1, 
-            transform: 'scale(1) translateY(0px)',
-        },
-        config: config.wobbly, // Bouncy, playful
-    });
+    const [entranceSpring, entranceApi] = useSpring(() => ({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        config: config.wobbly,
+    }));
 
-    // Celebration animation for completing
+    useEffect(() => {
+        if (!isNew) {
+            entranceApi.set({
+                opacity: 1,
+                y: 0,
+                scale: 1,
+            });
+            return;
+        }
+
+        entranceApi.set({
+            opacity: 0,
+            y: -20,
+            scale: 0.85,
+        });
+        entranceApi.start({
+            opacity: 1,
+            y: 0,
+            scale: 1,
+        });
+    }, [isNew, entranceApi]);
+
     const celebrationSpring = useSpring({
-        from: { scale: 1 },
-        to: { scale: isCompleting ? 1.05 : 1 },
+        scale: isCompleting ? 1.05 : 1,
         config: config.gentle,
     });
 
-    // Combine animations
     const style = {
-        ...entranceSpring,
-        ...(isCompleting && {
-            transform: entranceSpring.transform.to(
-                t => `${t} scale(${celebrationSpring.scale.get()})`
-            )
-        })
+        opacity: entranceSpring.opacity,
+        transform: to(
+            [entranceSpring.y, entranceSpring.scale, celebrationSpring.scale],
+            (y, entranceScale, celebrationScale) => `translateY(${y}px) scale(${entranceScale * celebrationScale})`
+        ),
     };
 
     return <animated.div style={style}>{children}</animated.div>;
@@ -48,7 +61,14 @@ export const AnimatedQuestCard = ({ children, isNew = false, isCompleting = fals
  * Usage:
  * <AnimatedProgressBar percent={questProgress} color={progressColor(questProgress)} />
  */
-export const AnimatedProgressBar = ({ percent = 0, color = '#00d4ff' }) => {
+export const AnimatedProgressBar = ({
+    percent = 0,
+    color = '#00d4ff',
+    className = 'quest-progress-bar',
+    style = {},
+    ariaProps = {},
+    children = null
+}) => {
     const spring = useSpring({
         width: `${percent}%`,
         background: color,
@@ -56,13 +76,18 @@ export const AnimatedProgressBar = ({ percent = 0, color = '#00d4ff' }) => {
     });
 
     return (
-        <div className="quest-progress-bar" style={{ 
-            height: '10px', 
-            background: 'rgba(255,255,255,0.05)', 
-            borderRadius: '999px', 
-            overflow: 'hidden',
-            position: 'relative',
-        }}>
+        <div
+            className={className}
+            style={{
+                height: '10px',
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '999px',
+                overflow: 'hidden',
+                position: 'relative',
+                ...style
+            }}
+            {...ariaProps}
+        >
             <animated.div 
                 style={{
                     ...spring,
@@ -70,6 +95,7 @@ export const AnimatedProgressBar = ({ percent = 0, color = '#00d4ff' }) => {
                     borderRadius: '999px',
                 }}
             />
+            {children}
         </div>
     );
 };
@@ -146,14 +172,19 @@ export const AnimatedLevelUp = ({ level, onComplete }) => {
         config: config.wobbly,
     });
 
+    const transformSpring = to(
+        [spring.scale, spring.rotate],
+        (scale, rotate) => `translate(-50%, -50%) scale(${scale}) rotate(${rotate}deg)`
+    );
+
     return (
         <animated.div
             style={{
-                ...spring,
                 position: 'fixed',
                 top: '50%',
                 left: '50%',
-                transform: spring.scale.to(s => `translate(-50%, -50%) scale(${s}) rotate(${spring.rotate.get()}deg)`),
+                transform: transformSpring,
+                opacity: spring.opacity,
                 zIndex: 9999,
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 padding: '32px 48px',

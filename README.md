@@ -55,46 +55,18 @@ Notes and maintenance
 - Debug helpers (`/api/debug/*`) let you clear/seed quests or tweak XP while prototyping.
 - Configure JWT secrets with environment variables before starting the API: set `JWT_SECRET` for a single value, `JWT_SECRETS` for a comma-delimited rotation list, or `JWT_SECRET_FILE` to load the primary secret from disk. The server refuses to boot without a configured secret outside of test runs.
 
-Deno task runner
-----------------
-Install [Deno](https://deno.land/) (v1.40 or newer) to take advantage of repository-wide automation.
 
-### Testing and validation
-- `deno task validate` — runs backend Jest specs followed by the React test suite (single pass).
-- `deno task validate:ci` — runs the validate pipeline and finishes with `client` production build.
-- `deno task test:server` — executes only the server tests.
-- `deno task test:client` — executes only the client tests (non-watch mode).
-- `deno task build:client` — builds the frontend bundle for release verification.
 
-### Data backup and restore
-- `deno task backup` — creates a timestamped backup of all JSON data files (`tasks.json`, `users.json`, `campaigns.json`).
-- `deno task backup:list` — lists all available backups with timestamps and sizes.
-- `deno task backup:keep` — creates a backup and automatically removes old backups, keeping only the 10 most recent.
+# To do
 
-For restore operations or advanced options:
-```bash
-# Restore a specific backup
-deno run --allow-env --allow-read --allow-write tools/backup.ts --restore 2024-01-15_14-30-00
-
-# Create backup and keep only 5 most recent
-deno run --allow-env --allow-read --allow-write tools/backup.ts --keep 5
-
-# Show help
-deno run --allow-env --allow-read --allow-write tools/backup.ts --help
-```
-
-Backups are stored in the `backups/` directory (git-ignored). When restoring, the current state is automatically backed up to a `*_pre-restore` directory for safety.
-
-Task definitions live in `deno.jsonc`. The orchestrator script (`tools/validate.ts`) uses Deno's permissioned process runner to provide consistent local and CI validation workflows without adding further Node tooling.
-
-To do
------
 - [x] Set up Deno automations and validations
-- [x] Split up accumulated front end state management in `App.js` into multiple custom hooks
-- [x] Add automated backup and restore functionality
+- [x] Split up accumulated front end state management in `App.js` into multiple custom hooks 
+- [x] Show panel for keyboard shortcuts
+- [ ] Improve gamifacation and rpg elements (related to campaigns and classes)
+- [ ] Migrate front end animations to React Spring
+- [ ] API layer abstractions
+- [ ] Improved error boundaries (server side)
+- [ ] Migrate to scalable database SQLite / Dynamo / MongoDB ?
 
-Known issues
-------------
-- `client/src/App.js:67-89` — any network failure while fetching tasks clears the token and logs the player out. Differentiate 401 responses from transient errors so brief outages do not kick people back to the login screen.
 
-If you'd like, I can further split the root README into a short landing page and detailed docs per-package.
+

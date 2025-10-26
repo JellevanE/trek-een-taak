@@ -5,8 +5,8 @@
       "username": "local",
       "password_hash": "",
       "email": null,
-      "created_at": "2025-10-20T09:27:12.861Z",
-      "updated_at": "2025-10-20T09:27:12.861Z",
+      "created_at": "2025-10-26T17:10:00.000Z",
+      "updated_at": "2025-10-26T17:10:00.000Z",
       "profile": {
         "display_name": "Local User",
         "avatar": null,
@@ -35,7 +35,63 @@
         "flags": {},
         "metrics": {}
       }
+    },
+    {
+      "id": 2,
+      "username": "bbbbaby",
+      "password_hash": "$2a$10$C9mmKKjssoODmFkeM77M/uPHTilmnuViFOMqIP7WJNjn.1uU6f0ny",
+      "email": null,
+      "created_at": "2025-10-26T16:35:01.450Z",
+      "updated_at": "2025-10-26T16:35:01.450Z",
+      "profile": {
+        "display_name": "bbbbaby",
+        "avatar": null,
+        "class": "rogue",
+        "bio": "bbbbaaaby"
+      },
+      "rpg": {
+        "level": 1,
+        "xp": 50,
+        "hp": 20,
+        "mp": 5,
+        "coins": 0,
+        "streak": 0,
+        "achievements": [],
+        "inventory": {
+          "items": []
+        },
+        "xp_log": [
+          {
+            "amount": 50,
+            "reason": "task_complete",
+            "message": "Quest complete +50 XP",
+            "metadata": {
+              "task_id": 18,
+              "task_level": 1,
+              "priority": "medium"
+            },
+            "at": "2025-10-26T21:16:39.801Z",
+            "level_before": 1,
+            "level_after": 1,
+            "xp_before": 0,
+            "xp_after": 50,
+            "xp_into_level": 50,
+            "xp_for_level": 100,
+            "xp_to_next": 50,
+            "leveled_up": false
+          }
+        ],
+        "last_daily_reward_at": null,
+        "last_xp_award_at": "2025-10-26T21:16:39.801Z",
+        "counters": {
+          "tasks_completed": 1,
+          "subtasks_completed": 0,
+          "daily_rewards_claimed": 0
+        },
+        "flags": {},
+        "metrics": {}
+      }
     }
   ],
-  "nextId": 2
+  "nextId": 3
 }

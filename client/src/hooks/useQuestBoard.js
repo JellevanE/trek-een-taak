@@ -5,7 +5,7 @@ import { usePlayerStats } from './usePlayerStats';
 import { useQuests } from './useQuests';
 
 export const useQuestBoard = ({ token, setToken }) => {
-    const { toasts, pushToast } = useToasts();
+    const { toasts, pushToast, dismissToast } = useToasts();
 
     const getAuthHeaders = useCallback((extra = {}) => {
         const base = { 'Content-Type': 'application/json' };
@@ -50,6 +50,7 @@ export const useQuestBoard = ({ token, setToken }) => {
         ...playerStatsApi,
         ...questsApi,
         toasts,
+        dismissToast,
         todayKey,
         dailyClaimed,
         xpPercent
