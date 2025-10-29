@@ -334,7 +334,7 @@ const QuestCard = React.memo(({
                                                                             }
                                                                         }}
                                                                     >
-                                                                        <div style={{display:'flex', alignItems:'center', gap:8, flex:1}}>
+                                                                        <div style={{display:'flex', alignItems:'center', gap:8, flex:1, minWidth:0, flexWrap:'wrap'}}>
                                                                             <button
                                                                                 type="button"
                                                                                 className="drag-handle"
@@ -396,7 +396,7 @@ const QuestCard = React.memo(({
                                                                                 </div>
                                                                             )}
                                                                         </div>
-                                                                        <div>
+                                                                        <div className="task-row-actions">
                                                                             {sideEditing ? (
                                                                                 <>
                                                                                     <button

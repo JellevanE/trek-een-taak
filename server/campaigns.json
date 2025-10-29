@@ -1,15 +1,4 @@
 {
-  "campaigns": [
-    {
-      "id": 1,
-      "name": "SP B",
-      "description": "",
-      "image_url": null,
-      "owner_id": 3,
-      "archived": false,
-      "created_at": "2025-10-26T16:15:37.647Z",
-      "updated_at": "2025-10-26T16:15:37.647Z"
-    }
-  ],
-  "nextId": 2
+  "campaigns": [],
+  "nextId": 1
 }

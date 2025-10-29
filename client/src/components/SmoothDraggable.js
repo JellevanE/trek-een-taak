@@ -118,7 +118,14 @@ const isInteractiveElement = (target) => {
     return false;
 };
 
-export const SmoothDraggableList = ({ items, onReorder, renderItem, itemHeight = 100, itemGap = 0 }) => {
+export const SmoothDraggableList = ({
+    items,
+    onReorder,
+    renderItem,
+    itemHeight = 100,
+    itemGap = 0,
+    refreshToken = 0
+}) => {
     const itemsRef = useRef(items);
     const keys = useMemo(() => {
         return items.map((item, index) => getItemKey(item, index));
@@ -136,10 +143,25 @@ export const SmoothDraggableList = ({ items, onReorder, renderItem, itemHeight =
     const dragCancelledRef = useRef(false);
     const dragStateRef = useRef({ key: null, baseOffset: 0, movementAtBase: 0, anchor: 0 });
 
+    const hasResizeObserver = typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined';
+
     const getHeight = useCallback((key) => {
         const stored = heightsRef.current.get(key);
         return stored && stored > 0 ? stored : itemHeight;
     }, [itemHeight]);
+
+    const measureNode = useCallback((key) => {
+        const node = nodesRef.current.get(key);
+        if (!node) return false;
+        const rect = node.getBoundingClientRect?.();
+        if (!rect || !rect.height) return false;
+        const prev = heightsRef.current.get(key) ?? 0;
+        if (Math.abs(prev - rect.height) > 0.5) {
+            heightsRef.current.set(key, rect.height);
+            return true;
+        }
+        return false;
+    }, []);
 
     const [springs, api] = useSprings(
         items.length,
@@ -172,6 +194,18 @@ export const SmoothDraggableList = ({ items, onReorder, renderItem, itemHeight =
             };
         });
     }, [api, getHeight, itemGap, itemHeight]);
+
+    const measureAllNodes = useCallback(() => {
+        let changed = false;
+        keysRef.current.forEach((key) => {
+            if (measureNode(key)) {
+                changed = true;
+            }
+        });
+        if (changed) {
+            updateLayout(true);
+        }
+    }, [measureNode, updateLayout]);
 
     useEffect(() => {
         itemsRef.current = items;
@@ -215,41 +249,50 @@ export const SmoothDraggableList = ({ items, onReorder, renderItem, itemHeight =
         nodesRef.current.clear();
     }, []);
 
-    const registerNode = useCallback((key) => (node) => {
-        const existing = observersRef.current.get(key);
-        if (existing) {
-            existing.disconnect();
-            observersRef.current.delete(key);
+    useLayoutEffect(() => {
+        measureAllNodes();
+    }, [items, measureAllNodes, refreshToken]);
+
+    useEffect(() => {
+        if (!hasResizeObserver && typeof window !== 'undefined') {
+            const handle = () => measureAllNodes();
+            window.addEventListener('resize', handle);
+            return () => window.removeEventListener('resize', handle);
         }
-        if (!node) {
-            const existingObserver = observersRef.current.get(key);
-            if (existingObserver) {
-                existingObserver.disconnect();
+        return undefined;
+    }, [hasResizeObserver, measureAllNodes]);
+
+    const registerNode = useCallback((key) => (node) => {
+        const teardown = () => {
+            const observer = observersRef.current.get(key);
+            if (observer) {
+                observer.disconnect();
                 observersRef.current.delete(key);
             }
+        };
+
+        teardown();
+
+        if (!node) {
             nodesRef.current.delete(key);
             return;
         }
 
         nodesRef.current.set(key, node);
+        if (measureNode(key)) {
+            updateLayout(true);
+        }
 
-        const measure = () => {
-            const rect = node.getBoundingClientRect();
-            if (!rect) return;
-            const prev = heightsRef.current.get(key) ?? 0;
-            if (Math.abs(prev - rect.height) > 0.5) {
-                heightsRef.current.set(key, rect.height);
-                updateLayout(true);
-            }
-        };
-
-        measure();
-        if (typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined') {
-            const observer = new window.ResizeObserver(() => measure());
+        if (hasResizeObserver) {
+            const observer = new window.ResizeObserver(() => {
+                if (measureNode(key)) {
+                    updateLayout(true);
+                }
+            });
             observer.observe(node);
             observersRef.current.set(key, observer);
         }
-    }, [updateLayout]);
+    }, [hasResizeObserver, measureNode, updateLayout]);
 
     const bind = useDrag(
         ({ args: [itemKey], active, movement: [, my], tap, first, event, cancel }) => {
@@ -287,13 +330,13 @@ export const SmoothDraggableList = ({ items, onReorder, renderItem, itemHeight =
             }
 
             // If this gesture was cancelled, ignore all subsequent events
-                if (dragCancelledRef.current) {
-                    if (!active) {
-                        dragCancelledRef.current = false;
-                        dragStateRef.current = { key: null, baseOffset: 0, movementAtBase: 0, anchor: 0 };
-                    }
-                    return;
+            if (dragCancelledRef.current) {
+                if (!active) {
+                    dragCancelledRef.current = false;
+                    dragStateRef.current = { key: null, baseOffset: 0, movementAtBase: 0, anchor: 0 };
                 }
+                return;
+            }
 
             // If gesture ended and we're not dragging, just clean up
             if (!active && !isDraggingRef.current) {
@@ -413,6 +456,22 @@ export const SmoothDraggableList = ({ items, onReorder, renderItem, itemHeight =
 
             if (!active && isDraggingRef.current) {
                 isDraggingRef.current = false;
+                
+                // Snap all items to their final grid positions
+                const { map: finalMap } = buildOffsets(order.current, getHeight, itemGap);
+                api.start((index) => {
+                    const key = keysRef.current[index];
+                    const offset = finalMap.get(key) ?? index * (itemHeight + itemGap);
+                    return {
+                        y: offset,
+                        scale: 1,
+                        zIndex: 0,
+                        shadow: 1,
+                        immediate: false,
+                        config: RESTING_CONFIG,
+                    };
+                });
+                
                 if (orderChangedRef.current) {
                     const reorderedItems = order.current
                         .map((key) => {
@@ -485,7 +544,14 @@ export const SmoothDraggableList = ({ items, onReorder, renderItem, itemHeight =
  * 
  * Optimized for smaller items with tighter spacing.
  */
-export const SmoothDraggableSideQuests = ({ items, onReorder, renderItem, itemHeight = 60, itemGap = 0 }) => {
+export const SmoothDraggableSideQuests = ({
+    items,
+    onReorder,
+    renderItem,
+    itemHeight = 60,
+    itemGap = 0,
+    refreshToken = 0
+}) => {
     const itemsRef = useRef(items);
     const keys = useMemo(() => items.map((item, index) => getItemKey(item, index)), [items]);
     const keysRef = useRef(keys);
@@ -501,10 +567,25 @@ export const SmoothDraggableSideQuests = ({ items, onReorder, renderItem, itemHe
     const dragCancelledRef = useRef(false);
     const dragStateRef = useRef({ key: null, baseOffset: 0, movementAtBase: 0, anchor: 0 });
 
+    const hasResizeObserver = typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined';
+
     const getHeight = useCallback((key) => {
         const stored = heightsRef.current.get(key);
         return stored && stored > 0 ? stored : itemHeight;
     }, [itemHeight]);
+
+    const measureNode = useCallback((key) => {
+        const node = nodesRef.current.get(key);
+        if (!node) return false;
+        const rect = node.getBoundingClientRect?.();
+        if (!rect || !rect.height) return false;
+        const prev = heightsRef.current.get(key) ?? 0;
+        if (Math.abs(prev - rect.height) > 0.5) {
+            heightsRef.current.set(key, rect.height);
+            return true;
+        }
+        return false;
+    }, []);
 
     const [springs, api] = useSprings(
         items.length,
@@ -537,6 +618,18 @@ export const SmoothDraggableSideQuests = ({ items, onReorder, renderItem, itemHe
             };
         });
     }, [api, getHeight, itemGap, itemHeight]);
+
+    const measureAllNodes = useCallback(() => {
+        let changed = false;
+        keysRef.current.forEach((key) => {
+            if (measureNode(key)) {
+                changed = true;
+            }
+        });
+        if (changed) {
+            updateLayout(true);
+        }
+    }, [measureNode, updateLayout]);
 
     useEffect(() => {
         itemsRef.current = items;
@@ -578,41 +671,50 @@ export const SmoothDraggableSideQuests = ({ items, onReorder, renderItem, itemHe
         nodesRef.current.clear();
     }, []);
 
-    const registerNode = useCallback((key) => (node) => {
-        const existing = observersRef.current.get(key);
-        if (existing) {
-            existing.disconnect();
-            observersRef.current.delete(key);
+    useLayoutEffect(() => {
+        measureAllNodes();
+    }, [items, measureAllNodes, refreshToken]);
+
+    useEffect(() => {
+        if (!hasResizeObserver && typeof window !== 'undefined') {
+            const handle = () => measureAllNodes();
+            window.addEventListener('resize', handle);
+            return () => window.removeEventListener('resize', handle);
         }
-        if (!node) {
-            const existingObserver = observersRef.current.get(key);
-            if (existingObserver) {
-                existingObserver.disconnect();
+        return undefined;
+    }, [hasResizeObserver, measureAllNodes]);
+
+    const registerNode = useCallback((key) => (node) => {
+        const teardown = () => {
+            const observer = observersRef.current.get(key);
+            if (observer) {
+                observer.disconnect();
                 observersRef.current.delete(key);
             }
+        };
+
+        teardown();
+
+        if (!node) {
             nodesRef.current.delete(key);
             return;
         }
 
         nodesRef.current.set(key, node);
+        if (measureNode(key)) {
+            updateLayout(true);
+        }
 
-        const measure = () => {
-            const rect = node.getBoundingClientRect();
-            if (!rect) return;
-            const prev = heightsRef.current.get(key) ?? 0;
-            if (Math.abs(prev - rect.height) > 0.5) {
-                heightsRef.current.set(key, rect.height);
-                updateLayout(true);
-            }
-        };
-
-        measure();
-        if (typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined') {
-            const observer = new window.ResizeObserver(() => measure());
+        if (hasResizeObserver) {
+            const observer = new window.ResizeObserver(() => {
+                if (measureNode(key)) {
+                    updateLayout(true);
+                }
+            });
             observer.observe(node);
             observersRef.current.set(key, observer);
         }
-    }, [updateLayout]);
+    }, [hasResizeObserver, measureNode, updateLayout]);
 
     const bind = useDrag(
         ({ args: [itemKey], active, movement: [, my], tap, first, event, cancel }) => {
@@ -776,6 +878,22 @@ export const SmoothDraggableSideQuests = ({ items, onReorder, renderItem, itemHe
 
             if (!active && isDraggingRef.current) {
                 isDraggingRef.current = false;
+                
+                // Snap all items to their final grid positions
+                const { map: finalMap } = buildOffsets(order.current, getHeight, itemGap);
+                api.start((index) => {
+                    const key = keysRef.current[index];
+                    const offset = finalMap.get(key) ?? index * (itemHeight + itemGap);
+                    return {
+                        y: offset,
+                        scale: 1,
+                        zIndex: 0,
+                        opacity: 1,
+                        immediate: false,
+                        config: RESTING_CONFIG,
+                    };
+                });
+                
                 if (orderChangedRef.current) {
                     const reorderedItems = order.current
                         .map((key) => {

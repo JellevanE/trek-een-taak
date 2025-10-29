@@ -63,6 +63,42 @@ export const useQuests = ({
     const [celebratingQuests, setCelebratingQuests] = useState({});
     const [spawnQuests, setSpawnQuests] = useState({});
     const smoothDrag = useSmoothDragQuests({ quests, setQuests });
+    const { refresh: refreshLayout } = smoothDrag || {};
+    const layoutRefreshRaf = useRef(null);
+
+    const scheduleLayoutRefresh = useCallback(() => {
+        if (typeof refreshLayout !== 'function') return;
+        if (typeof window === 'undefined' || typeof window.requestAnimationFrame !== 'function') {
+            refreshLayout();
+            return;
+        }
+        if (layoutRefreshRaf.current) {
+            window.cancelAnimationFrame(layoutRefreshRaf.current);
+        }
+        layoutRefreshRaf.current = window.requestAnimationFrame(() => {
+            layoutRefreshRaf.current = null;
+            refreshLayout();
+        });
+    }, [refreshLayout]);
+
+    useEffect(() => () => {
+        if (layoutRefreshRaf.current) {
+            window.cancelAnimationFrame(layoutRefreshRaf.current);
+        }
+    }, []);
+
+    useEffect(() => {
+        scheduleLayoutRefresh();
+    }, [
+        scheduleLayoutRefresh,
+        quests,
+        collapsedMap,
+        selectedQuestId,
+        selectedSideQuest,
+        editingQuest,
+        editingSideQuest,
+        addingSideQuestTo
+    ]);
 
     useEffect(() => {
         if (selectedQuestId !== null) {
@@ -232,13 +268,21 @@ export const useQuests = ({
                     }
                 }, 10);
                 refreshCampaigns();
+                // Refresh layout to remeasure quest card heights after adding side quest
+                if (refreshLayout) {
+                    setTimeout(() => refreshLayout(), 50);
+                }
             })
             .catch((error) => console.error('Error adding side-quest:', error));
-    }, [getAuthHeaders, refreshCampaigns, sideQuestDescriptionMap]);
+    }, [getAuthHeaders, refreshCampaigns, refreshLayout, sideQuestDescriptionMap]);
 
     const toggleCollapse = useCallback((questId) => {
         setCollapsedMap((prev) => ({ ...prev, [questId]: !prev[questId] }));
-    }, []);
+        // Refresh layout after collapse/expand animation
+        if (refreshLayout) {
+            setTimeout(() => refreshLayout(), 300);
+        }
+    }, [refreshLayout]);
 
     const ensureQuestExpanded = useCallback((questId) => {
         setCollapsedMap((prev) => {
@@ -247,7 +291,11 @@ export const useQuests = ({
             copy[questId] = false;
             return copy;
         });
-    }, []);
+        // Refresh layout after expansion
+        if (refreshLayout) {
+            setTimeout(() => refreshLayout(), 300);
+        }
+    }, [refreshLayout]);
 
     const handleSelectQuest = useCallback((questId) => {
         if (questId === undefined || questId === null) return;
@@ -475,9 +523,13 @@ export const useQuests = ({
                     ensureQuestExpanded(taskId);
                 }
                 refreshCampaigns();
+                // Refresh layout to remeasure quest card heights after status change
+                if (refreshLayout) {
+                    setTimeout(() => refreshLayout(), 50);
+                }
             })
             .catch((error) => console.error('Error updating side-quest status:', error));
-    }, [ensureQuestExpanded, getAuthHeaders, refreshCampaigns]);
+    }, [ensureQuestExpanded, getAuthHeaders, refreshCampaigns, refreshLayout]);
 
     const updateSideQuest = useCallback((taskId, subTaskId, payload) => fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}`, {
         method: 'PUT',
@@ -489,8 +541,12 @@ export const useQuests = ({
             const normalized = normalizeQuest(updatedTask);
             setQuests((prev) => prev.map((quest) => (quest.id === taskId ? normalized : quest)));
             refreshCampaigns();
+            // Refresh layout to remeasure quest card heights after update
+            if (refreshLayout) {
+                setTimeout(() => refreshLayout(), 50);
+            }
             return normalized;
-        }), [getAuthHeaders, refreshCampaigns]);
+        }), [getAuthHeaders, refreshCampaigns, refreshLayout]);
 
     const deleteSideQuest = useCallback((taskId, subTaskId) => {
         fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}`, { method: 'DELETE', headers: getAuthHeaders() })
@@ -505,9 +561,13 @@ export const useQuests = ({
                     setEditingSideQuest(null);
                 }
                 refreshCampaigns();
+                // Refresh layout to remeasure quest card heights after deletion
+                if (refreshLayout) {
+                    setTimeout(() => refreshLayout(), 50);
+                }
             })
             .catch((error) => console.error('Error deleting side-quest:', error));
-    }, [editingSideQuest, getAuthHeaders, refreshCampaigns, selectedSideQuest]);
+    }, [editingSideQuest, getAuthHeaders, refreshCampaigns, refreshLayout, selectedSideQuest]);
 
     const startEditingSideQuest = useCallback((questId, sideQuest) => {
         if (!sideQuest) return;

@@ -5,8 +5,8 @@
       "username": "local",
       "password_hash": "",
       "email": null,
-      "created_at": "2025-10-26T17:10:00.000Z",
-      "updated_at": "2025-10-26T17:10:00.000Z",
+      "created_at": "2025-10-26T21:30:09.569Z",
+      "updated_at": "2025-10-26T21:30:09.569Z",
       "profile": {
         "display_name": "Local User",
         "avatar": null,
@@ -38,20 +38,20 @@
     },
     {
       "id": 2,
-      "username": "bbbbaby",
-      "password_hash": "$2a$10$C9mmKKjssoODmFkeM77M/uPHTilmnuViFOMqIP7WJNjn.1uU6f0ny",
+      "username": "djoko",
+      "password_hash": "$2a$10$pafehiICEhutxmSU5NtjJeEwoiarns6rMQEUI.jQrUiJjA.xicd.i",
       "email": null,
-      "created_at": "2025-10-26T16:35:01.450Z",
-      "updated_at": "2025-10-26T16:35:01.450Z",
+      "created_at": "2025-10-26T21:45:20.429Z",
+      "updated_at": "2025-10-26T21:45:20.429Z",
       "profile": {
-        "display_name": "bbbbaby",
+        "display_name": "djoko",
         "avatar": null,
-        "class": "rogue",
-        "bio": "bbbbaaaby"
+        "class": "mage",
+        "bio": "BJLALALALA"
       },
       "rpg": {
         "level": 1,
-        "xp": 50,
+        "xp": 0,
         "hp": 20,
         "mp": 5,
         "coins": 0,
@@ -60,31 +60,11 @@
         "inventory": {
           "items": []
         },
-        "xp_log": [
-          {
-            "amount": 50,
-            "reason": "task_complete",
-            "message": "Quest complete +50 XP",
-            "metadata": {
-              "task_id": 18,
-              "task_level": 1,
-              "priority": "medium"
-            },
-            "at": "2025-10-26T21:16:39.801Z",
-            "level_before": 1,
-            "level_after": 1,
-            "xp_before": 0,
-            "xp_after": 50,
-            "xp_into_level": 50,
-            "xp_for_level": 100,
-            "xp_to_next": 50,
-            "leveled_up": false
-          }
-        ],
+        "xp_log": [],
         "last_daily_reward_at": null,
-        "last_xp_award_at": "2025-10-26T21:16:39.801Z",
+        "last_xp_award_at": null,
         "counters": {
-          "tasks_completed": 1,
+          "tasks_completed": 0,
           "subtasks_completed": 0,
           "daily_rewards_claimed": 0
         },

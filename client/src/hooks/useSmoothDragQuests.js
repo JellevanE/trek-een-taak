@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { SmoothDraggableList, SmoothDraggableSideQuests } from '../components/SmoothDraggable';
 
 /**
@@ -25,6 +25,9 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
     // Store quests in a ref so we can read the latest value without triggering re-memoization
     const questsRef = useRef(quests);
     questsRef.current = quests;
+    const [refreshToken, setRefreshToken] = useState(0);
+    const refreshTokenRef = useRef(refreshToken);
+    refreshTokenRef.current = refreshToken;
     
     // Handle quest reordering
     const handleQuestReorder = useCallback((reorderedQuests) => {
@@ -42,39 +45,48 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
         );
     }, [setQuests]);
 
+    const refreshLayouts = useCallback(() => {
+        setRefreshToken((prev) => prev + 1);
+    }, []);
+
     // Create stable wrapper components
     // These are created ONCE and never change
-    const components = useMemo(() => {
-        return {
-            // Component function reads from questsRef to get latest quests
-            QuestList: ({ renderItem, itemHeight = 100, itemGap = 0 }) => {
-                const currentQuests = questsRef.current;
-                return (
-                    <SmoothDraggableList
-                        items={currentQuests}
-                        onReorder={handleQuestReorder}
-                        renderItem={renderItem}
-                        itemHeight={itemHeight}
-                        itemGap={itemGap}
-                    />
-                );
-            },
+    const QuestList = useCallback(({ renderItem, itemHeight = 100, itemGap = 0 }) => {
+        const currentQuests = questsRef.current;
+        return (
+            <SmoothDraggableList
+                items={currentQuests}
+                onReorder={handleQuestReorder}
+                renderItem={renderItem}
+                itemHeight={itemHeight}
+                itemGap={itemGap}
+                refreshToken={refreshTokenRef.current}
+            />
+        );
+    }, [handleQuestReorder]);
 
-            SideQuestList: ({ questId, sideQuests, renderItem, itemHeight = 60, itemGap = 0 }) => {
-                return (
-                    <SmoothDraggableSideQuests
-                        items={sideQuests}
-                        onReorder={(reordered) => handleSideQuestReorder(questId, reordered)}
-                        renderItem={renderItem}
-                        itemHeight={itemHeight}
-                        itemGap={itemGap}
-                    />
-                );
-            },
-        };
-    }, [handleQuestReorder, handleSideQuestReorder]);
+    const SideQuestList = useCallback(({
+        questId,
+        sideQuests,
+        renderItem,
+        itemHeight = 60,
+        itemGap = 0
+    }) => (
+        <SmoothDraggableSideQuests
+            items={sideQuests}
+            onReorder={(reordered) => handleSideQuestReorder(questId, reordered)}
+            renderItem={renderItem}
+            itemHeight={itemHeight}
+            itemGap={itemGap}
+            refreshToken={refreshTokenRef.current}
+        />
+    ), [handleSideQuestReorder]);
 
     // Return the stable components directly
     // No need to create new wrappers - components read from questsRef
-    return components;
+    return useMemo(() => ({
+        QuestList,
+        SideQuestList,
+        refresh: refreshLayouts,
+    }), [QuestList, SideQuestList, refreshLayouts]);
 };
