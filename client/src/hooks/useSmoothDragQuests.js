@@ -70,7 +70,9 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
         sideQuests,
         renderItem,
         itemHeight = 60,
-        itemGap = 0
+        itemGap = 0,
+        maxContainerHeight = null,
+        footer = null
     }) => (
         <SmoothDraggableSideQuests
             items={sideQuests}
@@ -79,6 +81,8 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
             itemHeight={itemHeight}
             itemGap={itemGap}
             refreshToken={refreshTokenRef.current}
+            maxContainerHeight={maxContainerHeight}
+            footer={footer}
         />
     ), [handleSideQuestReorder]);
 

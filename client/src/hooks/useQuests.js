@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { apiFetch } from '../utils/api.js';
 import {
     normalizeQuest,
     normalizeQuestList,
@@ -17,8 +18,8 @@ import {
     calculateGlobalProgress,
     getNextPriority,
     getNextLevel
-} from './questHelpers';
-import { useSmoothDragQuests } from './useSmoothDragQuests';
+} from './questHelpers.js';
+import { useSmoothDragQuests } from './useSmoothDragQuests.js';
 
 export const useQuests = ({
     token,
@@ -110,31 +111,27 @@ export const useQuests = ({
         }
     }, [quests, selectedQuestId]);
 
-    const reloadTasks = useCallback((filterOverride = activeCampaignFilter) => {
-        if (!token) return Promise.resolve();
-        const headers = { Authorization: `Bearer ${token}` };
+    const reloadTasks = useCallback(async (filterOverride = activeCampaignFilter) => {
+        if (!token) return;
+        
         const url = getTasksEndpoint(filterOverride);
-        return fetch(url, { headers })
-            .then((res) => {
-                if (res.ok) return res.json();
-                if (res.status === 401) {
-                    onUnauthorized();
-                    setQuests([]);
-                    return null;
-                }
-                throw new Error(`Failed to refresh quests: ${res.status}`);
-            })
-            .then((data) => {
-                if (data) {
-                    const payload = data.tasks || data.quests || [];
-                    setQuests(normalizeQuestList(payload));
-                    refreshCampaigns();
-                }
-            })
-            .catch((error) => {
-                console.error('Error reloading quests:', error);
-                pushToast('Failed to refresh quests', 'error');
-            });
+        try {
+            const data = await apiFetch(
+                url,
+                { headers: { Authorization: `Bearer ${token}` } },
+                onUnauthorized
+            );
+            
+            if (data) {
+                const payload = data.tasks || data.quests || [];
+                setQuests(normalizeQuestList(payload));
+                refreshCampaigns();
+            }
+        } catch (error) {
+            console.error('Error reloading quests:', error);
+            pushToast('Failed to refresh quests', 'error');
+            setQuests([]);
+        }
     }, [activeCampaignFilter, getTasksEndpoint, onUnauthorized, pushToast, refreshCampaigns, token]);
 
     reloadTasksRef.current = reloadTasks;
@@ -145,93 +142,82 @@ export const useQuests = ({
             setPlayerStats(null);
             return;
         }
-        const headers = { Authorization: `Bearer ${token}` };
-        const url = getTasksEndpoint();
-        fetch(url, { headers })
-            .then((res) => {
-                if (res.ok) return res.json();
-                if (res.status === 401) {
-                    onUnauthorized();
-                    setQuests([]);
-                    return null;
-                }
-                const error = new Error(`Failed to fetch quests: ${res.status}`);
-                error.status = res.status;
-                throw error;
-            })
-            .then((data) => {
+        
+        const fetchQuests = async () => {
+            const url = getTasksEndpoint();
+            try {
+                const data = await apiFetch(
+                    url,
+                    { headers: { Authorization: `Bearer ${token}` } },
+                    onUnauthorized
+                );
+                
                 if (data) {
                     const payload = data.tasks || data.quests || [];
                     setQuests(normalizeQuestList(payload));
                 }
-            })
-            .catch((error) => {
-                if (error && error.status === 401) return;
+            } catch (error) {
                 console.error('Error fetching quests:', error);
-            });
+                setQuests([]);
+            }
+        };
+        
+        fetchQuests();
     }, [getTasksEndpoint, onUnauthorized, setPlayerStats, token]);
 
-    const addTask = useCallback(() => {
+    const addTask = useCallback(async () => {
         if (!description || description.trim() === '') return;
         const payload = { description, priority, task_level: taskLevel };
         if (taskCampaignSelection !== null) {
             payload.campaign_id = taskCampaignSelection;
         }
-        fetch('/api/tasks', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(payload)
-        })
-            .then((res) => {
-                if (res.ok) return res.json();
-                if (res.status === 401) {
-                    onUnauthorized();
-                    setQuests([]);
-                    throw new Error('Authentication expired');
+        
+        try {
+            const newQuest = await apiFetch(
+                '/api/tasks',
+                {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                },
+                onUnauthorized
+            );
+            
+            if (!newQuest) return;
+            const normalized = normalizeQuest(newQuest);
+            const matchesFilter =
+                activeCampaignFilter === null
+                || (activeCampaignFilter === 'uncategorized' && !normalized.campaign_id)
+                || (typeof activeCampaignFilter === 'number' && normalized.campaign_id === activeCampaignFilter);
+            if (matchesFilter) {
+                setQuests((prev) => [normalized, ...prev]);
+                if (normalized && normalized.id !== undefined && normalized.id !== null) {
+                    const questId = normalized.id;
+                    setSpawnQuests((prev) => ({ ...prev, [questId]: true }));
+                    setPulsingQuests((prev) => ({ ...prev, [questId]: 'spawn' }));
+                    setTimeout(() => {
+                        setSpawnQuests((prev) => {
+                            const copy = { ...prev };
+                            delete copy[questId];
+                            return copy;
+                        });
+                        setPulsingQuests((prev) => {
+                            const copy = { ...prev };
+                            delete copy[questId];
+                            return copy;
+                        });
+                    }, 650);
                 }
-                return res.json()
-                    .catch(() => ({}))
-                    .then((body) => {
-                        const error = new Error(body && body.error ? body.error : 'Failed to add quest');
-                        error.status = res.status;
-                        throw error;
-                    });
-            })
-            .then((newQuest) => {
-                if (!newQuest) return;
-                const normalized = normalizeQuest(newQuest);
-                const matchesFilter =
-                    activeCampaignFilter === null
-                    || (activeCampaignFilter === 'uncategorized' && !normalized.campaign_id)
-                    || (typeof activeCampaignFilter === 'number' && normalized.campaign_id === activeCampaignFilter);
-                if (matchesFilter) {
-                    setQuests((prev) => [normalized, ...prev]);
-                    if (normalized && normalized.id !== undefined && normalized.id !== null) {
-                        const questId = normalized.id;
-                        setSpawnQuests((prev) => ({ ...prev, [questId]: true }));
-                        setPulsingQuests((prev) => ({ ...prev, [questId]: 'spawn' }));
-                        setTimeout(() => {
-                            setSpawnQuests((prev) => {
-                                const copy = { ...prev };
-                                delete copy[questId];
-                                return copy;
-                            });
-                            setPulsingQuests((prev) => {
-                                const copy = { ...prev };
-                                delete copy[questId];
-                                return copy;
-                            });
-                        }, 650);
-                    }
-                } else {
-                    reloadTasks();
-                }
-                refreshCampaigns();
-                setDescription('');
-                setPriority('medium');
-                setTaskLevel(1);
-            })
-            .catch((error) => console.error('Error adding quest:', error));
+            } else {
+                await reloadTasks();
+            }
+            refreshCampaigns();
+            setDescription('');
+            setPriority('medium');
+            setTaskLevel(1);
+        } catch (error) {
+            console.error('Error adding quest:', error);
+        }
     }, [
         activeCampaignFilter,
         description,
@@ -245,36 +231,42 @@ export const useQuests = ({
         taskLevel
     ]);
 
-    const addSideQuest = useCallback((questId) => {
+    const addSideQuest = useCallback(async (questId) => {
         const value = sideQuestDescriptionMap[questId] || '';
         if (!value || value.trim() === '') return;
-        fetch(`/api/tasks/${questId}/subtasks`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ description: value })
-        })
-            .then((res) => res.json())
-            .then((updatedTask) => {
-                const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
-                setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
-                setTimeout(() => {
-                    if (addInputRefs.current && addInputRefs.current[questId]) {
-                        try {
-                            addInputRefs.current[questId].focus();
-                        } catch (error) {
-                            console.error(error);
-                        }
+        
+        try {
+            const updatedTask = await apiFetch(
+                `/api/tasks/${questId}/subtasks`,
+                {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ description: value })
+                },
+                onUnauthorized
+            );
+            
+            const normalized = normalizeQuest(updatedTask);
+            setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
+            setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
+            setTimeout(() => {
+                if (addInputRefs.current && addInputRefs.current[questId]) {
+                    try {
+                        addInputRefs.current[questId].focus();
+                    } catch (error) {
+                        console.error(error);
                     }
-                }, 10);
-                refreshCampaigns();
-                // Refresh layout to remeasure quest card heights after adding side quest
-                if (refreshLayout) {
-                    setTimeout(() => refreshLayout(), 50);
                 }
-            })
-            .catch((error) => console.error('Error adding side-quest:', error));
-    }, [getAuthHeaders, refreshCampaigns, refreshLayout, sideQuestDescriptionMap]);
+            }, 10);
+            refreshCampaigns();
+            // Refresh layout to remeasure quest card heights after adding side quest
+            if (refreshLayout) {
+                setTimeout(() => refreshLayout(), 50);
+            }
+        } catch (error) {
+            console.error('Error adding side-quest:', error);
+        }
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, refreshLayout, sideQuestDescriptionMap]);
 
     const toggleCollapse = useCallback((questId) => {
         setCollapsedMap((prev) => ({ ...prev, [questId]: !prev[questId] }));
@@ -403,36 +395,55 @@ export const useQuests = ({
         dismissUndoEntry(entryId);
     }, [dismissUndoEntry, restoreQuestFromSnapshot, undoQueue]);
 
-    const deleteTask = useCallback((id) => {
+    const deleteTask = useCallback(async (id) => {
         const questToDelete = quests.find((quest) => idsMatch(quest.id, id));
-        fetch(`/api/tasks/${id}`, { method: 'DELETE', headers: getAuthHeaders() })
-            .then((res) => res.json())
-            .then(() => {
-                setQuests((prev) => prev.filter((quest) => !idsMatch(quest.id, id)));
-                if (editingQuest && idsMatch(editingQuest.id, id)) {
-                    setEditingQuest(null);
-                }
-                if (questToDelete) scheduleQuestUndo(questToDelete);
-                refreshCampaigns();
-            })
-            .catch((error) => console.error('Error deleting quest:', error));
-    }, [editingQuest, getAuthHeaders, quests, refreshCampaigns, scheduleQuestUndo]);
+        
+        try {
+            await apiFetch(
+                `/api/tasks/${id}`,
+                {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                },
+                onUnauthorized
+            );
+            
+            setQuests((prev) => prev.filter((quest) => !idsMatch(quest.id, id)));
+            if (editingQuest && idsMatch(editingQuest.id, id)) {
+                setEditingQuest(null);
+            }
+            if (questToDelete) scheduleQuestUndo(questToDelete);
+            refreshCampaigns();
+        } catch (error) {
+            console.error('Error deleting quest:', error);
+        }
+    }, [editingQuest, getAuthHeaders, onUnauthorized, quests, refreshCampaigns, scheduleQuestUndo]);
 
-    const updateTask = useCallback((id, updatedTask) => {
+    const updateTask = useCallback(async (id, updatedTask) => {
         const payload = { ...updatedTask };
         if (Object.prototype.hasOwnProperty.call(payload, 'task_level')) {
             payload.task_level = Number(payload.task_level) || 1;
         }
-        fetch(`/api/tasks/${id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload) })
-            .then((res) => res.json())
-            .then((updatedQuest) => {
-                const normalized = normalizeQuest(updatedQuest);
-                setQuests((prev) => prev.map((quest) => (quest.id === id ? normalized : quest)));
-                setEditingQuest(null);
-                refreshCampaigns();
-            })
-            .catch((error) => console.error('Error updating quest:', error));
-    }, [getAuthHeaders, refreshCampaigns]);
+        
+        try {
+            const updatedQuest = await apiFetch(
+                `/api/tasks/${id}`,
+                {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                },
+                onUnauthorized
+            );
+            
+            const normalized = normalizeQuest(updatedQuest);
+            setQuests((prev) => prev.map((quest) => (quest.id === id ? normalized : quest)));
+            setEditingQuest(null);
+            refreshCampaigns();
+        } catch (error) {
+            console.error('Error updating quest:', error);
+        }
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns]);
 
     const scheduleCollapseAndMove = useCallback((questId, delay = 600) => {
         const ensureAtBottomCollapsed = () => {
@@ -469,75 +480,94 @@ export const useQuests = ({
         }
     }, []);
 
-    const setTaskStatus = useCallback((id, status, note) => {
-        fetch(`/api/tasks/${id}/status`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status, note }) })
-            .then((res) => res.json())
-            .then((updatedQuest) => {
-                handleXpPayload(updatedQuest);
-                const normalized = normalizeQuest(updatedQuest);
-                setQuests((prev) => prev.map((task) => (task.id === id ? normalized : task)));
-                setPulsingQuests((prev) => ({ ...prev, [id]: 'full' }));
-                setTimeout(() => setPulsingQuests((prev) => {
+    const setTaskStatus = useCallback(async (id, status, note) => {
+        try {
+            const updatedQuest = await apiFetch(
+                `/api/tasks/${id}/status`,
+                {
+                    method: 'PATCH',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ status, note })
+                },
+                onUnauthorized
+            );
+            
+            handleXpPayload(updatedQuest);
+            const normalized = normalizeQuest(updatedQuest);
+            setQuests((prev) => prev.map((task) => (task.id === id ? normalized : task)));
+            setPulsingQuests((prev) => ({ ...prev, [id]: 'full' }));
+            setTimeout(() => setPulsingQuests((prev) => {
+                const copy = { ...prev };
+                delete copy[id];
+                return copy;
+            }), 700);
+            if (status === 'done') {
+                setGlowQuests((prev) => ({ ...prev, [id]: true }));
+                setTimeout(() => setGlowQuests((prev) => {
                     const copy = { ...prev };
                     delete copy[id];
                     return copy;
-                }), 700);
-                if (status === 'done') {
-                    setGlowQuests((prev) => ({ ...prev, [id]: true }));
-                    setTimeout(() => setGlowQuests((prev) => {
-                        const copy = { ...prev };
-                        delete copy[id];
-                        return copy;
-                    }), 1400);
-                    setCelebratingQuests((prev) => ({ ...prev, [id]: true }));
-                    setTimeout(() => setCelebratingQuests((prev) => {
-                        const copy = { ...prev };
-                        delete copy[id];
-                        return copy;
-                    }), 1400);
-                    scheduleCollapseAndMove(id);
-                }
-                refreshCampaigns();
-            })
-            .catch((error) => console.error('Error updating quest status:', error));
-    }, [getAuthHeaders, handleXpPayload, refreshCampaigns, scheduleCollapseAndMove]);
-
-    const setSideQuestStatus = useCallback((taskId, subTaskId, status, note) => {
-        fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}/status`, {
-            method: 'PATCH',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ status, note })
-        })
-            .then((res) => res.json())
-            .then((updatedTask) => {
-                const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((task) => (task.id === taskId ? normalized : task)));
-                const subStatus = getSideQuestStatus(findSideQuestById(normalized, subTaskId), normalized);
-                setPulsingSideQuests((prev) => ({ ...prev, [`${taskId}:${subTaskId}`]: subStatus === 'done' ? 'full' : 'subtle' }));
-                setTimeout(() => setPulsingSideQuests((prev) => {
+                }), 1400);
+                setCelebratingQuests((prev) => ({ ...prev, [id]: true }));
+                setTimeout(() => setCelebratingQuests((prev) => {
                     const copy = { ...prev };
-                    delete copy[`${taskId}:${subTaskId}`];
+                    delete copy[id];
                     return copy;
-                }), 700);
-                if (subStatus === 'done') {
-                    ensureQuestExpanded(taskId);
-                }
-                refreshCampaigns();
-                // Refresh layout to remeasure quest card heights after status change
-                if (refreshLayout) {
-                    setTimeout(() => refreshLayout(), 50);
-                }
-            })
-            .catch((error) => console.error('Error updating side-quest status:', error));
-    }, [ensureQuestExpanded, getAuthHeaders, refreshCampaigns, refreshLayout]);
+                }), 1400);
+                scheduleCollapseAndMove(id);
+            }
+            refreshCampaigns();
+        } catch (error) {
+            console.error('Error updating quest status:', error);
+        }
+    }, [getAuthHeaders, handleXpPayload, onUnauthorized, refreshCampaigns, scheduleCollapseAndMove]);
 
-    const updateSideQuest = useCallback((taskId, subTaskId, payload) => fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload)
-    })
-        .then((res) => res.json())
-        .then((updatedTask) => {
+    const setSideQuestStatus = useCallback(async (taskId, subTaskId, status, note) => {
+        try {
+            const updatedTask = await apiFetch(
+                `/api/tasks/${taskId}/subtasks/${subTaskId}/status`,
+                {
+                    method: 'PATCH',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ status, note })
+                },
+                onUnauthorized
+            );
+            
+            const normalized = normalizeQuest(updatedTask);
+            setQuests((prev) => prev.map((task) => (task.id === taskId ? normalized : task)));
+            const subStatus = getSideQuestStatus(findSideQuestById(normalized, subTaskId), normalized);
+            setPulsingSideQuests((prev) => ({ ...prev, [`${taskId}:${subTaskId}`]: subStatus === 'done' ? 'full' : 'subtle' }));
+            setTimeout(() => setPulsingSideQuests((prev) => {
+                const copy = { ...prev };
+                delete copy[`${taskId}:${subTaskId}`];
+                return copy;
+            }), 700);
+            if (subStatus === 'done') {
+                ensureQuestExpanded(taskId);
+            }
+            refreshCampaigns();
+            // Refresh layout to remeasure quest card heights after status change
+            if (refreshLayout) {
+                setTimeout(() => refreshLayout(), 50);
+            }
+        } catch (error) {
+            console.error('Error updating side-quest status:', error);
+        }
+    }, [ensureQuestExpanded, getAuthHeaders, onUnauthorized, refreshCampaigns, refreshLayout]);
+
+    const updateSideQuest = useCallback(async (taskId, subTaskId, payload) => {
+        try {
+            const updatedTask = await apiFetch(
+                `/api/tasks/${taskId}/subtasks/${subTaskId}`,
+                {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                },
+                onUnauthorized
+            );
+            
             const normalized = normalizeQuest(updatedTask);
             setQuests((prev) => prev.map((quest) => (quest.id === taskId ? normalized : quest)));
             refreshCampaigns();
@@ -546,28 +576,40 @@ export const useQuests = ({
                 setTimeout(() => refreshLayout(), 50);
             }
             return normalized;
-        }), [getAuthHeaders, refreshCampaigns, refreshLayout]);
+        } catch (error) {
+            console.error('Error updating side-quest:', error);
+            throw error;
+        }
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, refreshLayout]);
 
-    const deleteSideQuest = useCallback((taskId, subTaskId) => {
-        fetch(`/api/tasks/${taskId}/subtasks/${subTaskId}`, { method: 'DELETE', headers: getAuthHeaders() })
-            .then((res) => res.json())
-            .then((updatedTask) => {
-                const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((quest) => (quest.id === taskId ? normalized : quest)));
-                if (selectedSideQuest && idsMatch(selectedSideQuest.questId, taskId) && idsMatch(selectedSideQuest.sideQuestId, subTaskId)) {
-                    setSelectedSideQuest(null);
-                }
-                if (editingSideQuest && idsMatch(editingSideQuest.questId, taskId) && idsMatch(editingSideQuest.sideQuestId, subTaskId)) {
-                    setEditingSideQuest(null);
-                }
-                refreshCampaigns();
-                // Refresh layout to remeasure quest card heights after deletion
-                if (refreshLayout) {
-                    setTimeout(() => refreshLayout(), 50);
-                }
-            })
-            .catch((error) => console.error('Error deleting side-quest:', error));
-    }, [editingSideQuest, getAuthHeaders, refreshCampaigns, refreshLayout, selectedSideQuest]);
+    const deleteSideQuest = useCallback(async (taskId, subTaskId) => {
+        try {
+            const updatedTask = await apiFetch(
+                `/api/tasks/${taskId}/subtasks/${subTaskId}`,
+                {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                },
+                onUnauthorized
+            );
+            
+            const normalized = normalizeQuest(updatedTask);
+            setQuests((prev) => prev.map((quest) => (quest.id === taskId ? normalized : quest)));
+            if (selectedSideQuest && idsMatch(selectedSideQuest.questId, taskId) && idsMatch(selectedSideQuest.sideQuestId, subTaskId)) {
+                setSelectedSideQuest(null);
+            }
+            if (editingSideQuest && idsMatch(editingSideQuest.questId, taskId) && idsMatch(editingSideQuest.sideQuestId, subTaskId)) {
+                setEditingSideQuest(null);
+            }
+            refreshCampaigns();
+            // Refresh layout to remeasure quest card heights after deletion
+            if (refreshLayout) {
+                setTimeout(() => refreshLayout(), 50);
+            }
+        } catch (error) {
+            console.error('Error deleting side-quest:', error);
+        }
+    }, [editingSideQuest, getAuthHeaders, onUnauthorized, refreshCampaigns, refreshLayout, selectedSideQuest]);
 
     const startEditingSideQuest = useCallback((questId, sideQuest) => {
         if (!sideQuest) return;
@@ -898,81 +940,107 @@ export const useQuests = ({
         ? `Today (${globalProgress.todayCount} quest${globalProgress.todayCount === 1 ? '' : 's'}${globalProgress.backlogCount ? ` + ${globalProgress.backlogCount} backlog` : ''})`
         : `All quests (${globalProgress.totalCount})`;
 
-    const clearAllQuests = useCallback(() => {
+    const clearAllQuests = useCallback(async () => {
         if (debugBusy) return;
         setDebugBusy(true);
-        fetch('/api/debug/clear-tasks', { method: 'POST', headers: getAuthHeaders() })
-            .then((res) => res.json())
-            .then((data) => {
-                setQuests([]);
-                pushToast(`Cleared ${data.removed || 0} quests`, 'success');
-                refreshCampaigns();
-            })
-            .catch((error) => {
-                console.error('Error clearing quests:', error);
-                pushToast('Failed to clear quests', 'error');
-            })
-            .finally(() => setDebugBusy(false));
-    }, [debugBusy, getAuthHeaders, pushToast, refreshCampaigns]);
+        
+        try {
+            const data = await apiFetch(
+                '/api/debug/clear-tasks',
+                {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                },
+                onUnauthorized
+            );
+            
+            setQuests([]);
+            pushToast(`Cleared ${data.removed || 0} quests`, 'success');
+            refreshCampaigns();
+        } catch (error) {
+            console.error('Error clearing quests:', error);
+            pushToast('Failed to clear quests', 'error');
+        } finally {
+            setDebugBusy(false);
+        }
+    }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast, refreshCampaigns]);
 
-    const seedDemoQuests = useCallback((count = 5) => {
+    const seedDemoQuests = useCallback(async (count = 5) => {
         if (debugBusy) return;
         setDebugBusy(true);
-        fetch('/api/debug/seed-tasks', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ count })
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                pushToast(`Seeded ${data.created || 0} demo quests`, 'success');
-                return reloadTasks();
-            })
-            .catch((error) => {
-                console.error('Error seeding quests:', error);
-                pushToast('Failed to seed quests', 'error');
-            })
-            .finally(() => setDebugBusy(false));
-    }, [debugBusy, getAuthHeaders, pushToast, reloadTasks]);
+        
+        try {
+            const data = await apiFetch(
+                '/api/debug/seed-tasks',
+                {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ count })
+                },
+                onUnauthorized
+            );
+            
+            pushToast(`Seeded ${data.created || 0} demo quests`, 'success');
+            await reloadTasks();
+        } catch (error) {
+            console.error('Error seeding quests:', error);
+            pushToast('Failed to seed quests', 'error');
+        } finally {
+            setDebugBusy(false);
+        }
+    }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast, reloadTasks]);
 
-    const grantXp = useCallback((amount) => {
+    const grantXp = useCallback(async (amount) => {
         if (debugBusy) return;
         setDebugBusy(true);
-        fetch('/api/debug/grant-xp', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ amount })
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                handleXpPayload(data);
-                const msg = data && data.xp_event && data.xp_event.message
-                    ? data.xp_event.message
-                    : `Adjusted XP by ${amount}`;
-                pushToast(msg, 'success');
-            })
-            .catch((error) => {
-                console.error('Error granting XP:', error);
-                pushToast('Failed to grant XP', 'error');
-            })
-            .finally(() => setDebugBusy(false));
-    }, [debugBusy, getAuthHeaders, handleXpPayload, pushToast]);
+        
+        try {
+            const data = await apiFetch(
+                '/api/debug/grant-xp',
+                {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ amount })
+                },
+                onUnauthorized
+            );
+            
+            handleXpPayload(data);
+            const msg = data && data.xp_event && data.xp_event.message
+                ? data.xp_event.message
+                : `Adjusted XP by ${amount}`;
+            pushToast(msg, 'success');
+        } catch (error) {
+            console.error('Error granting XP:', error);
+            pushToast('Failed to grant XP', 'error');
+        } finally {
+            setDebugBusy(false);
+        }
+    }, [debugBusy, getAuthHeaders, handleXpPayload, onUnauthorized, pushToast]);
 
-    const resetRpgStats = useCallback(() => {
+    const resetRpgStats = useCallback(async () => {
         if (debugBusy) return;
         setDebugBusy(true);
-        fetch('/api/debug/reset-rpg', { method: 'POST', headers: getAuthHeaders() })
-            .then((res) => res.json())
-            .then((data) => {
-                handleXpPayload(data);
-                pushToast('Reset RPG stats', 'success');
-            })
-            .catch((error) => {
-                console.error('Error resetting RPG stats:', error);
-                pushToast('Failed to reset RPG stats', 'error');
-            })
-            .finally(() => setDebugBusy(false));
-    }, [debugBusy, getAuthHeaders, handleXpPayload, pushToast]);
+        
+        try {
+            const data = await apiFetch(
+                '/api/debug/reset-rpg',
+                {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                },
+                onUnauthorized
+            );
+            
+            handleXpPayload(data);
+            pushToast('Reset RPG stats', 'success');
+        } catch (error) {
+            console.error('Error resetting RPG stats:', error);
+            pushToast('Failed to reset RPG stats', 'error');
+        } finally {
+            setDebugBusy(false);
+        }
+    }, [debugBusy, getAuthHeaders, handleXpPayload, onUnauthorized, pushToast]);
 
     return {
         quests,

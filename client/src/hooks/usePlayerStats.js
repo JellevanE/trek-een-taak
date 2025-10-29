@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { apiFetch, getAuthHeaders as getAuthHeadersUtil } from '../utils/api.js';
 
-export const usePlayerStats = ({ token, getAuthHeaders, pushToast }) => {
+export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorized }) => {
     const [playerStats, setPlayerStats] = useState(null);
     const [dailyLoading, setDailyLoading] = useState(false);
 
@@ -9,18 +10,24 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast }) => {
             setPlayerStats(null);
             return;
         }
-        const headers = { Authorization: `Bearer ${token}` };
-        fetch('/api/users/me', { headers })
-            .then((res) => (res.ok ? res.json() : null))
-            .then((data) => {
+        
+        const fetchPlayerStats = async () => {
+            try {
+                const data = await apiFetch(
+                    '/api/users/me',
+                    { headers: getAuthHeadersUtil(token) },
+                    onUnauthorized
+                );
                 if (data && data.user && data.user.rpg) {
                     setPlayerStats(data.user.rpg);
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error('Error fetching player stats:', error);
-            });
-    }, [token]);
+            }
+        };
+        
+        fetchPlayerStats();
+    }, [token, onUnauthorized]);
 
     const handleXpPayload = useCallback((payload) => {
         if (!payload) return;
@@ -40,29 +47,28 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast }) => {
         });
     }, [pushToast]);
 
-    const claimDailyReward = useCallback(() => {
+    const claimDailyReward = useCallback(async () => {
         if (dailyLoading) return;
         setDailyLoading(true);
-        fetch('/api/rpg/daily-reward', { method: 'POST', headers: getAuthHeaders() })
-            .then(async (res) => {
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    const message = data && data.error ? data.error : 'Unable to claim daily reward';
-                    pushToast(message, 'error', 4000);
-                    return null;
-                }
-                return data;
-            })
-            .then((data) => {
-                if (!data) return;
-                handleXpPayload(data);
-            })
-            .catch((error) => {
-                console.error('Error claiming daily reward:', error);
-                pushToast('Failed to claim daily reward', 'error', 4000);
-            })
-            .finally(() => setDailyLoading(false));
-    }, [dailyLoading, getAuthHeaders, handleXpPayload, pushToast]);
+        
+        try {
+            const data = await apiFetch(
+                '/api/rpg/daily-reward',
+                {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                },
+                onUnauthorized
+            );
+            handleXpPayload(data);
+        } catch (error) {
+            console.error('Error claiming daily reward:', error);
+            const message = error.message || 'Failed to claim daily reward';
+            pushToast(message, 'error', 4000);
+        } finally {
+            setDailyLoading(false);
+        }
+    }, [dailyLoading, getAuthHeaders, handleXpPayload, pushToast, onUnauthorized]);
 
     return {
         playerStats,

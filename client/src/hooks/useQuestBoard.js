@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { useToasts } from './useToasts';
-import { useCampaigns } from './useCampaigns';
-import { usePlayerStats } from './usePlayerStats';
-import { useQuests } from './useQuests';
+import { useToasts } from './useToasts.js';
+import { useCampaigns } from './useCampaigns.js';
+import { usePlayerStats } from './usePlayerStats.js';
+import { useQuests } from './useQuests.js';
 
 export const useQuestBoard = ({ token, setToken }) => {
     const { toasts, pushToast, dismissToast } = useToasts();
@@ -13,15 +13,14 @@ export const useQuestBoard = ({ token, setToken }) => {
         return { ...base, ...extra };
     }, [token]);
 
-    const playerStatsApi = usePlayerStats({ token, getAuthHeaders, pushToast });
-    const { playerStats, setPlayerStats } = playerStatsApi;
-
-    const reloadTasksRef = useRef(() => Promise.resolve());
-
     const onUnauthorized = useCallback(() => {
         setToken(null);
-        setPlayerStats(null);
-    }, [setPlayerStats, setToken]);
+    }, [setToken]);
+
+    const playerStatsApi = usePlayerStats({ token, getAuthHeaders, pushToast, onUnauthorized });
+    const { playerStats } = playerStatsApi;
+
+    const reloadTasksRef = useRef(() => Promise.resolve());
 
     const campaignApi = useCampaigns({
         token,

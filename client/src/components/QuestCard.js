@@ -66,6 +66,13 @@ const QuestCard = React.memo(({
     const campaign = questHasCampaign && typeof quest.campaign_id === 'number'
         ? (campaignLookup.get(quest.campaign_id) || null)
         : null;
+    const sideQuestGap = 8;
+    const visibleSideQuestRows = questSideQuests.length
+        ? Math.min(Math.max(questSideQuests.length, 3), 6)
+        : 0;
+    const sideQuestMaxHeight = visibleSideQuestRows > 0
+        ? (SIDE_QUEST_ITEM_HEIGHT * visibleSideQuestRows) + (sideQuestGap * Math.max(visibleSideQuestRows - 1, 0))
+        : null;
     
     const campaignChip = (() => {
         if (questHasCampaign && campaign) {
@@ -105,7 +112,25 @@ const QuestCard = React.memo(({
         }
         return null;
     })();
-    
+
+    const sideQuestFooter = (
+        <div className="side-quest-footer">
+            {addingSideQuestTo === quest.id ? (
+                renderAddSideQuestForm(quest.id)
+            ) : (
+                <button
+                    className="add-side-quest-button large"
+                    onClick={() => {
+                        handleSelectQuest(quest.id);
+                        setAddingSideQuestTo(quest.id);
+                    }}
+                >
+                    + Add Side Quest
+                </button>
+            )}
+        </div>
+    );
+
     const questClassName = [
         'quest',
         questStatus === 'done' ? 'completed' : '',
@@ -284,7 +309,7 @@ const QuestCard = React.memo(({
                                                 )}
                                             </div>
                                         </div>
-                                        {questSideQuests.length > 0 && (
+                                        {questSideQuests.length > 0 ? (
                                             <div>
                                                 <h4>Side-quests:</h4>
                                                 <div className="side-quest-list" role="list">
@@ -292,6 +317,9 @@ const QuestCard = React.memo(({
                                                         questId={quest.id}
                                                         sideQuests={questSideQuests}
                                                         itemHeight={SIDE_QUEST_ITEM_HEIGHT}
+                                                        itemGap={sideQuestGap}
+                                                        maxContainerHeight={sideQuestMaxHeight}
+                                                        footer={sideQuestFooter}
                                                         renderItem={(sideQuest, isSideDragging, sideDragMeta = {}) => {
                                                             const sideHandleProps = sideDragMeta.handleProps || {};
                                                             const sideHandleStyle = { cursor: 'grab', ...sideDragMeta.handleStyle };
@@ -481,18 +509,11 @@ const QuestCard = React.memo(({
                                                     />
                                                 </div>
                                             </div>
+                                        ) : (
+                                            <div style={{ marginTop: 12 }}>
+                                                {sideQuestFooter}
+                                            </div>
                                         )}
-                                        <div style={{marginTop:12}}>
-                                            {addingSideQuestTo === quest.id ? (
-                                                renderAddSideQuestForm(quest.id)
-                                            ) : (
-                                                <div style={{display:'flex', justifyContent:'flex-end'}}>
-                                                    <button className="add-side-quest-button large" onClick={() => { handleSelectQuest(quest.id); setAddingSideQuestTo(quest.id); }}>
-                                                        + Add Side Quest
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
                                     </>
                                 )}
                             </>

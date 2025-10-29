@@ -189,13 +189,15 @@ function App() {
 
     // Constants for item heights
     const QUEST_ITEM_HEIGHT = 320;
-    const SIDE_QUEST_ITEM_HEIGHT = 64;
+    const QUEST_ITEM_GAP = 16;
+    const SIDE_QUEST_ITEM_HEIGHT = 80;
 
     // Memoized render function for quest cards
     // This prevents unnecessary re-renders when unrelated state changes
     const renderQuestCard = React.useCallback((quest, isDragging = false, dragMeta = {}) => {
         return (
             <QuestCard
+                key={quest?.id ?? 'quest-fallback'}
                 quest={quest}
                 isDragging={isDragging}
                 dragMeta={dragMeta}
@@ -770,6 +772,7 @@ function App() {
                 {smoothDrag?.QuestList ? (
                     <smoothDrag.QuestList
                         itemHeight={QUEST_ITEM_HEIGHT}
+                        itemGap={QUEST_ITEM_GAP}
                         renderItem={renderQuestCard}
                     />
                 ) : (

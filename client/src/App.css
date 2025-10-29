@@ -597,7 +597,7 @@
 .quest-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     width:100%;
     max-width:980px;
     padding: 6px;
@@ -850,6 +850,21 @@
     padding:8px 10px;
     border-radius:6px;
     font-family: inherit;
+}
+
+.side-quest-footer{
+    display:flex;
+    justify-content:flex-end;
+    align-items:stretch;
+    width:100%;
+}
+
+.side-quest-footer .add-side-quest{
+    width:100%;
+}
+
+.side-quest-footer .add-side-quest-button{
+    margin-left:auto;
 }
 
 .toast-zone{

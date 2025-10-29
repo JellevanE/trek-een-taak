@@ -550,7 +550,9 @@ export const SmoothDraggableSideQuests = ({
     renderItem,
     itemHeight = 60,
     itemGap = 0,
-    refreshToken = 0
+    refreshToken = 0,
+    maxContainerHeight = null,
+    footer = null
 }) => {
     const itemsRef = useRef(items);
     const keys = useMemo(() => items.map((item, index) => getItemKey(item, index)), [items]);
@@ -916,45 +918,62 @@ export const SmoothDraggableSideQuests = ({
         }
     );
 
-    return (
-        <div style={{ position: 'relative', height: listHeight }}>
-            {springs.map(({ y, scale, zIndex, opacity }, index) => {
-                const item = items[index];
-                const key = keysRef.current[index];
-                const isDragging = (zIndex.get ? zIndex.get() : zIndex) > 0;
-                const rawHandleProps = bind(key);
-                const handleProps = {
-                    ...rawHandleProps,
-                    'data-drag-handle': 'true',
-                    'aria-grabbed': isDragging ? 'true' : 'false',
-                };
-                const dragMeta = {
-                    handleProps,
-                    handleStyle: { cursor: isDragging ? 'grabbing' : 'grab' },
-                    isDragging,
-                };
+    const needsScroll = typeof maxContainerHeight === 'number' && maxContainerHeight > 0 && listHeight > maxContainerHeight;
+    const containerHeight = needsScroll ? maxContainerHeight : listHeight;
 
-                return (
-                    <animated.div
-                        key={key}
-                        data-drag-container
-                        style={{
-                            position: 'absolute',
-                            width: '100%',
-                            y,
-                            scale,
-                            zIndex,
-                            opacity,
-                            touchAction: isDragging ? 'none' : 'auto',
-                            willChange: isDragging ? 'transform' : 'auto',
-                        }}
-                    >
-                        <div ref={registerNode(key)} style={{ width: '100%' }}>
-                            {renderItem(item, isDragging, dragMeta)}
-                        </div>
-                    </animated.div>
-                );
-            })}
+    return (
+        <div
+            style={{
+                position: 'relative',
+                height: containerHeight,
+                overflowY: needsScroll ? 'auto' : 'visible',
+                paddingRight: needsScroll ? 6 : 0,
+            }}
+        >
+            <div style={{ position: 'relative', height: listHeight }}>
+                {springs.map(({ y, scale, zIndex, opacity }, index) => {
+                    const item = items[index];
+                    const key = keysRef.current[index];
+                    const isDragging = (zIndex.get ? zIndex.get() : zIndex) > 0;
+                    const rawHandleProps = bind(key);
+                    const handleProps = {
+                        ...rawHandleProps,
+                        'data-drag-handle': 'true',
+                        'aria-grabbed': isDragging ? 'true' : 'false',
+                    };
+                    const dragMeta = {
+                        handleProps,
+                        handleStyle: { cursor: isDragging ? 'grabbing' : 'grab' },
+                        isDragging,
+                    };
+
+                    return (
+                        <animated.div
+                            key={key}
+                            data-drag-container
+                            style={{
+                                position: 'absolute',
+                                width: '100%',
+                                y,
+                                scale,
+                                zIndex,
+                                opacity,
+                                touchAction: isDragging ? 'none' : 'auto',
+                                willChange: isDragging ? 'transform' : 'auto',
+                            }}
+                        >
+                            <div ref={registerNode(key)} style={{ width: '100%' }}>
+                                {renderItem(item, isDragging, dragMeta)}
+                            </div>
+                        </animated.div>
+                    );
+                })}
+            </div>
+            {footer ? (
+                <div style={{ paddingTop: itemGap > 0 ? itemGap : 8 }}>
+                    {footer}
+                </div>
+            ) : null}
         </div>
     );
 };

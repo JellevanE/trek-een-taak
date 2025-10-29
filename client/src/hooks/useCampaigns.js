@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { apiFetch, getAuthHeaders as getAuthHeadersUtil } from '../utils/api.js';
 
 export const useCampaigns = ({
     token,
@@ -46,36 +47,30 @@ export const useCampaigns = ({
         return `/api/tasks?campaign_id=${encodeURIComponent(filterValue)}`;
     }, [activeCampaignFilter]);
 
-    const refreshCampaigns = useCallback(() => {
+    const refreshCampaigns = useCallback(async () => {
         if (!token) {
             setCampaigns([]);
-            return Promise.resolve(null);
+            return null;
         }
-        const headers = { Authorization: `Bearer ${token}` };
-        return fetch('/api/campaigns', { headers })
-            .then((res) => {
-                if (res.status === 401) {
-                    onUnauthorized?.();
-                    setCampaigns([]);
-                    return null;
-                }
-                if (!res.ok) {
-                    throw new Error(`Failed to load campaigns: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then((data) => {
-                if (data && Array.isArray(data.campaigns)) {
-                    setCampaigns(data.campaigns);
-                } else {
-                    setCampaigns([]);
-                }
-                return data;
-            })
-            .catch((error) => {
-                console.error('Error fetching campaigns:', error);
-                return null;
-            });
+        
+        try {
+            const data = await apiFetch(
+                '/api/campaigns',
+                { headers: getAuthHeadersUtil(token) },
+                onUnauthorized
+            );
+            
+            if (data && Array.isArray(data.campaigns)) {
+                setCampaigns(data.campaigns);
+            } else {
+                setCampaigns([]);
+            }
+            return data;
+        } catch (error) {
+            console.error('Error fetching campaigns:', error);
+            setCampaigns([]);
+            return null;
+        }
     }, [token, onUnauthorized]);
 
     useEffect(() => {
@@ -145,7 +140,7 @@ export const useCampaigns = ({
         }
     }, [campaignFormMode, selectedCampaign]);
 
-    const submitCampaignForm = useCallback((event) => {
+    const submitCampaignForm = useCallback(async (event) => {
         event.preventDefault();
         if (!campaignFormMode) return;
         const name = (campaignFormValues.name || '').trim();
@@ -164,75 +159,60 @@ export const useCampaigns = ({
         setCampaignFormBusy(true);
         setCampaignFormError(null);
 
-        const handleError = (body) => {
-            const verb = campaignFormMode === 'create' ? 'create' : 'update';
-            const message = body && body.error ? body.error : `Failed to ${verb} campaign`;
-            setCampaignFormError(message);
-            setCampaignFormBusy(false);
-        };
-
         if (campaignFormMode === 'create') {
-            fetch('/api/campaigns', {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(payload)
-            })
-                .then(async (res) => {
-                    if (!res.ok) {
-                        const body = await res.json().catch(() => ({}));
-                        handleError(body);
-                        return null;
-                    }
-                    return res.json();
-                })
-                .then(async (created) => {
-                    if (!created) return;
-                    closeCampaignForm();
-                    pushToast('Campaign created', 'success');
-                    const reloadTasks = reloadTasksRef.current;
-                    if (created.id) {
-                        setActiveCampaignFilter(created.id);
-                        setTaskCampaignSelection(created.id);
-                        if (reloadTasks) await reloadTasks(created.id);
-                    } else if (reloadTasks) {
-                        await reloadTasks();
-                    }
-                    setCampaignFormBusy(false);
-                })
-                .catch((error) => {
-                    console.error('Error creating campaign:', error);
-                    setCampaignFormError('Failed to create campaign');
-                    setCampaignFormBusy(false);
-                });
+            try {
+                const created = await apiFetch(
+                    '/api/campaigns',
+                    {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(payload)
+                    },
+                    onUnauthorized
+                );
+                
+                closeCampaignForm();
+                pushToast('Campaign created', 'success');
+                const reloadTasks = reloadTasksRef.current;
+                if (created.id) {
+                    setActiveCampaignFilter(created.id);
+                    setTaskCampaignSelection(created.id);
+                    if (reloadTasks) await reloadTasks(created.id);
+                } else if (reloadTasks) {
+                    await reloadTasks();
+                }
+            } catch (error) {
+                console.error('Error creating campaign:', error);
+                const message = error.message || 'Failed to create campaign';
+                setCampaignFormError(message);
+            } finally {
+                setCampaignFormBusy(false);
+            }
         } else if (campaignFormMode === 'edit' && selectedCampaign) {
-            fetch(`/api/campaigns/${selectedCampaign.id}`, {
-                method: 'PATCH',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(payload)
-            })
-                .then(async (res) => {
-                    if (!res.ok) {
-                        const body = await res.json().catch(() => ({}));
-                        handleError(body);
-                        return null;
-                    }
-                    return res.json();
-                })
-                .then(async (updated) => {
-                    if (!updated) return;
-                    closeCampaignForm();
-                    pushToast('Campaign updated', 'success');
-                    const reloadTasks = reloadTasksRef.current;
-                    if (reloadTasks) {
-                        await reloadTasks(activeCampaignFilter);
-                    }
-                    setCampaignFormBusy(false);
-                })
-                .catch((error) => {
-                    console.error('Error updating campaign:', error);
-                    setCampaignFormError('Failed to update campaign');
-                    setCampaignFormBusy(false);
-                });
+            try {
+                await apiFetch(
+                    `/api/campaigns/${selectedCampaign.id}`,
+                    {
+                        method: 'PATCH',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(payload)
+                    },
+                    onUnauthorized
+                );
+                
+                closeCampaignForm();
+                pushToast('Campaign updated', 'success');
+                const reloadTasks = reloadTasksRef.current;
+                if (reloadTasks) {
+                    await reloadTasks(activeCampaignFilter);
+                }
+            } catch (error) {
+                console.error('Error updating campaign:', error);
+                const message = error.message || 'Failed to update campaign';
+                setCampaignFormError(message);
+            } finally {
+                setCampaignFormBusy(false);
+            }
         }
     }, [
         campaignFormMode,
@@ -240,6 +220,7 @@ export const useCampaigns = ({
         activeCampaignFilter,
         closeCampaignForm,
         getAuthHeaders,
+        onUnauthorized,
         pushToast,
         reloadTasksRef,
         selectedCampaign

@@ -5,8 +5,8 @@
       "username": "local",
       "password_hash": "",
       "email": null,
-      "created_at": "2025-10-26T21:30:09.569Z",
-      "updated_at": "2025-10-26T21:30:09.569Z",
+      "created_at": "2025-10-29T20:09:24.584Z",
+      "updated_at": "2025-10-29T20:09:24.584Z",
       "profile": {
         "display_name": "Local User",
         "avatar": null,
@@ -35,43 +35,7 @@
         "flags": {},
         "metrics": {}
       }
-    },
-    {
-      "id": 2,
-      "username": "djoko",
-      "password_hash": "$2a$10$pafehiICEhutxmSU5NtjJeEwoiarns6rMQEUI.jQrUiJjA.xicd.i",
-      "email": null,
-      "created_at": "2025-10-26T21:45:20.429Z",
-      "updated_at": "2025-10-26T21:45:20.429Z",
-      "profile": {
-        "display_name": "djoko",
-        "avatar": null,
-        "class": "mage",
-        "bio": "BJLALALALA"
-      },
-      "rpg": {
-        "level": 1,
-        "xp": 0,
-        "hp": 20,
-        "mp": 5,
-        "coins": 0,
-        "streak": 0,
-        "achievements": [],
-        "inventory": {
-          "items": []
-        },
-        "xp_log": [],
-        "last_daily_reward_at": null,
-        "last_xp_award_at": null,
-        "counters": {
-          "tasks_completed": 0,
-          "subtasks_completed": 0,
-          "daily_rewards_claimed": 0
-        },
-        "flags": {},
-        "metrics": {}
-      }
     }
   ],
-  "nextId": 3
+  "nextId": 2
 }
