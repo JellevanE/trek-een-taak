@@ -19,14 +19,8 @@
 - **Animation & transitions**: Implement 300ms ease-in-out slide transitions between steps, 200ms focus highlights, 150ms validation feedback color changes, and 400ms progress bar width animations.
 - **Mobile optimization**: Enhance mobile experience (320px-768px) with larger touch targets (min 44px), simplified navigation, condensed progress indicator, and optimized keyboard handling. Add tablet layout (768px-1024px) with two-column forms and side-by-side fields.
 
-### Accessibility Enhancements
-- **WCAG 2.1 AA Compliance**: Add comprehensive ARIA labels, roles, and descriptions for all interactive elements. Ensure 4.5:1 color contrast minimum. Implement logical focus management with clear focus indicators and full keyboard navigation support (tab order, escape key handling).
-- **Screen reader support**: Add form validation announcements, progress indicator screen reader descriptions, skip links for multi-step navigation, and proper alternative text for all icons and visual feedback.
-- **Error handling**: Improve error messages with specific, actionable guidance rather than generic messages. Add descriptive screen reader announcements for validation feedback.
-
 ### Backend API Enhancements
 - **Email validation endpoint**: Add `POST /api/users/validate-email` endpoint for RFC-compliant email format validation to support optional email field validation.
-- **Enhanced password validation**: Enforce stronger password requirements (8+ characters with mixed case, numbers, special characters) on backend beyond current 6-character minimum.
 - **Rate limiting**: Implement 5 registration attempts per IP per hour to prevent abuse.
 - **Reserved words**: Add username blacklist for reserved words, admin terms, and system usernames.
 
@@ -37,14 +31,10 @@
 
 ### Testing Gaps
 - **Unit tests**: Add tests for individual components (RegistrationWizard, AccountDetailsStep, ProfileSetupStep, ProgressIndicator), validation logic, state management, and API integration points.
-- **Integration tests**: Test complete registration flow, error handling scenarios, cross-browser compatibility, and mobile device experience.
-- **Accessibility tests**: Validate screen reader compatibility, keyboard navigation functionality, color contrast compliance, and focus management behavior.
+- **Integration tests**: Test complete registration flow, error handling scenarios, and mobile device experience.
 - **Performance tests**: Measure component render times, API response handling, and behavior with large datasets or slow connections.
 
 ### Advanced Features (Future Consideration)
-- **Social login integration**: Support for Google, GitHub, or other OAuth providers.
-- **Email verification system**: Optional email confirmation workflow for verified accounts.
-- **Two-factor authentication**: Add 2FA setup option during or after registration.
 - **Registration achievements**: Award special badges or XP bonuses for completing profile setup.
 - **Welcome quest tutorial**: Create introductory quest that guides new users through core features.
 
