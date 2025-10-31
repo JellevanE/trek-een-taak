@@ -28,8 +28,8 @@ if [ -z "${JWT_SECRET:-}" ]; then
   log "JWT_SECRET not set — using development fallback (override in env for custom secret)"
 fi
 
-# start server and redirect logs
-node server.js > "$ROOT_DIR/server.log" 2>&1 &
+# start server (ts-node) and redirect logs
+npm run dev > "$ROOT_DIR/server.log" 2>&1 &
 SERVER_PID=$!
 log "Server PID $SERVER_PID (logs: $ROOT_DIR/server.log)"
 

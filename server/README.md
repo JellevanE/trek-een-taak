@@ -11,18 +11,19 @@ Run locally
 npm install
 ```
 
-2. Start the server:
+2. Start the server in watch mode:
 
 ```bash
-npm start
+npm run dev
 ```
 
-The server listens on `http://localhost:3001` by default.
+The server listens on `http://localhost:3001` by default. For a production build, run `npm run build` then `npm start`.
 
 Notes
 -----
 
 - Data is persisted to `server/tasks.json` (quests) and `server/campaigns.json` (quest collections). Tests will modify these files; they try to reset state but consider using separate fixtures for CI runs.
+- Tests now default to per-run temp copies of the JSON stores. If you need ad-hoc runs, point `TASKS_FILE`, `USERS_FILE`, and `CAMPAIGNS_FILE` to a throwaway directory instead of touching the tracked fixtures.
 - `writeTasks` throws on write errors and endpoints return 500 when writes fail. This is intentional so clients can surface errors.
 - For production or concurrent use, consider moving away from a single JSON file to a small database (sqlite, lowdb) and implement atomic writes.
 - The API now maintains a lightweight RPG experience system. Completing quests or side-quests awards XP based on task level and priority, and players can claim a once-per-day bonus via `POST /api/rpg/daily-reward`.
@@ -38,6 +39,6 @@ Notes
   - `POST /api/debug/seed-tasks` (optional body `{ count: number }`) fills the current user with demo quests.
   - `POST /api/debug/grant-xp` (body `{ amount }`) adjusts XP directly; negative numbers subtract.
   - `POST /api/debug/reset-rpg` resets the player RPG state back to level 1.
-- Automated tests run with Jest and a lightweight in-memory HTTP harness (`server/utils/testClient.js`) so they pass even in sandboxed environments that disallow opening sockets. Run them with `npm test`.
+- Automated tests run with Jest and a lightweight in-memory HTTP harness (`server/src/utils/testClient.ts`) so they pass even in sandboxed environments that disallow opening sockets. Run them with `npm test`.
 - JWT signing requires you to provide secrets via environment variables. Set `JWT_SECRET` for a single secret or `JWT_SECRETS` (comma-separated) to support rotation. You can also point `JWT_SECRET_FILE` at a file containing the primary secret. The server refuses to start if no secret is configured (except in tests).
 - When using `./start-dev.sh`, a fallback `JWT_SECRET=dev-local-secret` is exported automatically if none is supplied; override it in your environment for custom values.

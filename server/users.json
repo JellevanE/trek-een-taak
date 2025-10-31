@@ -35,7 +35,63 @@
         "flags": {},
         "metrics": {}
       }
+    },
+    {
+      "id": 2,
+      "username": "filemaster2000",
+      "password_hash": "$2a$10$ShModLqdIJPaY1Y1QKt7Ru2O0erFitAr.ldXl.bMqcR.bR6llGWNS",
+      "email": null,
+      "created_at": "2025-10-30T15:28:41.556Z",
+      "updated_at": "2025-10-30T15:28:41.556Z",
+      "profile": {
+        "display_name": "filemaster2000",
+        "avatar": null,
+        "class": "mage",
+        "bio": "FIREBALLZ"
+      },
+      "rpg": {
+        "level": 1,
+        "xp": 41,
+        "hp": 20,
+        "mp": 5,
+        "coins": 0,
+        "streak": 0,
+        "achievements": [],
+        "inventory": {
+          "items": []
+        },
+        "xp_log": [
+          {
+            "amount": 41,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +41 XP",
+            "metadata": {
+              "task_id": 11,
+              "subtask_id": 1,
+              "priority": "high"
+            },
+            "at": "2025-10-30T15:29:20.552Z",
+            "level_before": 1,
+            "level_after": 1,
+            "xp_before": 0,
+            "xp_after": 41,
+            "xp_into_level": 41,
+            "xp_for_level": 100,
+            "xp_to_next": 59,
+            "leveled_up": false
+          }
+        ],
+        "last_daily_reward_at": null,
+        "last_xp_award_at": "2025-10-30T15:29:20.552Z",
+        "counters": {
+          "tasks_completed": 0,
+          "subtasks_completed": 1,
+          "daily_rewards_claimed": 0
+        },
+        "flags": {},
+        "metrics": {}
+      }
     }
   ],
-  "nextId": 2
+  "nextId": 3
 }

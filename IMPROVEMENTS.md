@@ -5,269 +5,65 @@
 - **Batch layout refresh triggers** — Multiple code paths schedule `refreshLayout` with `setTimeout`, which can result in redundant calls when several quest mutations run together (e.g., bulk status changes). Wrapping these in a debounced utility or leveraging `requestAnimationFrame` batching inside `useSmoothDragQuests` would cut unnecessary reflows.
 - **Generalize draggable layout** — `SmoothDraggableList` only supports a single column stack today. Extracting the physics layer from layout math would let the board offer responsive multi-column grids (or a denser masonry view) without rewriting drag logic.
 
----
+## Registration Flow Enhancements
 
-# Backend TypeScript Migration Plan
+### UX Improvements
+- **Real-time username availability check**: Integrate frontend with existing `/api/users/check-username/:username` endpoint with debounced API calls (500ms delay) and visual feedback (✓ available, ✗ taken, ⏳ checking). Show alternative suggestions when username is taken.
+- **Enhanced password strength meter**: Expand basic strength indicator with specific improvement suggestions, character requirement checklist (uppercase, lowercase, numbers, special chars), and color-coded feedback beyond weak/good/strong levels.
+- **Welcome step**: Add introductory step with app overview, feature highlights with icons, privacy/security assurance, and "Get Started" CTA before account details step.
+- **Confirmation step**: Add final step after profile setup with welcome message, profile summary display, next steps guidance, and celebration elements (achievement notification, animated welcome toast).
 
-## Overview
-Migrate the Express backend from JavaScript (CommonJS) to TypeScript to improve type safety, catch API contract mismatches, and leverage modern development tooling. The backend is a manageable size (~24 files) making this an ideal candidate for incremental migration.
+### Visual & Interaction Polish
+- **Avatar picker**: Add visual avatar selection component with grid layout, predefined avatar options, hover effects, selection states, and keyboard navigation support.
+- **Clickable progress indicator**: Enable navigation by clicking on completed steps (if validation passed) to improve wizard flexibility.
+- **Animation & transitions**: Implement 300ms ease-in-out slide transitions between steps, 200ms focus highlights, 150ms validation feedback color changes, and 400ms progress bar width animations.
+- **Mobile optimization**: Enhance mobile experience (320px-768px) with larger touch targets (min 44px), simplified navigation, condensed progress indicator, and optimized keyboard handling. Add tablet layout (768px-1024px) with two-column forms and side-by-side fields.
 
-## Benefits
-- **Type-safe API contracts** — Define interfaces for Quest, Campaign, User, and XP payloads to prevent client/server mismatches
-- **Better refactoring confidence** — TypeScript catches breaking changes during complex RPG system enhancements
-- **Improved IDE support** — Enhanced autocomplete, inline documentation, and error detection
-- **Future-proof architecture** — Align with modern Node.js patterns and potential ESM migration
-- **Team consistency** — Match TypeScript usage in Deno tools (`validate.ts`, `backup.ts`)
+### Accessibility Enhancements
+- **WCAG 2.1 AA Compliance**: Add comprehensive ARIA labels, roles, and descriptions for all interactive elements. Ensure 4.5:1 color contrast minimum. Implement logical focus management with clear focus indicators and full keyboard navigation support (tab order, escape key handling).
+- **Screen reader support**: Add form validation announcements, progress indicator screen reader descriptions, skip links for multi-step navigation, and proper alternative text for all icons and visual feedback.
+- **Error handling**: Improve error messages with specific, actionable guidance rather than generic messages. Add descriptive screen reader announcements for validation feedback.
 
-## Migration Strategy
+### Backend API Enhancements
+- **Email validation endpoint**: Add `POST /api/users/validate-email` endpoint for RFC-compliant email format validation to support optional email field validation.
+- **Enhanced password validation**: Enforce stronger password requirements (8+ characters with mixed case, numbers, special characters) on backend beyond current 6-character minimum.
+- **Rate limiting**: Implement 5 registration attempts per IP per hour to prevent abuse.
+- **Reserved words**: Add username blacklist for reserved words, admin terms, and system usernames.
 
-### Phase 1: Project Setup (1-2 hours)
-1. **Install TypeScript dependencies**
-   ```bash
-   cd server
-   npm install --save-dev typescript @types/node @types/express @types/cors @types/jsonwebtoken @types/bcryptjs
-   npm install --save-dev @types/jest @types/supertest
-   npm install --save-dev ts-node ts-jest
-   ```
+### Component Refactoring Opportunities
+- **FormField component**: Create reusable form input component with built-in validation, error/success message display, and consistent styling to reduce code duplication.
+- **ErrorBoundary component**: Add registration-specific error boundary with graceful error handling, user-friendly messages, retry mechanisms, and fallback UI for critical failures.
+- **LoadingSpinner component**: Centralize loading state management with consistent indicators, context labels, timeout handling, and cancel buttons for long operations.
 
-2. **Create `tsconfig.json`** in `server/` directory:
-   ```json
-   {
-     "compilerOptions": {
-       "target": "ES2022",
-       "module": "commonjs",
-       "lib": ["ES2022"],
-       "outDir": "./dist",
-       "rootDir": "./src",
-       "strict": true,
-       "esModuleInterop": true,
-       "skipLibCheck": true,
-       "forceConsistentCasingInFileNames": true,
-       "resolveJsonModule": true,
-       "moduleResolution": "node",
-       "types": ["node", "jest"]
-     },
-     "include": ["src/**/*"],
-     "exclude": ["node_modules", "dist", "__tests__"]
-   }
-   ```
+### Testing Gaps
+- **Unit tests**: Add tests for individual components (RegistrationWizard, AccountDetailsStep, ProfileSetupStep, ProgressIndicator), validation logic, state management, and API integration points.
+- **Integration tests**: Test complete registration flow, error handling scenarios, cross-browser compatibility, and mobile device experience.
+- **Accessibility tests**: Validate screen reader compatibility, keyboard navigation functionality, color contrast compliance, and focus management behavior.
+- **Performance tests**: Measure component render times, API response handling, and behavior with large datasets or slow connections.
 
-3. **Update package.json scripts**:
-   ```json
-   "scripts": {
-     "build": "tsc",
-     "start": "node dist/server.js",
-     "dev": "ts-node src/server.ts",
-     "test": "jest --runInBand"
-   }
-   ```
+### Advanced Features (Future Consideration)
+- **Social login integration**: Support for Google, GitHub, or other OAuth providers.
+- **Email verification system**: Optional email confirmation workflow for verified accounts.
+- **Two-factor authentication**: Add 2FA setup option during or after registration.
+- **Registration achievements**: Award special badges or XP bonuses for completing profile setup.
+- **Welcome quest tutorial**: Create introductory quest that guides new users through core features.
 
-4. **Configure Jest for TypeScript** — Update `jest.config.js`:
-   ```javascript
-   module.exports = {
-     preset: 'ts-jest',
-     testEnvironment: 'node',
-     roots: ['<rootDir>/__tests__'],
-     testMatch: ['**/*.test.ts'],
-     moduleFileExtensions: ['ts', 'js', 'json']
-   };
-   ```
-
-### Phase 2: Folder Restructuring (30 minutes)
-Move all source files into `server/src/` to match TypeScript conventions:
-```
-server/
-  src/
-    server.ts
-    app.ts
-    config.ts
-    routes/
-    controllers/
-    middleware/
-    data/
-    rpg/
-    utils/
-    types/          ← New: shared type definitions
-  dist/             ← New: compiled output
-  __tests__/        ← Keep separate, migrate later
-  tasks.json        ← Keep at root (data files)
-  users.json
-  campaigns.json
-```
-
-### Phase 3: Create Core Type Definitions (1-2 hours)
-Create `server/src/types/` directory with shared interfaces:
-
-**`types/quest.types.ts`**:
-```typescript
-export type QuestUrgency = 'critical' | 'high' | 'medium' | 'low';
-export type QuestStatus = 'active' | 'completed';
-
-export interface SideQuest {
-  id: string;
-  description: string;
-  completed: boolean;
-}
-
-export interface Quest {
-  id: string;
-  description: string;
-  priority: QuestUrgency;
-  level: number;
-  status: QuestStatus;
-  campaign_id?: string;
-  user_id: string;
-  side_quests?: SideQuest[];
-  created_at?: string;
-  completed_at?: string | null;
-}
-```
-
-**`types/rpg.types.ts`**:
-```typescript
-export interface XPPayload {
-  xp_gained: number;
-  level_up: boolean;
-  new_level?: number;
-  total_xp?: number;
-}
-
-export interface PlayerStats {
-  id: string;
-  username: string;
-  level: number;
-  xp: number;
-  total_quests_completed: number;
-  daily_streak: number;
-  last_daily_bonus?: string;
-}
-```
-
-**`types/campaign.types.ts`**:
-```typescript
-export interface Campaign {
-  id: string;
-  name: string;
-  description?: string;
-  user_id: string;
-  created_at?: string;
-}
-```
-
-**`types/user.types.ts`**:
-```typescript
-export interface User {
-  id: string;
-  username: string;
-  email?: string;
-  password_hash: string;
-  level: number;
-  xp: number;
-  total_quests_completed: number;
-  daily_streak: number;
-  last_daily_bonus?: string;
-  created_at?: string;
-}
-
-export interface AuthRequest {
-  username: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  token: string;
-  user: Omit<User, 'password_hash'>;
-}
-```
-
-**`types/express.types.ts`**:
-```typescript
-import { Request } from 'express';
-import { User } from './user.types';
-
-export interface AuthenticatedRequest extends Request {
-  userId?: string;
-  user?: User;
-}
-```
-
-### Phase 4: Incremental File Migration (2-3 days)
-Migrate files in dependency order, renaming `.js` → `.ts`:
-
-**Day 1: Utilities and Data Layer**
-1. `utils/http.ts` — Simple HTTP utilities
-2. `data/filePaths.ts` — Path configurations
-3. `data/taskStore.ts` — Add `Quest` types to CRUD operations
-4. `data/userStore.ts` — Add `User` types
-5. `data/campaignStore.ts` — Add `Campaign` types
-6. `rpg/experience.ts` — Add `XPPayload` return types
-
-**Day 2: Middleware and Controllers**
-1. `middleware/auth.ts` — Type `AuthenticatedRequest`
-2. `controllers/rpgController.ts` — Type XP calculation functions
-3. `controllers/tasksController.ts` — Type Quest handlers
-4. `controllers/usersController.ts` — Type User handlers
-5. `controllers/campaignsController.ts` — Type Campaign handlers
-6. `controllers/debugController.ts` — Type debug utilities
-
-**Day 3: Routes and App**
-1. `routes/rpg.ts` — Apply `AuthenticatedRequest` types
-2. `routes/tasks.ts`
-3. `routes/users.ts`
-4. `routes/campaigns.ts`
-5. `routes/debug.ts`
-6. `app.ts` — Main Express app configuration
-7. `server.ts` — Entry point
-8. `config.ts` — Configuration types
-
-### Phase 5: Test Migration (1 day)
-1. Rename `__tests__/api.test.js` → `api.test.ts`
-2. Rename `__tests__/campaigns.test.js` → `campaigns.test.ts`
-3. Add type annotations to test fixtures and assertions
-4. Update Supertest calls with typed responses
-
-### Phase 6: Validation and Cleanup (2-3 hours)
-1. Run `npm run build` — Fix any TypeScript compilation errors
-2. Run `npm test` — Ensure all tests pass
-3. Update `start-dev.sh` to run `npm run dev` for TypeScript
-4. Update `tools/validate.ts` to compile TypeScript before testing
-5. Update documentation in `server/README.md` and root `README.md`
-6. Remove old `.js` files after confirming `.ts` versions work
-
-## Migration Example: A Simple File
-
-**Before (`rpg/experience.js`)**:
-```javascript
-function calculateXpReward(level) {
-  const baseXp = 10;
-  const levelMultiplier = 1.5;
-  return Math.floor(baseXp * Math.pow(levelMultiplier, level - 1));
-}
-
-module.exports = { calculateXpReward };
-```
-
-**After (`rpg/experience.ts`)**:
-```typescript
-export function calculateXpReward(level: number): number {
-  const baseXp = 10;
-  const levelMultiplier = 1.5;
-  return Math.floor(baseXp * Math.pow(levelMultiplier, level - 1));
-}
-```
-
-## Rollout Strategy
-- **Feature branch**: Create `feature/typescript-migration` branch
-- **Incremental PRs**: Submit separate PRs for each phase to keep reviews manageable
-- **Parallel development**: Keep main branch working in JS while migration progresses
-- **Cutover**: Merge complete TypeScript backend once all tests pass and validation succeeds
 
 ## Future Enhancements (Post-Migration)
 - Consider ESM modules (`"type": "module"`) for modern Node.js patterns
-- Add runtime validation with Zod or io-ts for API request/response schemas
+- Expand Zod validation across remaining controllers and responses, and align error mapping with existing API expectations
 - Implement strict null checks and enable stricter compiler options
 - Generate OpenAPI/Swagger docs from TypeScript types
 - Add `tsc --watch` mode for development hot-reloading
+- Archive or relocate legacy `dist/src` artifacts once the release freeze ends
+- Break `src/rpg/experience.ts` into modules (`experienceEngine`, `rewardTables`, `eventHooks`) after migration; draft steps:
+  1. Outline current responsibilities and decide module boundaries.
+  2. Create new files with shared types and migrate logic incrementally.
+  3. Update imports/tests to reflect the new structure and ensure coverage.
+- Audit remaining `any` usages; proposal:
+  1. Inventory current `any` locations and document justification per file.
+  2. Replace with precise domain types or utility generics where possible.
+  3. For unavoidable cases (JSON parsing), wrap with helper functions and comments.
 
 ## Estimated Timeline
 - **Minimal viable migration**: 3-4 days of focused work
