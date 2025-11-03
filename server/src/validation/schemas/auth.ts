@@ -44,6 +44,19 @@ export const loginUserSchema = z
     })
     .strict();
 
+const emailFormatSchema = z.string().trim().email();
+
+export const emailValidationRequestSchema = z
+    .object({
+        email: z.string().trim().min(1)
+    })
+    .strict();
+
+export function isEmailFormatValid(email: string): boolean {
+    return emailFormatSchema.safeParse(email).success;
+}
+
 export type ProfileUpdatePayload = z.infer<typeof profileUpdateSchema>;
 export type RegisterUserPayload = z.infer<typeof registerUserSchema>;
 export type LoginUserPayload = z.infer<typeof loginUserSchema>;
+export type EmailValidationPayload = z.infer<typeof emailValidationRequestSchema>;

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import { ensureAuth } from '../middleware/auth';
-import { clearTasks, seedTasks } from '../controllers/debugController';
-import { grantXp, resetRpg } from '../controllers/rpgController';
+import { ensureAuth } from '../middleware/auth.js';
+import { clearTasks, seedTasks } from '../controllers/debugController.js';
+import { grantXp, resetRpg } from '../controllers/rpgController.js';
 
 const router = Router();
 

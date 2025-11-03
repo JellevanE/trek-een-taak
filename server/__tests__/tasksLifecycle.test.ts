@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 
 import app from '../src/app';
 import { signToken } from '../src/middleware/auth';
-import { XP_CONFIG, type PublicXpEvent } from '../src/rpg/experience';
+import { XP_CONFIG } from '../src/rpg/rewardTables';
+import type { PublicXpEvent } from '../src/rpg/experienceTypes';
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildCampaign,

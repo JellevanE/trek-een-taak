@@ -6,7 +6,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -16,10 +16,13 @@
     "zod": "^3.23.8"
   },
   "scripts": {
+    "lint": "node scripts/check-no-explicit-any.js",
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts",
-    "test": "jest --runInBand"
+    "dev": "node --loader ts-node/esm src/server.ts",
+    "docs:generate": "node --loader ts-node/esm src/docs/generateOpenApi.ts",
+    "watch": "tsc --watch --preserveWatchOutput --pretty",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

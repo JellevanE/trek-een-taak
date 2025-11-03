@@ -1,4 +1,4 @@
-import app from './app';
+import app from './app.js';
 import process from 'node:process';
 
 const port = Number(process.env.PORT || 3001);

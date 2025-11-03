@@ -1,7 +1,8 @@
 import http from 'node:http';
 import type { Express } from 'express';
 
-type ListenCallback = (...args: any[]) => void;
+type ListenCallback = (...args: unknown[]) => void;
+type ListenArg = number | string | ListenCallback;
 
 interface ListenConfig {
     port?: number;
@@ -12,18 +13,18 @@ interface ListenConfig {
 
 let httpPatched = false;
 
-function extractListenConfig(args: any[]): ListenConfig {
+function extractListenConfig(args: unknown[]): ListenConfig {
     const [rawPort, second, third, fourth] = args;
     const config: ListenConfig = {};
 
     if (typeof rawPort === 'number') {
         config.port = rawPort;
     } else if (typeof rawPort === 'function') {
-        config.callback = rawPort;
+        config.callback = rawPort as ListenCallback;
     }
 
     if (typeof second === 'function') {
-        config.callback = second;
+        config.callback = second as ListenCallback;
     } else if (typeof second === 'string') {
         config.host = second;
     } else if (typeof second === 'number') {
@@ -31,7 +32,7 @@ function extractListenConfig(args: any[]): ListenConfig {
     }
 
     if (typeof third === 'function') {
-        config.callback = third;
+        config.callback = third as ListenCallback;
     } else if (config.host === undefined && typeof third === 'string') {
         config.host = third;
     } else if (config.backlog === undefined && (typeof third === 'number' || typeof third === 'string')) {
@@ -39,14 +40,14 @@ function extractListenConfig(args: any[]): ListenConfig {
     }
 
     if (typeof fourth === 'function') {
-        config.callback = fourth;
+        config.callback = fourth as ListenCallback;
     }
 
     return config;
 }
 
-function buildListenArgs(config: ListenConfig): any[] {
-    const args: any[] = [];
+function buildListenArgs(config: ListenConfig): ListenArg[] {
+    const args: ListenArg[] = [];
     if (config.port !== undefined) args.push(config.port);
     if (config.host !== undefined) args.push(config.host);
     if (config.backlog !== undefined) args.push(config.backlog);
@@ -66,14 +67,15 @@ function patchHttpServerListen(): void {
     if (httpPatched) return;
     httpPatched = true;
     const originalHttpListen = http.Server.prototype.listen;
+    type ServerListenArgs = Parameters<typeof originalHttpListen>;
 
-    function patchedHttpListen(this: http.Server, ...args: any[]): http.Server {
+    function patchedHttpListen(this: http.Server, ...args: ServerListenArgs): http.Server {
         if (process.env.JEST_WORKER_ID !== undefined) {
             const config = overrideHostIfNeeded(extractListenConfig(args));
             const finalArgs = buildListenArgs(config);
-            return (originalHttpListen as (...params: any[]) => http.Server).apply(this, finalArgs);
+            return originalHttpListen.call(this, ...(finalArgs as ServerListenArgs));
         }
-        return (originalHttpListen as (...params: any[]) => http.Server).apply(this, args as any);
+        return originalHttpListen.apply(this, args);
     }
 
     http.Server.prototype.listen = patchedHttpListen as typeof originalHttpListen;
@@ -81,14 +83,15 @@ function patchHttpServerListen(): void {
 
 export function applyTestingListenPatch(app: Express): void {
     const originalListen = app.listen;
+    type AppListenArgs = Parameters<typeof originalListen>;
 
-    function patchedAppListen(this: Express, ...args: any[]): http.Server {
+    function patchedAppListen(this: Express, ...args: AppListenArgs): http.Server {
         if (process.env.JEST_WORKER_ID !== undefined) {
             const config = overrideHostIfNeeded(extractListenConfig(args));
             const finalArgs = buildListenArgs(config);
-            return originalListen.apply(this, finalArgs as any);
+            return originalListen.call(this, ...(finalArgs as AppListenArgs));
         }
-        return originalListen.apply(this, args as any);
+        return originalListen.apply(this, args);
     }
 
     app.listen = patchedAppListen as typeof originalListen;

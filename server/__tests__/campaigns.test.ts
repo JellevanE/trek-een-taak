@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import app from '../src/app';
+import { resetRegistrationRateLimiter } from '../src/security/registrationRateLimiter';
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
@@ -35,6 +36,7 @@ beforeEach(() => {
     resetTaskStore(tasksFile);
     resetCampaignStore(campaignsFile);
     resetUserStore(usersFile, [buildDefaultUser()]);
+    resetRegistrationRateLimiter();
     client = createTestClient(app);
 });
 
@@ -287,8 +289,9 @@ test('deletes campaign and detaches related tasks', async () => {
         headers: { authorization: `Bearer ${authToken}` }
     });
     const tasks = (taskDetail.body as { tasks: Array<JsonRecord> }).tasks;
-    const [detached] = tasks.filter((task) => task.id === taskId);
-    expect(detached.campaign_id).toBeNull();
+    const detached = tasks.find((task) => task.id === taskId);
+    expect(detached).toBeDefined();
+    expect(detached?.campaign_id ?? null).toBeNull();
 });
 
 test('list campaigns requires authentication', async () => {

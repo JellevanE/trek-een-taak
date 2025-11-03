@@ -1,9 +1,9 @@
 import type { NextFunction, Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 
-import { primaryJwtSecret, jwtSecrets } from '../config';
-import type { AuthenticatedRequest, AuthenticatedUser } from '../types/auth';
-import { sendError } from '../utils/http';
+import { primaryJwtSecret, jwtSecrets } from '../config.js';
+import type { AuthenticatedRequest, AuthenticatedUser } from '../types/auth.js';
+import { sendError } from '../utils/http.js';
 
 interface TokenPayload extends JwtPayload {
     id: number;

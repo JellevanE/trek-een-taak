@@ -1,9 +1,10 @@
 import fs from 'node:fs';
 
-import * as experience from '../rpg/experience';
-import type { PublicUser, UserRecord, UserStoreData } from '../types/user';
+import { createInitialRpgState, ensureUserRpg } from '../rpg/experienceEngine.js';
+import { buildPublicRpgState } from '../rpg/eventHooks.js';
+import type { PublicUser, UserRecord, UserStoreData } from '../types/user.js';
 
-import { getUsersFile } from './filePaths';
+import { getUsersFile } from './filePaths.js';
 
 function createDefaultUser(): UserRecord {
     const now = new Date().toISOString();
@@ -20,7 +21,7 @@ function createDefaultUser(): UserRecord {
             class: 'adventurer',
             bio: ''
         },
-        rpg: experience.createInitialRpgState()
+        rpg: createInitialRpgState()
     } as UserRecord;
 }
 
@@ -52,7 +53,7 @@ export function readUsers(): UserStoreData {
         }
 
         parsed.users.forEach((user) => {
-            if (user) experience.ensureUserRpg(user);
+            if (user) ensureUserRpg(user);
         });
 
         return {
@@ -88,6 +89,6 @@ export function sanitizeUser(user: UserRecord | null | undefined): PublicUser | 
     const { password_hash, ...rest } = user;
     return {
         ...rest,
-        rpg: experience.buildPublicRpgState(user.rpg)
+        rpg: buildPublicRpgState(user.rpg)
     };
 }

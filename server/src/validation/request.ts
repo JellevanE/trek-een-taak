@@ -6,7 +6,7 @@ import {
     type ValidationErrorPayload,
     type ValidationIssue,
     type ValidationResult
-} from './helpers';
+} from './helpers.js';
 
 export interface RequestSchemas<B = unknown, Q = unknown, P = unknown, H = unknown> {
     body?: ZodSchema<B>;
@@ -29,7 +29,12 @@ function collectIssues(existing: ValidationIssue[], payload: ValidationErrorPayl
 
 function summarizeIssues(issues: ValidationIssue[]): string {
     if (issues.length === 0) return 'Validation passed';
-    if (issues.length === 1) return `Invalid ${issues[0].path || 'request'}: ${issues[0].message}`;
+    if (issues.length === 1) {
+        const [singleIssue] = issues;
+        const target = singleIssue?.path && singleIssue.path.length > 0 ? singleIssue.path : 'request';
+        const message = singleIssue?.message ?? 'Validation failed';
+        return `Invalid ${target}: ${message}`;
+    }
     return `Invalid request with ${issues.length} issues`;
 }
 

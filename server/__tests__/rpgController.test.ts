@@ -1,11 +1,14 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { jest } from '@jest/globals';
 
-import app from '../src/app';
-import * as experience from '../src/rpg/experience';
-import { readUsers, writeUsers } from '../src/data/userStore';
-import { createTestClient, type TestClient } from '../src/utils/testClient';
+import app from '../src/app.js';
+import * as experienceEngine from '../src/rpg/experienceEngine.js';
+import { readUsers, writeUsers } from '../src/data/userStore.js';
+import * as userStoreModule from '../src/data/userStore.js';
+import { resetRegistrationRateLimiter } from '../src/security/registrationRateLimiter.js';
+import { createTestClient, type TestClient } from '../src/utils/testClient.js';
 import {
     JsonRecord,
     buildDefaultUser,
@@ -14,7 +17,8 @@ import {
     resetTaskStore,
     resetCampaignStore,
     resetUserStore
-} from '../src/testing/fixtures';
+} from '../src/testing/fixtures.js';
+import { XP_CONFIG } from '../src/rpg/rewardTables.js';
 
 let dataDir: string;
 let tasksFile: string;
@@ -36,6 +40,7 @@ beforeEach(async () => {
     resetTaskStore(tasksFile);
     resetCampaignStore(campaignsFile);
     resetUserStore(usersFile, [buildDefaultUser()]);
+    resetRegistrationRateLimiter();
 
     const register = await client.post('/api/users/register', {
         body: { username: `player_${Date.now()}`, password: 'password123' },
@@ -77,12 +82,13 @@ test('claim daily reward errors when user missing', async () => {
 });
 
 test('claim daily reward handles applyXp failure', async () => {
-    const spy = jest.spyOn(experience, 'applyXp').mockReturnValue(null);
+    const originalDailyXp = XP_CONFIG.dailyBaseXp;
+    XP_CONFIG.dailyBaseXp = 0;
     const res = await client.post('/api/rpg/daily-reward', {
         headers: authHeaders()
     });
     expect(res.status).toBe(500);
-    spy.mockRestore();
+    XP_CONFIG.dailyBaseXp = originalDailyXp;
 });
 
 test('grant XP validates amount and handles missing user', async () => {
@@ -110,9 +116,11 @@ test('grant XP validates amount and handles missing user', async () => {
 });
 
 test('grant XP handles write errors', async () => {
-    const spy = jest.spyOn(require('node:fs'), 'writeFileSync').mockImplementation(() => {
-        throw new Error('persist failed');
-    });
+    const failingDir = mkdtempSync(join(tmpdir(), 'task-track-writefail-'));
+    const failingPath = join(failingDir, 'users.json');
+    writeFileSync(failingPath, readFileSync(usersFile));
+    chmodSync(failingDir, 0o555);
+    configureDataFiles({ users: failingPath });
     try {
         const res = await client.post('/api/rpg/grant-xp', {
             body: { amount: 5 },
@@ -120,7 +128,9 @@ test('grant XP handles write errors', async () => {
         });
         expect(res.status).toBe(500);
     } finally {
-        spy.mockRestore();
+        configureDataFiles({ users: usersFile });
+        chmodSync(failingDir, 0o755);
+        rmSync(failingDir, { recursive: true, force: true });
     }
 });
 

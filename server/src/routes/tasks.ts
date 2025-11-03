@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { ensureAuth } from '../middleware/auth';
+import { ensureAuth } from '../middleware/auth.js';
 import {
     createSubtask,
     createTask,
@@ -13,7 +13,7 @@ import {
     updateTask,
     updateTaskOrder,
     updateTaskStatus
-} from '../controllers/tasksController';
+} from '../controllers/tasksController.js';
 
 const router = Router();
 

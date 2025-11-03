@@ -1,8 +1,10 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 type DataFileKey = 'tasks' | 'users' | 'campaigns';
 
-const ROOT_DIR = path.join(__dirname, '..', '..');
+const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
+const ROOT_DIR = path.resolve(MODULE_DIR, '..', '..');
 
 const defaults: Record<DataFileKey, string> = {
     tasks: path.join(ROOT_DIR, 'tasks.json'),

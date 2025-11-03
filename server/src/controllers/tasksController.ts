@@ -2,25 +2,26 @@ import type { Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 import type { ParsedQs } from 'qs';
 
-import * as experience from '../rpg/experience';
-import { computeSubtaskXp, computeTaskXp } from '../rpg/rewards';
+import { applyXp, ensureUserRpg } from '../rpg/experienceEngine.js';
+import { buildPublicRpgState, incrementCounter, toPublicXpEvent } from '../rpg/eventHooks.js';
+import { clampTaskLevel, computeSubtaskXp, computeTaskXp } from '../rpg/rewardTables.js';
 import {
     readTasks,
     serializeTask,
     serializeTaskList,
     writeTasks
-} from '../data/taskStore';
-import { readCampaigns } from '../data/campaignStore';
-import { readUsers, writeUsers } from '../data/userStore';
-import { sendError } from '../utils/http';
-import { assertAuthenticated } from '../utils/authGuard';
-import type { AuthenticatedRequest } from '../types/auth';
-import type { CampaignStoreData } from '../types/campaign';
-import type { SubTask, TaskRecord, TaskStatus, TaskStoreData } from '../types/task';
-import type { PublicUserRpgState, UserRecord, UserStoreData } from '../types/user';
-import type { PublicXpEvent } from '../rpg/experience';
-import type { SubtaskCompletionMetadata, TaskCompletionMetadata } from '../types/rpg';
-import { validateRequest } from '../validation';
+} from '../data/taskStore.js';
+import { readCampaigns } from '../data/campaignStore.js';
+import { readUsers, writeUsers } from '../data/userStore.js';
+import { sendError } from '../utils/http.js';
+import { assertAuthenticated } from '../utils/authGuard.js';
+import type { AuthenticatedRequest } from '../types/auth.js';
+import type { CampaignStoreData } from '../types/campaign.js';
+import type { SubTask, TaskRecord, TaskStatus, TaskStoreData } from '../types/task.js';
+import type { PublicUserRpgState, UserRecord, UserStoreData } from '../types/user.js';
+import type { PublicXpEvent } from '../rpg/experienceTypes.js';
+import type { SubtaskCompletionMetadata, TaskCompletionMetadata } from '../types/rpg.js';
+import { validateRequest } from '../validation/index.js';
 import {
     createSubtaskSchema,
     createTaskSchema,
@@ -34,7 +35,7 @@ import {
     type UpdateStatusPayload,
     type UpdateSubtaskPayload,
     type UpdateTaskPayload
-} from '../validation/schemas/tasks';
+} from '../validation/schemas/tasks.js';
 
 type BaseAuthedRequest<
     P extends ParamsDictionary = ParamsDictionary,
@@ -106,7 +107,7 @@ export function createTask(req: BaseAuthedRequest<ParamsDictionary, CreateTaskPa
     const { description, priority, due_date, task_level, campaign_id } = validation.data.body!;
 
     const prio: TaskRecord['priority'] = priority ?? 'medium';
-    const questLevel = experience.clampTaskLevel(task_level ?? 1);
+    const questLevel = clampTaskLevel(task_level ?? 1);
 
     let campaignId: number | null = null;
     if (campaign_id !== undefined && campaign_id !== null) {
@@ -123,6 +124,10 @@ export function createTask(req: BaseAuthedRequest<ParamsDictionary, CreateTaskPa
     }
 
     const tasksData = readTasks();
+    const normalizedDueDate: string =
+        typeof due_date === 'string' && due_date.trim().length > 0
+            ? due_date
+            : new Date().toISOString().slice(0, 10);
     const now = new Date().toISOString();
     const newTask: TaskRecord = {
         id: tasksData.nextId,
@@ -130,7 +135,7 @@ export function createTask(req: BaseAuthedRequest<ParamsDictionary, CreateTaskPa
         priority: prio,
         sub_tasks: [],
         nextSubtaskId: 1,
-        due_date: typeof due_date === 'string' && due_date ? due_date : new Date().toISOString().split('T')[0],
+        due_date: normalizedDueDate,
         status: 'todo',
         order: tasksData.tasks.length,
         created_at: now,
@@ -219,10 +224,10 @@ function applyTaskCompletionReward(
         task_level: task.task_level,
         priority: task.priority
     };
-    const xpEvent = experience.applyXp(user, reward.amount, 'task_complete', metadata);
+    const xpEvent = applyXp(user, reward.amount, 'task_complete', metadata);
     if (!xpEvent) return { xpEvents: [], playerSnapshot: null };
 
-    experience.incrementCounter(user.rpg, 'tasks_completed');
+    incrementCounter(user.rpg, 'tasks_completed');
     task.rpg.xp_awarded = true;
     task.rpg.last_reward_at = xpEvent.at;
     task.rpg.history.unshift({
@@ -232,9 +237,9 @@ function applyTaskCompletionReward(
     });
     if (task.rpg.history.length > 10) task.rpg.history.length = 10;
 
-    const publicEvent = experience.toPublicXpEvent(xpEvent);
+    const publicEvent = toPublicXpEvent(xpEvent);
     const xpEvents = publicEvent ? [publicEvent] : [];
-    const playerSnapshot = experience.buildPublicRpgState(user.rpg);
+    const playerSnapshot = buildPublicRpgState(user.rpg);
     return { xpEvents, playerSnapshot };
 }
 
@@ -269,8 +274,10 @@ export function updateTaskStatus(
         usersData = readUsers();
         userIndex = usersData.users.findIndex((user) => user.id === req.user.id);
         if (userIndex === -1) return sendError(res, 404, 'User not found');
-        userRecord = usersData.users[userIndex];
-        experience.ensureUserRpg(userRecord);
+        const record = usersData.users[userIndex];
+        if (!record) return sendError(res, 404, 'User not found');
+        userRecord = record;
+        ensureUserRpg(userRecord);
     }
 
     const now = new Date().toISOString();
@@ -329,10 +336,10 @@ function applySubtaskCompletionReward(
         metadata.weight = subtask.weight;
     }
 
-    const xpEvent = experience.applyXp(user, reward.amount, 'subtask_complete', metadata);
+    const xpEvent = applyXp(user, reward.amount, 'subtask_complete', metadata);
     if (!xpEvent) return null;
 
-    experience.incrementCounter(user.rpg, 'subtasks_completed');
+    incrementCounter(user.rpg, 'subtasks_completed');
     subtask.rpg.xp_awarded = true;
     subtask.rpg.last_reward_at = xpEvent.at;
 
@@ -385,8 +392,10 @@ export function updateSubtaskStatus(
         usersData = readUsers();
         userIndex = usersData.users.findIndex((user) => user.id === req.user.id);
         if (userIndex === -1) return sendError(res, 404, 'User not found');
-        userRecord = usersData.users[userIndex];
-        experience.ensureUserRpg(userRecord);
+        const record = usersData.users[userIndex];
+        if (!record) return sendError(res, 404, 'User not found');
+        userRecord = record;
+        ensureUserRpg(userRecord);
     }
 
     const now = new Date().toISOString();
@@ -403,9 +412,9 @@ export function updateSubtaskStatus(
     if (willComplete && userRecord) {
         const event = applySubtaskCompletionReward(task, subtask, userRecord);
         if (event) {
-            const publicEvent = experience.toPublicXpEvent(event);
+            const publicEvent = toPublicXpEvent(event);
             if (publicEvent) xpEvents.push(publicEvent);
-            playerSnapshot = experience.buildPublicRpgState(userRecord.rpg);
+            playerSnapshot = buildPublicRpgState(userRecord.rpg);
         }
     }
 
@@ -450,7 +459,7 @@ export function updateTaskOrder(
     });
 
     let updated = false;
-    order.forEach((taskId, index) => {
+    order.forEach((taskId: number, index: number) => {
         const task = idToTask.get(taskId);
         if (task) {
             task.order = index;
@@ -528,7 +537,7 @@ export function updateTask(
 
     if (Object.prototype.hasOwnProperty.call(updates, 'due_date')) {
         if (updates.due_date === null) {
-            task.due_date = new Date().toISOString().split('T')[0];
+            task.due_date = new Date().toISOString().slice(0, 10);
         } else if (typeof updates.due_date === 'string') {
             task.due_date = updates.due_date;
         } else {
@@ -537,7 +546,7 @@ export function updateTask(
     }
 
     if (Object.prototype.hasOwnProperty.call(updates, 'task_level') && updates.task_level !== undefined) {
-        task.task_level = experience.clampTaskLevel(updates.task_level);
+        task.task_level = clampTaskLevel(updates.task_level);
     }
 
     if (Object.prototype.hasOwnProperty.call(updates, 'campaign_id')) {

@@ -43,10 +43,15 @@ function mapIssues(error: ZodError, scope?: string): ValidationIssue[] {
 
 export function formatZodError(error: ZodError, scope?: string): ValidationErrorPayload {
     const issues = mapIssues(error, scope);
-    const summary =
-        issues.length === 1
-            ? `Validation failed for ${issues[0].path || (scope ?? 'value')}: ${issues[0].message}`
-            : `Validation failed with ${issues.length} issues`;
+    let summary: string;
+    if (issues.length === 1) {
+        const [singleIssue] = issues;
+        const targetPath = singleIssue?.path && singleIssue.path.length > 0 ? singleIssue.path : scope ?? 'value';
+        const message = singleIssue?.message ?? 'Validation failed';
+        summary = `Validation failed for ${targetPath}: ${message}`;
+    } else {
+        summary = `Validation failed with ${issues.length} issues`;
+    }
     return { issues, summary };
 }
 

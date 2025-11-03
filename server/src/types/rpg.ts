@@ -1,5 +1,5 @@
-import type { TaskPriority } from './task';
-import type { JsonValue } from './json';
+import type { TaskPriority } from './task.js';
+import type { JsonValue } from './json.js';
 
 export type XpEventReason =
     | 'task_complete'
