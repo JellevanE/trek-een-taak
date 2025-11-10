@@ -320,7 +320,6 @@ const QuestCard = React.memo(({
                                                         itemHeight={SIDE_QUEST_ITEM_HEIGHT}
                                                         itemGap={sideQuestGap}
                                                         maxContainerHeight={sideQuestMaxHeight}
-                                                        footer={sideQuestFooter}
                                                         themeName={themeName}
                                                         renderItem={(sideQuest, isSideDragging, sideDragMeta = {}) => {
                                                             const sideHandleProps = sideDragMeta.handleProps || {};
@@ -509,6 +508,9 @@ const QuestCard = React.memo(({
                                                             );
                                                         }}
                                                     />
+                                                </div>
+                                                <div className="side-quest-footer-wrapper">
+                                                    {sideQuestFooter}
                                                 </div>
                                             </div>
                                         ) : (

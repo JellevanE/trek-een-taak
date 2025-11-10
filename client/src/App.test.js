@@ -224,3 +224,38 @@ test('allows editing the selected campaign', async () => {
     name: 'Renamed Campaign'
   });
 });
+
+test('add side quest button works even when quest already has side quests', async () => {
+  const quests = [
+    {
+      id: 501,
+      description: 'Master quest',
+      status: 'todo',
+      priority: 'medium',
+      task_level: 1,
+      campaign_id: null,
+      side_quests: [
+        { id: 9001, description: 'Gather crystals', status: 'todo' }
+      ]
+    }
+  ];
+
+  setupAuthenticatedApp((url, options = {}) => {
+    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 3 } } });
+    if (url === '/api/campaigns') return okResponse({ campaigns: [] });
+    if (url === '/api/tasks' && (!options.method || options.method === 'GET')) return okResponse({ tasks: quests });
+    if (url.startsWith('/api/tasks?')) return okResponse({ tasks: quests });
+    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
+  });
+
+  await waitFor(() => expect(screen.getByText('Master quest')).toBeInTheDocument());
+
+  const questCard = screen.getByText('Master quest').closest('.quest');
+  expect(questCard).toBeTruthy();
+  const addButton = within(questCard).getByRole('button', { name: /\+ Add Side Quest/i });
+  fireEvent.click(addButton);
+
+  await waitFor(() => {
+    expect(screen.getByPlaceholderText(/Add a side-quest/i)).toBeInTheDocument();
+  });
+});

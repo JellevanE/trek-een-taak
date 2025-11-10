@@ -7,6 +7,7 @@ import { useAuth } from './hooks/useAuth';
 import { useQuestBoard } from './hooks/useQuestBoard';
 import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
+import { QuestEditForm, AddSideQuestForm } from './features/quest-board/components/forms';
 
 const KEY_LABEL_MAP = {
     ArrowDown: '↓',
@@ -124,10 +125,13 @@ function App() {
         showDebugTools,
         setShowDebugTools,
         editingQuest,
+        editingQuestInputRef,
         setEditingQuest,
         selectedQuestId,
         selectedSideQuest,
         editingSideQuest,
+        sideQuestDescriptionMap,
+        setSideQuestDescriptionMap,
         addingSideQuestTo,
         setAddingSideQuestTo,
         collapsedMap,
@@ -148,12 +152,14 @@ function App() {
         handleCampaignFieldChange,
         submitCampaignForm,
         addTask,
+        addSideQuest,
         toggleCollapse,
         handleSelectQuest,
         handleSelectSideQuest,
         dismissUndoEntry,
         handleUndoDelete,
         deleteTask,
+        updateTask,
         toasts,
         dismissToast,
         pulsingQuests,
@@ -173,10 +179,11 @@ function App() {
         handleSideQuestEditChange,
         cancelSideQuestEdit,
         saveSideQuestEdit,
+        handleEditChange,
         cyclePriority,
         cycleTaskLevel,
-        renderEditForm,
-        renderAddSideQuestForm,
+        cycleEditingPriority,
+        cycleEditingLevel,
         smoothDrag,
         campaignLookup,
         hasCampaigns,
@@ -192,6 +199,67 @@ function App() {
     const QUEST_ITEM_HEIGHT = 320;
     const QUEST_ITEM_GAP = 16;
     const SIDE_QUEST_ITEM_HEIGHT = 80;
+
+    const renderEditForm = React.useCallback((quest) => {
+        if (!quest || !editingQuest) return null;
+        return (
+            <QuestEditForm
+                quest={quest}
+                editingQuest={editingQuest}
+                inputRef={editingQuestInputRef}
+                campaigns={campaigns}
+                hasCampaigns={hasCampaigns}
+                onChange={handleEditChange}
+                onCancel={() => setEditingQuest(null)}
+                onSave={() => updateTask(quest.id, editingQuest)}
+                onCyclePriority={cycleEditingPriority}
+                onCycleLevel={cycleEditingLevel}
+            />
+        );
+    }, [
+        campaigns,
+        cycleEditingLevel,
+        cycleEditingPriority,
+        editingQuest,
+        editingQuestInputRef,
+        handleEditChange,
+        hasCampaigns,
+        setEditingQuest,
+        updateTask
+    ]);
+
+    const renderAddSideQuestForm = React.useCallback((questId) => (
+        <AddSideQuestForm
+            questId={questId}
+            value={sideQuestDescriptionMap[questId] || ''}
+            inputRef={(el) => {
+                if (!addInputRefs.current) addInputRefs.current = {};
+                if (el) {
+                    addInputRefs.current[questId] = el;
+                } else {
+                    delete addInputRefs.current[questId];
+                }
+            }}
+            onChange={(next) => setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: next }))}
+            onAdd={() => addSideQuest(questId)}
+            onCancel={() => {
+                setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
+                setAddingSideQuestTo(null);
+            }}
+            onFocus={() => setAddingSideQuestTo(questId)}
+            onBlur={() => {
+                setTimeout(() => {
+                    setAddingSideQuestTo((prev) => (prev === questId ? null : prev));
+                }, 100);
+            }}
+        />
+    ), [
+        addInputRefs,
+        addSideQuest,
+        setAddingSideQuestTo,
+        setSideQuestDescriptionMap,
+        sideQuestDescriptionMap
+    ]);
 
     // Memoized render function for quest cards
     // This prevents unnecessary re-renders when unrelated state changes
