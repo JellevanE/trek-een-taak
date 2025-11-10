@@ -671,6 +671,20 @@
     gap:12px;
 }
 
+.quest-card-shell{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+}
+
+.quest-card-body{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
 .task-header .left,
 .quest-header .left{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; flex:1; min-width:0 }
 .task-header .right,
@@ -807,6 +821,15 @@
     flex-wrap:wrap;
 }
 
+.side-quest-main{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex:1;
+    min-width:0;
+    flex-wrap:wrap;
+}
+
 .task-row-actions{
     display:flex;
     align-items:center;
@@ -839,6 +862,32 @@
     background: rgba(0,0,0,0.35);
     border-radius:6px;
     padding:6px;
+}
+
+.side-quest-panel{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.side-quest-scroll{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    overflow:hidden;
+}
+
+.side-quest-scroll[data-scrollable="true"]{
+    overflow-y:auto;
+    padding-right:4px;
+}
+
+.side-quest-footer-wrapper{
+    margin-top:8px;
+}
+
+.side-quest-empty{
+    margin-top:12px;
 }
 
 .side-quest-edit{ flex:1; }
@@ -1099,6 +1148,14 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 .quest-details .muted{ color:var(--muted); font-size:12px }
 .task-details .small,
 .quest-details .small{ font-size:11px; color:var(--muted) }
+
+.quest-actions{
+    margin-left:auto;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    align-items:center;
+}
 
 /* Per-task progress */
 .task-progress-wrap,
