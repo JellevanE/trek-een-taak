@@ -11,7 +11,8 @@ export const QuestCardShell = ({
     isCelebrating,
     handleSelectQuest,
     isInteractiveTarget,
-    children
+    children,
+    cardTokens
 }) => {
     const questHandleProps = dragMeta?.handleProps || {};
     const questHandleStyle = {
@@ -24,6 +25,23 @@ export const QuestCardShell = ({
         cursor: 'grab',
         ...dragMeta?.handleStyle
     };
+    const cardStyle = React.useMemo(() => {
+        if (!cardTokens) return undefined;
+        const styleVars = {};
+        if (cardTokens.depth?.resting) {
+            styleVars['--quest-card-shadow-resting'] = cardTokens.depth.resting;
+        }
+        if (cardTokens.depth?.active) {
+            styleVars['--quest-card-shadow-active'] = cardTokens.depth.active;
+        }
+        if (cardTokens.transition) {
+            styleVars['--quest-card-shadow-transition'] = cardTokens.transition;
+        }
+        if (cardTokens.focusRing) {
+            styleVars['--quest-card-focus-outline'] = cardTokens.focusRing;
+        }
+        return Object.keys(styleVars).length > 0 ? styleVars : undefined;
+    }, [cardTokens]);
 
     const handleRootInteraction = (event) => {
         if (isInteractiveTarget(event.target)) return;
@@ -37,6 +55,7 @@ export const QuestCardShell = ({
                 tabIndex={0}
                 className={questClassName}
                 data-dragging={isDragging ? 'true' : undefined}
+                style={cardStyle}
                 onClick={handleRootInteraction}
                 onFocus={handleRootInteraction}
                 onKeyDown={(event) => {
@@ -102,14 +121,23 @@ QuestCardShell.propTypes = {
     isCelebrating: PropTypes.bool,
     handleSelectQuest: PropTypes.func.isRequired,
     isInteractiveTarget: PropTypes.func.isRequired,
-    children: PropTypes.node.isRequired
+    children: PropTypes.node.isRequired,
+    cardTokens: PropTypes.shape({
+        depth: PropTypes.shape({
+            resting: PropTypes.string,
+            active: PropTypes.string
+        }),
+        transition: PropTypes.string,
+        focusRing: PropTypes.string
+    })
 };
 
 QuestCardShell.defaultProps = {
     isDragging: false,
     dragMeta: {},
     isNew: false,
-    isCelebrating: false
+    isCelebrating: false,
+    cardTokens: null
 };
 
 export default QuestCardShell;

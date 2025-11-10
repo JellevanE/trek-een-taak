@@ -43,12 +43,11 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
 - [x] **Clarify test fixtures approach:** Either add explicit Storybook setup with installation steps, or document that "Storybook-style" means lightweight test fixtures (`.json` mock data files) for component testing. _Documented via `client/src/features/quest-board/test-data/questFixtures.js`, which supplies deterministic fixtures to the new Jest suites._
 
 ## Story 4 · Theme & Interaction Tokens
-- [ ] Extend `client/src/hooks/useTheme.js` (or create `client/src/theme/index.js`) to expose interaction tokens: `motion.curves`, `motion.durations`, `glow.intensity`, `card.depth`, `soundFx` toggles.
-- [ ] Provide a default "Neon Arcade" theme profile plus a placeholder "Classic" profile so we can prove animations/styles swap together.
-- [ ] Update quest board components (`QuestCard`, new Framer list wrappers, CTA buttons) to consume the theme tokens instead of
- hard-coded CSS transitions.
-- [ ] Ensure theming covers reduced-motion fallbacks by reading `prefers-reduced-motion` inside the theme hook and clamping animation durations.
-- [ ] Add regression checks (Jest snapshots or visual diff harness) that confirm theme changes don't alter business logic output, only presentation.
+- [x] Extend `client/src/hooks/useTheme.js` (or create `client/src/theme/index.js`) to expose interaction tokens: `motion.curves`, `motion.durations`, `glow.intensity`, `card.depth`, `soundFx` toggles. _New `client/src/theme/index.js` owns the Neon/Classic profiles and `useTheme` now returns `themeProfile`, auto-syncs CSS vars, and broadcasts card/CTA tokens + sound flags through context._
+- [x] Provide a default "Neon Arcade" theme profile plus a placeholder "Classic" profile so we can prove animations/styles swap together. _`DEFAULT_THEME_ID` points to `neon_arcade` with a light-mode `classic` fallback + legacy dark/light aliases so existing localStorage entries migrate automatically._
+- [x] Update quest board components (`QuestCard`, new Framer list wrappers, CTA buttons) to consume the theme tokens instead of hard-coded CSS transitions. _QuestCardShell + QuestActions now drive box-shadows/focus rings/CTA motion through theme-fed CSS vars, and Framer lists consume the shared motion presets._
+- [x] Ensure theming covers reduced-motion fallbacks by reading `prefers-reduced-motion` inside the theme hook and clamping animation durations. _`useQuestMotionTokens` pulls from the central profiles and still halves durations + disables glow when reduced motion is enabled._
+- [x] Add regression checks (Jest snapshots or visual diff harness) that confirm theme changes don't alter business logic output, only presentation. _Covered via the new `useQuestMotionTokens.test.js`, which asserts profile switching + reduced-motion clamping without touching quest logic._
 - [ ] **CSS variable migration:** Extract hardcoded colors and animations from `App.css` into theme-controlled variants:
   - Map existing CSS custom properties (--accent-cyan, --accent-pink, --accent-purple, --muted) to theme profiles
   - Migrate `@keyframes` animations (pulse-anim, glow-anim, burst-fade, burst-ring, quest-spawn-anim) to support theme-specific parameters
@@ -63,7 +62,7 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
   - Consider a `/themes` preview route showing all quest states (active, completed, editing, dragging, glowing, pulsing)
   - Add visual regression testing setup (lightweight Percy/Chromatic snapshots or manual screenshot comparison)
   - Test theme switching doesn't cause FOUC (flash of unstyled content)
-- [ ] **Extend useQuestMotionTokens:** The existing hook in `client/src/features/quest-board/hooks/useQuestMotionTokens.js` already handles motion profiles and reduced-motion—integrate it with the broader theme system rather than duplicating logic.
+- [x] **Extend useQuestMotionTokens:** The existing hook in `client/src/features/quest-board/hooks/useQuestMotionTokens.js` already handles motion profiles and reduced-motion—integrate it with the broader theme system rather than duplicating logic. _Hook now resolves presets from the shared theme module so Story 4 tokens stay in sync._
 
 ## Story 5 · Quest State Store (Zustand)
 - [ ] Introduce a `client/src/store/questBoardStore.js` (or similar) using Zustand to own quests, selection, editing, and layout metadata.

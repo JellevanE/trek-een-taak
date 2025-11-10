@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { FramerQuestList, FramerSideQuestList } from '../features/quest-board/components';
+import { DEFAULT_THEME_ID } from '../theme';
 
 /**
  * useSmoothDragQuests - Integration layer for smooth drag & drop
@@ -55,7 +56,7 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
         renderItem,
         itemHeight = 100,
         itemGap = 0,
-        themeName = 'dark'
+        themeName = DEFAULT_THEME_ID
     }) => {
         const currentQuests = questsRef.current;
         return (
@@ -78,7 +79,7 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
         itemHeight = 60,
         itemGap = 0,
         maxContainerHeight = null,
-        themeName = 'dark'
+        themeName = DEFAULT_THEME_ID
     }) => (
         <FramerSideQuestList
             questId={questId}

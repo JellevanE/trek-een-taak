@@ -19,6 +19,7 @@ const QuestCard = React.memo(({
 }) => {
     const {
         themeName = 'dark',
+        themeProfile,
         selectedQuestId,
         selectedSideQuest,
         editingQuest,
@@ -76,6 +77,9 @@ const QuestCard = React.memo(({
         itemHeight: SIDE_QUEST_ITEM_HEIGHT,
         gap: sideQuestGap
     });
+    const cardTokens = themeProfile?.card || null;
+    const ctaTokens = themeProfile?.cta || null;
+    const soundFxTokens = themeProfile?.soundFx || null;
     
     const sideQuestFooter = (
         <div className="side-quest-footer">
@@ -122,6 +126,7 @@ const QuestCard = React.memo(({
             isCelebrating={isCelebrating}
             handleSelectQuest={handleSelectQuest}
             isInteractiveTarget={isInteractiveTarget}
+            cardTokens={cardTokens}
         >
             {editingQuest && editingQuest.id === quest.id ? (
                 renderEditForm(quest)
@@ -153,6 +158,8 @@ const QuestCard = React.memo(({
                                 onStart={() => setTaskStatus(quest.id, 'in_progress')}
                                 onComplete={() => setTaskStatus(quest.id, 'done')}
                                 onUndo={() => setTaskStatus(quest.id, 'todo')}
+                                ctaTokens={ctaTokens}
+                                soundFx={soundFxTokens}
                             />
                             <SideQuestList
                                 quest={quest}

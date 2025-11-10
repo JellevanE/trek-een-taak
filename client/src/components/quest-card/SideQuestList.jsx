@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { DEFAULT_THEME_ID } from '../../theme';
 
 const SideQuestItem = ({
     quest,
@@ -347,7 +348,7 @@ SideQuestList.propTypes = {
 
 SideQuestList.defaultProps = {
     smoothDrag: null,
-    themeName: 'dark',
+    themeName: DEFAULT_THEME_ID,
     sideQuestItemHeight: 60,
     sideQuestGap: 8,
     sideQuestMaxHeight: null,

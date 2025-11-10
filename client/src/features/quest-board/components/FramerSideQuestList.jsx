@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Reorder } from 'framer-motion';
+import { DEFAULT_THEME_ID } from '../../../theme';
 import { useQuestMotionTokens } from '../hooks/useQuestMotionTokens.js';
 import { getItemKey, reconcileOrder, useNeonDragHandle } from './listUtils.js';
 
@@ -151,7 +152,7 @@ FramerSideQuestList.defaultProps = {
     itemHeight: 0,
     maxContainerHeight: null,
     refreshToken: 0,
-    themeName: 'dark'
+    themeName: DEFAULT_THEME_ID
 };
 
 export default FramerSideQuestList;

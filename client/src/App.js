@@ -9,6 +9,8 @@ import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
 import { QuestEditForm, AddSideQuestForm } from './features/quest-board/components/forms';
 import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
+// TEMPORARY: Showcase import (remove when done exploring)
+import QuickDemo from './showcase/QuickDemo.jsx';
 
 const KEY_LABEL_MAP = {
     ArrowDown: '↓',
@@ -98,9 +100,14 @@ const formatKeyLabel = (key) => KEY_LABEL_MAP[key] || key;
 function App() {
     console.log('[App] Re-rendering');
     
-    const { theme, setTheme } = useTheme();
+    const { theme, themeLabel, themeProfile, toggleTheme } = useTheme();
+    const isDarkAppearance = themeProfile?.appearance !== 'light';
+    const surfaceTint = isDarkAppearance ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+    const progressTrackColor = isDarkAppearance ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
     const { token, setToken, showProfile, setShowProfile } = useAuth();
     const [showShortcuts, setShowShortcuts] = React.useState(false);
+    // TEMPORARY: Showcase state (remove when done exploring)
+    const [showShowcase, setShowShowcase] = React.useState(false);
     const shortcutsPanelRef = React.useRef(null);
     const {
         quests,
@@ -264,6 +271,7 @@ function App() {
 
     const questBoardContextValue = React.useMemo(() => ({
         themeName: theme,
+        themeProfile,
         selectedQuestId,
         selectedSideQuest,
         editingQuest,
@@ -306,6 +314,7 @@ function App() {
         sideQuestItemHeight: SIDE_QUEST_ITEM_HEIGHT
     }), [
         theme,
+        themeProfile,
         selectedQuestId,
         selectedSideQuest,
         editingQuest,
@@ -385,7 +394,20 @@ function App() {
                             <div className="subtitle">Quest management made easy, but also way harder.</div>
                         </div>
                         <div style={{display:'flex', alignItems:'center', gap:8}}>
-                            <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                            <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
+                            {/* TEMPORARY: Showcase button (remove when done exploring) */}
+                            <button 
+                                className="btn-ghost" 
+                                onClick={() => setShowShowcase(true)}
+                                style={{
+                                    background: 'var(--neon-purple, #9400d3)',
+                                    color: 'white',
+                                    border: '2px solid var(--neon-purple, #9400d3)',
+                                    boxShadow: '0 0 10px rgba(148, 0, 211, 0.5)'
+                                }}
+                            >
+                                🎮 Showcase
+                            </button>
                         </div>
                     </div>
                 </header>
@@ -502,7 +524,20 @@ function App() {
                         <div className="subtitle">Quest management made easy, but also way harder.</div>
                     </div>
                     <div style={{display:'flex', alignItems:'center', gap:8}}>
-                        <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                        <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
+                        {/* TEMPORARY: Showcase button (remove when done exploring) */}
+                        <button 
+                            className="btn-ghost" 
+                            onClick={() => setShowShowcase(true)}
+                            style={{
+                                background: 'var(--neon-purple, #9400d3)',
+                                color: 'white',
+                                border: '2px solid var(--neon-purple, #9400d3)',
+                                boxShadow: '0 0 10px rgba(148, 0, 211, 0.5)'
+                            }}
+                        >
+                            🎮 Showcase
+                        </button>
                         <button
                             className="btn-ghost"
                             onClick={() => setShowShortcuts((prev) => !prev)}
@@ -522,7 +557,7 @@ function App() {
                     style={{
                         margin: '16px 0',
                         padding: '12px 16px',
-                        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                        background: surfaceTint,
                         borderRadius: 12,
                         display: 'flex',
                         alignItems: 'center',
@@ -540,7 +575,7 @@ function App() {
                             <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>Total XP {playerStats.xp}</div>
                         </div>
                         <div style={{ marginTop: 8 }}>
-                            <div style={{ height: 8, borderRadius: 6, background: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                            <div style={{ height: 8, borderRadius: 6, background: progressTrackColor, overflow: 'hidden' }}>
                                 <div
                                     style={{
                                         width: `${Math.max(0, Math.min(100, xpPercent))}%`,
@@ -877,6 +912,9 @@ function App() {
                     ))}
                 </AnimatePresence>
             </div>
+            
+            {/* TEMPORARY: Showcase demo (remove when done exploring) */}
+            {showShowcase && <QuickDemo onClose={() => setShowShowcase(false)} />}
         </div>
     );
 }

@@ -1,45 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-
-const MOTION_PROFILES = {
-    dark: {
-        durations: {
-            drag: 0.28,
-            hover: 0.18,
-            release: 0.32
-        },
-        easing: {
-            drag: [0.25, 0.1, 0.25, 1],
-            hover: [0.4, 0, 0.2, 1]
-        },
-        drag: {
-            scale: 1.02,
-            shadow: '0 14px 24px rgba(57, 255, 20, 0.25)',
-            glow: '0 0 18px rgba(57, 255, 20, 0.45)'
-        },
-        idle: {
-            shadow: '0 8px 14px rgba(0, 0, 0, 0.35)'
-        }
-    },
-    light: {
-        durations: {
-            drag: 0.24,
-            hover: 0.16,
-            release: 0.26
-        },
-        easing: {
-            drag: [0.4, 0, 0.2, 1],
-            hover: [0.25, 0.1, 0.25, 1]
-        },
-        drag: {
-            scale: 1.015,
-            shadow: '0 10px 18px rgba(111, 0, 255, 0.25)',
-            glow: '0 0 14px rgba(111, 0, 255, 0.35)'
-        },
-        idle: {
-            shadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
-        }
-    }
-};
+import { DEFAULT_THEME_ID, getThemeProfile } from '../../../theme';
 
 const REDUCED_MOTION_SCALE = 0.5;
 
@@ -79,11 +39,11 @@ const clampProfile = (profile) => ({
     }
 });
 
-export const useQuestMotionTokens = (themeName = 'dark') => {
+export const useQuestMotionTokens = (themeName = DEFAULT_THEME_ID) => {
     const prefersReducedMotion = usePrefersReducedMotion();
 
     return useMemo(() => {
-        const preset = MOTION_PROFILES[themeName] || MOTION_PROFILES.dark;
+        const preset = getThemeProfile(themeName)?.motion ?? getThemeProfile(DEFAULT_THEME_ID).motion;
         return prefersReducedMotion ? clampProfile(preset) : preset;
     }, [prefersReducedMotion, themeName]);
 };
