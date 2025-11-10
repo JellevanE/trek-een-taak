@@ -1,66 +1,17 @@
 import { useEffect } from 'react';
-import { useSpring, animated, config, to } from '@react-spring/web';
+import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 
-/**
- * AnimatedQuestCard - Wraps quest cards with entrance/exit animations
- * 
- * Usage:
- * <AnimatedQuestCard isNew={spawnQuests[quest.id]}>
- *   {your existing quest card JSX}
- * </AnimatedQuestCard>
- */
-export const AnimatedQuestCard = ({ children, isNew = false, isCompleting = false }) => {
-    const [entranceSpring, entranceApi] = useSpring(() => ({
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        config: config.wobbly,
-    }));
+export const AnimatedQuestCard = ({ children, isNew = false, isCompleting = false }) => (
+    <motion.div
+        layout
+        initial={isNew ? { opacity: 0, y: -20, scale: 0.85 } : { opacity: 1, y: 0, scale: 1 }}
+        animate={{ opacity: 1, y: 0, scale: isCompleting ? 1.05 : 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+    >
+        {children}
+    </motion.div>
+);
 
-    useEffect(() => {
-        if (!isNew) {
-            entranceApi.set({
-                opacity: 1,
-                y: 0,
-                scale: 1,
-            });
-            return;
-        }
-
-        entranceApi.set({
-            opacity: 0,
-            y: -20,
-            scale: 0.85,
-        });
-        entranceApi.start({
-            opacity: 1,
-            y: 0,
-            scale: 1,
-        });
-    }, [isNew, entranceApi]);
-
-    const celebrationSpring = useSpring({
-        scale: isCompleting ? 1.05 : 1,
-        config: config.gentle,
-    });
-
-    const style = {
-        opacity: entranceSpring.opacity,
-        transform: to(
-            [entranceSpring.y, entranceSpring.scale, celebrationSpring.scale],
-            (y, entranceScale, celebrationScale) => `translateY(${y}px) scale(${entranceScale * celebrationScale})`
-        ),
-    };
-
-    return <animated.div style={style}>{children}</animated.div>;
-};
-
-/**
- * AnimatedProgressBar - Spring-based progress bar fill
- * 
- * Usage:
- * <AnimatedProgressBar percent={questProgress} color={progressColor(questProgress)} />
- */
 export const AnimatedProgressBar = ({
     percent = 0,
     color = '#00d4ff',
@@ -68,57 +19,33 @@ export const AnimatedProgressBar = ({
     style = {},
     ariaProps = {},
     children = null
-}) => {
-    const spring = useSpring({
-        width: `${percent}%`,
-        background: color,
-        config: config.molasses, // Slow and smooth
-    });
-
-    return (
-        <div
-            className={className}
+}) => (
+    <div
+        className={className}
+        style={{
+            height: '10px',
+            background: 'rgba(255,255,255,0.05)',
+            borderRadius: '999px',
+            overflow: 'hidden',
+            position: 'relative',
+            ...style
+        }}
+        {...ariaProps}
+    >
+        <motion.div
+            layout
             style={{
-                height: '10px',
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: '999px',
-                overflow: 'hidden',
-                position: 'relative',
-                ...style
+                height: '100%',
+                borderRadius: '999px'
             }}
-            {...ariaProps}
-        >
-            <animated.div 
-                style={{
-                    ...spring,
-                    height: '100%',
-                    borderRadius: '999px',
-                }}
-            />
-            {children}
-        </div>
-    );
-};
+            animate={{ width: `${percent}%`, backgroundColor: color }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+        />
+        {children}
+    </div>
+);
 
-/**
- * AnimatedToast - Toast notification with spring entrance/exit
- * 
- * Usage in your useToasts hook:
- * <AnimatedToast message={toast.msg} type={toast.type} onDismiss={() => ...} />
- */
 export const AnimatedToast = ({ message, type = 'info', onDismiss }) => {
-    const spring = useSpring({
-        from: { 
-            opacity: 0, 
-            transform: 'translateX(100%) scale(0.8)',
-        },
-        to: { 
-            opacity: 1, 
-            transform: 'translateX(0%) scale(1)',
-        },
-        config: config.gentle,
-    });
-
     const typeColors = {
         success: '#22c55e',
         error: '#ef4444',
@@ -126,65 +53,57 @@ export const AnimatedToast = ({ message, type = 'info', onDismiss }) => {
     };
 
     return (
-        <animated.div
+        <motion.div
+            layout
+            initial={{ opacity: 0, x: 72, scale: 0.85 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 64, scale: 0.85 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 24 }}
             style={{
-                ...spring,
-                padding: '12px 16px',
-                marginBottom: '8px',
-                borderRadius: '8px',
                 background: 'rgba(0,0,0,0.85)',
-                border: `2px solid ${typeColors[type] || typeColors.info}`,
                 color: 'white',
-                cursor: 'pointer',
-                boxShadow: `0 4px 12px rgba(0,0,0,0.3), 0 0 20px ${typeColors[type]}40`,
+                padding: '12px 18px',
+                borderRadius: '12px',
+                marginBottom: '12px',
+                border: `1px solid ${typeColors[type] ?? typeColors.info}`,
+                boxShadow: `0 10px 30px rgba(0,0,0,0.35), 0 0 25px ${(typeColors[type] ?? typeColors.info)}33`,
+                cursor: 'pointer'
             }}
             onClick={onDismiss}
         >
             {message}
-        </animated.div>
+        </motion.div>
     );
 };
 
-/**
- * AnimatedLevelUp - Celebratory animation for level ups
- * 
- * Usage when level increases:
- * {showLevelUp && <AnimatedLevelUp level={playerStats.level} onComplete={() => setShowLevelUp(false)} />}
- */
 export const AnimatedLevelUp = ({ level, onComplete }) => {
-    const spring = useSpring({
-        from: { 
-            scale: 0.5, 
-            opacity: 0,
-            rotate: -180,
-        },
-        to: async (next) => {
-            // Bounce in
-            await next({ scale: 1.2, opacity: 1, rotate: 0 });
-            // Settle
-            await next({ scale: 1 });
-            // Wait
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            // Fade out
-            await next({ opacity: 0, scale: 0.8 });
-            onComplete?.();
-        },
-        config: config.wobbly,
-    });
+    const controls = useAnimation();
 
-    const transformSpring = to(
-        [spring.scale, spring.rotate],
-        (scale, rotate) => `translate(-50%, -50%) scale(${scale}) rotate(${rotate}deg)`
-    );
+    useEffect(() => {
+        let mounted = true;
+        const runSequence = async () => {
+            await controls.start({ scale: 1.2, opacity: 1, rotate: 0 });
+            await controls.start({ scale: 1 });
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            await controls.start({ opacity: 0, scale: 0.8 });
+            if (mounted) onComplete?.();
+        };
+        runSequence();
+        return () => {
+            mounted = false;
+        };
+    }, [controls, onComplete]);
 
     return (
-        <animated.div
+        <motion.div
+            initial={{ scale: 0.5, opacity: 0, rotate: -180 }}
+            animate={controls}
+            transition={{ type: 'spring', stiffness: 180, damping: 20 }}
             style={{
                 position: 'fixed',
                 top: '50%',
                 left: '50%',
-                transform: transformSpring,
-                opacity: spring.opacity,
+                transform: 'translate(-50%, -50%)',
                 zIndex: 9999,
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 padding: '32px 48px',
@@ -197,72 +116,43 @@ export const AnimatedLevelUp = ({ level, onComplete }) => {
             }}
         >
             🎉 Level {level}! 🎉
-        </animated.div>
+        </motion.div>
     );
 };
 
-/**
- * AnimatedCollapse - Smooth accordion animation for side quests
- * 
- * Usage:
- * <AnimatedCollapse isOpen={!collapsedMap[quest.id]}>
- *   {side quest list}
- * </AnimatedCollapse>
- */
-export const AnimatedCollapse = ({ children, isOpen }) => {
-    const spring = useSpring({
-        height: isOpen ? 'auto' : 0,
-        opacity: isOpen ? 1 : 0,
-        config: config.gentle,
-    });
+export const AnimatedCollapse = ({ children, isOpen }) => (
+    <motion.div
+        layout
+        initial={false}
+        animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.25, ease: 'easeInOut' }}
+        style={{ overflow: 'hidden' }}
+    >
+        {children}
+    </motion.div>
+);
 
-    return (
-        <animated.div
+export const AnimatedXPGain = ({ amount, color = '#fbbf24' }) => (
+    <AnimatePresence>
+        <motion.div
+            initial={{ opacity: 1, y: 0, scale: 0.8 }}
+            animate={{ y: -40, scale: 1.2, opacity: [1, 1, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: 'easeOut' }}
             style={{
-                ...spring,
-                overflow: 'hidden',
-            }}
-        >
-            {children}
-        </animated.div>
-    );
-};
-
-/**
- * AnimatedXPGain - Floating +XP indicator
- * 
- * Usage when XP is gained:
- * <AnimatedXPGain amount={50} />
- */
-export const AnimatedXPGain = ({ amount, color = '#fbbf24' }) => {
-    const spring = useSpring({
-        from: { 
-            opacity: 1, 
-            transform: 'translateY(0px) scale(0.8)',
-        },
-        to: async (next) => {
-            await next({ transform: 'translateY(-40px) scale(1.2)', opacity: 1 });
-            await next({ opacity: 0 });
-        },
-        config: config.slow,
-    });
-
-    return (
-        <animated.div
-            style={{
-                ...spring,
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
+                transform: 'translate(-50%, -50%)',
                 fontSize: '20px',
                 fontWeight: 'bold',
-                color: color,
+                color,
                 textShadow: `0 0 10px ${color}, 0 2px 5px rgba(0,0,0,0.5)`,
                 pointerEvents: 'none',
                 zIndex: 100,
             }}
         >
             +{amount} XP
-        </animated.div>
-    );
-};
+        </motion.div>
+    </AnimatePresence>
+);

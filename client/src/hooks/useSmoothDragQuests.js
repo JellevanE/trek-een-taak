@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { SmoothDraggableList, SmoothDraggableSideQuests } from '../components/SmoothDraggable';
+import { FramerQuestList, FramerSideQuestList } from '../features/quest-board/components';
 
 /**
  * useSmoothDragQuests - Integration layer for smooth drag & drop
@@ -51,16 +51,22 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
 
     // Create stable wrapper components
     // These are created ONCE and never change
-    const QuestList = useCallback(({ renderItem, itemHeight = 100, itemGap = 0 }) => {
+    const QuestList = useCallback(({
+        renderItem,
+        itemHeight = 100,
+        itemGap = 0,
+        themeName = 'dark'
+    }) => {
         const currentQuests = questsRef.current;
         return (
-            <SmoothDraggableList
+            <FramerQuestList
                 items={currentQuests}
                 onReorder={handleQuestReorder}
                 renderItem={renderItem}
                 itemHeight={itemHeight}
                 itemGap={itemGap}
                 refreshToken={refreshTokenRef.current}
+                themeName={themeName}
             />
         );
     }, [handleQuestReorder]);
@@ -72,17 +78,18 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
         itemHeight = 60,
         itemGap = 0,
         maxContainerHeight = null,
-        footer = null
+        themeName = 'dark'
     }) => (
-        <SmoothDraggableSideQuests
-            items={sideQuests}
+        <FramerSideQuestList
+            questId={questId}
+            sideQuests={Array.isArray(sideQuests) ? sideQuests : []}
             onReorder={(reordered) => handleSideQuestReorder(questId, reordered)}
             renderItem={renderItem}
             itemHeight={itemHeight}
             itemGap={itemGap}
             refreshToken={refreshTokenRef.current}
             maxContainerHeight={maxContainerHeight}
-            footer={footer}
+            themeName={themeName}
         />
     ), [handleSideQuestReorder]);
 

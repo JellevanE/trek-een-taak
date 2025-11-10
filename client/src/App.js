@@ -1,4 +1,5 @@
 import React from 'react';
+import { AnimatePresence } from 'framer-motion';
 import './App.css';
 import Profile from './Profile';
 import { useTheme } from './hooks/useTheme';
@@ -201,6 +202,7 @@ function App() {
                 quest={quest}
                 isDragging={isDragging}
                 dragMeta={dragMeta}
+                themeName={theme}
                 selectedQuestId={selectedQuestId}
                 selectedSideQuest={selectedSideQuest}
                 editingQuest={editingQuest}
@@ -283,6 +285,7 @@ function App() {
         renderAddSideQuestForm,
         smoothDrag,
         addInputRefs,
+        theme,
     ]);
 
     React.useEffect(() => {
@@ -774,6 +777,7 @@ function App() {
                         itemHeight={QUEST_ITEM_HEIGHT}
                         itemGap={QUEST_ITEM_GAP}
                         renderItem={renderQuestCard}
+                        themeName={theme}
                     />
                 ) : (
                     quests.map((quest) => renderQuestCard(quest))
@@ -790,14 +794,16 @@ function App() {
                         <button className="btn-ghost btn-small" onClick={() => dismissUndoEntry(entry.id)}>Dismiss</button>
                     </div>
                 ))}
-                {toasts.map((toast) => (
-                    <AnimatedToast
-                        key={toast.id}
-                        message={toast.msg}
-                        type={toast.type}
-                        onDismiss={() => dismissToast(toast.id)}
-                    />
-                ))}
+                <AnimatePresence initial={false}>
+                    {toasts.map((toast) => (
+                        <AnimatedToast
+                            key={toast.id}
+                            message={toast.msg}
+                            type={toast.type}
+                            onDismiss={() => dismissToast(toast.id)}
+                        />
+                    ))}
+                </AnimatePresence>
             </div>
         </div>
     );

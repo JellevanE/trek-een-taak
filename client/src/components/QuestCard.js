@@ -10,6 +10,7 @@ const QuestCard = React.memo(({
     quest,
     isDragging,
     dragMeta,
+    themeName = 'dark',
     // Quest state
     selectedQuestId,
     selectedSideQuest,
@@ -320,6 +321,7 @@ const QuestCard = React.memo(({
                                                         itemGap={sideQuestGap}
                                                         maxContainerHeight={sideQuestMaxHeight}
                                                         footer={sideQuestFooter}
+                                                        themeName={themeName}
                                                         renderItem={(sideQuest, isSideDragging, sideDragMeta = {}) => {
                                                             const sideHandleProps = sideDragMeta.handleProps || {};
                                                             const sideHandleStyle = { cursor: 'grab', ...sideDragMeta.handleStyle };
