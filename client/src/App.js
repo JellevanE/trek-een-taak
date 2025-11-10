@@ -8,6 +8,7 @@ import { useQuestBoard } from './hooks/useQuestBoard';
 import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
 import { QuestEditForm, AddSideQuestForm } from './features/quest-board/components/forms';
+import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
 
 const KEY_LABEL_MAP = {
     ArrowDown: '↓',
@@ -261,59 +262,8 @@ function App() {
         sideQuestDescriptionMap
     ]);
 
-    // Memoized render function for quest cards
-    // This prevents unnecessary re-renders when unrelated state changes
-    const renderQuestCard = React.useCallback((quest, isDragging = false, dragMeta = {}) => {
-        return (
-            <QuestCard
-                key={quest?.id ?? 'quest-fallback'}
-                quest={quest}
-                isDragging={isDragging}
-                dragMeta={dragMeta}
-                themeName={theme}
-                selectedQuestId={selectedQuestId}
-                selectedSideQuest={selectedSideQuest}
-                editingQuest={editingQuest}
-                editingSideQuest={editingSideQuest}
-                addingSideQuestTo={addingSideQuestTo}
-                collapsedMap={collapsedMap}
-                pulsingQuests={pulsingQuests}
-                pulsingSideQuests={pulsingSideQuests}
-                glowQuests={glowQuests}
-                celebratingQuests={celebratingQuests}
-                spawnQuests={spawnQuests}
-                campaignLookup={campaignLookup}
-                hasCampaigns={hasCampaigns}
-                getQuestStatus={getQuestStatus}
-                getQuestStatusLabel={getQuestStatusLabel}
-                getQuestSideQuests={getQuestSideQuests}
-                getSideQuestStatus={getSideQuestStatus}
-                getSideQuestStatusLabel={getSideQuestStatusLabel}
-                isInteractiveTarget={isInteractiveTarget}
-                idsMatch={idsMatch}
-                getQuestProgress={getQuestProgress}
-                progressColor={progressColor}
-                handleSelectQuest={handleSelectQuest}
-                handleSelectSideQuest={handleSelectSideQuest}
-                setEditingQuest={setEditingQuest}
-                deleteTask={deleteTask}
-                setTaskStatus={setTaskStatus}
-                setSideQuestStatus={setSideQuestStatus}
-                deleteSideQuest={deleteSideQuest}
-                startEditingSideQuest={startEditingSideQuest}
-                handleSideQuestEditChange={handleSideQuestEditChange}
-                cancelSideQuestEdit={cancelSideQuestEdit}
-                saveSideQuestEdit={saveSideQuestEdit}
-                toggleCollapse={toggleCollapse}
-                setAddingSideQuestTo={setAddingSideQuestTo}
-                renderEditForm={renderEditForm}
-                renderAddSideQuestForm={renderAddSideQuestForm}
-                smoothDrag={smoothDrag}
-                addInputRefs={addInputRefs}
-                SIDE_QUEST_ITEM_HEIGHT={SIDE_QUEST_ITEM_HEIGHT}
-            />
-        );
-    }, [
+    const questBoardContextValue = React.useMemo(() => ({
+        themeName: theme,
         selectedQuestId,
         selectedSideQuest,
         editingQuest,
@@ -353,8 +303,60 @@ function App() {
         renderAddSideQuestForm,
         smoothDrag,
         addInputRefs,
+        sideQuestItemHeight: SIDE_QUEST_ITEM_HEIGHT
+    }), [
         theme,
+        selectedQuestId,
+        selectedSideQuest,
+        editingQuest,
+        editingSideQuest,
+        addingSideQuestTo,
+        collapsedMap,
+        pulsingQuests,
+        pulsingSideQuests,
+        glowQuests,
+        celebratingQuests,
+        spawnQuests,
+        campaignLookup,
+        hasCampaigns,
+        getQuestStatus,
+        getQuestStatusLabel,
+        getQuestSideQuests,
+        getSideQuestStatus,
+        getSideQuestStatusLabel,
+        isInteractiveTarget,
+        idsMatch,
+        getQuestProgress,
+        progressColor,
+        handleSelectQuest,
+        handleSelectSideQuest,
+        setEditingQuest,
+        deleteTask,
+        setTaskStatus,
+        setSideQuestStatus,
+        deleteSideQuest,
+        startEditingSideQuest,
+        handleSideQuestEditChange,
+        cancelSideQuestEdit,
+        saveSideQuestEdit,
+        toggleCollapse,
+        setAddingSideQuestTo,
+        renderEditForm,
+        renderAddSideQuestForm,
+        smoothDrag,
+        addInputRefs
     ]);
+
+    // Memoized render function for quest cards
+    // This prevents unnecessary re-renders when unrelated state changes
+    const renderQuestCard = React.useCallback((quest, isDragging = false, dragMeta = {}) => (
+        <QuestCard
+            key={quest?.id ?? 'quest-fallback'}
+            quest={quest}
+            isDragging={isDragging}
+            dragMeta={dragMeta}
+        />
+    ), []);
 
     React.useEffect(() => {
         if (showShortcuts && shortcutsPanelRef.current) {
@@ -840,16 +842,18 @@ function App() {
                 <button className="btn-primary" onClick={addTask}>Add Quest</button>
             </div>
             <div className="quest-container">
-                {smoothDrag?.QuestList ? (
-                    <smoothDrag.QuestList
-                        itemHeight={QUEST_ITEM_HEIGHT}
-                        itemGap={QUEST_ITEM_GAP}
-                        renderItem={renderQuestCard}
-                        themeName={theme}
-                    />
-                ) : (
-                    quests.map((quest) => renderQuestCard(quest))
-                )}
+                <QuestBoardProvider value={questBoardContextValue}>
+                    {smoothDrag?.QuestList ? (
+                        <smoothDrag.QuestList
+                            itemHeight={QUEST_ITEM_HEIGHT}
+                            itemGap={QUEST_ITEM_GAP}
+                            renderItem={renderQuestCard}
+                            themeName={theme}
+                        />
+                    ) : (
+                        quests.map((quest) => renderQuestCard(quest))
+                    )}
+                </QuestBoardProvider>
             </div>
                 </div>
             </div>

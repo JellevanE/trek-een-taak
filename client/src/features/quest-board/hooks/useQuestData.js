@@ -325,15 +325,17 @@ export const useQuestData = ({
         }
     }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast, refreshCampaigns]);
 
-    const seedDemoQuests = useCallback(async () => {
+    const seedDemoQuests = useCallback(async (count) => {
         if (debugBusy) return;
         setDebugBusy(true);
         try {
+            const payload = typeof count === 'number' ? { count } : {};
             const data = await apiFetch(
-                '/api/debug/seed-demo-tasks',
+                '/api/debug/seed-tasks',
                 {
                     method: 'POST',
-                    headers: getAuthHeaders()
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
                 },
                 onUnauthorized
             );

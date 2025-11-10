@@ -21,7 +21,7 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
 ## Story 2 · Quest Hook Decomposition & UI Extraction
 - [x] Carve data fetching/mutations from `client/src/hooks/useQuests.js` into `useQuestData.js`, leaving orchestration hooks (`useQuestSelection.js`, `useQuestInteractions.js`, `useQuestAnimations.js`) to manage selection, keyboard shortcuts, undo stacks, and glow/pulse states.
 - [x] Move JSX helper functions such as `renderEditForm` and `renderAddSideQuestForm` into dedicated components under `client/src/components/quest-board/forms/` so hooks no longer emit UI.
-- [ ] Introduce a lightweight context (e.g., `QuestBoardContext.jsx`) that exposes quest state + dispatchers to the card and list components, reducing prop threading. _Pending next iteration; new hook wiring was structured to plug into this context without additional refactors._
+- [x] Introduce a lightweight context (e.g., `QuestBoardContext.jsx`) that exposes quest state + dispatchers to the card and list components, reducing prop threading. _Implemented via `QuestBoardProvider`/`useQuestBoardContext`, wrapping the Framer quest list so cards/list items consume shared state without prop churn._
 - [x] Add focused unit tests per hook (jest/react-hooks) covering selection reset, undo timers, and layout refresh scheduling now that logic is isolated.
 - [x] Document the refactor in-code (JSDoc or README snippet) so future contributors know where to extend quests vs. side quests.
 - _Note: Drag jank persists because `renderQuestCard` and related props are regenerated on nearly every state change inside `useQuests.js`. Decomposition should stabilize dependencies so Framer Motion receives steady layout data before drag start events._

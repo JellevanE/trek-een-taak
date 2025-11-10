@@ -1,5 +1,6 @@
 import React from 'react';
 import { AnimatedQuestCard, AnimatedProgressBar } from './AnimatedComponents';
+import { useQuestBoardContext } from '../features/quest-board/context/QuestBoardContext.jsx';
 
 /**
  * QuestCard - Memoized quest card component to prevent unnecessary re-renders
@@ -9,53 +10,53 @@ import { AnimatedQuestCard, AnimatedProgressBar } from './AnimatedComponents';
 const QuestCard = React.memo(({
     quest,
     isDragging,
-    dragMeta,
-    themeName = 'dark',
-    // Quest state
-    selectedQuestId,
-    selectedSideQuest,
-    editingQuest,
-    editingSideQuest,
-    addingSideQuestTo,
-    collapsedMap,
-    pulsingQuests,
-    pulsingSideQuests,
-    glowQuests,
-    celebratingQuests,
-    spawnQuests,
-    // Campaign data
-    campaignLookup,
-    hasCampaigns,
-    // Helper functions
-    getQuestStatus,
-    getQuestStatusLabel,
-    getQuestSideQuests,
-    getSideQuestStatus,
-    getSideQuestStatusLabel,
-    isInteractiveTarget,
-    idsMatch,
-    getQuestProgress,
-    progressColor,
-    // Action handlers
-    handleSelectQuest,
-    handleSelectSideQuest,
-    setEditingQuest,
-    deleteTask,
-    setTaskStatus,
-    setSideQuestStatus,
-    deleteSideQuest,
-    startEditingSideQuest,
-    handleSideQuestEditChange,
-    cancelSideQuestEdit,
-    saveSideQuestEdit,
-    toggleCollapse,
-    setAddingSideQuestTo,
-    renderEditForm,
-    renderAddSideQuestForm,
-    smoothDrag,
-    addInputRefs,
-    SIDE_QUEST_ITEM_HEIGHT,
+    dragMeta = {}
 }) => {
+    const {
+        themeName = 'dark',
+        selectedQuestId,
+        selectedSideQuest,
+        editingQuest,
+        editingSideQuest,
+        addingSideQuestTo,
+        collapsedMap,
+        pulsingQuests,
+        pulsingSideQuests,
+        glowQuests,
+        celebratingQuests,
+        spawnQuests,
+        campaignLookup,
+        hasCampaigns,
+        getQuestStatus,
+        getQuestStatusLabel,
+        getQuestSideQuests,
+        getSideQuestStatus,
+        getSideQuestStatusLabel,
+        isInteractiveTarget,
+        idsMatch,
+        getQuestProgress,
+        progressColor,
+        handleSelectQuest,
+        handleSelectSideQuest,
+        setEditingQuest,
+        deleteTask,
+        setTaskStatus,
+        setSideQuestStatus,
+        deleteSideQuest,
+        startEditingSideQuest,
+        handleSideQuestEditChange,
+        cancelSideQuestEdit,
+        saveSideQuestEdit,
+        toggleCollapse,
+        setAddingSideQuestTo,
+        renderEditForm,
+        renderAddSideQuestForm,
+        smoothDrag,
+        addInputRefs,
+        sideQuestItemHeight
+    } = useQuestBoardContext();
+
+    const SIDE_QUEST_ITEM_HEIGHT = sideQuestItemHeight ?? 80;
     const questHandleProps = dragMeta.handleProps || {};
     const questHandleStyle = { cursor: 'grab', ...dragMeta.handleStyle };
     const questStatus = getQuestStatus(quest);
