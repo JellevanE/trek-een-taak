@@ -105,7 +105,7 @@
     margin:0 auto;
     display:flex;
     justify-content:center;
-    padding:0 12px;
+    padding:0 var(--quest-board-gutter);
     box-sizing:border-box;
 }
 
@@ -597,18 +597,19 @@
 .quest-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--quest-card-stack-gap);
     width:100%;
-    max-width:980px;
-    padding: 6px;
+    max-width: var(--quest-card-max-width);
+    padding: var(--arcade-space-sm);
+    margin: 0 auto;
     box-sizing:border-box;
 }
 
 .task,
 .quest {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
-    border-radius: 8px;
-    padding: 14px;
+    border-radius: var(--quest-card-radius);
+    padding: var(--quest-card-padding-block) var(--quest-card-padding-inline);
     margin: 0;
     text-align: left;
     border: 1px solid rgba(155,92,255,0.12);
@@ -668,13 +669,13 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    gap:12px;
+    gap:var(--quest-card-gap);
 }
 
 .quest-card-shell{
     display:flex;
     align-items:flex-start;
-    gap:12px;
+    gap:var(--quest-card-gap);
 }
 
 .quest-card-body{
@@ -682,11 +683,11 @@
     min-width:0;
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:var(--quest-card-body-gap);
 }
 
 .task-header .left,
-.quest-header .left{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; flex:1; min-width:0 }
+.quest-header .left{ display:flex; flex-direction:column; align-items:flex-start; gap:var(--arcade-space-xs); flex:1; min-width:0 }
 .task-header .right,
 .quest-header .right{ display:flex; align-items:center; justify-content:flex-end }
 
@@ -694,21 +695,25 @@
     width:100%;
     display:flex;
     align-items:flex-start;
-    gap:12px;
+    gap:var(--quest-card-gap);
     flex-wrap:wrap;
 }
 
 .quest-title-row h3{
     flex:1;
     min-width:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
 }
 
 .quest-meta-tags{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:var(--quest-meta-gap);
     flex:0 1 auto;
     flex-wrap:wrap;
+    row-gap:var(--arcade-space-xxs);
     justify-content:flex-end;
     margin-left:auto;
     min-width:0;
@@ -722,8 +727,8 @@
 .campaign-chip{
     display:inline-flex;
     align-items:center;
-    gap:6px;
-    padding:6px 12px;
+    gap:var(--arcade-space-xxs);
+    padding:var(--arcade-space-xxs) var(--arcade-space-sm);
     border-radius:999px;
     background: rgba(0,240,255,0.12);
     border:1px solid rgba(0,240,255,0.25);
@@ -824,7 +829,7 @@
 .side-quest-main{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:var(--side-quest-gap);
     flex:1;
     min-width:0;
     flex-wrap:wrap;
@@ -834,7 +839,7 @@
     display:flex;
     align-items:center;
     justify-content:flex-end;
-    gap:8px;
+    gap:var(--side-quest-gap);
     flex-wrap:wrap;
     margin-left:auto;
 }
@@ -846,11 +851,11 @@
 
 .subtask-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px }
 .subtask-desc.small{ font-size:12px }
-.side-quest-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px }
+.side-quest-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px; overflow-wrap:anywhere; }
 .side-quest-desc.small{ font-size:12px }
-.quest ul { padding-left: 8px }
+.quest ul { padding-left: var(--side-quest-gap) }
 .quest li,
-.task li { margin:8px 0; padding:6px 8px; border-radius:6px; }
+.task li { margin:var(--side-quest-gap) 0; padding:var(--arcade-space-xs) var(--side-quest-gap); border-radius:6px; }
 .quest li.selected{
     background: rgba(0,240,255,0.08);
     box-shadow: 0 0 0 1px rgba(0,240,255,0.12);
@@ -867,13 +872,13 @@
 .side-quest-panel{
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:var(--side-quest-gap);
 }
 
 .side-quest-scroll{
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:var(--side-quest-gap);
     overflow:hidden;
 }
 
@@ -883,11 +888,11 @@
 }
 
 .side-quest-footer-wrapper{
-    margin-top:8px;
+    margin-top:var(--side-quest-footer-margin);
 }
 
 .side-quest-empty{
-    margin-top:12px;
+    margin-top:var(--side-quest-gap);
 }
 
 .side-quest-edit{ flex:1; }
@@ -1140,10 +1145,19 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 
 /* Task info hierarchy */
 .task h3,
-.quest h3{ color: white; font-size:16px; margin:0; line-height:1.1; text-overflow:ellipsis; white-space:nowrap; overflow:hidden }
+.quest h3{
+    color: white;
+    font-size:16px;
+    margin:0;
+    line-height:1.1;
+    text-overflow:ellipsis;
+    white-space:normal;
+    overflow:hidden;
+    word-break:break-word;
+}
 .priority-tag{ font-size:11px; padding:6px 10px; }
 .task-details,
-.quest-details{ margin-top:8px; display:flex; gap:12px; flex-wrap:wrap }
+.quest-details{ margin-top:var(--arcade-space-sm); display:flex; gap:var(--quest-card-gap); flex-wrap:wrap }
 .task-details .muted,
 .quest-details .muted{ color:var(--muted); font-size:12px }
 .task-details .small,
@@ -1152,16 +1166,16 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
 .quest-actions{
     margin-left:auto;
     display:flex;
-    gap:6px;
+    gap:var(--quest-actions-gap);
     flex-wrap:wrap;
     align-items:center;
 }
 
 /* Per-task progress */
 .task-progress-wrap,
-.quest-progress-wrap{ width:100%; margin-bottom:8px }
+.quest-progress-wrap{ width:100%; margin-bottom:var(--arcade-space-sm) }
 .task-progress,
-.quest-progress{ display:flex; align-items:center; gap:8px }
+.quest-progress{ display:flex; align-items:center; gap:var(--arcade-space-sm) }
 .task-progress-bar,
 .quest-progress-bar{ flex:1; height:10px; background: rgba(255,255,255,0.03); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,0.03) }
 .task-progress-fill,
@@ -2017,7 +2031,7 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     color: var(--text-muted);
 }
 
-@media (max-width: 960px){
+@media (max-width: 1024px){
     .board-layout{
         max-width:100%;
         padding:0 16px;
@@ -2034,6 +2048,63 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     .campaign-sidebar.collapsed{
         width:100%;
         align-items:flex-start;
+    }
+    .quest-card-shell{
+        gap:var(--arcade-space-sm);
+    }
+    .quest-actions{
+        width:100%;
+        justify-content:flex-start;
+    }
+}
+
+@media (max-width: 768px){
+    :root{
+        --quest-card-handle-size: 44px;
+        --quest-card-handle-font-size: 20px;
+        --side-quest-handle-size: 32px;
+        --side-quest-handle-font-size: 16px;
+    }
+    .quest-container{
+        padding: var(--arcade-space-xs);
+    }
+    .quest-card-shell{
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .quest > div > .drag-handle.top{
+        opacity:1;
+        width:44px;
+        height:44px;
+        font-size:20px;
+        margin-left:auto;
+        margin-bottom: var(--arcade-space-xs);
+    }
+    .side-quest-main{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--arcade-space-xs);
+    }
+    .task-row-actions{
+        width: 100%;
+        justify-content: flex-start;
+        gap: var(--arcade-space-xs);
+    }
+    .task-row-actions button,
+    .quest-actions .btn-small,
+    .side-quest-footer .add-side-quest-button{
+        min-height: 44px;
+    }
+    .quest-title-row{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .quest-meta-tags{
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .side-quest-panel{
+        gap: var(--arcade-space-xs);
     }
 }
 
@@ -2053,13 +2124,12 @@ button:focus{ outline: 2px solid rgba(155,92,255,0.12); outline-offset: 2px }
     .campaign-select{
         min-width:100%;
     }
-    .quest-title-row{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:6px;
+    .quest-container{
+        overflow-x:auto;
+        padding-bottom: var(--arcade-space-sm);
+        scroll-snap-type:x proximity;
     }
-    .quest-meta-tags{
-        flex-wrap:wrap;
-        gap:6px;
+    .quest{
+        scroll-snap-align:start;
     }
 }

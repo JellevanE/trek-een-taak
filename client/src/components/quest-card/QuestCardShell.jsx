@@ -14,7 +14,16 @@ export const QuestCardShell = ({
     children
 }) => {
     const questHandleProps = dragMeta?.handleProps || {};
-    const questHandleStyle = { cursor: 'grab', ...dragMeta?.handleStyle };
+    const questHandleStyle = {
+        width: 'var(--quest-card-handle-size)',
+        height: 'var(--quest-card-handle-size)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 'var(--quest-card-handle-font-size)',
+        cursor: 'grab',
+        ...dragMeta?.handleStyle
+    };
 
     const handleRootInteraction = (event) => {
         if (isInteractiveTarget(event.target)) return;
@@ -46,15 +55,7 @@ export const QuestCardShell = ({
                         data-drag-handle="true"
                         aria-label="Reorder quest"
                         {...questHandleProps}
-                        style={{
-                            width: 32,
-                            height: 32,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 18,
-                            ...questHandleStyle
-                        }}
+                        style={questHandleStyle}
                         onFocus={(event) => {
                             event.stopPropagation();
                             if (typeof questHandleProps.onFocus === 'function') {

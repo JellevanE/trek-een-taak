@@ -32,8 +32,21 @@ const SideQuestItem = ({
         && idsMatch(editingSideQuest.sideQuestId, sideQuest.id));
     const sideKey = `${quest.id}:${sideQuest.id}`;
     const sideHandleProps = dragMeta?.handleProps || {};
-    const sideHandleStyle = { cursor: 'grab', ...dragMeta?.handleStyle };
+    const sideHandleStyle = {
+        width: 'var(--side-quest-handle-size)',
+        height: 'var(--side-quest-handle-size)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 'var(--side-quest-handle-font-size)',
+        cursor: 'grab',
+        ...dragMeta?.handleStyle
+    };
     const pulsingClass = pulsingSideQuests?.[sideKey] ? 'pulse-subtle' : '';
+    const safeSideDescription = typeof sideQuest.description === 'string'
+        && sideQuest.description.trim().length
+        ? sideQuest.description.trim()
+        : 'Untitled side quest';
 
     const withStop = (fn) => (event) => {
         event.stopPropagation();
@@ -83,15 +96,7 @@ const SideQuestItem = ({
                         data-drag-handle="true"
                         aria-label="Reorder side quest"
                         {...sideHandleProps}
-                        style={{
-                            width: 24,
-                            height: 24,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 12,
-                            ...sideHandleStyle
-                        }}
+                        style={sideHandleStyle}
                         onFocus={(event) => {
                             event.stopPropagation();
                             if (typeof sideHandleProps.onFocus === 'function') {
@@ -147,8 +152,9 @@ const SideQuestItem = ({
                                 pulsingClass
                             ].filter(Boolean).join(' ')}
                             style={{ flex: 1 }}
+                            title={safeSideDescription}
                         >
-                            {sideQuest.description}
+                            {safeSideDescription}
                             <small className="small"> - {sideStatusLabel}</small>
                         </div>
                     )}

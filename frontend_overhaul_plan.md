@@ -31,15 +31,16 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
 - [x] Ensure the new `SideQuestList` keeps items inside the quest card by using intrinsic height calculations plus CSS grid/flex tweaks in `client/src/App.css` (or a new `quest-board.css`). _Added `.quest-card-shell`, `.side-quest-panel`, and scroll clamping styles so Framer lists respect card bounds._
 - [x] Rebuild side-quest rows (`SideQuestItem.jsx`) with tighter vertical rhythm, draggable handles that don't overlap buttons, and responsive states for nested buttons/menus. _Implemented via the `SideQuestList` + `SideQuestItem` pair, which centralizes button spacing and drag-handle focus management._
 - [x] Add stories/tests or Storybook-style fixtures (even lightweight) to verify quests with 0/3/6 side quests render without clipping. _`SideQuestList.test.jsx` now covers empty, three-item, and six-item scenarios to guard scroll states._
-- [ ] Align spacing tokens (gap, padding, card width) with the neon arcade vibe decided for the board skin.
+- [x] Align spacing tokens (gap, padding, card width) with the neon arcade vibe decided for the board skin. _`client/src/index.css` now exposes the `arcade-space` scale + quest layout tokens, and `QuestCard.js` consumes `tokens/spacing.js` for consistent side-quest math._
 - [x] **Side-quest overflow handling:** Implement max-height constraints for side-quest containers with proper scrolling behavior; consider virtualization for quests with 10+ side-quests to maintain performance. _Scroll regions now set `data-scrollable` when clamped; virtualization TBD if perf demands it._
-- [ ] **Content edge cases:** Test with long descriptions (200+ chars), special characters, emoji, and empty states to ensure layout doesn't break.
-- [ ] **Responsive breakpoints:** Define mobile (<768px) and tablet (768px-1024px) layouts:
+- [x] **Content edge cases:** Test with long descriptions (200+ chars), special characters, emoji, and empty states to ensure layout doesn't break. _Quest/side-quest headings now clamp to two lines, fall back to "Untitled" labels, and `QuestHeader`/`SideQuestList` tests cover emoji + blank-description scenarios._
+- [x] **Responsive breakpoints:** Define mobile (<768px) and tablet (768px-1024px) layouts:
   - Quest cards stack vertically on mobile with full-width
   - Side-quest action buttons reposition for touch (min 44px tap targets)
   - Drag handles enlarge for touch interaction
   - Consider horizontal scrolling for quest list on narrow screens
-- [ ] **Clarify test fixtures approach:** Either add explicit Storybook setup with installation steps, or document that "Storybook-style" means lightweight test fixtures (`.json` mock data files) for component testing.
+  _New 1024px/768px/600px media queries in `client/src/App.css` collapse quest card shells, enlarge drag handles via CSS vars, widen tap targets, and enable overflow scrolling when space is constrained._
+- [x] **Clarify test fixtures approach:** Either add explicit Storybook setup with installation steps, or document that "Storybook-style" means lightweight test fixtures (`.json` mock data files) for component testing. _Documented via `client/src/features/quest-board/test-data/questFixtures.js`, which supplies deterministic fixtures to the new Jest suites._
 
 ## Story 4 · Theme & Interaction Tokens
 - [ ] Extend `client/src/hooks/useTheme.js` (or create `client/src/theme/index.js`) to expose interaction tokens: `motion.curves`, `motion.durations`, `glow.intensity`, `card.depth`, `soundFx` toggles.
@@ -104,7 +105,7 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
   - Re-render performance: Quest card updates shouldn't trigger full list re-render (validate React.memo effectiveness)
   - Memory: No memory leaks during 100 quest add/complete/delete cycles
 - [ ] **Test coverage requirements:** Current client-side test coverage is minimal (3 test files found):
-  - Mandate minimum 70% coverage for new code in Stories 3-5
+  - Mandate minimum 75% coverage for each module
   - Required test files:
     - `useQuestMotionTokens.test.js` - Theme switching, reduced motion
     - `FramerQuestList.test.jsx` / `FramerSideQuestList.test.jsx` - Reorder logic, edge cases

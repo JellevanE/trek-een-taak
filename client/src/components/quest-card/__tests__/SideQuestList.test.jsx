@@ -1,6 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SideQuestList } from '../SideQuestList.jsx';
+import { createSideQuestFixture } from '../../../features/quest-board/test-data/questFixtures.js';
+import { QUEST_LAYOUT_TOKENS } from '../../../features/quest-board/tokens/spacing.js';
 
 const baseQuest = { id: 1 };
 
@@ -11,7 +13,7 @@ const requiredProps = {
     smoothDrag: null,
     themeName: 'dark',
     sideQuestItemHeight: 80,
-    sideQuestGap: 8,
+    sideQuestGap: QUEST_LAYOUT_TOKENS.sideQuestGap,
     sideQuestMaxHeight: null,
     sideQuestFooter: <div data-testid="footer">footer</div>,
     selectedSideQuest: null,
@@ -81,5 +83,18 @@ describe('SideQuestList', () => {
 
         const scrollRegion = screen.getByRole('list');
         expect(scrollRegion).toHaveAttribute('data-scrollable', 'true');
+    });
+
+    it('falls back to copy when a side quest description is missing', () => {
+        render(
+            <SideQuestList
+                {...requiredProps}
+                sideQuests={[
+                    createSideQuestFixture({ id: 31, description: '   ' })
+                ]}
+            />
+        );
+
+        expect(screen.getByText('Untitled side quest')).toBeInTheDocument();
     });
 });

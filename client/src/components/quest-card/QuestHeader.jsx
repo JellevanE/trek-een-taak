@@ -62,6 +62,12 @@ CampaignChip.defaultProps = {
     hasCampaigns: false
 };
 
+const getDisplayDescription = (description) => {
+    if (typeof description !== 'string') return 'Untitled quest';
+    const trimmed = description.trim();
+    return trimmed.length ? trimmed : 'Untitled quest';
+};
+
 export const QuestHeader = ({
     description,
     priority,
@@ -71,38 +77,44 @@ export const QuestHeader = ({
     hasCampaigns,
     isCollapsed,
     onToggleCollapse
-}) => (
-    <div className="quest-header">
-        <div className="left">
-            <div className="quest-title-row">
-                <h3>{description}</h3>
-                <div className="quest-meta-tags">
-                    <span className={`priority-pill ${priority}`}>{priority}</span>
-                    <span className="level-pill">Lv. {level || 1}</span>
-                    <CampaignChip
-                        campaign={campaign}
-                        questHasCampaign={questHasCampaign}
-                        hasCampaigns={hasCampaigns}
-                    />
+}) => {
+    const headingLabel = getDisplayDescription(description);
+
+    return (
+        <div className="quest-header">
+            <div className="left">
+                <div className="quest-title-row">
+                    <h3 title={headingLabel} data-testid="quest-heading">
+                        {headingLabel}
+                    </h3>
+                    <div className="quest-meta-tags">
+                        <span className={`priority-pill ${priority}`}>{priority}</span>
+                        <span className="level-pill">Lv. {level || 1}</span>
+                        <CampaignChip
+                            campaign={campaign}
+                            questHasCampaign={questHasCampaign}
+                            hasCampaigns={hasCampaigns}
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className="right">
+                <div className="quest-controls">
+                    <button
+                        className="btn-ghost"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onToggleCollapse();
+                        }}
+                        aria-label="toggle quest details"
+                    >
+                        {isCollapsed ? 'Expand' : 'Minimize'}
+                    </button>
                 </div>
             </div>
         </div>
-        <div className="right">
-            <div className="quest-controls">
-                <button
-                    className="btn-ghost"
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        onToggleCollapse();
-                    }}
-                    aria-label="toggle quest details"
-                >
-                    {isCollapsed ? 'Expand' : 'Minimize'}
-                </button>
-            </div>
-        </div>
-    </div>
-);
+    );
+};
 
 QuestHeader.propTypes = {
     description: PropTypes.string.isRequired,

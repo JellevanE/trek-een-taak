@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuestBoardContext } from '../features/quest-board/context/QuestBoardContext.jsx';
+import { getSideQuestMaxHeight, QUEST_LAYOUT_TOKENS } from '../features/quest-board/tokens/spacing.js';
 import { QuestCardShell } from './quest-card/QuestCardShell.jsx';
 import { QuestHeader } from './quest-card/QuestHeader.jsx';
 import { QuestProgress } from './quest-card/QuestProgress.jsx';
@@ -60,7 +61,7 @@ const QuestCard = React.memo(({
         sideQuestItemHeight
     } = useQuestBoardContext();
 
-    const SIDE_QUEST_ITEM_HEIGHT = sideQuestItemHeight ?? 80;
+    const SIDE_QUEST_ITEM_HEIGHT = sideQuestItemHeight ?? QUEST_LAYOUT_TOKENS.sideQuestItemHeight;
     const questStatus = getQuestStatus(quest);
     const questStatusLabel = getQuestStatusLabel(quest);
     const questSelected = selectedQuestId !== null && idsMatch(selectedQuestId, quest.id);
@@ -70,13 +71,11 @@ const QuestCard = React.memo(({
     const campaign = questHasCampaign && typeof quest.campaign_id === 'number'
         ? (campaignLookup.get(quest.campaign_id) || null)
         : null;
-    const sideQuestGap = 8;
-    const visibleSideQuestRows = questSideQuests.length
-        ? Math.min(Math.max(questSideQuests.length, 3), 6)
-        : 0;
-    const sideQuestMaxHeight = visibleSideQuestRows > 0
-        ? (SIDE_QUEST_ITEM_HEIGHT * visibleSideQuestRows) + (sideQuestGap * Math.max(visibleSideQuestRows - 1, 0))
-        : null;
+    const sideQuestGap = QUEST_LAYOUT_TOKENS.sideQuestGap;
+    const sideQuestMaxHeight = getSideQuestMaxHeight(questSideQuests.length, {
+        itemHeight: SIDE_QUEST_ITEM_HEIGHT,
+        gap: sideQuestGap
+    });
     
     const sideQuestFooter = (
         <div className="side-quest-footer">

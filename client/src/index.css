@@ -5,6 +5,32 @@
   --accent-pink: #ff2ec4;
   --accent-purple: #9b5cff;
   --muted: #9aa3b2;
+
+  /* Neon arcade spacing scale */
+  --arcade-space-xxs: 4px;
+  --arcade-space-xs: 8px;
+  --arcade-space-sm: 12px;
+  --arcade-space-md: 16px;
+  --arcade-space-lg: 24px;
+  --arcade-space-xl: 32px;
+
+  /* Quest board layout tokens */
+  --quest-card-radius: 16px;
+  --quest-card-padding-block: 20px;
+  --quest-card-padding-inline: 24px;
+  --quest-card-gap: var(--arcade-space-md);
+  --quest-card-body-gap: var(--arcade-space-md);
+  --quest-card-stack-gap: var(--arcade-space-lg);
+  --quest-card-max-width: 560px;
+  --quest-board-gutter: clamp(16px, 2vw, 40px);
+  --quest-meta-gap: var(--arcade-space-sm);
+  --quest-actions-gap: var(--arcade-space-xs);
+  --side-quest-gap: var(--arcade-space-sm);
+  --side-quest-footer-margin: var(--arcade-space-sm);
+  --quest-card-handle-size: 32px;
+  --quest-card-handle-font-size: 18px;
+  --side-quest-handle-size: 24px;
+  --side-quest-handle-font-size: 12px;
 }
 
 /* light theme variables override */
