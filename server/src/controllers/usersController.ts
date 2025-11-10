@@ -2,23 +2,29 @@ import bcrypt from 'bcryptjs';
 import type { Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 
-import * as experience from '../rpg/experience';
-import { readUsers, sanitizeUser, writeUsers } from '../data/userStore';
-import { sendError } from '../utils/http';
-import { signToken } from '../middleware/auth';
-import type { AuthenticatedRequest } from '../types/auth';
-import { assertAuthenticated } from '../utils/authGuard';
-import type { PublicUser, UserRecord } from '../types/user';
-import { isJsonObject } from '../types/json';
-import { validateRequest } from '../validation';
+import { createInitialRpgState, ensureUserRpg } from '../rpg/experienceEngine.js';
+import { readUsers, sanitizeUser, writeUsers } from '../data/userStore.js';
+import { sendError } from '../utils/http.js';
+import { signToken } from '../middleware/auth.js';
+import type { AuthenticatedRequest } from '../types/auth.js';
+import { assertAuthenticated } from '../utils/authGuard.js';
+import type { PublicUser, UserRecord } from '../types/user.js';
+import { isJsonObject } from '../types/json.js';
+import { validateRequest } from '../validation/index.js';
+import { getClientIp } from '../utils/ip.js';
+import { registrationRateLimiter } from '../security/registrationRateLimiter.js';
+import { isUsernameReserved } from '../security/reservedUsernames.js';
 import {
+    emailValidationRequestSchema,
     loginUserSchema,
     profileUpdateSchema,
     registerUserSchema,
+    isEmailFormatValid,
     type LoginUserPayload,
     type ProfileUpdatePayload,
-    type RegisterUserPayload
-} from '../validation/schemas/auth';
+    type RegisterUserPayload,
+    type EmailValidationPayload
+} from '../validation/schemas/auth.js';
 
 type BaseAuthedRequest<P extends ParamsDictionary = ParamsDictionary, B = unknown> = AuthenticatedRequest<
     P,
@@ -48,21 +54,31 @@ export function updateCurrentUser(req: BaseAuthedRequest<Record<string, string>,
     const userIndex = usersData.users.findIndex((record) => record.id === req.user.id);
     if (userIndex === -1) return sendError(res, 404, 'User not found');
 
+    const userRecord = usersData.users[userIndex];
+    if (!userRecord) return sendError(res, 404, 'User not found');
+
     const allowedProfile: Array<keyof ProfileUpdatePayload> = ['display_name', 'avatar', 'class', 'bio', 'prefs'];
-    const profile = usersData.users[userIndex].profile || {};
+    const profile: UserRecord['profile'] = { ...userRecord.profile };
 
     allowedProfile.forEach((key) => {
-        if (Object.prototype.hasOwnProperty.call(updates, key) && updates[key] !== undefined) {
-            profile[key] = updates[key] as never;
+        if (Object.prototype.hasOwnProperty.call(updates, key)) {
+            const value = updates[key];
+            if (value !== undefined) {
+                (profile as Record<typeof key, unknown>)[key] = value as never;
+            }
         }
     });
 
-    usersData.users[userIndex].profile = profile;
-    usersData.users[userIndex].updated_at = new Date().toISOString();
+    const updatedUser: UserRecord = {
+        ...userRecord,
+        profile,
+        updated_at: new Date().toISOString()
+    };
+    usersData.users[userIndex] = updatedUser;
 
     try {
         writeUsers(usersData);
-        const safeUser = sanitizeUser(usersData.users[userIndex]);
+        const safeUser = sanitizeUser(updatedUser);
         if (!safeUser) return sendError(res, 500, 'Failed to load user');
         return res.json({ user: safeUser });
     } catch (error) {
@@ -78,6 +94,13 @@ export function checkUsernameAvailability(req: BaseAuthedRequest<{ username: str
 
     const usersData = readUsers();
     const normalized = username.trim().toLowerCase();
+    if (isUsernameReserved(normalized)) {
+        const suggestions = [
+            `${username}${Math.floor(Math.random() * 100)}`,
+            `${username}_${Math.floor(Math.random() * 10)}`
+        ];
+        return res.json({ available: false, reserved: true, suggestions });
+    }
     const isTaken = usersData.users.some((user) => typeof user.username === 'string' && user.username.toLowerCase() === normalized);
     if (isTaken) {
         const suggestions = [
@@ -90,7 +113,32 @@ export function checkUsernameAvailability(req: BaseAuthedRequest<{ username: str
     return res.json({ available: true });
 }
 
+export function validateEmail(req: BaseAuthedRequest<Record<string, string>, EmailValidationPayload>, res: Response) {
+    const validation = validateRequest(req, { body: emailValidationRequestSchema });
+    if (!validation.success) {
+        return sendError(res, 400, validation.error.summary);
+    }
+    const { email } = validation.data.body!;
+    const normalizedEmail = email.trim();
+
+    if (!isEmailFormatValid(normalizedEmail)) {
+        return res.json({ valid: false, normalized_email: normalizedEmail, reason: 'invalid_format' });
+    }
+
+    return res.json({ valid: true, normalized_email: normalizedEmail });
+}
+
 export function registerUser(req: BaseAuthedRequest<Record<string, string>, RegisterUserPayload>, res: Response) {
+    const clientIp = getClientIp(req);
+    const rateStatus = registrationRateLimiter.attempt(clientIp);
+    res.setHeader('X-RateLimit-Limit', String(rateStatus.limit));
+    res.setHeader('X-RateLimit-Remaining', String(Math.max(rateStatus.remaining, 0)));
+    if (!rateStatus.allowed) {
+        const retryAfterSeconds = Math.max(Math.ceil(rateStatus.resetInMs / 1000), 1);
+        res.setHeader('Retry-After', String(retryAfterSeconds));
+        return sendError(res, 429, 'Too many registration attempts. Please try again later.');
+    }
+
     const validation = validateRequest(req, { body: registerUserSchema });
     if (!validation.success) {
         return sendError(res, 400, validation.error.summary);
@@ -102,6 +150,10 @@ export function registerUser(req: BaseAuthedRequest<Record<string, string>, Regi
     const normalizedUsername = trimmedUsername.toLowerCase();
 
     const usersData = readUsers();
+    if (isUsernameReserved(normalizedUsername)) {
+        return sendError(res, 400, 'Username not allowed');
+    }
+
     if (usersData.users.some((user) => typeof user.username === 'string' && user.username.toLowerCase() === normalizedUsername)) {
         return sendError(res, 400, 'Username taken');
     }
@@ -146,7 +198,7 @@ export function registerUser(req: BaseAuthedRequest<Record<string, string>, Regi
         created_at: now,
         updated_at: now,
         profile,
-        rpg: experience.createInitialRpgState()
+        rpg: createInitialRpgState()
     };
 
     usersData.users.push(user);
@@ -184,7 +236,7 @@ export function loginUser(req: BaseAuthedRequest<Record<string, string>, LoginUs
         return sendError(res, 401, 'Invalid credentials');
     }
 
-    experience.ensureUserRpg(user);
+    ensureUserRpg(user);
     const token = signToken(user);
     const safeUser = sanitizeUser(user);
     if (!safeUser) return sendError(res, 500, 'Failed to load user');
@@ -195,6 +247,7 @@ const controller = {
     getCurrentUser,
     updateCurrentUser,
     checkUsernameAvailability,
+    validateEmail,
     registerUser,
     loginUser
 };

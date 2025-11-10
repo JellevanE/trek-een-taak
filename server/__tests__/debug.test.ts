@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import app from '../src/app';
+import { resetRegistrationRateLimiter } from '../src/security/registrationRateLimiter';
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
@@ -34,6 +35,7 @@ beforeEach(async () => {
     resetTaskStore(tasksFile);
     resetCampaignStore(campaignsFile);
     resetUserStore(usersFile, [buildDefaultUser()]);
+    resetRegistrationRateLimiter();
 
     const register = await client.post('/api/users/register', {
         body: { username: `debugger_${Date.now()}`, password: 'password123' },

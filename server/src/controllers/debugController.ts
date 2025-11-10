@@ -6,10 +6,12 @@ import {
     readTasks,
     serializeTaskList,
     writeTasks
-} from '../data/taskStore';
-import { sendError } from '../utils/http';
-import { assertAuthenticated } from '../utils/authGuard';
-import type { AuthenticatedRequest } from '../types/auth';
+} from '../data/taskStore.js';
+import { sendError } from '../utils/http.js';
+import { assertAuthenticated } from '../utils/authGuard.js';
+import type { AuthenticatedRequest } from '../types/auth.js';
+import { validateRequest } from '../validation/index.js';
+import { seedTasksSchema, type SeedTasksPayload } from '../validation/schemas/debug.js';
 
 type BaseAuthedRequest<B = unknown> = AuthenticatedRequest<ParamsDictionary, unknown, B>;
 
@@ -28,19 +30,28 @@ export function clearTasks(req: BaseAuthedRequest, res: Response) {
     }
 }
 
-interface SeedTasksBody {
-    count?: number;
-}
-
-export function seedTasks(req: BaseAuthedRequest<SeedTasksBody>, res: Response) {
+export function seedTasks(req: BaseAuthedRequest<SeedTasksPayload>, res: Response) {
     if (!assertAuthenticated(req, res)) return;
-    const { count } = req.body || {};
+    const validation = validateRequest(req, { body: seedTasksSchema });
+    if (!validation.success) {
+        return sendError(res, 400, validation.error.summary);
+    }
+
+    const payload = (validation.data.body ?? {}) as SeedTasksPayload;
+    const rawCount = payload.count;
+    let seedCount = 5;
+    if (rawCount !== undefined && rawCount !== null) {
+        const numeric = Number(rawCount);
+        if (Number.isFinite(numeric)) {
+            const floored = Math.floor(numeric);
+            seedCount = Math.max(1, Math.min(10, floored));
+        }
+    }
 
     const tasksData = readTasks();
     const existing = tasksData.tasks.filter((task) => task.owner_id !== req.user.id);
     const userTasksRemoved = tasksData.tasks.length - existing.length;
     const orderStart = existing.reduce((max, task) => (task.order > max ? task.order : max), -1) + 1;
-    const seedCount = Number.isFinite(count) ? Math.max(1, Math.min(10, Math.floor(count as number))) : 5;
 
     const demo = buildDemoTasks({
         count: seedCount,

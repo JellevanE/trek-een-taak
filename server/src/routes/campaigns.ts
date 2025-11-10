@@ -1,13 +1,13 @@
 import { Router } from 'express';
 
-import { ensureAuth } from '../middleware/auth';
+import { ensureAuth } from '../middleware/auth.js';
 import {
     createCampaign,
     deleteCampaign,
     getCampaign,
     listCampaigns,
     updateCampaign
-} from '../controllers/campaignsController';
+} from '../controllers/campaignsController.js';
 
 const router = Router();
 

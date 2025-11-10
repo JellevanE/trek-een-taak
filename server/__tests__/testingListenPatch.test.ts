@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { jest } from '@jest/globals';
 import type { Express } from 'express';
 
 import { applyTestingListenPatch } from '../src/utils/testingListenPatch';
@@ -16,18 +17,18 @@ describe('testing listen patch utilities', () => {
         delete process.env.HOST;
 
         const fakeServer = {} as unknown as http.Server;
-        const recordedAppArgs: any[][] = [];
-        const originalAppListen = jest.fn(function (this: Express, ...args: any[]) {
+        const recordedAppArgs: unknown[][] = [];
+        const originalAppListen = jest.fn(function (this: Express, ...args: unknown[]) {
             recordedAppArgs.push(args);
             return fakeServer;
         });
         const app = { listen: originalAppListen } as unknown as Express;
 
         const originalHttpListen = http.Server.prototype.listen;
-        const recordedHttpArgs: any[][] = [];
+        const recordedHttpArgs: unknown[][] = [];
         const httpListenSpy = jest
             .spyOn(http.Server.prototype, 'listen')
-            .mockImplementation(function (this: http.Server, ...args: any[]) {
+            .mockImplementation(function (this: http.Server, ...args: unknown[]) {
                 recordedHttpArgs.push(args);
                 return this;
             });
@@ -35,7 +36,7 @@ describe('testing listen patch utilities', () => {
         applyTestingListenPatch(app);
 
         const callback = jest.fn();
-        const result = (app.listen as unknown as (...args: any[]) => http.Server)(3000, callback);
+        const result = (app.listen as unknown as (...args: unknown[]) => http.Server)(3000, callback);
         expect(result).toBe(fakeServer);
         expect(recordedAppArgs[0]).toEqual([3000, '127.0.0.1', callback]);
 
@@ -53,8 +54,8 @@ describe('testing listen patch utilities', () => {
         process.env.BIND_ADDRESS = '10.1.0.5';
 
         const fakeServer = {} as unknown as http.Server;
-        const recordedAppArgs: any[][] = [];
-        const originalAppListen = jest.fn(function (this: Express, ...args: any[]) {
+        const recordedAppArgs: unknown[][] = [];
+        const originalAppListen = jest.fn(function (this: Express, ...args: unknown[]) {
             recordedAppArgs.push(args);
             return fakeServer;
         });
@@ -63,7 +64,7 @@ describe('testing listen patch utilities', () => {
         applyTestingListenPatch(app);
 
         const callback = jest.fn();
-        (app.listen as unknown as (...args: any[]) => http.Server)(5000, '0.0.0.0', 128, callback);
+        (app.listen as unknown as (...args: unknown[]) => http.Server)(5000, '0.0.0.0', 128, callback);
         expect(recordedAppArgs[0]).toEqual([5000, '10.1.0.5', 128, callback]);
 
         app.listen = originalAppListen;

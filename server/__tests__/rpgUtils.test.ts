@@ -1,18 +1,20 @@
 import {
-    XP_CONFIG,
     applyXp,
-    buildPublicRpgState,
     createInitialRpgState,
-    ensureUserRpg,
+    ensureUserRpg
+} from '../src/rpg/experienceEngine';
+import {
+    buildPublicRpgState,
     incrementCounter,
     toPublicXpEvent
-} from '../src/rpg/experience';
+} from '../src/rpg/eventHooks';
 import {
+    XP_CONFIG,
     computeDailyBaseXp,
     computeSubtaskXp,
     computeTaskXp,
     summarizeTaskReward
-} from '../src/rpg/rewards';
+} from '../src/rpg/rewardTables';
 import type { SubTask, TaskRecord } from '../src/types/task';
 import type { UserRpgEvent, UserRpgState } from '../src/types/user';
 
@@ -42,7 +44,7 @@ describe('rpg experience utilities', () => {
                 flags: null as unknown as UserRpgState['flags'],
                 metrics: null as unknown as UserRpgState['metrics'],
                 last_daily_reward_at: 123 as unknown as string,
-                last_xp_award_at: undefined
+                last_xp_award_at: 42 as unknown as string
             }
         };
         const repaired = ensureUserRpg(damaged);

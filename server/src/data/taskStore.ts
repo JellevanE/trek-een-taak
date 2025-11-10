@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
-import * as experience from '../rpg/experience';
-import type { UserStoreData } from '../types/user';
+import { clampTaskLevel } from '../rpg/rewardTables.js';
+import type { UserStoreData } from '../types/user.js';
 import type {
     StatusHistoryEntry,
     SubTask,
@@ -10,11 +10,11 @@ import type {
     TaskRpgData,
     TaskStoreData,
     TaskStatus
-} from '../types/task';
-import { isJsonObject } from '../types/json';
+} from '../types/task.js';
+import { isJsonObject } from '../types/json.js';
 
-import { getTasksFile } from './filePaths';
-import { readUsers } from './userStore';
+import { getTasksFile } from './filePaths.js';
+import { readUsers } from './userStore.js';
 
 function ensureStatusHistory(history: unknown, status: TaskStatus, timestamp: string): StatusHistoryEntry[] {
     if (!Array.isArray(history) || history.length === 0) {
@@ -70,7 +70,7 @@ function normalizeSubTask(raw: unknown, now: string): SubTask {
     const weightValue =
         typeof source.weight === 'number' && Number.isFinite(source.weight) ? source.weight : undefined;
 
-    return {
+    const subtask: SubTask = {
         id: idValue,
         description: descriptionValue,
         status: statusValue,
@@ -81,10 +81,17 @@ function normalizeSubTask(raw: unknown, now: string): SubTask {
         rpg: {
             xp_awarded: xpAwarded,
             last_reward_at: lastRewardAt
-        },
-        priority: priorityValue,
-        weight: weightValue
+        }
     };
+
+    if (priorityValue !== undefined) {
+        subtask.priority = priorityValue;
+    }
+    if (weightValue !== undefined) {
+        subtask.weight = weightValue;
+    }
+
+    return subtask;
 }
 
 function resolveOwnerId(usersData: UserStoreData): number {
@@ -168,10 +175,10 @@ function normalizeTask(raw: unknown, index: number, usersData: UserStoreData): T
     const statusHistory = ensureStatusHistory(source.status_history, statusValue, updatedAt);
 
     const orderValue = typeof source.order === 'number' && Number.isFinite(source.order) ? source.order : index;
-    const dueDateValue =
+    const dueDateValue: string =
         typeof source.due_date === 'string' && source.due_date.trim().length > 0
             ? source.due_date
-            : now.split('T')[0];
+            : now.slice(0, 10);
 
     const ownerIdValue =
         typeof source.owner_id === 'number' && Number.isFinite(source.owner_id)
@@ -179,7 +186,7 @@ function normalizeTask(raw: unknown, index: number, usersData: UserStoreData): T
             : resolveOwnerId(usersData);
 
     const rawLevel = typeof source.task_level === 'number' && Number.isFinite(source.task_level) ? source.task_level : 1;
-    const taskLevel = experience.clampTaskLevel(rawLevel);
+    const taskLevel = clampTaskLevel(rawLevel);
 
     const rpg = normalizeTaskRpg(source.rpg, now);
     if (typeof source.xp_awarded === 'boolean') {
@@ -292,10 +299,14 @@ function serializeSubtask(subtask: SubTask | null | undefined): SubTask | null {
         rpg: {
             xp_awarded: !!(subtask.rpg && subtask.rpg.xp_awarded),
             last_reward_at: subtask.rpg?.last_reward_at ?? null
-        },
-        priority: subtask.priority,
-        weight: subtask.weight
+        }
     };
+    if (subtask.priority !== undefined) {
+        base.priority = subtask.priority;
+    }
+    if (subtask.weight !== undefined) {
+        base.weight = subtask.weight;
+    }
     return base;
 }
 
@@ -338,7 +349,11 @@ export function serializeTaskList(list: TaskRecord[] | null | undefined): TaskRe
 }
 
 function randomChoice<T>(arr: T[]): T {
-    return arr[Math.floor(Math.random() * arr.length)];
+    if (arr.length === 0) {
+        throw new Error('Cannot choose from an empty array');
+    }
+    const index = Math.floor(Math.random() * arr.length);
+    return arr[index] as T;
 }
 
 interface DemoTaskOptions {
@@ -388,7 +403,7 @@ export function buildDemoTasks(options: DemoTaskOptions): TaskStoreData {
         const level = Math.floor(Math.random() * 5) + 1;
         const dueDate = new Date(today);
         dueDate.setDate(today.getDate() + (Math.floor(Math.random() * 6) - 2));
-        const dueDateIso = dueDate.toISOString().split('T')[0];
+        const dueDateIso = dueDate.toISOString().slice(0, 10);
 
         const now = new Date().toISOString();
         const taskId = idCounter++;

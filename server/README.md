@@ -19,9 +19,31 @@ npm run dev
 
 The server listens on `http://localhost:3001` by default. For a production build, run `npm run build` then `npm start`.
 
+### Optional: TypeScript rebuild watcher
+
+Run this in a separate terminal if you prefer incremental compiles to disk:
+
+```bash
+npm run watch
+```
+
 Notes
 -----
 
+- Generate the OpenAPI definition whenever you adjust request/response contracts:
+  ```bash
+  npm run docs:generate
+  ```
+  The generated `openapi.json` is also served live at `GET /api/docs/openapi.json`.
+- Enforce type hygiene before committing:
+  ```bash
+  npm run lint
+  ```
+  This script blocks explicit `any` usage across `src/` and the test suite, keeping typings precise.
+- Registration endpoints:
+  - `POST /api/users/register` — accepts `username`, `password`, optional `email`, and optional `profile` data. Enforces reserved-username blacklist (extendable via `RESERVED_USERNAMES=csv`) and per-IP throttling (5 attempts/hour) with `X-RateLimit-*` headers plus `Retry-After` when blocked.
+  - `POST /api/users/validate-email` — payload `{ email }`, returns `{ valid, normalized_email }` plus optional `{ reason }` when the address fails RFC validation. Useful for real-time client checks before registration submission.
+  - `GET /api/users/check-username/:username` — indicates `{ available }` and `{ reserved }` flags, including suggestion lists whenever a name is unavailable.
 - Data is persisted to `server/tasks.json` (quests) and `server/campaigns.json` (quest collections). Tests will modify these files; they try to reset state but consider using separate fixtures for CI runs.
 - Tests now default to per-run temp copies of the JSON stores. If you need ad-hoc runs, point `TASKS_FILE`, `USERS_FILE`, and `CAMPAIGNS_FILE` to a throwaway directory instead of touching the tracked fixtures.
 - `writeTasks` throws on write errors and endpoints return 500 when writes fail. This is intentional so clients can surface errors.

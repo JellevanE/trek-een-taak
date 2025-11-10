@@ -1,5 +1,21 @@
-import type { SubTask, TaskRecord, TaskStatus } from '../types/task';
-import { XP_CONFIG, clampTaskLevel, getPriorityMultiplier } from './experience';
+import type { TaskPriority, SubTask, TaskRecord, TaskStatus } from '../types/task.js';
+
+export const XP_CONFIG = {
+    baseTaskXp: 50,
+    taskLevelBonus: 12,
+    baseSubtaskXp: 18,
+    subtaskLevelBonus: 6,
+    subtaskWeightFloor: 0.35,
+    priorityMultipliers: { low: 0.9, medium: 1.0, high: 1.15 } as Record<TaskPriority, number>,
+    dailyBaseXp: 30,
+    maxTaskLevel: 10,
+    levelBaseRequirement: 100,
+    levelStepRequirement: 40,
+    xpLogLimit: 30
+} as const;
+
+type PartialTask = Partial<TaskRecord> | null | undefined;
+type PartialSubtask = Partial<SubTask> | null | undefined;
 
 export interface TaskRewardBreakdown {
     amount: number;
@@ -18,8 +34,19 @@ export interface DailyReward {
     reason: 'daily_focus';
 }
 
-type PartialTask = Partial<TaskRecord> | null | undefined;
-type PartialSubtask = Partial<SubTask> | null | undefined;
+export function clampTaskLevel(level: unknown): number {
+    if (typeof level !== 'number' || !Number.isFinite(level)) return 1;
+    const rounded = Math.round(level);
+    if (rounded < 1) return 1;
+    if (rounded > XP_CONFIG.maxTaskLevel) return XP_CONFIG.maxTaskLevel;
+    return rounded;
+}
+
+export function getPriorityMultiplier(priority: unknown): number {
+    if (!priority || typeof priority !== 'string') return 1.0;
+    const key = priority.toLowerCase();
+    return XP_CONFIG.priorityMultipliers[key as TaskPriority] ?? 1.0;
+}
 
 function resolveTaskStatus(task: Partial<TaskRecord>): TaskStatus {
     const status = task.status;

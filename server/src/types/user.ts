@@ -1,4 +1,4 @@
-import type { JsonObject } from './json';
+import type { JsonObject } from './json.js';
 import type {
     RpgAchievement,
     RpgFlags,
@@ -6,7 +6,7 @@ import type {
     RpgMetrics,
     XpEventMetadata,
     XpEventReason
-} from './rpg';
+} from './rpg.js';
 
 export interface UserProfile {
     display_name: string;

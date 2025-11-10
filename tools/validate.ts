@@ -10,6 +10,11 @@ type CommandSpec = {
 };
 
 const commands: Record<string, CommandSpec> = {
+    'server:lint': {
+        cmd: ['npm', 'run', 'lint'],
+        cwd: 'server',
+        description: 'Enforce TypeScript hygiene checks (no explicit any)'
+    },
     'server:build': {
         cmd: ['npm', 'run', 'build'],
         cwd: 'server',
@@ -33,8 +38,8 @@ const commands: Record<string, CommandSpec> = {
 };
 
 const pipelines: Record<string, string[]> = {
-    default: ['server:build', 'server:test', 'client:test'],
-    ci: ['server:build', 'server:test', 'client:test', 'client:build']
+    default: ['server:lint', 'server:build', 'server:test', 'client:test'],
+    ci: ['server:lint', 'server:build', 'server:test', 'client:test', 'client:build']
 };
 
 function printUsage(): void {

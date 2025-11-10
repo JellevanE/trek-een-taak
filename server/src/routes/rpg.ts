@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
-import { ensureAuth } from '../middleware/auth';
-import { claimDailyReward, grantXp, resetRpg } from '../controllers/rpgController';
+import { ensureAuth } from '../middleware/auth.js';
+import { claimDailyReward, grantXp, resetRpg } from '../controllers/rpgController.js';
 
 const router = Router();
 

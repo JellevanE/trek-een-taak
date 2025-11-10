@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import app from '../src/app';
+import { resetRegistrationRateLimiter } from '../src/security/registrationRateLimiter';
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
@@ -31,6 +32,7 @@ beforeEach(() => {
     authToken = null;
     resetTaskStore(tasksFile);
     resetUserStore(usersFile, [buildDefaultUser()]);
+    resetRegistrationRateLimiter();
     client = createTestClient(app);
 });
 
@@ -229,7 +231,9 @@ test('re-completing a subtask does not grant additional XP', async () => {
         body: { description: 'Initial effort' },
         headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
     });
-    const subId = (subRes.body as JsonRecord & { sub_tasks: Array<JsonRecord> }).sub_tasks[0].id as number;
+    const subTasks = (subRes.body as JsonRecord & { sub_tasks: Array<JsonRecord> }).sub_tasks || [];
+    expect(subTasks.length).toBeGreaterThan(0);
+    const subId = subTasks[0].id as number;
 
     const firstComplete = await client.patch(`/api/tasks/${taskId}/subtasks/${subId}/status`, {
         body: { status: 'done' },

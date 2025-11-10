@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 
-import type { CampaignExtras, CampaignRecord, CampaignStoreData } from '../types/campaign';
+import type { CampaignExtras, CampaignRecord, CampaignStoreData } from '../types/campaign.js';
 
-import { getCampaignsFile } from './filePaths';
+import { getCampaignsFile } from './filePaths.js';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;

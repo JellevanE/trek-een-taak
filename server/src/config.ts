@@ -47,4 +47,8 @@ function resolveJwtSecrets(): string[] {
 }
 
 export const jwtSecrets = resolveJwtSecrets();
-export const primaryJwtSecret = jwtSecrets[0];
+const [primarySecret] = jwtSecrets;
+if (!primarySecret) {
+    throw new Error('JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.');
+}
+export const primaryJwtSecret = primarySecret;

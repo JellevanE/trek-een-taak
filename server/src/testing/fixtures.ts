@@ -1,11 +1,11 @@
 import { writeFileSync } from 'node:fs';
 
-import type { CampaignRecord, CampaignStoreData } from '../types/campaign';
-import type { SubTask, TaskRecord, TaskStoreData } from '../types/task';
-import type { UserRecord, UserStoreData } from '../types/user';
-import { configureDataFiles, resetDataFileOverrides } from '../data/filePaths';
-import { createInitialRpgState } from '../rpg/experience';
-import type { JsonObject } from '../types/json';
+import type { CampaignRecord, CampaignStoreData } from '../types/campaign.js';
+import type { SubTask, TaskRecord, TaskStoreData } from '../types/task.js';
+import type { UserRecord, UserStoreData } from '../types/user.js';
+import { configureDataFiles, resetDataFileOverrides } from '../data/filePaths.js';
+import { createInitialRpgState } from '../rpg/experienceEngine.js';
+import type { JsonObject } from '../types/json.js';
 
 export type JsonRecord = JsonObject;
 
@@ -33,12 +33,11 @@ function normalizeTask(task: TaskRecord): TaskRecord {
 
 export function buildDefaultUser(overrides: Partial<UserRecord> = {}): UserRecord {
     const now = new Date().toISOString();
-    const baseProfile = {
+    const baseProfile: UserRecord['profile'] = {
         display_name: 'Local User',
         avatar: null,
         class: 'adventurer',
-        bio: '',
-        prefs: undefined
+        bio: ''
     };
 
     const base: UserRecord = {
@@ -52,9 +51,13 @@ export function buildDefaultUser(overrides: Partial<UserRecord> = {}): UserRecor
         rpg: createInitialRpgState()
     };
 
-    const mergedProfile = overrides.profile
-        ? { ...baseProfile, ...overrides.profile }
-        : baseProfile;
+    let mergedProfile: UserRecord['profile'] = { ...baseProfile };
+    if (overrides.profile) {
+        mergedProfile = { ...mergedProfile, ...overrides.profile };
+        if (overrides.profile.prefs === undefined) {
+            delete (mergedProfile as { prefs?: JsonObject }).prefs;
+        }
+    }
 
     const mergedRpg = overrides.rpg ? { ...createInitialRpgState(), ...overrides.rpg } : base.rpg;
 
@@ -147,7 +150,7 @@ export function buildTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
         sub_tasks: [],
         side_quests: [],
         nextSubtaskId: 1,
-        due_date: now.split('T')[0],
+        due_date: now.slice(0, 10),
         status: 'todo',
         order: 0,
         created_at: now,

@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import app from '../src/app';
+import { resetRegistrationRateLimiter } from '../src/security/registrationRateLimiter';
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
@@ -33,6 +34,7 @@ beforeEach(() => {
     resetTaskStore(tasksFile);
     resetCampaignStore(campaignsFile);
     resetUserStore(usersFile, [buildDefaultUser()]);
+    resetRegistrationRateLimiter();
 });
 
 afterAll(() => {

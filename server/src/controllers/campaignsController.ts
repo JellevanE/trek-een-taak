@@ -7,13 +7,24 @@ import {
     serializeCampaign,
     serializeCampaignList,
     writeCampaigns
-} from '../data/campaignStore';
-import { readTasks, serializeTaskList, writeTasks } from '../data/taskStore';
-import { sendError } from '../utils/http';
-import { assertAuthenticated } from '../utils/authGuard';
-import type { AuthenticatedRequest } from '../types/auth';
-import type { CampaignExtras, CampaignRecord } from '../types/campaign';
-import type { TaskRecord } from '../types/task';
+} from '../data/campaignStore.js';
+import { readTasks, serializeTaskList, writeTasks } from '../data/taskStore.js';
+import { sendError } from '../utils/http.js';
+import { assertAuthenticated } from '../utils/authGuard.js';
+import type { AuthenticatedRequest } from '../types/auth.js';
+import type { CampaignExtras, CampaignRecord } from '../types/campaign.js';
+import type { TaskRecord } from '../types/task.js';
+import { validateRequest } from '../validation/index.js';
+import {
+    campaignIdParamsSchema,
+    createCampaignSchema,
+    listCampaignsQuerySchema,
+    updateCampaignSchema,
+    type CampaignIdParams,
+    type CreateCampaignPayload,
+    type ListCampaignsQuery,
+    type UpdateCampaignPayload
+} from '../validation/schemas/campaigns.js';
 
 type BaseAuthedRequest<
     P extends ParamsDictionary = ParamsDictionary,
@@ -56,18 +67,20 @@ function buildCampaignStatsMap(
     return stats;
 }
 
-export function listCampaigns(
-    req: BaseAuthedRequest<ParamsDictionary, unknown, CampaignListQuery>,
-    res: Response
-) {
+export function listCampaigns(req: BaseAuthedRequest, res: Response) {
     if (!assertAuthenticated(req, res)) return;
+    const validation = validateRequest(req, { query: listCampaignsQuerySchema });
+    if (!validation.success) {
+        return sendError(res, 400, validation.error.summary);
+    }
+
+    const query = (validation.data.query ?? {}) as ListCampaignsQuery;
+    const includeArchivedRaw = query.include_archived;
+    const includeArchived = Array.isArray(includeArchivedRaw)
+        ? includeArchivedRaw.includes('true')
+        : includeArchivedRaw === 'true';
     const campaignsData = readCampaigns();
     const tasksData = readTasks();
-
-    const queryValue = req.query.include_archived;
-    const includeArchived = Array.isArray(queryValue)
-        ? queryValue.includes('true')
-        : queryValue === 'true';
     const ownerId = req.user.id;
 
     const campaigns = campaignsData.campaigns.filter((campaign) => {
@@ -80,26 +93,29 @@ export function listCampaigns(
     return res.json({ campaigns: serializeCampaignList(campaigns, statsMap) });
 }
 
-interface CreateCampaignBody {
-    name?: string;
-    description?: string;
-    image_url?: string | null;
-}
-
-export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCampaignBody>, res: Response) {
+export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCampaignPayload>, res: Response) {
     if (!assertAuthenticated(req, res)) return;
-    const { name, description, image_url } = req.body || {};
-    if (!name || typeof name !== 'string' || !name.trim()) {
-        return sendError(res, 400, 'Missing or invalid name');
+    const validation = validateRequest(req, { body: createCampaignSchema });
+    if (!validation.success) {
+        return sendError(res, 400, validation.error.summary);
     }
 
+    const payload = (validation.data.body as CreateCampaignPayload)!;
     const campaignsData = readCampaigns();
     const now = new Date().toISOString();
+
+    const normalizedImage =
+        payload.image_url === null
+            ? null
+            : typeof payload.image_url === 'string' && payload.image_url.length > 0
+            ? payload.image_url
+            : null;
+
     const newCampaign: CampaignRecord = {
         id: campaignsData.nextId,
-        name: name.trim(),
-        description: typeof description === 'string' ? description.trim() : '',
-        image_url: typeof image_url === 'string' && image_url.trim() ? image_url.trim() : null,
+        name: payload.name,
+        description: payload.description ?? '',
+        image_url: normalizedImage,
         owner_id: req.user.id,
         archived: false,
         created_at: now,
@@ -123,8 +139,13 @@ export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCa
 
 export function getCampaign(req: BaseAuthedRequest<{ id: string }>, res: Response) {
     if (!assertAuthenticated(req, res)) return;
-    const campaignId = Number.parseInt(req.params.id, 10);
-    if (!Number.isFinite(campaignId)) return sendError(res, 400, 'Invalid campaign id');
+    const validation = validateRequest(req, { params: campaignIdParamsSchema });
+    if (!validation.success) {
+        return sendError(res, 400, validation.error.summary);
+    }
+
+    const params = validation.data.params as CampaignIdParams;
+    const campaignId = params.id;
 
     const campaignsData = readCampaigns();
     const campaign = campaignsData.campaigns.find((item) => item.id === campaignId && item.owner_id === req.user.id);
@@ -142,18 +163,18 @@ export function getCampaign(req: BaseAuthedRequest<{ id: string }>, res: Respons
     });
 }
 
-interface UpdateCampaignBody {
-    name?: string;
-    description?: string;
-    image_url?: string | null;
-    archived?: boolean;
-}
-
-export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCampaignBody>, res: Response) {
+export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCampaignPayload>, res: Response) {
     if (!assertAuthenticated(req, res)) return;
-    const campaignId = Number.parseInt(req.params.id, 10);
-    if (!Number.isFinite(campaignId)) return sendError(res, 400, 'Invalid campaign id');
+    const validation = validateRequest(req, {
+        params: campaignIdParamsSchema,
+        body: updateCampaignSchema
+    });
+    if (!validation.success) {
+        return sendError(res, 400, validation.error.summary);
+    }
 
+    const params = validation.data.params as CampaignIdParams;
+    const campaignId = params.id;
     const campaignsData = readCampaigns();
     const index = campaignsData.campaigns.findIndex(
         (item) => item.id === campaignId && item.owner_id === req.user.id
@@ -161,29 +182,25 @@ export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCamp
     if (index === -1) return sendError(res, 404, 'Campaign not found');
 
     const target = campaignsData.campaigns[index];
-    const body = req.body || {};
+    if (!target) return sendError(res, 404, 'Campaign not found');
+    const updates = (validation.data.body ?? {}) as UpdateCampaignPayload;
 
-    if (Object.prototype.hasOwnProperty.call(body, 'name')) {
-        if (typeof body.name !== 'string' || !body.name.trim()) return sendError(res, 400, 'Invalid name');
-        target.name = body.name.trim();
+    if (Object.prototype.hasOwnProperty.call(updates, 'name') && updates.name !== undefined) {
+        target.name = updates.name;
     }
-    if (Object.prototype.hasOwnProperty.call(body, 'description')) {
-        if (typeof body.description !== 'string') return sendError(res, 400, 'Invalid description');
-        target.description = body.description.trim();
+    if (Object.prototype.hasOwnProperty.call(updates, 'description') && updates.description !== undefined) {
+        target.description = updates.description;
     }
-    if (Object.prototype.hasOwnProperty.call(body, 'image_url')) {
-        const image = body.image_url;
+    if (Object.prototype.hasOwnProperty.call(updates, 'image_url')) {
+        const image = updates.image_url;
         if (image === null) {
             target.image_url = null;
         } else if (typeof image === 'string') {
-            target.image_url = image.trim() ? image.trim() : null;
-        } else {
-            return sendError(res, 400, 'Invalid image_url');
+            target.image_url = image.length > 0 ? image : null;
         }
     }
-    if (Object.prototype.hasOwnProperty.call(body, 'archived')) {
-        if (typeof body.archived !== 'boolean') return sendError(res, 400, 'Invalid archived flag');
-        target.archived = body.archived;
+    if (Object.prototype.hasOwnProperty.call(updates, 'archived') && updates.archived !== undefined) {
+        target.archived = updates.archived;
     }
 
     target.updated_at = new Date().toISOString();
@@ -201,8 +218,13 @@ export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCamp
 
 export function deleteCampaign(req: BaseAuthedRequest<{ id: string }>, res: Response) {
     if (!assertAuthenticated(req, res)) return;
-    const campaignId = Number.parseInt(req.params.id, 10);
-    if (!Number.isFinite(campaignId)) return sendError(res, 400, 'Invalid campaign id');
+    const validation = validateRequest(req, { params: campaignIdParamsSchema });
+    if (!validation.success) {
+        return sendError(res, 400, validation.error.summary);
+    }
+
+    const params = validation.data.params as CampaignIdParams;
+    const campaignId = params.id;
 
     const campaignsData = readCampaigns();
     const index = campaignsData.campaigns.findIndex(
@@ -211,6 +233,7 @@ export function deleteCampaign(req: BaseAuthedRequest<{ id: string }>, res: Resp
     if (index === -1) return sendError(res, 404, 'Campaign not found');
 
     const [removed] = campaignsData.campaigns.splice(index, 1);
+    if (!removed) return sendError(res, 404, 'Campaign not found');
     try {
         writeCampaigns(campaignsData);
     } catch (error) {

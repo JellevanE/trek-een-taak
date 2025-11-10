@@ -1,6 +1,7 @@
 import fs, { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { jest } from '@jest/globals';
 
 import { configureDataFiles, resetDataFileOverrides } from '../src/testing/fixtures';
 import { getTasksFile } from '../src/data/filePaths';
@@ -67,11 +68,17 @@ describe('data stores', () => {
 
         const data = readTasks();
         expect(data.tasks).toHaveLength(1);
-        const task = data.tasks[0];
+        const [task] = data.tasks;
+        expect(task).toBeDefined();
+        if (!task) throw new Error('Task should be defined');
         expect(typeof task.id).toBe('number');
         expect(task.description.length).toBeGreaterThan(0);
-        expect(task.sub_tasks[0].status_history.length).toBeGreaterThan(0);
-        expect(task.rpg.history[0]).toHaveProperty('at');
+        const [firstSubtask] = task.sub_tasks;
+        expect(firstSubtask).toBeDefined();
+        expect(firstSubtask?.status_history.length ?? 0).toBeGreaterThan(0);
+        const [firstHistory] = task.rpg.history;
+        expect(firstHistory).toBeDefined();
+        expect(firstHistory).toHaveProperty('at');
         expect(task.owner_id).toBe(1);
         expect(typeof data.nextId).toBe('number');
     });
@@ -155,7 +162,9 @@ describe('data stores', () => {
         };
         expect(writeCampaigns(snapshot)).toBe(true);
         const reread = readCampaigns();
-        expect(reread.campaigns[0].name).toBe('Coverage Drive');
+        const [storedCampaign] = reread.campaigns;
+        expect(storedCampaign).toBeDefined();
+        expect(storedCampaign?.name).toBe('Coverage Drive');
     });
 
     test('readCampaigns falls back when file contents are malformed', () => {

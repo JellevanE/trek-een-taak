@@ -44,16 +44,11 @@
 - Expand Zod validation across remaining controllers and responses, and align error mapping with existing API expectations
 - Implement strict null checks and enable stricter compiler options
 - Generate OpenAPI/Swagger docs from TypeScript types
+- Add Swagger UI tooling (e.g., `swagger-cli` and `swagger-ui` preview script) so API docs stay linted and easy to browse locally
 - Add `tsc --watch` mode for development hot-reloading
-- Archive or relocate legacy `dist/src` artifacts once the release freeze ends
-- Break `src/rpg/experience.ts` into modules (`experienceEngine`, `rewardTables`, `eventHooks`) after migration; draft steps:
-  1. Outline current responsibilities and decide module boundaries.
-  2. Create new files with shared types and migrate logic incrementally.
-  3. Update imports/tests to reflect the new structure and ensure coverage.
-- Audit remaining `any` usages; proposal:
-  1. Inventory current `any` locations and document justification per file.
-  2. Replace with precise domain types or utility generics where possible.
-  3. For unavoidable cases (JSON parsing), wrap with helper functions and comments.
+- ✅ Legacy `dist/src` artifacts removed; verify future builds cleanly overwrite `dist/` outputs.
+- ✅ RPG experience utilities reshaped into `experienceEngine`, `rewardTables`, and `eventHooks`; consider data-driven tuning or event analytics as follow-up.
+- ✅ Typed hygiene guard blocks new explicit `any` usage via `npm run lint` (see `scripts/check-no-explicit-any.js`).
 
 ## Estimated Timeline
 - **Minimal viable migration**: 3-4 days of focused work
