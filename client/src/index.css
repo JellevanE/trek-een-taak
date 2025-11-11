@@ -38,8 +38,9 @@
   --quest-card-gap: var(--arcade-space-md);
   --quest-card-body-gap: var(--arcade-space-md);
   --quest-card-stack-gap: var(--arcade-space-lg);
-  --quest-card-max-width: 560px;
   --quest-board-gutter: clamp(16px, 2vw, 40px);
+  --quest-board-frame-max-width: min(980px, calc(100vw - (var(--quest-board-gutter) * 2)));
+  --quest-card-max-width: var(--quest-board-frame-max-width);
   --quest-meta-gap: var(--arcade-space-sm);
   --quest-actions-gap: var(--arcade-space-xs);
   --side-quest-gap: var(--arcade-space-sm);

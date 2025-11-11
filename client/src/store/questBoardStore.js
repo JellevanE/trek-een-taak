@@ -1,6 +1,11 @@
 import { create } from 'zustand';
-import { devtools, persist, createJSONStorage } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { getQuestSideQuests, idsMatch } from '../hooks/questHelpers.js';
+
+// Conditionally import devtools only in development
+const devtools = process.env.NODE_ENV === 'development'
+    ? require('zustand/middleware').devtools
+    : (config) => config; // No-op in production
 
 const memoryStorage = {
     getItem: () => null,
