@@ -88,6 +88,7 @@ describe('useQuestInteractions', () => {
     it('schedules a layout refresh after adding a side quest', async () => {
         const refreshLayout = jest.fn();
         const props = baseProps();
+        props.quests = [{ id: 7, description: 'Quest', side_quests: [] }];
         props.refreshLayout = refreshLayout;
         props.selection.sideQuestDescriptionMap = { 7: 'Chase the bug' };
         props.createSideQuest.mockResolvedValue({
@@ -110,5 +111,63 @@ describe('useQuestInteractions', () => {
 
         expect(refreshLayout.mock.calls.length).toBe(initialCalls + 1);
         expect(props.createSideQuest).toHaveBeenCalledWith(7, 'Chase the bug');
+    });
+
+    it('optimistically adds side quests and reconciles with the API response', async () => {
+        const props = baseProps();
+        props.quests = [{ id: 7, description: 'Quest', side_quests: [] }];
+        let questsState = props.quests;
+        props.setQuests = jest.fn((updater) => {
+            questsState = typeof updater === 'function' ? updater(questsState) : updater;
+            return questsState;
+        });
+        props.selection.sideQuestDescriptionMap = { 7: 'Collect runes' };
+        props.createSideQuest.mockResolvedValue({
+            id: 7,
+            description: 'Quest',
+            side_quests: [{ id: 42, description: 'Collect runes', status: 'todo' }]
+        });
+
+        const { result } = renderHook(() => useQuestInteractions(props));
+
+        await act(async () => {
+            await result.current.addSideQuest(7);
+        });
+
+        expect(props.setQuests).toHaveBeenCalledTimes(2);
+        const optimisticUpdater = props.setQuests.mock.calls[0][0];
+        const optimisticState = optimisticUpdater([{ id: 7, description: 'Quest', side_quests: [] }]);
+        expect(optimisticState[0].side_quests).toHaveLength(1);
+        expect(optimisticState[0].side_quests[0]).toMatchObject({
+            description: 'Collect runes',
+            optimistic: true
+        });
+
+        const finalUpdater = props.setQuests.mock.calls[props.setQuests.mock.calls.length - 1][0];
+        const finalState = finalUpdater(optimisticState);
+        expect(finalState[0].side_quests).toEqual([
+            expect.objectContaining({ id: 42, description: 'Collect runes', status: 'todo' })
+        ]);
+        expect(props.selection.setSideQuestDescriptionMap).toHaveBeenCalled();
+        expect(props.playSound).toHaveBeenCalled();
+    });
+
+    it('reverts the optimistic side quest when the API call fails', async () => {
+        const props = baseProps();
+        props.quests = [{ id: 7, description: 'Quest', side_quests: [] }];
+        props.selection.sideQuestDescriptionMap = { 7: 'Collect runes' };
+        props.createSideQuest.mockRejectedValue(new Error('nope'));
+
+        const { result } = renderHook(() => useQuestInteractions(props));
+
+        await act(async () => {
+            await result.current.addSideQuest(7);
+        });
+
+        expect(props.setQuests).toHaveBeenCalledTimes(2);
+        const optimisticState = props.setQuests.mock.calls[0][0](props.quests);
+        const revertedState = props.setQuests.mock.calls[1][0](optimisticState);
+        expect(revertedState[0].side_quests).toHaveLength(0);
+        expect(props.pushToast).toHaveBeenCalledWith('Failed to add side quest', 'error');
     });
 });
