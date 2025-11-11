@@ -11,9 +11,9 @@ import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
 import { QuestEditForm, AddSideQuestForm } from './features/quest-board/components/forms';
 import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
-import { ThemePreviewPage } from './theme/ThemePreviewPage.jsx';
-// TEMPORARY: Showcase import (remove when done exploring)
-import QuickDemo from './showcase/QuickDemo.jsx';
+// Theme preview + showcase demos are lazy so they stay out of the main bundle
+const ThemePreviewPage = React.lazy(() => import('./theme/ThemePreviewPage.jsx'));
+const QuickDemo = React.lazy(() => import('./showcase/QuickDemo.jsx'));
 
 const KEY_LABEL_MAP = {
     ArrowDown: '↓',
@@ -413,14 +413,16 @@ function App() {
     const isThemePreviewRoute = typeof window !== 'undefined' && window.location.pathname === '/themes';
     if (isThemePreviewRoute) {
         return (
-            <ThemePreviewPage
-                currentThemeId={theme}
-                themeLabel={themeLabel}
-                toggleTheme={toggleTheme}
-                soundVolume={soundVolume}
-                setSoundVolume={setSoundVolume}
-                soundFxMeta={soundFxController.requirements}
-            />
+            <React.Suspense fallback={<div className="App container">Loading theme previews…</div>}>
+                <ThemePreviewPage
+                    currentThemeId={theme}
+                    themeLabel={themeLabel}
+                    toggleTheme={toggleTheme}
+                    soundVolume={soundVolume}
+                    setSoundVolume={setSoundVolume}
+                    soundFxMeta={soundFxController.requirements}
+                />
+            </React.Suspense>
         );
     }
 
@@ -956,7 +958,9 @@ function App() {
             </div>
             
             {/* TEMPORARY: Showcase demo (remove when done exploring) */}
-            {showShowcase && <QuickDemo onClose={() => setShowShowcase(false)} />}
+            <React.Suspense fallback={null}>
+                {showShowcase && <QuickDemo onClose={() => setShowShowcase(false)} />}
+            </React.Suspense>
         </div>
     );
 }
