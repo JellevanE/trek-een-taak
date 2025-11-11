@@ -59,7 +59,8 @@ const QuestCard = React.memo(({
         renderAddSideQuestForm,
         smoothDrag,
         addInputRefs,
-        sideQuestItemHeight
+        sideQuestItemHeight,
+        soundFxEnabled
     } = useQuestBoardContext();
 
     const SIDE_QUEST_ITEM_HEIGHT = sideQuestItemHeight ?? QUEST_LAYOUT_TOKENS.sideQuestItemHeight;
@@ -79,7 +80,13 @@ const QuestCard = React.memo(({
     });
     const cardTokens = themeProfile?.card || null;
     const ctaTokens = themeProfile?.cta || null;
-    const soundFxTokens = themeProfile?.soundFx || null;
+    const soundFxTokens = React.useMemo(() => {
+        if (!themeProfile?.soundFx) return null;
+        if (soundFxEnabled === false) {
+            return { ...themeProfile.soundFx, enabled: false };
+        }
+        return themeProfile.soundFx;
+    }, [soundFxEnabled, themeProfile]);
     
     const sideQuestFooter = (
         <div className="side-quest-footer">

@@ -48,20 +48,23 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
 - [x] Update quest board components (`QuestCard`, new Framer list wrappers, CTA buttons) to consume the theme tokens instead of hard-coded CSS transitions. _QuestCardShell + QuestActions now drive box-shadows/focus rings/CTA motion through theme-fed CSS vars, and Framer lists consume the shared motion presets._
 - [x] Ensure theming covers reduced-motion fallbacks by reading `prefers-reduced-motion` inside the theme hook and clamping animation durations. _`useQuestMotionTokens` pulls from the central profiles and still halves durations + disables glow when reduced motion is enabled._
 - [x] Add regression checks (Jest snapshots or visual diff harness) that confirm theme changes don't alter business logic output, only presentation. _Covered via the new `useQuestMotionTokens.test.js`, which asserts profile switching + reduced-motion clamping without touching quest logic._
-- [ ] **CSS variable migration:** Extract hardcoded colors and animations from `App.css` into theme-controlled variants:
+- [x] **CSS variable migration:** Extract hardcoded colors and animations from `App.css` into theme-controlled variants:
   - Map existing CSS custom properties (--accent-cyan, --accent-pink, --accent-purple, --muted) to theme profiles
   - Migrate `@keyframes` animations (pulse-anim, glow-anim, burst-fade, burst-ring, quest-spawn-anim) to support theme-specific parameters
   - Document which animations/styles are themable vs. structural (unchangeable)
-- [ ] **Sound effect implementation:** Expand beyond toggle to include:
+  _Body/background hues, progress bars, and the glow/burst/pulse keyframes now read from the theme tokens exposed via `getThemeCssVariables`, and `client/src/theme/THEME_NOTES.md` calls out which animations remain structural._
+- [x] **Sound effect implementation:** Expand beyond toggle to include:
   - Define audio file requirements (format: WebM/MP3 fallback, max size: 50kb per file)
   - Add volume controls (0-100%) in theme settings
   - Implement preload strategy to avoid first-play latency
   - Map sound events: quest-add, quest-complete, side-quest-add, priority-cycle, level-up
   - Ensure sounds respect reduced-motion preferences (mute if enabled)
-- [ ] **Theme validation tooling:** Create mechanisms to verify themes work across all states:
+  _`useSoundFx` preloads tone/sample players, honors reduced-motion, and new FX sliders wire into `useTheme` so quest add/complete/etc. fire theme-aware cues._
+- [x] **Theme validation tooling:** Create mechanisms to verify themes work across all states:
   - Consider a `/themes` preview route showing all quest states (active, completed, editing, dragging, glowing, pulsing)
   - Add visual regression testing setup (lightweight Percy/Chromatic snapshots or manual screenshot comparison)
   - Test theme switching doesn't cause FOUC (flash of unstyled content)
+  _Visited via `/themes`, the preview grid renders every quest state per theme and is snapshotted by `ThemePreviewPage.test.jsx`; the root now sets `data-theme-ready` to prevent FOUC before CSS vars apply._
 - [x] **Extend useQuestMotionTokens:** The existing hook in `client/src/features/quest-board/hooks/useQuestMotionTokens.js` already handles motion profiles and reduced-motion—integrate it with the broader theme system rather than duplicating logic. _Hook now resolves presets from the shared theme module so Story 4 tokens stay in sync._
 
 ## Story 5 · Quest State Store (Zustand)

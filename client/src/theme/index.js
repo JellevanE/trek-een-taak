@@ -18,6 +18,51 @@ const createMotionProfile = (overrides = {}) => ({
     }
 });
 
+const createColorTokens = (overrides = {}) => ({
+    background: overrides.background ?? '#081020',
+    backgroundGradient: overrides.backgroundGradient ?? 'radial-gradient(ellipse at center, rgba(20,24,35,1) 0%, rgba(8,16,32,1) 60%)',
+    surface: overrides.surface ?? '#0f1724',
+    accentCyan: overrides.accentCyan ?? '#00f0ff',
+    accentPink: overrides.accentPink ?? '#ff2ec4',
+    accentPurple: overrides.accentPurple ?? '#9b5cff',
+    muted: overrides.muted ?? '#9aa3b2',
+    progressTrack: overrides.progressTrack ?? 'rgba(255,255,255,0.03)',
+    progressFill: overrides.progressFill ?? 'linear-gradient(90deg, #9b5cff, #ff2ec4)'
+});
+
+const createAnimationTokens = (overrides = {}) => ({
+    pulse: {
+        scale: overrides.pulse?.scale ?? 1.02,
+        shadowStrong: overrides.pulse?.shadowStrong ?? 'rgba(0,0,0,0.18)',
+        shadowRest: overrides.pulse?.shadowRest ?? 'rgba(0,0,0,0.08)'
+    },
+    spawn: {
+        startShadow: overrides.spawn?.startShadow ?? 'rgba(0,0,0,0)',
+        midShadow: overrides.spawn?.midShadow ?? 'rgba(0,0,0,0.45)',
+        endShadow: overrides.spawn?.endShadow ?? 'rgba(0,0,0,0.6)'
+    },
+    glow: {
+        phaseOne: overrides.glow?.phaseOne ?? 'rgba(99,102,241,0.30)',
+        phaseTwo: overrides.glow?.phaseTwo ?? 'rgba(155,92,255,0.28)',
+        phaseThree: overrides.glow?.phaseThree ?? 'rgba(99,102,241,0.18)'
+    },
+    burst: {
+        ringStart: overrides.burst?.ringStart ?? 'rgba(0,240,255,0.12)',
+        ringMid: overrides.burst?.ringMid ?? 'rgba(255,255,255,0.22)',
+        ringEnd: overrides.burst?.ringEnd ?? 'rgba(255,255,255,0)',
+        haloBorder: overrides.burst?.haloBorder ?? 'rgba(255,255,255,0.14)',
+        haloBackground: overrides.burst?.haloBackground ?? 'rgba(0,0,0,0.68)'
+    }
+});
+
+export const SOUND_EVENT_KEYS = Object.freeze({
+    QUEST_ADD: 'quest_add',
+    QUEST_COMPLETE: 'quest_complete',
+    SIDE_QUEST_ADD: 'side_quest_add',
+    PRIORITY_CYCLE: 'priority_cycle',
+    LEVEL_UP: 'level_up'
+});
+
 export const DEFAULT_THEME_ID = 'neon_arcade';
 
 export const THEME_PROFILES = Object.freeze({
@@ -25,6 +70,8 @@ export const THEME_PROFILES = Object.freeze({
         id: 'neon_arcade',
         label: 'Neon Arcade',
         appearance: 'dark',
+        colors: createColorTokens(),
+        animations: createAnimationTokens(),
         motion: createMotionProfile(),
         card: {
             depth: {
@@ -48,13 +95,75 @@ export const THEME_PROFILES = Object.freeze({
         },
         soundFx: {
             enabled: true,
-            volume: 0.65
+            volumePercent: 65,
+            requirements: {
+                formats: ['audio/webm', 'audio/mpeg'],
+                maxFileSizeKb: 50,
+                notes: 'Provide both .webm and .mp3 variants for each clip; keep files under 50kb.'
+            },
+            events: {
+                [SOUND_EVENT_KEYS.QUEST_ADD]: {
+                    label: 'Quest added',
+                    tone: { type: 'triangle', frequency: 560, duration: 0.28 }
+                },
+                [SOUND_EVENT_KEYS.QUEST_COMPLETE]: {
+                    label: 'Quest completed',
+                    tone: { type: 'sawtooth', frequency: 720, duration: 0.34 }
+                },
+                [SOUND_EVENT_KEYS.SIDE_QUEST_ADD]: {
+                    label: 'Side quest added',
+                    tone: { type: 'square', frequency: 640, duration: 0.2 }
+                },
+                [SOUND_EVENT_KEYS.PRIORITY_CYCLE]: {
+                    label: 'Priority cycled',
+                    tone: { type: 'triangle', frequency: 420, duration: 0.16 }
+                },
+                [SOUND_EVENT_KEYS.LEVEL_UP]: {
+                    label: 'Level up',
+                    tone: { type: 'sine', frequency: 880, duration: 0.5 }
+                }
+            }
         }
     },
     classic: {
         id: 'classic',
         label: 'Classic',
         appearance: 'light',
+        colors: createColorTokens({
+            background: '#f6fafc',
+            backgroundGradient: 'radial-gradient(circle at top, rgba(246,250,252,1) 0%, rgba(226,230,238,1) 65%)',
+            surface: '#ffffff',
+            accentCyan: '#0ea5e9',
+            accentPink: '#e879f9',
+            accentPurple: '#7c3aed',
+            muted: '#415161',
+            progressTrack: 'rgba(15,23,42,0.08)',
+            progressFill: 'linear-gradient(90deg, #7c3aed, #f472b6)'
+        }),
+        animations: createAnimationTokens({
+            pulse: {
+                scale: 1.015,
+                shadowStrong: 'rgba(15, 23, 42, 0.22)',
+                shadowRest: 'rgba(15, 23, 42, 0.12)'
+            },
+            spawn: {
+                startShadow: 'rgba(15,23,42,0.12)',
+                midShadow: 'rgba(15,23,42,0.3)',
+                endShadow: 'rgba(15,23,42,0.24)'
+            },
+            glow: {
+                phaseOne: 'rgba(63,81,181,0.35)',
+                phaseTwo: 'rgba(124,58,237,0.28)',
+                phaseThree: 'rgba(63,81,181,0.15)'
+            },
+            burst: {
+                ringStart: 'rgba(14,165,233,0.25)',
+                ringMid: 'rgba(15,23,42,0.45)',
+                ringEnd: 'rgba(15,23,42,0)',
+                haloBorder: 'rgba(15,23,42,0.2)',
+                haloBackground: 'rgba(246,250,252,0.92)'
+            }
+        }),
         motion: createMotionProfile({
             durations: {
                 drag: 0.24,
@@ -96,7 +205,13 @@ export const THEME_PROFILES = Object.freeze({
         },
         soundFx: {
             enabled: false,
-            volume: 0
+            volumePercent: 0,
+            requirements: {
+                formats: ['audio/webm', 'audio/mpeg'],
+                maxFileSizeKb: 50,
+                notes: 'Classic keeps sound design disabled by default; enable per user preference.'
+            },
+            events: {}
         }
     }
 });
@@ -133,6 +248,53 @@ export const getNextThemeId = (currentId = DEFAULT_THEME_ID) => {
 export const getThemeCssVariables = (profile) => {
     if (!profile) return {};
     const vars = {};
+    if (profile.colors?.background) {
+        vars['--bg-dark'] = profile.colors.background;
+        vars['--body-background'] = profile.colors.backgroundGradient || profile.colors.background;
+    }
+    if (profile.colors?.surface) {
+        vars['--panel-dark'] = profile.colors.surface;
+    }
+    if (profile.colors?.accentCyan) {
+        vars['--accent-cyan'] = profile.colors.accentCyan;
+    }
+    if (profile.colors?.accentPink) {
+        vars['--accent-pink'] = profile.colors.accentPink;
+    }
+    if (profile.colors?.accentPurple) {
+        vars['--accent-purple'] = profile.colors.accentPurple;
+    }
+    if (profile.colors?.muted) {
+        vars['--muted'] = profile.colors.muted;
+    }
+    if (profile.colors?.progressTrack) {
+        vars['--progress-track'] = profile.colors.progressTrack;
+    }
+    if (profile.colors?.progressFill) {
+        vars['--quest-progress-gradient'] = profile.colors.progressFill;
+    }
+    if (profile.animations?.pulse) {
+        vars['--anim-pulse-scale-up'] = profile.animations.pulse.scale;
+        vars['--anim-pulse-shadow-strong'] = profile.animations.pulse.shadowStrong;
+        vars['--anim-pulse-shadow-rest'] = profile.animations.pulse.shadowRest;
+    }
+    if (profile.animations?.spawn) {
+        vars['--anim-spawn-shadow-start'] = profile.animations.spawn.startShadow;
+        vars['--anim-spawn-shadow-mid'] = profile.animations.spawn.midShadow;
+        vars['--anim-spawn-shadow-end'] = profile.animations.spawn.endShadow;
+    }
+    if (profile.animations?.glow) {
+        vars['--anim-glow-phase-1'] = profile.animations.glow.phaseOne;
+        vars['--anim-glow-phase-2'] = profile.animations.glow.phaseTwo;
+        vars['--anim-glow-phase-3'] = profile.animations.glow.phaseThree;
+    }
+    if (profile.animations?.burst) {
+        vars['--anim-burst-ring-start'] = profile.animations.burst.ringStart;
+        vars['--anim-burst-ring-mid'] = profile.animations.burst.ringMid;
+        vars['--anim-burst-ring-end'] = profile.animations.burst.ringEnd;
+        vars['--anim-burst-halo-border'] = profile.animations.burst.haloBorder;
+        vars['--anim-burst-halo-bg'] = profile.animations.burst.haloBackground;
+    }
     if (profile.card?.depth?.resting) {
         vars['--quest-card-shadow-resting'] = profile.card.depth.resting;
     }

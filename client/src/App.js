@@ -5,10 +5,13 @@ import Profile from './Profile';
 import { useTheme } from './hooks/useTheme';
 import { useAuth } from './hooks/useAuth';
 import { useQuestBoard } from './hooks/useQuestBoard';
+import { useSoundFx } from './hooks/useSoundFx.js';
+import { useReducedMotionPreference } from './hooks/useReducedMotionPreference.js';
 import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
 import { QuestEditForm, AddSideQuestForm } from './features/quest-board/components/forms';
 import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
+import { ThemePreviewPage } from './theme/ThemePreviewPage.jsx';
 // TEMPORARY: Showcase import (remove when done exploring)
 import QuickDemo from './showcase/QuickDemo.jsx';
 
@@ -100,11 +103,44 @@ const formatKeyLabel = (key) => KEY_LABEL_MAP[key] || key;
 function App() {
     console.log('[App] Re-rendering');
     
-    const { theme, themeLabel, themeProfile, toggleTheme } = useTheme();
+    const { theme, themeLabel, themeProfile, toggleTheme, soundVolume, setSoundVolume } = useTheme();
+    const prefersReducedMotion = useReducedMotionPreference();
+    const soundFxController = useSoundFx({
+        soundFxProfile: themeProfile?.soundFx,
+        volumePercent: soundVolume,
+        prefersReducedMotion
+    });
     const isDarkAppearance = themeProfile?.appearance !== 'light';
     const surfaceTint = isDarkAppearance ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
     const progressTrackColor = isDarkAppearance ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
     const { token, setToken, showProfile, setShowProfile } = useAuth();
+    const soundSliderId = React.useId();
+    const renderSoundSlider = React.useCallback((suffix) => (
+        <label className="theme-audio-control" htmlFor={`${soundSliderId}-${suffix}`}>
+            <span>FX {soundVolume}%</span>
+            <input
+                id={`${soundSliderId}-${suffix}`}
+                type="range"
+                min="0"
+                max="100"
+                value={soundVolume}
+                onChange={(event) => setSoundVolume(Number(event.target.value))}
+            />
+        </label>
+    ), [soundSliderId, soundVolume, setSoundVolume]);
+    const isThemePreviewRoute = typeof window !== 'undefined' && window.location.pathname === '/themes';
+    if (isThemePreviewRoute) {
+        return (
+            <ThemePreviewPage
+                currentThemeId={theme}
+                themeLabel={themeLabel}
+                toggleTheme={toggleTheme}
+                soundVolume={soundVolume}
+                setSoundVolume={setSoundVolume}
+                soundFxMeta={soundFxController.requirements}
+            />
+        );
+    }
     const [showShortcuts, setShowShortcuts] = React.useState(false);
     // TEMPORARY: Showcase state (remove when done exploring)
     const [showShowcase, setShowShowcase] = React.useState(false);
@@ -201,7 +237,7 @@ function App() {
         globalLabel,
         dailyClaimed,
         xpPercent
-    } = useQuestBoard({ token, setToken });
+    } = useQuestBoard({ token, setToken, soundFx: soundFxController });
 
     // Constants for item heights
     const QUEST_ITEM_HEIGHT = 320;
@@ -311,7 +347,9 @@ function App() {
         renderAddSideQuestForm,
         smoothDrag,
         addInputRefs,
-        sideQuestItemHeight: SIDE_QUEST_ITEM_HEIGHT
+        sideQuestItemHeight: SIDE_QUEST_ITEM_HEIGHT,
+        soundFxEnabled: soundFxController.enabled,
+        soundFxVolume: soundVolume
     }), [
         theme,
         themeProfile,
@@ -353,7 +391,9 @@ function App() {
         renderEditForm,
         renderAddSideQuestForm,
         smoothDrag,
-        addInputRefs
+        addInputRefs,
+        soundFxController.enabled,
+        soundVolume
     ]);
 
     // Memoized render function for quest cards
@@ -395,6 +435,7 @@ function App() {
                         </div>
                         <div style={{display:'flex', alignItems:'center', gap:8}}>
                             <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
+                            {renderSoundSlider('auth')}
                             {/* TEMPORARY: Showcase button (remove when done exploring) */}
                             <button 
                                 className="btn-ghost" 
@@ -525,6 +566,7 @@ function App() {
                     </div>
                     <div style={{display:'flex', alignItems:'center', gap:8}}>
                         <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
+                        {renderSoundSlider('main')}
                         {/* TEMPORARY: Showcase button (remove when done exploring) */}
                         <button 
                             className="btn-ghost" 

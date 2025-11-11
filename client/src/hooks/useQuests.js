@@ -18,6 +18,7 @@ import {
     getNextLevel
 } from './questHelpers.js';
 import { useSmoothDragQuests } from './useSmoothDragQuests.js';
+import { SOUND_EVENT_KEYS } from '../theme';
 
 export const useQuests = ({
     token,
@@ -26,7 +27,8 @@ export const useQuests = ({
     pushToast,
     campaignApi,
     playerStatsApi,
-    reloadTasksRef
+    reloadTasksRef,
+    soundFx = null
 }) => {
     const {
         activeCampaignFilter,
@@ -93,6 +95,10 @@ export const useQuests = ({
     const smoothDrag = useSmoothDragQuests({ quests, setQuests });
     const { refresh: refreshLayout } = smoothDrag || {};
     const layoutRefreshRaf = useRef(null);
+    const playSound = useCallback((eventKey) => {
+        if (!soundFx || typeof soundFx.play !== 'function' || !eventKey) return;
+        soundFx.play(eventKey);
+    }, [soundFx]);
 
     const scheduleLayoutRefresh = useCallback(() => {
         if (typeof refreshLayout !== 'function') return;
@@ -142,6 +148,7 @@ export const useQuests = ({
         const created = await createQuest();
         if (created && created.id !== undefined && created.id !== null) {
             const questId = created.id;
+            playSound(SOUND_EVENT_KEYS.QUEST_ADD);
             setSpawnQuests((prev) => ({ ...prev, [questId]: true }));
             setPulsingQuests((prev) => ({ ...prev, [questId]: 'spawn' }));
             setTimeout(() => {
@@ -157,7 +164,7 @@ export const useQuests = ({
                 });
             }, 650);
         }
-    }, [createQuest]);
+    }, [createQuest, playSound]);
 
     const addSideQuest = useCallback(async (questId) => {
         const value = sideQuestDescriptionMap[questId] || '';
@@ -165,6 +172,7 @@ export const useQuests = ({
         const updatedQuest = await createSideQuest(questId, value);
         if (updatedQuest) {
             setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
+            playSound(SOUND_EVENT_KEYS.SIDE_QUEST_ADD);
             setTimeout(() => {
                 if (addInputRefs.current && addInputRefs.current[questId]) {
                     try {
@@ -178,7 +186,7 @@ export const useQuests = ({
                 setTimeout(() => refreshLayout(), 50);
             }
         }
-    }, [createSideQuest, refreshLayout, sideQuestDescriptionMap]);
+    }, [createSideQuest, playSound, refreshLayout, sideQuestDescriptionMap]);
 
     const toggleCollapse = useCallback((questId) => {
         setCollapsedMap((prev) => ({ ...prev, [questId]: !prev[questId] }));
@@ -372,6 +380,7 @@ export const useQuests = ({
             return copy;
         }), 700);
         if (status === 'done') {
+            playSound(SOUND_EVENT_KEYS.QUEST_COMPLETE);
             setGlowQuests((prev) => ({ ...prev, [id]: true }));
             setTimeout(() => setGlowQuests((prev) => {
                 const copy = { ...prev };
@@ -386,7 +395,7 @@ export const useQuests = ({
             }), 1400);
             scheduleCollapseAndMove(id);
         }
-    }, [mutateTaskStatus, scheduleCollapseAndMove]);
+    }, [mutateTaskStatus, playSound, scheduleCollapseAndMove]);
 
     const setSideQuestStatus = useCallback(async (taskId, subTaskId, status, note) => {
         const normalized = await mutateSideQuestStatus(taskId, subTaskId, status, note);
@@ -487,20 +496,24 @@ export const useQuests = ({
     }, []);
 
     const cyclePriority = useCallback(() => {
+        playSound(SOUND_EVENT_KEYS.PRIORITY_CYCLE);
         setPriority((prev) => getNextPriority(prev));
-    }, []);
+    }, [playSound]);
 
     const cycleTaskLevel = useCallback(() => {
+        playSound(SOUND_EVENT_KEYS.LEVEL_UP);
         setTaskLevel((prev) => getNextLevel(prev));
-    }, []);
+    }, [playSound]);
 
     const cycleEditingPriority = useCallback(() => {
+        playSound(SOUND_EVENT_KEYS.PRIORITY_CYCLE);
         setEditingQuest((prev) => (prev ? { ...prev, priority: getNextPriority(prev.priority || 'low') } : prev));
-    }, []);
+    }, [playSound]);
 
     const cycleEditingLevel = useCallback(() => {
+        playSound(SOUND_EVENT_KEYS.LEVEL_UP);
         setEditingQuest((prev) => (prev ? { ...prev, task_level: getNextLevel(prev.task_level || 1) } : prev));
-    }, []);
+    }, [playSound]);
 
 
     useEffect(() => {
