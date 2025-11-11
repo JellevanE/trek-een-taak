@@ -1,4 +1,5 @@
 import React from 'react';
+import { AnimatePresence } from 'framer-motion';
 import './App.css';
 import Profile from './Profile';
 import { useTheme } from './hooks/useTheme';
@@ -6,6 +7,10 @@ import { useAuth } from './hooks/useAuth';
 import { useQuestBoard } from './hooks/useQuestBoard';
 import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
+import { QuestEditForm, AddSideQuestForm } from './features/quest-board/components/forms';
+import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
+// TEMPORARY: Showcase import (remove when done exploring)
+import QuickDemo from './showcase/QuickDemo.jsx';
 
 const KEY_LABEL_MAP = {
     ArrowDown: '↓',
@@ -95,9 +100,14 @@ const formatKeyLabel = (key) => KEY_LABEL_MAP[key] || key;
 function App() {
     console.log('[App] Re-rendering');
     
-    const { theme, setTheme } = useTheme();
+    const { theme, themeLabel, themeProfile, toggleTheme } = useTheme();
+    const isDarkAppearance = themeProfile?.appearance !== 'light';
+    const surfaceTint = isDarkAppearance ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+    const progressTrackColor = isDarkAppearance ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
     const { token, setToken, showProfile, setShowProfile } = useAuth();
     const [showShortcuts, setShowShortcuts] = React.useState(false);
+    // TEMPORARY: Showcase state (remove when done exploring)
+    const [showShowcase, setShowShowcase] = React.useState(false);
     const shortcutsPanelRef = React.useRef(null);
     const {
         quests,
@@ -123,10 +133,13 @@ function App() {
         showDebugTools,
         setShowDebugTools,
         editingQuest,
+        editingQuestInputRef,
         setEditingQuest,
         selectedQuestId,
         selectedSideQuest,
         editingSideQuest,
+        sideQuestDescriptionMap,
+        setSideQuestDescriptionMap,
         addingSideQuestTo,
         setAddingSideQuestTo,
         collapsedMap,
@@ -147,12 +160,14 @@ function App() {
         handleCampaignFieldChange,
         submitCampaignForm,
         addTask,
+        addSideQuest,
         toggleCollapse,
         handleSelectQuest,
         handleSelectSideQuest,
         dismissUndoEntry,
         handleUndoDelete,
         deleteTask,
+        updateTask,
         toasts,
         dismissToast,
         pulsingQuests,
@@ -172,10 +187,11 @@ function App() {
         handleSideQuestEditChange,
         cancelSideQuestEdit,
         saveSideQuestEdit,
+        handleEditChange,
         cyclePriority,
         cycleTaskLevel,
-        renderEditForm,
-        renderAddSideQuestForm,
+        cycleEditingPriority,
+        cycleEditingLevel,
         smoothDrag,
         campaignLookup,
         hasCampaigns,
@@ -192,58 +208,70 @@ function App() {
     const QUEST_ITEM_GAP = 16;
     const SIDE_QUEST_ITEM_HEIGHT = 80;
 
-    // Memoized render function for quest cards
-    // This prevents unnecessary re-renders when unrelated state changes
-    const renderQuestCard = React.useCallback((quest, isDragging = false, dragMeta = {}) => {
+    const renderEditForm = React.useCallback((quest) => {
+        if (!quest || !editingQuest) return null;
         return (
-            <QuestCard
-                key={quest?.id ?? 'quest-fallback'}
+            <QuestEditForm
                 quest={quest}
-                isDragging={isDragging}
-                dragMeta={dragMeta}
-                selectedQuestId={selectedQuestId}
-                selectedSideQuest={selectedSideQuest}
                 editingQuest={editingQuest}
-                editingSideQuest={editingSideQuest}
-                addingSideQuestTo={addingSideQuestTo}
-                collapsedMap={collapsedMap}
-                pulsingQuests={pulsingQuests}
-                pulsingSideQuests={pulsingSideQuests}
-                glowQuests={glowQuests}
-                celebratingQuests={celebratingQuests}
-                spawnQuests={spawnQuests}
-                campaignLookup={campaignLookup}
+                inputRef={editingQuestInputRef}
+                campaigns={campaigns}
                 hasCampaigns={hasCampaigns}
-                getQuestStatus={getQuestStatus}
-                getQuestStatusLabel={getQuestStatusLabel}
-                getQuestSideQuests={getQuestSideQuests}
-                getSideQuestStatus={getSideQuestStatus}
-                getSideQuestStatusLabel={getSideQuestStatusLabel}
-                isInteractiveTarget={isInteractiveTarget}
-                idsMatch={idsMatch}
-                getQuestProgress={getQuestProgress}
-                progressColor={progressColor}
-                handleSelectQuest={handleSelectQuest}
-                handleSelectSideQuest={handleSelectSideQuest}
-                setEditingQuest={setEditingQuest}
-                deleteTask={deleteTask}
-                setTaskStatus={setTaskStatus}
-                setSideQuestStatus={setSideQuestStatus}
-                deleteSideQuest={deleteSideQuest}
-                startEditingSideQuest={startEditingSideQuest}
-                handleSideQuestEditChange={handleSideQuestEditChange}
-                cancelSideQuestEdit={cancelSideQuestEdit}
-                saveSideQuestEdit={saveSideQuestEdit}
-                toggleCollapse={toggleCollapse}
-                setAddingSideQuestTo={setAddingSideQuestTo}
-                renderEditForm={renderEditForm}
-                renderAddSideQuestForm={renderAddSideQuestForm}
-                smoothDrag={smoothDrag}
-                addInputRefs={addInputRefs}
-                SIDE_QUEST_ITEM_HEIGHT={SIDE_QUEST_ITEM_HEIGHT}
+                onChange={handleEditChange}
+                onCancel={() => setEditingQuest(null)}
+                onSave={() => updateTask(quest.id, editingQuest)}
+                onCyclePriority={cycleEditingPriority}
+                onCycleLevel={cycleEditingLevel}
             />
         );
     }, [
+        campaigns,
+        cycleEditingLevel,
+        cycleEditingPriority,
+        editingQuest,
+        editingQuestInputRef,
+        handleEditChange,
+        hasCampaigns,
+        setEditingQuest,
+        updateTask
+    ]);
+
+    const renderAddSideQuestForm = React.useCallback((questId) => (
+        <AddSideQuestForm
+            questId={questId}
+            value={sideQuestDescriptionMap[questId] || ''}
+            inputRef={(el) => {
+                if (!addInputRefs.current) addInputRefs.current = {};
+                if (el) {
+                    addInputRefs.current[questId] = el;
+                } else {
+                    delete addInputRefs.current[questId];
+                }
+            }}
+            onChange={(next) => setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: next }))}
+            onAdd={() => addSideQuest(questId)}
+            onCancel={() => {
+                setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
+                setAddingSideQuestTo(null);
+            }}
+            onFocus={() => setAddingSideQuestTo(questId)}
+            onBlur={() => {
+                setTimeout(() => {
+                    setAddingSideQuestTo((prev) => (prev === questId ? null : prev));
+                }, 100);
+            }}
+        />
+    ), [
+        addInputRefs,
+        addSideQuest,
+        setAddingSideQuestTo,
+        setSideQuestDescriptionMap,
+        sideQuestDescriptionMap
+    ]);
+
+    const questBoardContextValue = React.useMemo(() => ({
+        themeName: theme,
+        themeProfile,
         selectedQuestId,
         selectedSideQuest,
         editingQuest,
@@ -283,7 +311,61 @@ function App() {
         renderAddSideQuestForm,
         smoothDrag,
         addInputRefs,
+        sideQuestItemHeight: SIDE_QUEST_ITEM_HEIGHT
+    }), [
+        theme,
+        themeProfile,
+        selectedQuestId,
+        selectedSideQuest,
+        editingQuest,
+        editingSideQuest,
+        addingSideQuestTo,
+        collapsedMap,
+        pulsingQuests,
+        pulsingSideQuests,
+        glowQuests,
+        celebratingQuests,
+        spawnQuests,
+        campaignLookup,
+        hasCampaigns,
+        getQuestStatus,
+        getQuestStatusLabel,
+        getQuestSideQuests,
+        getSideQuestStatus,
+        getSideQuestStatusLabel,
+        isInteractiveTarget,
+        idsMatch,
+        getQuestProgress,
+        progressColor,
+        handleSelectQuest,
+        handleSelectSideQuest,
+        setEditingQuest,
+        deleteTask,
+        setTaskStatus,
+        setSideQuestStatus,
+        deleteSideQuest,
+        startEditingSideQuest,
+        handleSideQuestEditChange,
+        cancelSideQuestEdit,
+        saveSideQuestEdit,
+        toggleCollapse,
+        setAddingSideQuestTo,
+        renderEditForm,
+        renderAddSideQuestForm,
+        smoothDrag,
+        addInputRefs
     ]);
+
+    // Memoized render function for quest cards
+    // This prevents unnecessary re-renders when unrelated state changes
+    const renderQuestCard = React.useCallback((quest, isDragging = false, dragMeta = {}) => (
+        <QuestCard
+            key={quest?.id ?? 'quest-fallback'}
+            quest={quest}
+            isDragging={isDragging}
+            dragMeta={dragMeta}
+        />
+    ), []);
 
     React.useEffect(() => {
         if (showShortcuts && shortcutsPanelRef.current) {
@@ -312,7 +394,20 @@ function App() {
                             <div className="subtitle">Quest management made easy, but also way harder.</div>
                         </div>
                         <div style={{display:'flex', alignItems:'center', gap:8}}>
-                            <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                            <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
+                            {/* TEMPORARY: Showcase button (remove when done exploring) */}
+                            <button 
+                                className="btn-ghost" 
+                                onClick={() => setShowShowcase(true)}
+                                style={{
+                                    background: 'var(--neon-purple, #9400d3)',
+                                    color: 'white',
+                                    border: '2px solid var(--neon-purple, #9400d3)',
+                                    boxShadow: '0 0 10px rgba(148, 0, 211, 0.5)'
+                                }}
+                            >
+                                🎮 Showcase
+                            </button>
                         </div>
                     </div>
                 </header>
@@ -429,7 +524,20 @@ function App() {
                         <div className="subtitle">Quest management made easy, but also way harder.</div>
                     </div>
                     <div style={{display:'flex', alignItems:'center', gap:8}}>
-                        <button className="btn-ghost" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>Theme: {theme}</button>
+                        <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
+                        {/* TEMPORARY: Showcase button (remove when done exploring) */}
+                        <button 
+                            className="btn-ghost" 
+                            onClick={() => setShowShowcase(true)}
+                            style={{
+                                background: 'var(--neon-purple, #9400d3)',
+                                color: 'white',
+                                border: '2px solid var(--neon-purple, #9400d3)',
+                                boxShadow: '0 0 10px rgba(148, 0, 211, 0.5)'
+                            }}
+                        >
+                            🎮 Showcase
+                        </button>
                         <button
                             className="btn-ghost"
                             onClick={() => setShowShortcuts((prev) => !prev)}
@@ -449,7 +557,7 @@ function App() {
                     style={{
                         margin: '16px 0',
                         padding: '12px 16px',
-                        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                        background: surfaceTint,
                         borderRadius: 12,
                         display: 'flex',
                         alignItems: 'center',
@@ -467,7 +575,7 @@ function App() {
                             <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>Total XP {playerStats.xp}</div>
                         </div>
                         <div style={{ marginTop: 8 }}>
-                            <div style={{ height: 8, borderRadius: 6, background: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                            <div style={{ height: 8, borderRadius: 6, background: progressTrackColor, overflow: 'hidden' }}>
                                 <div
                                     style={{
                                         width: `${Math.max(0, Math.min(100, xpPercent))}%`,
@@ -769,15 +877,18 @@ function App() {
                 <button className="btn-primary" onClick={addTask}>Add Quest</button>
             </div>
             <div className="quest-container">
-                {smoothDrag?.QuestList ? (
-                    <smoothDrag.QuestList
-                        itemHeight={QUEST_ITEM_HEIGHT}
-                        itemGap={QUEST_ITEM_GAP}
-                        renderItem={renderQuestCard}
-                    />
-                ) : (
-                    quests.map((quest) => renderQuestCard(quest))
-                )}
+                <QuestBoardProvider value={questBoardContextValue}>
+                    {smoothDrag?.QuestList ? (
+                        <smoothDrag.QuestList
+                            itemHeight={QUEST_ITEM_HEIGHT}
+                            itemGap={QUEST_ITEM_GAP}
+                            renderItem={renderQuestCard}
+                            themeName={theme}
+                        />
+                    ) : (
+                        quests.map((quest) => renderQuestCard(quest))
+                    )}
+                </QuestBoardProvider>
             </div>
                 </div>
             </div>
@@ -790,15 +901,20 @@ function App() {
                         <button className="btn-ghost btn-small" onClick={() => dismissUndoEntry(entry.id)}>Dismiss</button>
                     </div>
                 ))}
-                {toasts.map((toast) => (
-                    <AnimatedToast
-                        key={toast.id}
-                        message={toast.msg}
-                        type={toast.type}
-                        onDismiss={() => dismissToast(toast.id)}
-                    />
-                ))}
+                <AnimatePresence initial={false}>
+                    {toasts.map((toast) => (
+                        <AnimatedToast
+                            key={toast.id}
+                            message={toast.msg}
+                            type={toast.type}
+                            onDismiss={() => dismissToast(toast.id)}
+                        />
+                    ))}
+                </AnimatePresence>
             </div>
+            
+            {/* TEMPORARY: Showcase demo (remove when done exploring) */}
+            {showShowcase && <QuickDemo onClose={() => setShowShowcase(false)} />}
         </div>
     );
 }
