@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import {
     getQuestSideQuests,
     idsMatch,
     isInteractiveTarget
 } from '../../../hooks/questHelpers.js';
+import { useQuestBoardStore } from '../../../store/questBoardStore.js';
 
 /**
  * Coordinates quest/side quest selection, collapsed panels, and edit focus state.
@@ -14,14 +16,40 @@ export const useQuestSelection = ({
     quests,
     refreshLayout = null
 }) => {
-    const [editingQuest, setEditingQuest] = useState(null);
+    const {
+        editingQuest,
+        setEditingQuest,
+        selectedQuestId,
+        setSelectedQuestId,
+        selectedSideQuest,
+        setSelectedSideQuest,
+        editingSideQuest,
+        setEditingSideQuest,
+        sideQuestDescriptionMap,
+        setSideQuestDescriptionMap,
+        addingSideQuestTo,
+        setAddingSideQuestTo,
+        collapsedMap,
+        setCollapsedMap,
+        resetSelection
+    } = useQuestBoardStore(useShallow((state) => ({
+        editingQuest: state.editingQuest,
+        setEditingQuest: state.setEditingQuest,
+        selectedQuestId: state.selectedQuestId,
+        setSelectedQuestId: state.setSelectedQuestId,
+        selectedSideQuest: state.selectedSideQuest,
+        setSelectedSideQuest: state.setSelectedSideQuest,
+        editingSideQuest: state.editingSideQuest,
+        setEditingSideQuest: state.setEditingSideQuest,
+        sideQuestDescriptionMap: state.sideQuestDescriptionMap,
+        setSideQuestDescriptionMap: state.setSideQuestDescriptionMap,
+        addingSideQuestTo: state.addingSideQuestTo,
+        setAddingSideQuestTo: state.setAddingSideQuestTo,
+        collapsedMap: state.collapsedMap,
+        setCollapsedMap: state.setCollapsedMap,
+        resetSelection: state.resetSelection
+    })));
     const editingQuestInputRef = useRef(null);
-    const [selectedQuestId, setSelectedQuestId] = useState(null);
-    const [selectedSideQuest, setSelectedSideQuest] = useState(null);
-    const [editingSideQuest, setEditingSideQuest] = useState(null);
-    const [sideQuestDescriptionMap, setSideQuestDescriptionMap] = useState({});
-    const [addingSideQuestTo, setAddingSideQuestTo] = useState(null);
-    const [collapsedMap, setCollapsedMap] = useState({});
     const addInputRefs = useRef({});
 
     const ensureQuestExpanded = useCallback((questId) => {
@@ -35,14 +63,14 @@ export const useQuestSelection = ({
         if (refreshLayout) {
             setTimeout(() => refreshLayout(), 300);
         }
-    }, [refreshLayout]);
+    }, [refreshLayout, setCollapsedMap]);
 
     const toggleCollapse = useCallback((questId) => {
         setCollapsedMap((prev) => ({ ...prev, [questId]: !prev[questId] }));
         if (refreshLayout) {
             setTimeout(() => refreshLayout(), 300);
         }
-    }, [refreshLayout]);
+    }, [refreshLayout, setCollapsedMap]);
 
     const handleSelectQuest = useCallback((questId) => {
         if (questId === undefined || questId === null) return;
@@ -50,7 +78,7 @@ export const useQuestSelection = ({
         setSelectedSideQuest(null);
         setEditingSideQuest(null);
         ensureQuestExpanded(questId);
-    }, [ensureQuestExpanded]);
+    }, [ensureQuestExpanded, setEditingSideQuest, setSelectedQuestId, setSelectedSideQuest]);
 
     const handleSelectSideQuest = useCallback((questId, sideQuestId) => {
         if (
@@ -62,13 +90,11 @@ export const useQuestSelection = ({
         setSelectedQuestId(questId);
         setSelectedSideQuest({ questId, sideQuestId });
         ensureQuestExpanded(questId);
-    }, [ensureQuestExpanded]);
+    }, [ensureQuestExpanded, setSelectedQuestId, setSelectedSideQuest]);
 
     const clearSelection = useCallback(() => {
-        setSelectedQuestId(null);
-        setSelectedSideQuest(null);
-        setEditingSideQuest(null);
-    }, []);
+        resetSelection();
+    }, [resetSelection]);
 
     const findQuestById = useCallback((questId) => {
         if (questId === undefined || questId === null) return null;
@@ -125,18 +151,18 @@ export const useQuestSelection = ({
                 }
             }
         }, 0);
-    }, []);
+    }, [setEditingSideQuest]);
 
     const handleSideQuestEditChange = useCallback((input) => {
         const nextValue = typeof input === 'string'
             ? input
             : (input && input.target ? input.target.value : '');
         setEditingSideQuest((prev) => (prev ? { ...prev, description: nextValue } : prev));
-    }, []);
+    }, [setEditingSideQuest]);
 
     const cancelSideQuestEdit = useCallback(() => {
         setEditingSideQuest(null);
-    }, []);
+    }, [setEditingSideQuest]);
 
     const handleEditChange = useCallback((event) => {
         const { name, value } = event.target;
@@ -150,7 +176,7 @@ export const useQuestSelection = ({
             }
             return { ...prevQuest, [name]: nextValue };
         });
-    }, []);
+    }, [setEditingQuest]);
 
     useEffect(() => {
         if (selectedQuestId !== null) {
@@ -160,7 +186,7 @@ export const useQuestSelection = ({
                 setSelectedSideQuest(null);
             }
         }
-    }, [quests, selectedQuestId]);
+    }, [quests, selectedQuestId, setSelectedQuestId, setSelectedSideQuest]);
 
     useEffect(() => {
         const handleClick = (event) => {
@@ -171,7 +197,7 @@ export const useQuestSelection = ({
         };
         document.addEventListener('click', handleClick);
         return () => document.removeEventListener('click', handleClick);
-    }, [editingQuest]);
+    }, [editingQuest, setEditingQuest]);
 
     useEffect(() => {
         if (!editingQuestInputRef.current) return;

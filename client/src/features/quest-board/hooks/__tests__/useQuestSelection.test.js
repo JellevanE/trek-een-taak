@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useQuestSelection } from '../useQuestSelection.js';
+import { resetQuestBoardStore } from '../../../../store/questBoardStore.js';
 
 const createQuest = (id) => ({
     id,
@@ -9,6 +10,10 @@ const createQuest = (id) => ({
 });
 
 describe('useQuestSelection', () => {
+    beforeEach(async () => {
+        await resetQuestBoardStore({ clearPersisted: true });
+    });
+
     it('clears quest and side-quest selection when the quest disappears', async () => {
         const { result, rerender } = renderHook(
             (props) => useQuestSelection(props),

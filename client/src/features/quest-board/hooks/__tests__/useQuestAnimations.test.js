@@ -1,8 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { useQuestAnimations } from '../useQuestAnimations.js';
+import { resetQuestBoardStore } from '../../../../store/questBoardStore.js';
 
 describe('useQuestAnimations', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+        await resetQuestBoardStore({ clearPersisted: true });
         jest.useFakeTimers();
     });
 

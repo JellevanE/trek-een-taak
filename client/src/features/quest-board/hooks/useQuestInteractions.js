@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import {
     getNextLevel,
     getNextPriority,
@@ -8,6 +9,7 @@ import {
     isInteractiveTarget
 } from '../../../hooks/questHelpers.js';
 import { SOUND_EVENT_KEYS } from '../../../theme';
+import { useQuestBoardStore } from '../../../store/questBoardStore.js';
 
 /**
  * Packages higher-level quest interactions: keyboard shortcuts, undo queue,
@@ -62,7 +64,10 @@ export const useQuestInteractions = ({
     } = animations;
 
     const undoTimersRef = useRef({});
-    const [undoQueue, setUndoQueue] = useState([]);
+    const { undoQueue, setUndoQueue } = useQuestBoardStore(useShallow((state) => ({
+        undoQueue: state.undoQueue,
+        setUndoQueue: state.setUndoQueue
+    })));
     const layoutRefreshRaf = useRef(null);
 
     const scheduleLayoutRefresh = useCallback(() => {
@@ -144,7 +149,7 @@ export const useQuestInteractions = ({
         if (!undoTimersRef.current) undoTimersRef.current = {};
         undoTimersRef.current[entryId] = timer;
         setUndoQueue((prev) => [...prev, { id: entryId, quest: snapshot }]);
-    }, [createQuestSnapshot]);
+    }, [createQuestSnapshot, setUndoQueue]);
 
     const dismissUndoEntry = useCallback((entryId) => {
         if (undoTimersRef.current && undoTimersRef.current[entryId]) {
@@ -152,7 +157,7 @@ export const useQuestInteractions = ({
             delete undoTimersRef.current[entryId];
         }
         setUndoQueue((prev) => prev.filter((entry) => entry.id !== entryId));
-    }, []);
+    }, [setUndoQueue]);
 
     const restoreQuestFromSnapshot = useCallback((snapshot) => {
         if (!snapshot) return;

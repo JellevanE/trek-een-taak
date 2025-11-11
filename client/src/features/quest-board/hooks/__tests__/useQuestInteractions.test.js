@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { useQuestInteractions } from '../useQuestInteractions.js';
+import { resetQuestBoardStore } from '../../../../store/questBoardStore.js';
 
 const createSelectionStub = () => ({
     selectedQuestId: null,
@@ -51,7 +52,8 @@ describe('useQuestInteractions', () => {
         setTaskLevel: jest.fn()
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        await resetQuestBoardStore({ clearPersisted: true });
         jest.useFakeTimers();
         jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
             cb();

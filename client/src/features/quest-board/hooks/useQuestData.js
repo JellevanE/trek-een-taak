@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { apiFetch } from '../../../utils/api.js';
 import {
     normalizeQuest,
     normalizeQuestList,
     cloneQuestSnapshot
 } from '../../../hooks/questHelpers.js';
+import { useQuestBoardStore } from '../../../store/questBoardStore.js';
 
 /**
  * useQuestData
@@ -31,12 +33,33 @@ export const useQuestData = ({
     } = campaignApi;
     const { setPlayerStats, handleXpPayload } = playerStatsApi;
 
-    const [quests, setQuests] = useState([]);
-    const [description, setDescription] = useState('');
-    const [priority, setPriority] = useState('medium');
-    const [taskLevel, setTaskLevel] = useState(1);
-    const [debugBusy, setDebugBusy] = useState(false);
-    const [showDebugTools, setShowDebugTools] = useState(false);
+    const {
+        quests,
+        setQuests,
+        description,
+        setDescription,
+        priority,
+        setPriority,
+        taskLevel,
+        setTaskLevel,
+        debugBusy,
+        setDebugBusy,
+        showDebugTools,
+        setShowDebugTools
+    } = useQuestBoardStore(useShallow((state) => ({
+        quests: state.quests,
+        setQuests: state.setQuests,
+        description: state.description,
+        setDescription: state.setDescription,
+        priority: state.priority,
+        setPriority: state.setPriority,
+        taskLevel: state.taskLevel,
+        setTaskLevel: state.setTaskLevel,
+        debugBusy: state.debugBusy,
+        setDebugBusy: state.setDebugBusy,
+        showDebugTools: state.showDebugTools,
+        setShowDebugTools: state.setShowDebugTools
+    })));
 
     const reloadTasks = useCallback(async (filterOverride = activeCampaignFilter) => {
         if (!token) return;
@@ -59,7 +82,7 @@ export const useQuestData = ({
             pushToast('Failed to refresh quests', 'error');
             setQuests([]);
         }
-    }, [activeCampaignFilter, getTasksEndpoint, onUnauthorized, pushToast, refreshCampaigns, token]);
+    }, [activeCampaignFilter, getTasksEndpoint, onUnauthorized, pushToast, refreshCampaigns, setQuests, token]);
 
     reloadTasksRef.current = reloadTasks;
 
@@ -91,7 +114,7 @@ export const useQuestData = ({
         };
 
         fetchQuests();
-    }, [getTasksEndpoint, onUnauthorized, setPlayerStats, skipInitialFetch, token]);
+    }, [getTasksEndpoint, onUnauthorized, setPlayerStats, setQuests, skipInitialFetch, token]);
 
     const addTask = useCallback(async () => {
         if (!description || description.trim() === '') return null;
@@ -139,8 +162,12 @@ export const useQuestData = ({
         priority,
         refreshCampaigns,
         reloadTasks,
+        setDescription,
+        setPriority,
+        setQuests,
         taskCampaignSelection,
-        taskLevel
+        taskLevel,
+        setTaskLevel
     ]);
 
     const patchQuest = useCallback(async (questId, updates) => {
@@ -164,7 +191,7 @@ export const useQuestData = ({
             console.error('Error updating quest:', error);
         }
         return null;
-    }, [getAuthHeaders, onUnauthorized, refreshCampaigns]);
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, setQuests]);
 
     const deleteQuest = useCallback(async (questId) => {
         try {
@@ -183,7 +210,7 @@ export const useQuestData = ({
             console.error('Error deleting quest:', error);
             return false;
         }
-    }, [getAuthHeaders, onUnauthorized, refreshCampaigns]);
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, setQuests]);
 
     const addSideQuest = useCallback(async (questId, descriptionText) => {
         if (!descriptionText || descriptionText.trim() === '') return null;
@@ -207,7 +234,7 @@ export const useQuestData = ({
             console.error('Error adding side-quest:', error);
         }
         return null;
-    }, [getAuthHeaders, onUnauthorized, refreshCampaigns]);
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, setQuests]);
 
     const setTaskStatus = useCallback(async (questId, status, note) => {
         try {
@@ -231,7 +258,7 @@ export const useQuestData = ({
             console.error('Error updating quest status:', error);
         }
         return null;
-    }, [getAuthHeaders, handleXpPayload, onUnauthorized, refreshCampaigns]);
+    }, [getAuthHeaders, handleXpPayload, onUnauthorized, refreshCampaigns, setQuests]);
     const updateQuest = patchQuest;
 
     const setSideQuestStatus = useCallback(async (questId, sideQuestId, status, note) => {
@@ -255,7 +282,7 @@ export const useQuestData = ({
             console.error('Error updating side quest status:', error);
         }
         return null;
-    }, [getAuthHeaders, onUnauthorized, refreshCampaigns]);
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, setQuests]);
 
     const updateSideQuest = useCallback(async (questId, sideQuestId, payload) => {
         try {
@@ -278,7 +305,7 @@ export const useQuestData = ({
             console.error('Error updating side quest:', error);
         }
         return null;
-    }, [getAuthHeaders, onUnauthorized, refreshCampaigns]);
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, setQuests]);
 
     const deleteSideQuest = useCallback(async (questId, sideQuestId) => {
         try {
@@ -300,7 +327,7 @@ export const useQuestData = ({
             console.error('Error deleting side quest:', error);
         }
         return null;
-    }, [getAuthHeaders, onUnauthorized, refreshCampaigns]);
+    }, [getAuthHeaders, onUnauthorized, refreshCampaigns, setQuests]);
 
     const clearAllQuests = useCallback(async () => {
         if (debugBusy) return;
@@ -323,7 +350,7 @@ export const useQuestData = ({
         } finally {
             setDebugBusy(false);
         }
-    }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast, refreshCampaigns]);
+    }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast, refreshCampaigns, setDebugBusy, setQuests]);
 
     const seedDemoQuests = useCallback(async (count) => {
         if (debugBusy) return;
@@ -349,7 +376,7 @@ export const useQuestData = ({
         } finally {
             setDebugBusy(false);
         }
-    }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast]);
+    }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast, setDebugBusy, setQuests]);
 
     const grantXp = useCallback(async (amount) => {
         if (debugBusy) return;
@@ -377,7 +404,7 @@ export const useQuestData = ({
         } finally {
             setDebugBusy(false);
         }
-    }, [debugBusy, getAuthHeaders, handleXpPayload, onUnauthorized, pushToast]);
+    }, [debugBusy, getAuthHeaders, handleXpPayload, onUnauthorized, pushToast, setDebugBusy]);
 
     const resetRpgStats = useCallback(async () => {
         if (debugBusy) return;
@@ -401,7 +428,7 @@ export const useQuestData = ({
         } finally {
             setDebugBusy(false);
         }
-    }, [debugBusy, getAuthHeaders, handleXpPayload, onUnauthorized, pushToast]);
+    }, [debugBusy, getAuthHeaders, handleXpPayload, onUnauthorized, pushToast, setDebugBusy]);
 
     const createQuestSnapshot = useCallback((questId) => {
         const quest = quests.find((q) => q.id === questId);

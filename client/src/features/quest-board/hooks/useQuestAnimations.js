@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useRef, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import {
     findSideQuestById,
     getQuestStatus,
@@ -6,6 +7,7 @@ import {
     idsMatch
 } from '../../../hooks/questHelpers.js';
 import { SOUND_EVENT_KEYS } from '../../../theme';
+import { useQuestBoardStore } from '../../../store/questBoardStore.js';
 
 /**
  * Handles quest/side quest animation flags (pulse, glow, spawn) plus collapse timers.
@@ -21,11 +23,29 @@ export const useQuestAnimations = ({
     mutateSideQuestStatus,
     playSound
 }) => {
-    const [pulsingQuests, setPulsingQuests] = useState({});
-    const [pulsingSideQuests, setPulsingSideQuests] = useState({});
-    const [glowQuests, setGlowQuests] = useState({});
-    const [celebratingQuests, setCelebratingQuests] = useState({});
-    const [spawnQuests, setSpawnQuests] = useState({});
+    const {
+        pulsingQuests,
+        setPulsingQuests,
+        pulsingSideQuests,
+        setPulsingSideQuests,
+        glowQuests,
+        setGlowQuests,
+        celebratingQuests,
+        setCelebratingQuests,
+        spawnQuests,
+        setSpawnQuests
+    } = useQuestBoardStore(useShallow((state) => ({
+        pulsingQuests: state.pulsingQuests,
+        setPulsingQuests: state.setPulsingQuests,
+        pulsingSideQuests: state.pulsingSideQuests,
+        setPulsingSideQuests: state.setPulsingSideQuests,
+        glowQuests: state.glowQuests,
+        setGlowQuests: state.setGlowQuests,
+        celebratingQuests: state.celebratingQuests,
+        setCelebratingQuests: state.setCelebratingQuests,
+        spawnQuests: state.spawnQuests,
+        setSpawnQuests: state.setSpawnQuests
+    })));
     const completedCollapseTimersRef = useRef({});
 
     const triggerQuestSpawn = useCallback((questId) => {
@@ -44,7 +64,7 @@ export const useQuestAnimations = ({
                 return copy;
             });
         }, 650);
-    }, []);
+    }, [setPulsingQuests, setSpawnQuests]);
 
     const scheduleCollapseAndMove = useCallback((questId, delay = 600) => {
         const ensureAtBottomCollapsed = () => {
@@ -106,7 +126,7 @@ export const useQuestAnimations = ({
             }), 1400);
             scheduleCollapseAndMove(id);
         }
-    }, [mutateTaskStatus, playSound, scheduleCollapseAndMove]);
+    }, [mutateTaskStatus, playSound, scheduleCollapseAndMove, setCelebratingQuests, setGlowQuests, setPulsingQuests]);
 
     const setSideQuestStatusWithFx = useCallback(async (taskId, subTaskId, status, note) => {
         const normalized = await mutateSideQuestStatus(taskId, subTaskId, status, note);
@@ -127,7 +147,7 @@ export const useQuestAnimations = ({
         if (refreshLayout) {
             setTimeout(() => refreshLayout(), 50);
         }
-    }, [ensureQuestExpanded, mutateSideQuestStatus, refreshLayout]);
+    }, [ensureQuestExpanded, mutateSideQuestStatus, refreshLayout, setPulsingSideQuests]);
 
     return {
         pulsingQuests,
