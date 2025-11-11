@@ -9,7 +9,9 @@ describe('useQuestAnimations', () => {
     });
 
     afterEach(() => {
-        jest.runOnlyPendingTimers();
+        act(() => {
+            jest.runOnlyPendingTimers();
+        });
         jest.useRealTimers();
     });
 
@@ -49,5 +51,40 @@ describe('useQuestAnimations', () => {
 
         expect(latestQuests[latestQuests.length - 1].id).toBe(1);
         expect(collapsedState[1]).toBe(true);
+    });
+
+    it('syncs quest state after a side quest status update', async () => {
+        let latestQuests = [{
+            id: 1,
+            description: 'Quest',
+            side_quests: [{ id: 11, description: 'Collect runes', status: 'todo' }]
+        }];
+        const setQuests = jest.fn((updater) => {
+            latestQuests = typeof updater === 'function' ? updater(latestQuests) : updater;
+            return latestQuests;
+        });
+        const mutateSideQuestStatus = jest.fn().mockResolvedValue({
+            id: 1,
+            description: 'Quest',
+            side_quests: [{ id: 11, description: 'Collect runes', status: 'done' }]
+        });
+
+        const { result } = renderHook(() => useQuestAnimations({
+            quests: latestQuests,
+            setQuests,
+            setCollapsedMap: jest.fn(),
+            refreshLayout: null,
+            ensureQuestExpanded: jest.fn(),
+            mutateTaskStatus: jest.fn(),
+            mutateSideQuestStatus,
+            playSound: jest.fn()
+        }));
+
+        await act(async () => {
+            await result.current.setSideQuestStatus(1, 11, 'done');
+        });
+
+        expect(mutateSideQuestStatus).toHaveBeenCalledWith(1, 11, 'done', undefined);
+        expect(latestQuests[0].side_quests[0].status).toBe('done');
     });
 });
