@@ -7,6 +7,7 @@ import {
     type ZodNullable,
     type ZodObject,
     type ZodOptional,
+    type ZodRawShape,
     type ZodRecord,
     type ZodTypeAny
 } from 'zod';
@@ -148,17 +149,21 @@ function mergeNullable(target: JsonSchema, nullable: boolean): JsonSchema {
     return target;
 }
 
+type BaseZodSchema = ZodTypeAny & {
+    _def: Record<string, unknown> & { typeName: ZodFirstPartyTypeKind };
+};
+
 function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchemaResult {
-    const baseSchema = schema as unknown as { _def: any };
+    const baseSchema = schema as BaseZodSchema;
     const typeName = baseSchema._def.typeName as ZodFirstPartyTypeKind;
 
     if (seen.has(schema)) {
         return { schema: {}, nullable: false };
     }
 
-    if (isZodType<ZodObject<any>>(schema, ZodFirstPartyTypeKind.ZodObject)) {
+    if (isZodType<ZodObject<ZodRawShape>>(schema, ZodFirstPartyTypeKind.ZodObject)) {
         seen.add(schema);
-        const def = baseSchema._def as ZodObject<any>['_def'];
+        const def = baseSchema._def as ZodObject<ZodRawShape>['_def'];
         const shape = def.shape();
         const properties: Record<string, JsonSchema> = {};
         const required: string[] = [];
@@ -195,14 +200,14 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodString)) {
         const jsonSchema: JsonSchema = { type: 'string' };
-        const checks = (baseSchema._def as any).checks as Array<Record<string, unknown>> | undefined;
+        const { checks } = baseSchema._def as { checks?: Array<Record<string, unknown>> };
         convertStringChecks(jsonSchema, checks ?? []);
         return { schema: jsonSchema, nullable: false };
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodNumber)) {
         const jsonSchema: JsonSchema = { type: 'number' };
-        const checks = (baseSchema._def as any).checks as Array<Record<string, unknown>> | undefined;
+        const { checks } = baseSchema._def as { checks?: Array<Record<string, unknown>> };
         convertNumberChecks(jsonSchema, checks ?? []);
         return { schema: jsonSchema, nullable: false };
     }
@@ -220,17 +225,18 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodEnum)) {
-        const values = (baseSchema._def as any).values as string[];
+        const { values } = baseSchema._def as { values: string[] };
         return { schema: { type: 'string', enum: [...values] }, nullable: false };
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodNativeEnum)) {
-        const enumValues = Object.values((baseSchema._def as any).values).filter((value) => typeof value === 'string');
+        const { values } = baseSchema._def as { values: Record<string, string | number> };
+        const enumValues = Object.values(values).filter((value) => typeof value === 'string');
         return { schema: { type: 'string', enum: enumValues }, nullable: false };
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodLiteral)) {
-        const value = (baseSchema._def as any).value;
+        const { value } = baseSchema._def as { value: unknown };
         const literalSchema: JsonSchema = { enum: [value] };
         if (value === null) {
             return { schema: literalSchema, nullable: true };
@@ -256,7 +262,7 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
         mergeNullable(itemsSchema, itemsConverted.nullable);
 
         const arraySchema: JsonSchema = { type: 'array', items: itemsSchema };
-        const checks = (def as any).checks as Array<Record<string, unknown>> | undefined;
+        const { checks } = def as ZodArray<ZodTypeAny>['_def'] & { checks?: Array<Record<string, unknown>> };
         if (Array.isArray(checks)) {
             checks.forEach((check) => {
                 if (check.kind === 'min' && typeof check.value === 'number') {
@@ -270,8 +276,8 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodTuple)) {
-        const tupleDef = baseSchema._def as any;
-        const items = (tupleDef.items as ZodTypeAny[]).map((item) => {
+        const tupleDef = baseSchema._def as { items: ZodTypeAny[] };
+        const items = tupleDef.items.map((item) => {
             const converted = convert(item, seen);
             const json = cloneSchema(converted.schema);
             mergeNullable(json, converted.nullable);
@@ -282,7 +288,8 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodUnion)) {
-        const optionResults = (baseSchema._def as any).options.map((option: ZodTypeAny) => convert(option, seen));
+        const unionDef = baseSchema._def as { options: ZodTypeAny[] };
+        const optionResults = unionDef.options.map((option) => convert(option, seen));
         const optionSchemas: JsonSchema[] = [];
         let unionNullable = false;
 
@@ -316,7 +323,8 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodDiscriminatedUnion)) {
-        const optionResults = (baseSchema._def as any).options.map((option: ZodTypeAny) => convert(option, seen));
+        const unionDef = baseSchema._def as { options: ZodTypeAny[] };
+        const optionResults = unionDef.options.map((option) => convert(option, seen));
         const optionSchemas = optionResults.map((result: ConvertedSchema) => {
             const schemaClone = cloneSchema(result.schema);
             mergeNullable(schemaClone, result.nullable);
@@ -344,14 +352,15 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodPromise)) {
-        const result = convert((baseSchema._def as any).type as ZodTypeAny, seen);
+        const { type } = baseSchema._def as { type: ZodTypeAny };
+        const result = convert(type, seen);
         return { schema: cloneSchema(result.schema), nullable: result.nullable };
     }
 
     if (isZodType(schema, ZodFirstPartyTypeKind.ZodMap)) {
-        const mapDef = baseSchema._def as any;
-        const key = convert(mapDef.keyType as ZodTypeAny, seen);
-        const value = convert(mapDef.valueType as ZodTypeAny, seen);
+        const mapDef = baseSchema._def as { keyType: ZodTypeAny; valueType: ZodTypeAny };
+        const key = convert(mapDef.keyType, seen);
+        const value = convert(mapDef.valueType, seen);
         const mapSchema: JsonSchema = {
             type: 'array',
             items: {

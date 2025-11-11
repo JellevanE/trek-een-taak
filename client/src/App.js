@@ -128,19 +128,6 @@ function App() {
             />
         </label>
     ), [soundSliderId, soundVolume, setSoundVolume]);
-    const isThemePreviewRoute = typeof window !== 'undefined' && window.location.pathname === '/themes';
-    if (isThemePreviewRoute) {
-        return (
-            <ThemePreviewPage
-                currentThemeId={theme}
-                themeLabel={themeLabel}
-                toggleTheme={toggleTheme}
-                soundVolume={soundVolume}
-                setSoundVolume={setSoundVolume}
-                soundFxMeta={soundFxController.requirements}
-            />
-        );
-    }
     const [showShortcuts, setShowShortcuts] = React.useState(false);
     // TEMPORARY: Showcase state (remove when done exploring)
     const [showShowcase, setShowShowcase] = React.useState(false);
@@ -423,6 +410,19 @@ function App() {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [showShortcuts]);
+    const isThemePreviewRoute = typeof window !== 'undefined' && window.location.pathname === '/themes';
+    if (isThemePreviewRoute) {
+        return (
+            <ThemePreviewPage
+                currentThemeId={theme}
+                themeLabel={themeLabel}
+                toggleTheme={toggleTheme}
+                soundVolume={soundVolume}
+                setSoundVolume={setSoundVolume}
+                soundFxMeta={soundFxController.requirements}
+            />
+        );
+    }
 
     if (!token) {
         return (
