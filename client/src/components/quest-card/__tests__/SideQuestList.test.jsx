@@ -97,4 +97,22 @@ describe('SideQuestList', () => {
 
         expect(screen.getByText('Untitled side quest')).toBeInTheDocument();
     });
+
+    it('marks completed side quests with the completed class', () => {
+        render(
+            <SideQuestList
+                {...requiredProps}
+                getSideQuestStatus={() => 'done'}
+                getSideQuestStatusLabel={() => 'Done'}
+                sideQuests={[
+                    createSideQuestFixture({ id: 51, description: 'Victory lap' })
+                ]}
+            />
+        );
+
+        const description = screen.getByText('Victory lap');
+        expect(description).toHaveClass('completed');
+        const listItem = description.closest('[role="listitem"]');
+        expect(listItem).toHaveAttribute('data-status', 'done');
+    });
 });

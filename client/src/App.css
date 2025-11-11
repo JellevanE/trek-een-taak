@@ -900,6 +900,24 @@
 }
 .quest li.selected .side-quest-desc{ color:#fff; }
 .quest li.selected .task-row{ background: rgba(0,0,0,0.25); border-radius:6px; }
+.side-quest-scroll .completed .task-row{
+    background: var(--side-quest-completed-bg);
+    border-radius: var(--arcade-space-xs);
+    border: 1px solid var(--side-quest-completed-border);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.1);
+}
+.side-quest-scroll .completed .drag-handle{
+    color: var(--side-quest-completed-handle);
+}
+.side-quest-scroll .completed .task-row-actions button{
+    opacity: 0.95;
+}
+.side-quest-desc.completed{
+    color: var(--side-quest-completed-text);
+}
+.side-quest-desc.completed .small{
+    color: var(--side-quest-completed-subtle);
+}
 
 .task-row.editing{
     background: rgba(0,0,0,0.35);
