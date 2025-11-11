@@ -11,14 +11,18 @@ export const normalizeSideQuest = (raw) => {
 
 export const normalizeQuest = (task) => {
     if (!task || typeof task !== 'object') return task;
-    const rawSubs = Array.isArray(task.side_quests)
-        ? task.side_quests
-        : Array.isArray(task.sub_tasks)
-            ? task.sub_tasks
+    const canonicalSubs = Array.isArray(task.sub_tasks) && task.sub_tasks.length > 0
+        ? task.sub_tasks
+        : Array.isArray(task.side_quests)
+            ? task.side_quests
             : [];
-    const sideQuests = rawSubs.map(normalizeSideQuest);
+    const sideQuests = canonicalSubs.map(normalizeSideQuest);
     const taskLevel = typeof task.task_level === 'number' ? task.task_level : 1;
-    return { ...task, side_quests: sideQuests, task_level: taskLevel };
+    return {
+        ...task,
+        side_quests: sideQuests,
+        task_level: taskLevel
+    };
 };
 
 export const normalizeQuestList = (list) => (Array.isArray(list) ? list.map(normalizeQuest) : []);

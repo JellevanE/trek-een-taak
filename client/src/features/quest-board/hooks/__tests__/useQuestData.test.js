@@ -93,3 +93,64 @@ test('addSideQuest updates quest list when API succeeds', async () => {
     expect(hook.result.current.quests[0].side_quests).toHaveLength(1);
     expect(hook.result.current.quests[0].side_quests[0].description).toBe('Nested task');
 });
+
+test('addSideQuest falls back to sub_tasks when side_quests is stale', async () => {
+    apiFetch.mockImplementation((url, options = {}) => {
+        if (url === '/api/tasks/7/subtasks' && options.method === 'POST') {
+            return Promise.resolve({
+                id: 7,
+                description: 'Parent quest',
+                status: 'todo',
+                side_quests: [{ id: 1, description: 'Only original', status: 'todo' }],
+                sub_tasks: [
+                    { id: 1, description: 'Only original', status: 'todo' },
+                    { id: 2, description: 'Fresh task', status: 'todo' }
+                ]
+            });
+        }
+        throw new Error(`Unhandled request: ${url}`);
+    });
+
+    const { hook } = setupHook();
+    act(() => {
+        hook.result.current.setQuests([{ id: 7, description: 'Parent quest', status: 'todo', side_quests: [] }]);
+    });
+
+    await act(async () => {
+        await hook.result.current.addSideQuest(7, 'Fresh task');
+    });
+
+    expect(hook.result.current.quests[0].side_quests).toHaveLength(2);
+    expect(hook.result.current.quests[0].side_quests[1]).toMatchObject({ id: 2, description: 'Fresh task' });
+});
+
+test('setSideQuestStatus mirrors updated sub_tasks payload', async () => {
+    apiFetch.mockImplementation((url, options = {}) => {
+        if (url === '/api/tasks/7/subtasks/1/status' && options.method === 'PATCH') {
+            return Promise.resolve({
+                id: 7,
+                description: 'Parent quest',
+                status: 'todo',
+                side_quests: [{ id: 1, description: 'Only original', status: 'todo' }],
+                sub_tasks: [{ id: 1, description: 'Only original', status: 'done' }]
+            });
+        }
+        throw new Error(`Unhandled request: ${url}`);
+    });
+
+    const { hook } = setupHook();
+    act(() => {
+        hook.result.current.setQuests([{
+            id: 7,
+            description: 'Parent quest',
+            status: 'todo',
+            side_quests: [{ id: 1, description: 'Only original', status: 'todo' }]
+        }]);
+    });
+
+    await act(async () => {
+        await hook.result.current.setSideQuestStatus(7, 1, 'done');
+    });
+
+    expect(hook.result.current.quests[0].side_quests[0].status).toBe('done');
+});
