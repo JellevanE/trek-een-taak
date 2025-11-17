@@ -1078,6 +1078,72 @@ button{
 .btn-start{ background: linear-gradient(90deg,#3b82f6,#60a5fa); color:#001018; }
 .btn-complete{ background: linear-gradient(90deg,#22c55e,#16a34a); color:#001018; }
 
+/* Button loading states */
+button[data-loading] {
+    cursor: not-allowed;
+    opacity: 0.7;
+    position: relative;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Retro arcade-style spinner */
+.btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 0 6px 0 0;
+    position: relative;
+    vertical-align: middle;
+}
+
+.btn-spinner::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-right-color: currentColor;
+    border-radius: 50%;
+    animation: btn-spinner-rotate 0.6s linear infinite;
+    box-sizing: border-box;
+}
+
+/* Spinner in primary/gradient buttons gets special glow */
+.btn-primary .btn-spinner::before,
+.btn-start .btn-spinner::before,
+.btn-complete .btn-spinner::before,
+.btn-danger .btn-spinner::before {
+    border-top-color: #001018;
+    border-right-color: #001018;
+    filter: drop-shadow(0 0 2px rgba(0, 240, 255, 0.4));
+}
+
+/* Ghost button spinner uses muted color */
+.btn-ghost .btn-spinner::before {
+    border-top-color: var(--muted);
+    border-right-color: var(--muted);
+}
+
+/* Right-aligned spinner */
+button[data-loading] .btn-spinner:last-child {
+    margin: 0 0 0 6px;
+}
+
+/* Loading text subtle fade */
+.btn-text-loading {
+    opacity: 0.85;
+}
+
+@keyframes btn-spinner-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Visual cue when a task or subtask is started */
 .task.started,
 .quest.started{ box-shadow: 0 10px 30px rgba(66,153,225,0.08), 0 0 24px rgba(99,102,241,0.04) inset; border-color: rgba(59,130,246,0.12); transform: translateY(-2px); transition: transform .18s ease, box-shadow .22s ease }

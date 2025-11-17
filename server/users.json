@@ -539,7 +539,43 @@
         "flags": {},
         "metrics": {}
       }
+    },
+    {
+      "id": 3,
+      "username": "Resilient_toad",
+      "password_hash": "$2a$10$MemBvv7st1B4c2W1qlxu7etbvsN/LF2byHQL/8JW7o7G6eT...R1G",
+      "email": null,
+      "created_at": "2025-11-17T16:47:43.907Z",
+      "updated_at": "2025-11-17T16:47:43.907Z",
+      "profile": {
+        "display_name": "Resilient_toad",
+        "avatar": null,
+        "class": "warrior",
+        "bio": "On the road again."
+      },
+      "rpg": {
+        "level": 1,
+        "xp": 0,
+        "hp": 20,
+        "mp": 5,
+        "coins": 0,
+        "streak": 0,
+        "achievements": [],
+        "inventory": {
+          "items": []
+        },
+        "xp_log": [],
+        "last_daily_reward_at": null,
+        "last_xp_award_at": null,
+        "counters": {
+          "tasks_completed": 0,
+          "subtasks_completed": 0,
+          "daily_rewards_claimed": 0
+        },
+        "flags": {},
+        "metrics": {}
+      }
     }
   ],
-  "nextId": 3
+  "nextId": 4
 }

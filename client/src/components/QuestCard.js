@@ -6,6 +6,7 @@ import { QuestHeader } from './quest-card/QuestHeader.jsx';
 import { QuestProgress } from './quest-card/QuestProgress.jsx';
 import { QuestActions } from './quest-card/QuestActions.jsx';
 import { SideQuestList } from './quest-card/SideQuestList.jsx';
+import { ActionButton } from './ActionButton.jsx';
 
 /**
  * QuestCard - Memoized quest card component to prevent unnecessary re-renders
@@ -25,6 +26,7 @@ const QuestCard = React.memo(({
         editingQuest,
         editingSideQuest,
         addingSideQuestTo,
+        loadingSideQuestAdds = new Set(),
         collapsedMap,
         pulsingQuests,
         pulsingSideQuests,
@@ -93,15 +95,18 @@ const QuestCard = React.memo(({
             {addingSideQuestTo === quest.id ? (
                 renderAddSideQuestForm(quest.id)
             ) : (
-                <button
-                    className="add-side-quest-button large"
+                <ActionButton
+                    variant="primary"
+                    size="large"
+                    className="add-side-quest-button"
+                    loading={loadingSideQuestAdds.has(quest.id)}
                     onClick={() => {
                         handleSelectQuest(quest.id);
                         setAddingSideQuestTo(quest.id);
                     }}
                 >
                     + Add Side Quest
-                </button>
+                </ActionButton>
             )}
         </div>
     );

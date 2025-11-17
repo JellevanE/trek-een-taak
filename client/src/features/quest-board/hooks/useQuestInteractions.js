@@ -46,6 +46,8 @@ export const useQuestInteractions = ({
         setSideQuestDescriptionMap,
         addingSideQuestTo,
         setAddingSideQuestTo,
+        loadingSideQuestAdds,
+        setLoadingSideQuestAdds,
         collapsedMap,
         addInputRefs,
         ensureQuestExpanded,
@@ -117,6 +119,13 @@ export const useQuestInteractions = ({
         const value = rawValue.trim();
         if (!value) return;
 
+        // Mark this quest as loading
+        setLoadingSideQuestAdds((prev) => {
+            const next = new Set(prev);
+            next.add(questId);
+            return next;
+        });
+
         const optimisticId = `optimistic-${questId}-${Date.now()}`;
         const optimisticSideQuest = {
             id: optimisticId,
@@ -159,6 +168,13 @@ export const useQuestInteractions = ({
             clearOptimistic();
             pushToast('Failed to add side quest', 'error');
         } finally {
+            // Clear loading state
+            setLoadingSideQuestAdds((prev) => {
+                const next = new Set(prev);
+                next.delete(questId);
+                return next;
+            });
+
             setTimeout(() => {
                 if (addInputRefs.current && addInputRefs.current[questId]) {
                     try {
@@ -178,6 +194,7 @@ export const useQuestInteractions = ({
         playSound,
         pushToast,
         refreshLayout,
+        setLoadingSideQuestAdds,
         setQuests,
         setSideQuestDescriptionMap,
         sideQuestDescriptionMap

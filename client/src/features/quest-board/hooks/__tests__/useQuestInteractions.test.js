@@ -15,6 +15,8 @@ const createSelectionStub = () => ({
     setSideQuestDescriptionMap: jest.fn(),
     addingSideQuestTo: null,
     setAddingSideQuestTo: jest.fn(),
+    loadingSideQuestAdds: new Set(),
+    setLoadingSideQuestAdds: jest.fn(),
     collapsedMap: {},
     addInputRefs: { current: {} },
     ensureQuestExpanded: jest.fn(),
@@ -170,4 +172,56 @@ describe('useQuestInteractions', () => {
         expect(revertedState[0].side_quests).toHaveLength(0);
         expect(props.pushToast).toHaveBeenCalledWith('Failed to add side quest', 'error');
     });
+
+    it('tracks loading state while adding a side quest', async () => {
+        const props = baseProps();
+        props.quests = [{ id: 7, description: 'Quest', side_quests: [] }];
+        props.selection.sideQuestDescriptionMap = { 7: 'New side quest' };
+        props.selection.loadingSideQuestAdds = new Set();
+        
+        let resolveCreate;
+        const createPromise = new Promise((resolve) => {
+            resolveCreate = resolve;
+        });
+        props.createSideQuest.mockReturnValue(createPromise);
+
+        const { result } = renderHook(() => useQuestInteractions(props));
+
+        // Start adding side quest (don't await yet)
+        let addPromise;
+        act(() => {
+            addPromise = result.current.addSideQuest(7);
+        });
+
+        // Should have called setLoadingSideQuestAdds to add quest 7
+        expect(props.selection.setLoadingSideQuestAdds).toHaveBeenCalled();
+        const addCall = props.selection.setLoadingSideQuestAdds.mock.calls.find(call => {
+            const updater = call[0];
+            const testSet = new Set();
+            const result = updater(testSet);
+            return result.has(7);
+        });
+        expect(addCall).toBeTruthy();
+
+        // Resolve the API call
+        resolveCreate({
+            id: 7,
+            description: 'Quest',
+            side_quests: [{ id: 1, description: 'New side quest', status: 'todo' }]
+        });
+
+        await act(async () => {
+            await addPromise;
+        });
+
+        // Should have called setLoadingSideQuestAdds to remove quest 7
+        const removeCall = props.selection.setLoadingSideQuestAdds.mock.calls.find(call => {
+            const updater = call[0];
+            const testSet = new Set([7]);
+            const result = updater(testSet);
+            return !result.has(7);
+        });
+        expect(removeCall).toBeTruthy();
+    });
 });
+

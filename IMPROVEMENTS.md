@@ -50,10 +50,6 @@
 - ✅ RPG experience utilities reshaped into `experienceEngine`, `rewardTables`, and `eventHooks`; consider data-driven tuning or event analytics as follow-up.
 - ✅ Typed hygiene guard blocks new explicit `any` usage via `npm run lint` (see `scripts/check-no-explicit-any.js`).
 
-## Estimated Timeline
-- **Minimal viable migration**: 3-4 days of focused work
-- **Complete with tests and docs**: 5-7 days
-- **Per-file average**: 15-30 minutes including testing
 
 ## Success Metrics
 - ✅ Zero TypeScript compilation errors

@@ -47,6 +47,7 @@ const baseInitialState = () => ({
     editingSideQuest: null,
     sideQuestDescriptionMap: {},
     addingSideQuestTo: null,
+    loadingSideQuestAdds: new Set(),
     collapsedMap: {},
     pulsingQuests: {},
     pulsingSideQuests: {},
@@ -81,6 +82,7 @@ const createQuestBoardStore = (set, get) => {
     const setEditingSideQuest = createSetter(set, 'editingSideQuest', 'setEditingSideQuest');
     const setSideQuestDescriptionMap = createSetter(set, 'sideQuestDescriptionMap', 'setSideQuestDescriptionMap');
     const setAddingSideQuestTo = createSetter(set, 'addingSideQuestTo', 'setAddingSideQuestTo');
+    const setLoadingSideQuestAdds = createSetter(set, 'loadingSideQuestAdds', 'setLoadingSideQuestAdds');
     const setCollapsedMap = createSetter(set, 'collapsedMap', 'setCollapsedMap');
     const setPulsingQuests = createSetter(set, 'pulsingQuests', 'setPulsingQuests');
     const setPulsingSideQuests = createSetter(set, 'pulsingSideQuests', 'setPulsingSideQuests');
@@ -103,6 +105,7 @@ const createQuestBoardStore = (set, get) => {
         setEditingSideQuest,
         setSideQuestDescriptionMap,
         setAddingSideQuestTo,
+        setLoadingSideQuestAdds,
         setCollapsedMap,
         setPulsingQuests,
         setPulsingSideQuests,
