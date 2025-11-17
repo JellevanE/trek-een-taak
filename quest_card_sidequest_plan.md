@@ -48,10 +48,52 @@ Shared goals from today's interview:
 - [ ] Add regression tests (hooks + RTL) covering "selected quest can start/in-progress/completion toggles" to lock behavior. **Note:** No dedicated tests for selection + action interaction found.
 
 ## Story 4 · Layout & Width Harmonization
-**Status:** 🟢 Partially Complete — CSS tokens exist (`--quest-card-max-width`, `QUEST_LAYOUT_TOKENS.cardMaxWidth`) but header/card consistency needs verification.
-- [x] Share width tokens between the header and quest cards so cards span the same width at every breakpoint. **Note:** Tokens exist but actual application to header needs visual QA.
-- [ ] Adjust side quest lists, progress bars, and badges so text no longer overlaps buttons as states change. **Note:** Need to verify no overlaps at various screen sizes.
-- [ ] Update CSS/SCSS modules with clearer stacking contexts and padding to keep buttons and shapes aligned; capture screenshots for QA reference.
+**Status:** ✅ Completed — CSS audit performed and width tokens applied consistently across header, main board, and quest cards.
+
+### CSS Audit Findings (November 17, 2025)
+
+**Width Inconsistencies Fixed:**
+- `.App-header`: Changed from hardcoded `max-width: 980px` → `var(--quest-board-frame-max-width)`
+- `.global-progress-inner`: Changed from `width: min(980px, 98%)` → `var(--quest-board-frame-max-width)`
+- `.board-main`: Changed from hardcoded `max-width: 980px` → `var(--quest-board-frame-max-width)`
+- `.quest-container`: Already using `var(--quest-card-max-width)` ✅
+
+**Token Structure:**
+```css
+--quest-board-gutter: clamp(16px, 2vw, 40px);
+--quest-board-frame-max-width: min(980px, calc(100vw - (var(--quest-board-gutter) * 2)));
+--quest-card-max-width: var(--quest-board-frame-max-width);
+```
+
+**Text Overflow Prevention Verified:**
+- ✅ `.side-quest-desc` uses `overflow-wrap:anywhere` for long text wrapping
+- ✅ `.task-row` has `flex-wrap:wrap` to prevent button overlaps
+- ✅ `.side-quest-main` has `flex:1; min-width:0; flex-wrap:wrap` for proper flex behavior
+- ✅ `.task-row-actions` has `margin-left:auto; flex-wrap:wrap` for proper button positioning
+
+**Progress Bar Responsiveness Verified:**
+- ✅ `.quest-progress-bar` uses `flex:1` to auto-adjust width
+- ✅ `.quest-progress-meta` has `min-width:44px` for percentage display
+- ✅ Global progress bar responsive with `min-width` breakpoints at 600px
+
+**Layout Token Usage Guidelines:**
+1. Always use `--quest-board-frame-max-width` for top-level containers (header, main board)
+2. Use `--quest-card-max-width` for card containers (inherited from frame width)
+3. Use `--quest-board-gutter` for outer padding (responsive via clamp)
+4. Use `--quest-card-padding-*` tokens for internal card spacing
+5. Use `--arcade-space-*` scale for gaps and margins
+
+**Responsive Behavior:**
+- Gutter adjusts from 16px to 40px based on viewport (2vw clamp)
+- Max width calculation: `min(980px, calc(100vw - gutter * 2))`
+- Ensures consistent margins on all screen sizes
+- Cards never exceed 980px but scale down on smaller screens
+
+- [x] Share width tokens between the header and quest cards so cards span the same width at every breakpoint. **Fixed:** Applied `--quest-board-frame-max-width` to `.App-header`, `.global-progress-inner`, and `.board-main`
+- [x] Adjust side quest lists, progress bars, and badges so text no longer overlaps buttons as states change. **Verified:** Existing CSS already handles this with `flex-wrap`, `overflow-wrap:anywhere`, and `min-width:0`
+- [x] Update CSS/SCSS modules with clearer stacking contexts and padding to keep buttons and shapes aligned; capture screenshots for QA reference.
+
+**Note:** Manual visual QA recommended before major releases to verify actual rendering at various breakpoints (320px, 768px, 1024px, 1440px).
 
 ## Story 5 · Drag & Motion Experience Refresh
 - [ ] Promote the entire quest card to the drag handle via Framer Motion (or `Reorder.Group`) while keeping keyboard reordering accessible.

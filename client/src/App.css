@@ -12,7 +12,7 @@
 
 .App-header {
     width: 100%;
-    max-width: 980px;
+    max-width: var(--quest-board-frame-max-width);
     margin: 0 auto 18px;
     padding: 18px 20px;
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
@@ -41,7 +41,7 @@
 }
 .global-progress-inner{
     pointer-events: auto;
-    width: min(980px, 98%);
+    width: var(--quest-board-frame-max-width);
     display:flex;
     align-items:center;
     gap:12px;
@@ -408,7 +408,7 @@
     position:relative;
     z-index:1;
     width:100%;
-    max-width:980px;
+    max-width: var(--quest-board-frame-max-width);
     margin:0 auto;
     padding:0 12px;
     display:flex;
