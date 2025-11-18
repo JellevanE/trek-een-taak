@@ -1,0 +1,104 @@
+/* RESPONSIVE.CSS - Media queries and responsive adaptations */
+
+@media (max-width: 1024px){
+    .board-layout{
+        max-width:100%;
+        padding:0 16px;
+    }
+    .campaign-sidebar{
+        position:relative;
+        top:auto;
+        transform:none;
+        left:0;
+        max-width:100%;
+        width:100%;
+        box-shadow:0 12px 32px rgba(0,0,0,0.45);
+    }
+    .campaign-sidebar.collapsed{
+        width:100%;
+        align-items:flex-start;
+    }
+    .quest-card-shell{
+        gap:var(--arcade-space-sm);
+    }
+    .quest-actions{
+        width:100%;
+        justify-content:flex-start;
+    }
+}
+
+@media (max-width: 768px){
+    :root{
+        --quest-card-handle-size: 44px;
+        --quest-card-handle-font-size: 20px;
+        --side-quest-handle-size: 32px;
+        --side-quest-handle-font-size: 16px;
+    }
+    .quest-container{
+        padding: var(--arcade-space-xs);
+    }
+    .quest-card-shell{
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .quest > div > .drag-handle.top{
+        opacity:1;
+        width:44px;
+        height:44px;
+        font-size:20px;
+        margin-left:auto;
+        margin-bottom: var(--arcade-space-xs);
+    }
+    .side-quest-main{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--arcade-space-xs);
+    }
+    .task-row-actions{
+        width: 100%;
+        justify-content: flex-start;
+        gap: var(--arcade-space-xs);
+    }
+    .task-row-actions button,
+    .quest-actions .btn-small,
+    .side-quest-footer .add-side-quest-button{
+        min-height: 44px;
+    }
+    .quest-title-row{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .quest-meta-tags{
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .side-quest-panel{
+        gap: var(--arcade-space-xs);
+    }
+}
+
+@media (max-width: 600px){
+    .campaign-sidebar{
+        gap:10px;
+    }
+    .campaign-sidebar.collapsed{
+        flex-direction:row;
+        justify-content:flex-start;
+        overflow-x:auto;
+    }
+    .campaign-select,
+    .campaign-select select{
+        width:100%;
+    }
+    .campaign-select{
+        min-width:100%;
+    }
+    .quest-container{
+        overflow-x:auto;
+        padding-bottom: var(--arcade-space-sm);
+        scroll-snap-type:x proximity;
+    }
+    .quest{
+        scroll-snap-align:start;
+    }
+}

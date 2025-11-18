@@ -1,0 +1,177 @@
+/* LAYOUT.CSS - App layout, board structure, header, global progress bar */
+
+.App {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    /* leave room for the fixed global progress bar at the top */
+    padding: 60px 12px 48px;
+    box-sizing: border-box;
+}
+
+.App-header {
+    width: 100%;
+    max-width: var(--quest-board-frame-max-width);
+    margin: 0 auto 18px;
+    padding: 18px 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+    border: 1px solid rgba(255,255,255,0.03);
+    border-left: 3px solid var(--accent-pink);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 18px rgba(155,92,255,0.06) inset;
+    position: relative;
+}
+
+.App-header h1 {
+    margin: 0;
+    color: white;
+    letter-spacing: 1px;
+    font-size: 18px;
+    text-shadow: 0 0 8px rgba(0,240,255,0.24), 0 0 16px rgba(255,46,196,0.08);
+}
+
+.App-header .subtitle {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+/* Global sticky progress bar at the top of the app (always visible) */
+.global-progress-sticky{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    z-index: 1500;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events: none; /* allow clicks to pass through except on children */
+    background: linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.12));
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+.global-progress-inner{
+    pointer-events: auto;
+    width: var(--quest-board-frame-max-width);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap: wrap;
+}
+
+.global-progress-label{ font-size:12px; color:var(--muted); min-width:72px }
+
+/* the track is a clear full-width bar to indicate daily completion */
+.global-progress-track{ flex:1; height:10px; background: var(--progress-track, rgba(255,255,255,0.03)); border-radius: 999px; overflow:hidden; border: 1px solid var(--progress-track, rgba(255,255,255,0.03)) }
+
+.global-progress-fill{ height:100%; background: linear-gradient(90deg,var(--accent-cyan),var(--accent-purple)); transition: width .28s ease }
+
+.global-progress-mood{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); min-width:138px; text-transform:uppercase; letter-spacing:0.6px }
+
+.global-progress-mood .mood-emoji{ font-size:16px; opacity:0.9; filter: drop-shadow(0 0 6px rgba(0,0,0,0.4)); }
+
+.global-progress-mood .mood-label{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px }
+
+.global-progress-percent{ min-width:44px; text-align:right; font-weight:700; color:white }
+
+.global-progress-fill.progress-idle{ background-size:140% 100%; animation: progress-flow 12s linear infinite; opacity:0.9 }
+
+.global-progress-fill.progress-building{ background-size:160% 100%; animation: progress-flow 9s linear infinite; box-shadow: 0 0 18px rgba(0,0,0,0.2) inset; }
+
+.global-progress-fill.progress-ready{ background-size:190% 100%; animation: progress-flow 7s linear infinite; box-shadow: 0 0 14px rgba(255,255,255,0.12); }
+
+.global-progress-fill.progress-heroic{ background-size:220% 100%; animation: progress-flow 5s linear infinite; box-shadow: 0 0 18px rgba(0,240,255,0.28); }
+
+.global-progress-fill.progress-legend{ background-size:240% 100%; animation: progress-flow 4s linear infinite; box-shadow: 0 0 24px rgba(255,255,255,0.18), 0 0 30px rgba(0,240,255,0.35); }
+
+@keyframes progress-flow{
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* tooltips for progress bars */
+.global-progress-track, .task-progress-bar{ position:relative }
+
+.tooltip{ position:absolute; top:-36px; left:50%; transform:translateX(-50%) scale(.92); background: rgba(0,0,0,0.75); color:white; padding:6px 8px; border-radius:6px; font-size:12px; white-space:nowrap; opacity:0; pointer-events:none; transition: opacity .18s ease, transform .18s ease }
+
+.global-progress-track:hover .tooltip, .task-progress-bar:hover .tooltip{ opacity:1; transform:translateX(-50%) scale(1) }
+
+.theme-audio-control{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--muted);
+}
+
+.theme-audio-control input[type="range"]{
+    appearance:none;
+    width:120px;
+    height:4px;
+    background:rgba(255,255,255,0.18);
+    border-radius:999px;
+    outline:none;
+    cursor:pointer;
+}
+
+.theme-audio-control input[type="range"]::-webkit-slider-thumb{
+    appearance:none;
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:var(--accent-cyan);
+    box-shadow:0 0 8px rgba(0,240,255,0.45);
+}
+
+.theme-audio-control input[type="range"]::-moz-range-thumb{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    border:none;
+    background:var(--accent-cyan);
+    box-shadow:0 0 8px rgba(0,240,255,0.45);
+}
+
+/* animated fill easing and micro bounce */
+.task-progress-fill, .global-progress-fill{ transition: width .5s cubic-bezier(.2,.9,.2,1), background .25s ease }
+
+.task-progress-fill{ box-shadow: 0 6px 18px rgba(0,0,0,0.45) inset }
+
+/* small responsive tweaks */
+@media (max-width:600px){
+    .global-progress-percent{ display:none }
+    .global-progress-label{ min-width:50px }
+    .global-progress-mood{ min-width:auto; font-size:10px }
+    .global-progress-mood .mood-label{ display:none }
+    .global-progress-mood .mood-emoji{ font-size:14px }
+}
+
+.board-layout{
+    position:relative;
+    width:100%;
+    max-width:1280px;
+    margin:0 auto;
+    display:flex;
+    justify-content:center;
+    padding:0 var(--quest-board-gutter);
+    box-sizing:border-box;
+}
+
+.board-main{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width: var(--quest-board-frame-max-width);
+    margin:0 auto;
+    padding:0 12px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}

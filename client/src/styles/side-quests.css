@@ -1,0 +1,129 @@
+/* SIDE-QUESTS.CSS - Side quest (subtask) specific styles */
+
+.quest ul { padding-left: var(--side-quest-gap) }
+
+.quest li,
+.task li { margin:var(--side-quest-gap) 0; padding:var(--arcade-space-xs) var(--side-quest-gap); border-radius:6px; }
+
+.quest li.selected{
+    background: rgba(0,240,255,0.08);
+    box-shadow: 0 0 0 1px rgba(0,240,255,0.12);
+}
+
+.quest li.selected .side-quest-desc{ color:#fff; }
+
+.quest li.selected .task-row{ background: rgba(0,0,0,0.25); border-radius:6px; }
+
+.task-row {
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.side-quest-main{
+    display:flex;
+    align-items:center;
+    gap:var(--side-quest-gap);
+    flex:1;
+    min-width:0;
+    flex-wrap:wrap;
+}
+
+.task-row-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:var(--side-quest-gap);
+    flex-wrap:wrap;
+    margin-left:auto;
+}
+
+.task-row-actions > *{
+    flex:0 0 auto;
+    white-space:nowrap;
+}
+
+.subtask-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px }
+
+.subtask-desc.small{ font-size:12px }
+
+.side-quest-desc{ font-family: 'Courier New', monospace; color: #e6f7ff; font-size:14px; overflow-wrap:anywhere; }
+
+.side-quest-desc.small{ font-size:12px }
+
+.task .subtask-desc.started,
+.quest .side-quest-desc.started{ font-weight:700; color:#fff }
+
+.task .subtask-desc.in-progress,
+.quest .side-quest-desc.in-progress{ color: #bfe6ff }
+
+.side-quest-scroll .completed .task-row{
+    background: var(--side-quest-completed-bg);
+    border-radius: var(--arcade-space-xs);
+    border: 1px solid var(--side-quest-completed-border);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.side-quest-scroll .completed .drag-handle{
+    color: var(--side-quest-completed-handle);
+}
+
+.side-quest-scroll .completed .task-row-actions button{
+    opacity: 0.95;
+}
+
+.side-quest-desc.completed{
+    color: var(--side-quest-completed-text);
+}
+
+.side-quest-desc.completed .small{
+    color: var(--side-quest-completed-subtle);
+}
+
+.task-row.editing{
+    background: rgba(0,0,0,0.35);
+    border-radius:6px;
+    padding:6px;
+}
+
+.side-quest-panel{
+    display:flex;
+    flex-direction:column;
+    gap:var(--side-quest-gap);
+}
+
+.side-quest-scroll{
+    display:flex;
+    flex-direction:column;
+    gap:var(--side-quest-gap);
+    overflow:hidden;
+}
+
+.side-quest-scroll[data-scrollable="true"]{
+    overflow-y:auto;
+    padding-right:4px;
+}
+
+.side-quest-footer-wrapper{
+    margin-top:var(--side-quest-footer-margin);
+}
+
+.side-quest-empty{
+    margin-top:var(--side-quest-gap);
+}
+
+.side-quest-footer{
+    display:flex;
+    justify-content:flex-end;
+    align-items:stretch;
+    width:100%;
+}
+
+.side-quest-footer .add-side-quest{
+    width:100%;
+}
+
+.side-quest-footer .add-side-quest-button{
+    margin-left:auto;
+}

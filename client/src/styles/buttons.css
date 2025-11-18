@@ -1,0 +1,301 @@
+/* BUTTONS.CSS - All button styles and interactions */
+
+/* Base button styles to keep UI consistent */
+button{
+    font-family: inherit;
+    font-size: 13px;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--cta-transition, transform 0.18s ease, box-shadow 0.18s ease);
+}
+
+button:hover{
+    transform: translateY(var(--cta-hover-translate, -1px));
+    box-shadow: var(--cta-hover-shadow, none);
+}
+
+button:active{
+    transform: translateY(var(--cta-press-translate, 1px));
+    box-shadow: var(--cta-press-shadow, none);
+}
+
+button:focus{
+    outline: 2px solid var(--cta-focus-ring-color, rgba(155,92,255,0.12));
+    outline-offset: 2px;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* utility classes available: .btn-primary, .btn-ghost, .btn-danger, .btn-small */
+
+.btn-primary {
+    background: linear-gradient(90deg,var(--accent-cyan),var(--accent-pink));
+    color: #001018;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,240,255,0.08), 0 0 14px rgba(255,46,196,0.06);
+    font-weight: 700;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px dashed rgba(255,255,255,0.04);
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-secondary{
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color:#f2fbff;
+    padding: 8px 12px;
+    border-radius:8px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+}
+
+.btn-secondary:hover{
+    border-color: rgba(0,240,255,0.35);
+    color:#ffffff;
+}
+
+.btn-secondary:disabled{
+    opacity:0.55;
+    cursor:not-allowed;
+}
+
+.btn-link{
+    background:none;
+    border:0;
+    padding:0;
+    color: var(--accent-cyan);
+    font-weight:600;
+    letter-spacing:0.4px;
+}
+
+.btn-link:hover{
+    color:#ffffff;
+    text-decoration:underline;
+}
+
+.btn-danger, .danger{ 
+    background: linear-gradient(90deg,#ff6b88,#ff2ec4);
+    color: #001018;
+}
+
+/* start and complete buttons distinct colors */
+.btn-start{ background: linear-gradient(90deg,#3b82f6,#60a5fa); color:#001018; }
+.btn-complete{ background: linear-gradient(90deg,#22c55e,#16a34a); color:#001018; }
+
+.btn-small{ padding:6px 8px; font-size:12px; border-radius:6px }
+
+.btn-full-width {
+    width: 100%;
+}
+
+/* Button loading states */
+button[data-loading] {
+    cursor: not-allowed;
+    opacity: 0.7;
+    position: relative;
+}
+
+/* Retro arcade-style spinner */
+.btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 0 6px 0 0;
+    position: relative;
+    vertical-align: middle;
+}
+
+.btn-spinner::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-right-color: currentColor;
+    border-radius: 50%;
+    animation: btn-spinner-rotate 0.6s linear infinite;
+    box-sizing: border-box;
+}
+
+/* Spinner in primary/gradient buttons gets special glow */
+.btn-primary .btn-spinner::before,
+.btn-start .btn-spinner::before,
+.btn-complete .btn-spinner::before,
+.btn-danger .btn-spinner::before {
+    border-top-color: #001018;
+    border-right-color: #001018;
+    filter: drop-shadow(0 0 2px rgba(0, 240, 255, 0.4));
+}
+
+/* Ghost button spinner uses muted color */
+.btn-ghost .btn-spinner::before {
+    border-top-color: var(--muted);
+    border-right-color: var(--muted);
+}
+
+/* Right-aligned spinner */
+button[data-loading] .btn-spinner:last-child {
+    margin: 0 0 0 6px;
+}
+
+/* Loading text subtle fade */
+.btn-text-loading {
+    opacity: 0.85;
+}
+
+@keyframes btn-spinner-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.task-controls button,
+.quest-controls button {
+    margin-left: 0;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 0;
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.task-controls .danger,
+.quest-controls .danger {
+    color: #ff7ea6;
+}
+
+.quest-controls{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.collapse-toggle{
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.06);
+    color: var(--muted);
+    width:28px;
+    height:28px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:600;
+}
+
+.close-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-button:hover {
+    color: var(--text-primary);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: var(--text-primary);
+}
+
+.error-dismiss {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+    min-width: 20px;
+}
+
+.cycle-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text-primary);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .2s ease, transform .12s ease, border .2s ease;
+}
+
+.cycle-toggle:hover{
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.18);
+}
+
+.cycle-toggle:active{
+    transform: translateY(1px);
+}
+
+.cycle-toggle:focus{
+    outline: 2px solid rgba(91,134,229,0.4);
+    outline-offset: 2px;
+}
+
+.level-toggle{
+    min-width: 70px;
+    justify-content:center;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.add-subtask-button.large,
+.add-side-quest-button.large{
+    padding: 10px 14px;
+    font-size:14px;
+    border-radius:10px;
+}
+
+.add-subtask-button,
+.add-side-quest-button{
+    background: linear-gradient(90deg,var(--accent-purple),var(--accent-pink));
+    color: #001018;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+}
