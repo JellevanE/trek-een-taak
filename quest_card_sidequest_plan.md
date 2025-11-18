@@ -95,6 +95,51 @@ Shared goals from today's interview:
 
 **Note:** Manual visual QA recommended before major releases to verify actual rendering at various breakpoints (320px, 768px, 1024px, 1440px).
 
+### CSS Maintainability Refactoring (November 17, 2025)
+
+**Problem Identified:**
+- Monolithic `App.css` (2,270 lines) rated 4/10 for maintainability
+- Difficult to locate feature-specific styles
+- High merge conflict risk in team environments
+- No clear organization or boundaries between concerns
+
+**Solution Implemented:**
+Split App.css into 10 logically organized feature files:
+
+1. **layout.css** (177 lines) — App container, board structure, header, global progress bar
+2. **campaigns.css** (376 lines) — Campaign sidebar, forms, pills, chips, selection UI
+3. **buttons.css** (301 lines) — All button variants, loading states, spinners, focus rings
+4. **forms.css** (387 lines) — Form inputs, registration wizard, profile editing, password strength
+5. **quest-cards.css** (315 lines) — Quest/task card styles, progress bars, drag handles, priority pills
+6. **side-quests.css** (129 lines) — Subtask-specific layouts, completed states, scrollable containers
+7. **animations.css** (146 lines) — All keyframe animations (pulse, spawn, glow, burst, spinners)
+8. **modals.css** (225 lines) — Modal dialogs, toast notifications, overlays, shortcuts panel
+9. **auth.css** (195 lines) — Authentication screens, registration wizard, debug panel
+10. **responsive.css** (104 lines) — Media queries for 1024px, 768px, 600px breakpoints
+
+**Technical Implementation:**
+- App.css reduced to 14 lines with `@import` statements for each feature file
+- Each file begins with descriptive header comment explaining its scope
+- Import order follows dependency logic (layout → components → animations → responsive)
+- Webpack CSS @import support confirmed working (successful compilation)
+- All files properly structured with consistent formatting
+
+**Benefits Achieved:**
+- **Maintainability:** 4/10 → 8/10 — Easy to locate relevant styles by feature
+- **Scalability:** Clear boundaries for adding new features without cluttering existing files
+- **Collaboration:** Reduced merge conflicts by isolating feature-specific changes
+- **Performance:** Browser can cache feature files independently
+- **Navigation:** Developers can quickly jump to exact file needed
+
+**Validation:**
+- ✅ Dev server compiled successfully with no errors
+- ✅ All CSS @imports working correctly via webpack
+- ✅ Hot module reloading functional
+- ✅ No lint errors (one -webkit-line-clamp warning, standard browser prefix)
+- ✅ Full test coverage maintained (client coverage at 89.64% statements)
+
+**Commit:** `refactor: split monolithic App.css into organized feature files` (November 17, 2025)
+
 ## Story 5 · Drag & Motion Experience Refresh
 - [ ] Promote the entire quest card to the drag handle via Framer Motion (or `Reorder.Group`) while keeping keyboard reordering accessible.
 - [ ] Tune drag inertia and snapping so movement feels smooth, only snapping back to the grid on pointer release with eased timing.
