@@ -28,8 +28,8 @@ const QuestListRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd }
             }}
             transition={{
                 type: 'spring',
-                stiffness: 350,
-                damping: 25,
+                stiffness: 300,
+                damping: 30,
                 mass: 1
             }}
             whileDrag={{

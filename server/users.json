@@ -610,8 +610,8 @@
         "bio": "bong"
       },
       "rpg": {
-        "level": 1,
-        "xp": 0,
+        "level": 3,
+        "xp": 406,
         "hp": 20,
         "mp": 5,
         "coins": 0,
@@ -620,13 +620,208 @@
         "inventory": {
           "items": []
         },
-        "xp_log": [],
-        "last_daily_reward_at": null,
-        "last_xp_award_at": null,
+        "xp_log": [
+          {
+            "amount": 30,
+            "reason": "daily_focus",
+            "message": "Daily focus bonus +30 XP",
+            "metadata": {
+              "date": "2025-11-21"
+            },
+            "at": "2025-11-21T17:13:42.069Z",
+            "level_before": 3,
+            "level_after": 3,
+            "xp_before": 376,
+            "xp_after": 406,
+            "xp_into_level": 166,
+            "xp_for_level": 180,
+            "xp_to_next": 14,
+            "leveled_up": false
+          },
+          {
+            "amount": 71,
+            "reason": "task_complete",
+            "message": "Quest complete +71 XP",
+            "metadata": {
+              "task_id": 94,
+              "task_level": 2,
+              "priority": "high"
+            },
+            "at": "2025-11-21T17:13:40.397Z",
+            "level_before": 3,
+            "level_after": 3,
+            "xp_before": 305,
+            "xp_after": 376,
+            "xp_into_level": 136,
+            "xp_for_level": 180,
+            "xp_to_next": 44,
+            "leveled_up": false
+          },
+          {
+            "amount": 28,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +28 XP",
+            "metadata": {
+              "task_id": 94,
+              "task_level": 2,
+              "subtask_id": 1,
+              "priority": "high"
+            },
+            "at": "2025-11-21T17:13:39.751Z",
+            "level_before": 3,
+            "level_after": 3,
+            "xp_before": 277,
+            "xp_after": 305,
+            "xp_into_level": 65,
+            "xp_for_level": 180,
+            "xp_to_next": 115,
+            "leveled_up": false
+          },
+          {
+            "amount": 28,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +28 XP",
+            "metadata": {
+              "task_id": 94,
+              "task_level": 2,
+              "subtask_id": 2,
+              "priority": "high"
+            },
+            "at": "2025-11-21T17:13:37.968Z",
+            "level_before": 3,
+            "level_after": 3,
+            "xp_before": 249,
+            "xp_after": 277,
+            "xp_into_level": 37,
+            "xp_for_level": 180,
+            "xp_to_next": 143,
+            "leveled_up": false
+          },
+          {
+            "amount": 28,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +28 XP",
+            "metadata": {
+              "task_id": 94,
+              "task_level": 2,
+              "subtask_id": 4,
+              "priority": "high"
+            },
+            "at": "2025-11-21T17:13:36.956Z",
+            "level_before": 2,
+            "level_after": 3,
+            "xp_before": 221,
+            "xp_after": 249,
+            "xp_into_level": 9,
+            "xp_for_level": 180,
+            "xp_to_next": 171,
+            "leveled_up": true
+          },
+          {
+            "amount": 28,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +28 XP",
+            "metadata": {
+              "task_id": 94,
+              "task_level": 2,
+              "subtask_id": 3,
+              "priority": "high"
+            },
+            "at": "2025-11-21T17:13:35.714Z",
+            "level_before": 2,
+            "level_after": 2,
+            "xp_before": 193,
+            "xp_after": 221,
+            "xp_into_level": 121,
+            "xp_for_level": 140,
+            "xp_to_next": 19,
+            "leveled_up": false
+          },
+          {
+            "amount": 67,
+            "reason": "task_complete",
+            "message": "Quest complete +67 XP",
+            "metadata": {
+              "task_id": 95,
+              "task_level": 3,
+              "priority": "low"
+            },
+            "at": "2025-11-21T17:13:32.464Z",
+            "level_before": 2,
+            "level_after": 2,
+            "xp_before": 126,
+            "xp_after": 193,
+            "xp_into_level": 93,
+            "xp_for_level": 140,
+            "xp_to_next": 47,
+            "leveled_up": false
+          },
+          {
+            "amount": 71,
+            "reason": "task_complete",
+            "message": "Quest complete +71 XP",
+            "metadata": {
+              "task_id": 100,
+              "task_level": 2,
+              "priority": "high"
+            },
+            "at": "2025-11-21T17:13:27.275Z",
+            "level_before": 1,
+            "level_after": 2,
+            "xp_before": 55,
+            "xp_after": 126,
+            "xp_into_level": 26,
+            "xp_for_level": 140,
+            "xp_to_next": 114,
+            "leveled_up": true
+          },
+          {
+            "amount": 27,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +27 XP",
+            "metadata": {
+              "task_id": 95,
+              "task_level": 3,
+              "subtask_id": 1,
+              "priority": "low"
+            },
+            "at": "2025-11-21T17:12:32.674Z",
+            "level_before": 1,
+            "level_after": 1,
+            "xp_before": 28,
+            "xp_after": 55,
+            "xp_into_level": 55,
+            "xp_for_level": 100,
+            "xp_to_next": 45,
+            "leveled_up": false
+          },
+          {
+            "amount": 28,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +28 XP",
+            "metadata": {
+              "task_id": 100,
+              "task_level": 2,
+              "subtask_id": 1,
+              "priority": "high"
+            },
+            "at": "2025-11-21T10:27:55.810Z",
+            "level_before": 1,
+            "level_after": 1,
+            "xp_before": 0,
+            "xp_after": 28,
+            "xp_into_level": 28,
+            "xp_for_level": 100,
+            "xp_to_next": 72,
+            "leveled_up": false
+          }
+        ],
+        "last_daily_reward_at": "2025-11-21",
+        "last_xp_award_at": "2025-11-21T17:13:42.069Z",
         "counters": {
-          "tasks_completed": 0,
-          "subtasks_completed": 0,
-          "daily_rewards_claimed": 0
+          "tasks_completed": 3,
+          "subtasks_completed": 6,
+          "daily_rewards_claimed": 1
         },
         "flags": {},
         "metrics": {}
