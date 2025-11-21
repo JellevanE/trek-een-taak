@@ -1723,6 +1723,25 @@
             "xp_awarded": false,
             "last_reward_at": null
           }
+        },
+        {
+          "id": 3,
+          "description": "Slump",
+          "status": "todo",
+          "created_at": "2025-11-21T19:29:35.547Z",
+          "updated_at": "2025-11-21T19:29:35.547Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T19:29:35.547Z",
+              "note": null
+            }
+          ],
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          },
+          "completed": false
         }
       ],
       "side_quests": [
@@ -1765,13 +1784,13 @@
           }
         }
       ],
-      "nextSubtaskId": 3,
+      "nextSubtaskId": 4,
       "due_date": "2025-11-21",
       "status": "in_progress",
       "completed": false,
       "order": 18,
       "created_at": "2025-11-21T10:17:39.328Z",
-      "updated_at": "2025-11-21T11:49:40.793Z",
+      "updated_at": "2025-11-21T19:29:35.547Z",
       "status_history": [
         {
           "status": "in_progress",

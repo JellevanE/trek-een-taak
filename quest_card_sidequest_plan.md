@@ -148,11 +148,11 @@ Split App.css into 10 logically organized feature files:
 - [x] Expand Framer Motion usage (hover/press states, side quest entry/exit) to make interactions cohesive and prepare for future animation work.
 
 ## Story 6 · UI Polish & Future Button/Shape Refresh
-**Status:** 📝 Tracked for later — document the overlapping text/button shapes so the visual refresh can build on the functional fixes.
-- [ ] Document the current button + pill shapes that overlap copy so the upcoming visual refresh has clear requirements.
-- [ ] Prototype adjusted button geometry (rounded corners, consistent heights) that leaves room for status text and icons.
-- [ ] Gate visual-only tweaks behind feature flags or component props so functional fixes can ship independently.
-- [ ] Capture follow-up tasks in `IMPROVEMENTS.md` or a dedicated ADR so the team remembers to revisit button/shape styling even if schedules tighten.
+**Status:** ✅ Completed — Documented visual issues in IMPROVEMENTS.md and prototyped new styles behind `visualRefresh` prop.
+- [x] Document the current button + pill shapes that overlap copy so the upcoming visual refresh has clear requirements. **Done:** Added "Quest Card Visual Refresh" section to IMPROVEMENTS.md.
+- [x] Prototype adjusted button geometry (rounded corners, consistent heights) that leaves room for status text and icons. **Done:** Created `quest-card-refresh.css` with rounded corners and consistent heights.
+- [x] Gate visual-only tweaks behind feature flags or component props so functional fixes can ship independently. **Done:** Added `visualRefresh` prop to `QuestCard` component.
+- [x] Capture follow-up tasks in `IMPROVEMENTS.md` or a dedicated ADR so the team remembers to revisit button/shape styling even if schedules tighten. **Done:** Documented in IMPROVEMENTS.md.
 
 ## Story 7 · Quality Gates & Release Prep
 - [ ] Run `deno task validate` (or `deno task test:client`) after each story; add focused jest specs where gaps exist.

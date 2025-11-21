@@ -57,3 +57,17 @@
 - `deno task validate` passes
 - ✅ No runtime regressions in API behavior
 - ✅ Type coverage >90% (no implicit `any` types)
+
+## Quest Card Visual Refresh (Planned)
+
+### Current Visual Issues
+- **Text Overlaps:** Long quest titles and descriptions can overlap with action buttons, especially on smaller screens or when many side quests are present.
+- **Inconsistent Heights:** Action buttons and status pills have varying heights, creating a jagged visual rhythm.
+- **Sharp Corners:** The current design uses relatively sharp corners (radius 4-6px) which feels slightly dated compared to the "pill" aesthetic used elsewhere.
+- **Status Text:** Status labels often crowd the progress bar or other metadata.
+
+### Proposed Geometric Improvements
+- **Rounded Corners:** Increase border-radius to 12px-16px for cards and 999px for buttons/pills to match a more modern, organic aesthetic.
+- **Consistent Heights:** Standardize all interactive elements to a 32px or 40px height grid.
+- **Spacing:** Increase internal padding (`--quest-card-padding-block`) to let content breathe.
+- **Typography:** Use slightly larger font sizes for titles and clearer hierarchy for metadata.

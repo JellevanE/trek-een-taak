@@ -8,6 +8,8 @@ import { QuestActions } from './quest-card/QuestActions.jsx';
 import { SideQuestList } from './quest-card/SideQuestList.jsx';
 import { ActionButton } from './ActionButton.jsx';
 
+import './../styles/quest-card-refresh.css';
+
 /**
  * QuestCard - Memoized quest card component to prevent unnecessary re-renders
  * This component is wrapped in React.memo to ensure it only re-renders when its
@@ -16,7 +18,8 @@ import { ActionButton } from './ActionButton.jsx';
 const QuestCard = React.memo(({
     quest,
     isDragging,
-    dragMeta = {}
+    dragMeta = {},
+    visualRefresh = false
 }) => {
     const {
         themeName = 'dark',
@@ -89,7 +92,7 @@ const QuestCard = React.memo(({
         }
         return themeProfile.soundFx;
     }, [soundFxEnabled, themeProfile]);
-    
+
     const sideQuestFooter = (
         <div className="side-quest-footer">
             {addingSideQuestTo === quest.id ? (
@@ -122,9 +125,9 @@ const QuestCard = React.memo(({
         glowQuests[quest.id] ? 'glow' : '',
         spawnQuests[quest.id] ? 'spawn' : '',
         questSelected ? 'selected' : '',
-        isDragging ? 'dragging' : ''
+        isDragging ? 'dragging' : '',
+        visualRefresh ? 'quest-card-refresh' : ''
     ].filter(Boolean).join(' ');
-
     const isNewQuest = !!spawnQuests[quest.id];
     const isCelebrating = !!celebratingQuests[quest.id];
 
