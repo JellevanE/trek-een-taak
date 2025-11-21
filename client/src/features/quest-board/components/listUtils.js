@@ -38,18 +38,33 @@ export const useNeonDragHandle = () => {
     const [isDragging, setIsDragging] = React.useState(false);
 
     const startDrag = React.useCallback((event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        controls.start(event, { snapToCursor: true });
+        // Don't start drag if interacting with a button, input, or other interactive element
+        const target = event.target;
+        const interactive = target.closest('button, a, input, textarea, select, [role="button"], [data-no-drag], .quest-card-actions, .action-button');
+
+        if (interactive && !interactive.hasAttribute('data-drag-handle')) {
+            return;
+        }
+
+        // Prevent default behavior to avoid text selection while dragging
+        // but only if we're actually starting a drag
+        if (event.cancelable) {
+            event.preventDefault();
+        }
+
+        // We don't stop propagation here so that click events can still fire
+        // if the drag doesn't actually move much (Framer Motion handles this)
+        // But for the handle itself, we might want to.
+        // For whole-card drag, we generally want to let events bubble unless we're dragging.
+
+        controls.start(event, { snapToCursor: false }); // snapToCursor: false is better for whole-card drag
     }, [controls]);
 
     const dragMeta = React.useMemo(() => ({
         handleProps: {
             'data-drag-handle': 'true',
             'aria-grabbed': isDragging ? 'true' : 'false',
-            onPointerDown: startDrag,
-            onMouseDown: startDrag,
-            onTouchStart: startDrag
+            onPointerDown: startDrag
         },
         handleStyle: { cursor: isDragging ? 'grabbing' : 'grab' },
         isDragging

@@ -555,6 +555,62 @@
       },
       "rpg": {
         "level": 1,
+        "xp": 86,
+        "hp": 20,
+        "mp": 5,
+        "coins": 0,
+        "streak": 0,
+        "achievements": [],
+        "inventory": {
+          "items": []
+        },
+        "xp_log": [
+          {
+            "amount": 86,
+            "reason": "task_complete",
+            "message": "Quest complete +86 XP",
+            "metadata": {
+              "task_id": 76,
+              "task_level": 4,
+              "priority": "medium"
+            },
+            "at": "2025-11-19T12:39:02.102Z",
+            "level_before": 1,
+            "level_after": 1,
+            "xp_before": 0,
+            "xp_after": 86,
+            "xp_into_level": 86,
+            "xp_for_level": 100,
+            "xp_to_next": 14,
+            "leveled_up": false
+          }
+        ],
+        "last_daily_reward_at": null,
+        "last_xp_award_at": "2025-11-19T12:39:02.102Z",
+        "counters": {
+          "tasks_completed": 1,
+          "subtasks_completed": 0,
+          "daily_rewards_claimed": 0
+        },
+        "flags": {},
+        "metrics": {}
+      }
+    },
+    {
+      "id": 4,
+      "username": "bing",
+      "password_hash": "$2a$10$am089hQ.0SeS4HotpwsrJuy4S8PFApTpJD3ocqbVgk4NX7eVUV1V6",
+      "email": null,
+      "created_at": "2025-11-19T16:18:15.980Z",
+      "updated_at": "2025-11-19T16:18:15.980Z",
+      "profile": {
+        "display_name": "bing",
+        "avatar": null,
+        "class": "adventurer",
+        "bio": "bong"
+      },
+      "rpg": {
+        "level": 1,
         "xp": 0,
         "hp": 20,
         "mp": 5,
@@ -577,5 +633,5 @@
       }
     }
   ],
-  "nextId": 4
+  "nextId": 5
 }

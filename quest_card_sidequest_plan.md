@@ -141,10 +141,11 @@ Split App.css into 10 logically organized feature files:
 **Commit:** `refactor: split monolithic App.css into organized feature files` (November 17, 2025)
 
 ## Story 5 · Drag & Motion Experience Refresh
-- [ ] Promote the entire quest card to the drag handle via Framer Motion (or `Reorder.Group`) while keeping keyboard reordering accessible.
-- [ ] Tune drag inertia and snapping so movement feels smooth, only snapping back to the grid on pointer release with eased timing.
-- [ ] Prevent card jumps near column boundaries by stabilizing the layout measurements (`ResizeObserver` + memoized dimensions).
-- [ ] Expand Framer Motion usage (hover/press states, side quest entry/exit) to make interactions cohesive and prepare for future animation work.
+**Status:** ✅ Completed — Drag physics tuned, whole card is drag handle, layout stabilized, and hover/tap effects added.
+- [x] Promote the entire quest card to the drag handle via Framer Motion (or `Reorder.Group`) while keeping keyboard reordering accessible.
+- [x] Tune drag inertia and snapping so movement feels smooth, only snapping back to the grid on pointer release with eased timing.
+- [x] Prevent card jumps near column boundaries by stabilizing the layout measurements (`ResizeObserver` + memoized dimensions).
+- [x] Expand Framer Motion usage (hover/press states, side quest entry/exit) to make interactions cohesive and prepare for future animation work.
 
 ## Story 6 · UI Polish & Future Button/Shape Refresh
 **Status:** 📝 Tracked for later — document the overlapping text/button shapes so the visual refresh can build on the functional fixes.
