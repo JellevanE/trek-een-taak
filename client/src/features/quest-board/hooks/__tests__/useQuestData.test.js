@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useQuestData } from '../useQuestData.js';
+import { resetQuestBoardStore } from '../../../../store/questBoardStore.js';
 
 jest.mock('../../../../utils/api.js', () => ({
     apiFetch: jest.fn()
@@ -36,7 +37,8 @@ const setupHook = () => {
     return { hook, campaignApi };
 };
 
-beforeEach(() => {
+beforeEach(async () => {
+    await resetQuestBoardStore({ clearPersisted: true });
     apiFetch.mockReset();
 });
 

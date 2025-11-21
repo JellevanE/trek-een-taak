@@ -1,28 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { DEFAULT_THEME_ID, getThemeProfile } from '../../../theme';
+import { useReducedMotionPreference } from '../../../hooks/useReducedMotionPreference.js';
 
 const REDUCED_MOTION_SCALE = 0.5;
-
-const usePrefersReducedMotion = () => {
-    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-    useEffect(() => {
-        if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-            return undefined;
-        }
-        const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const handler = (event) => setPrefersReducedMotion(event.matches);
-        setPrefersReducedMotion(query.matches);
-        if (typeof query.addEventListener === 'function') {
-            query.addEventListener('change', handler);
-            return () => query.removeEventListener('change', handler);
-        }
-        query.addListener(handler);
-        return () => query.removeListener(handler);
-    }, []);
-
-    return prefersReducedMotion;
-};
 
 const clampProfile = (profile) => ({
     ...profile,
@@ -40,7 +20,7 @@ const clampProfile = (profile) => ({
 });
 
 export const useQuestMotionTokens = (themeName = DEFAULT_THEME_ID) => {
-    const prefersReducedMotion = usePrefersReducedMotion();
+    const prefersReducedMotion = useReducedMotionPreference();
 
     return useMemo(() => {
         const preset = getThemeProfile(themeName)?.motion ?? getThemeProfile(DEFAULT_THEME_ID).motion;

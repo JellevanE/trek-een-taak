@@ -4,7 +4,7 @@ import { useCampaigns } from './useCampaigns.js';
 import { usePlayerStats } from './usePlayerStats.js';
 import { useQuests } from './useQuests.js';
 
-export const useQuestBoard = ({ token, setToken }) => {
+export const useQuestBoard = ({ token, setToken, soundFx = null }) => {
     const { toasts, pushToast, dismissToast } = useToasts();
 
     const getAuthHeaders = useCallback((extra = {}) => {
@@ -37,7 +37,8 @@ export const useQuestBoard = ({ token, setToken }) => {
         pushToast,
         campaignApi,
         playerStatsApi,
-        reloadTasksRef
+        reloadTasksRef,
+        soundFx
     });
 
     const todayKey = useMemo(() => new Date().toISOString().split('T')[0], [questsApi.quests]);

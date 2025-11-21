@@ -1,0 +1,719 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ThemePreviewPage renders every theme column and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="theme-preview-wrapper"
+  >
+    <header
+      class="theme-preview-header"
+    >
+      <div>
+        <p
+          class="theme-preview-eyebrow"
+        >
+          Theme audit route
+        </p>
+        <h1>
+          Quest Board Theme Preview
+        </h1>
+        <p
+          class="theme-preview-subtitle"
+        >
+          Verify every quest state (active, completed, editing, dragging, glowing, pulsing) before shipping theme tokens.
+        </p>
+      </div>
+      <div
+        class="theme-preview-actions"
+      >
+        <button
+          class="btn-ghost"
+        >
+          ← Back to board
+        </button>
+        <button
+          class="btn-ghost"
+        >
+          Toggle theme (current: Neon Arcade)
+        </button>
+        <label
+          class="theme-audio-control theme-audio-control-inline"
+          for="theme-preview-sound"
+        >
+          <span>
+            FX 65%
+          </span>
+          <input
+            id="theme-preview-sound"
+            max="100"
+            min="0"
+            type="range"
+            value="65"
+          />
+        </label>
+      </div>
+    </header>
+    <section
+      class="theme-preview-meta"
+    >
+      <div>
+        <h2>
+          Theme snapshot instructions
+        </h2>
+        <ul>
+          <li>
+            Load this page and capture screenshots per theme for Percy/Chromatic uploads.
+          </li>
+          <li>
+            Confirm reduced-motion preference removes glow/pulse + mutes the soundtrack.
+          </li>
+          <li>
+            Use the FX slider to validate volume persistence (0-100%).
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h2>
+          Sound FX requirements
+        </h2>
+        <p>
+          Formats: audio/webm, audio/mpeg · Max file size: 50kb per clip.
+        </p>
+        <p
+          class="theme-preview-note"
+        >
+          Provide WebM + MP3 fallbacks and respect reduced-motion → mute automatically.
+        </p>
+      </div>
+    </section>
+    <section
+      class="theme-preview-grid"
+    >
+      <article
+        class="theme-preview-column"
+        data-theme-id="neon_arcade"
+      >
+        <div
+          class="theme-preview-column-header"
+        >
+          <h3>
+            Neon Arcade
+          </h3>
+          <p>
+            Dark appearance
+          </p>
+        </div>
+        <div
+          class="theme-preview-state-grid"
+        >
+          <div
+            class="quest-card-preview quest started"
+            data-theme-card="neon_arcade"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Active Quest
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                In progress
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 42%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                42%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest completed glow"
+            data-theme-card="neon_arcade"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Completed Quest
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Completed
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 100%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                100%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest selected"
+            data-theme-card="neon_arcade"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Editing
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Editing
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 68%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                68%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest dragging"
+            data-theme-card="neon_arcade"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Dragging
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Reordering
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 15%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                15%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest pulse"
+            data-theme-card="neon_arcade"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Pulsing
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Status ping
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 55%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                55%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest spawn"
+            data-theme-card="neon_arcade"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Spawning
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                New arrival
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 5%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                5%
+              </span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article
+        class="theme-preview-column"
+        data-theme-id="classic"
+      >
+        <div
+          class="theme-preview-column-header"
+        >
+          <h3>
+            Classic
+          </h3>
+          <p>
+            Light appearance
+          </p>
+        </div>
+        <div
+          class="theme-preview-state-grid"
+        >
+          <div
+            class="quest-card-preview quest started"
+            data-theme-card="classic"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Active Quest
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                In progress
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 42%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                42%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest completed glow"
+            data-theme-card="classic"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Completed Quest
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Completed
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 100%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                100%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest selected"
+            data-theme-card="classic"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Editing
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Editing
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 68%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                68%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest dragging"
+            data-theme-card="classic"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Dragging
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Reordering
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 15%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                15%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest pulse"
+            data-theme-card="classic"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Pulsing
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                Status ping
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 55%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                55%
+              </span>
+            </div>
+          </div>
+          <div
+            class="quest-card-preview quest spawn"
+            data-theme-card="classic"
+          >
+            <div
+              class="theme-preview-state-meta"
+            >
+              <p
+                class="theme-preview-state-label"
+              >
+                Spawning
+              </p>
+              <p
+                class="theme-preview-state-status"
+              >
+                New arrival
+              </p>
+            </div>
+            <div
+              class="quest-progress-bar"
+            >
+              <div
+                class="quest-progress-fill"
+                style="width: 5%;"
+              />
+            </div>
+            <div
+              class="theme-preview-actions-row"
+            >
+              <button
+                class="btn-start btn-small"
+                type="button"
+              >
+                Start
+              </button>
+              <button
+                class="btn-complete btn-small"
+                type="button"
+              >
+                Complete
+              </button>
+              <span
+                class="theme-preview-progress"
+              >
+                5%
+              </span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+    <footer
+      class="theme-preview-footer"
+    >
+      <p>
+        Route: /themes · Current theme: neon_arcade
+      </p>
+      <p>
+        Run \`npm test -- ThemePreview\` to refresh snapshot coverage.
+      </p>
+    </footer>
+  </div>
+</DocumentFragment>
+`;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import RegistrationWizard from './RegistrationWizard';
+
+const RegistrationWizard = React.lazy(() => import('./RegistrationWizard'));
 
 export default function Profile({ token, onLogin, onLogout, onClose }) {
     const [profile, setProfile] = useState({ display_name: '', avatar: '', class: '', bio: '' });
@@ -84,24 +85,6 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
             .finally(() => setLoading(false));
     };
 
-    const handleRegister = () => {
-        if (!username || !password) return;
-        setLoading(true);
-        fetch('/api/users/register', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.token) {
-                    if (data.user && data.user.rpg) setRpg(data.user.rpg);
-                    onLogin(data.token, data.user);
-                }
-            })
-            .catch(() => {})
-            .finally(() => setLoading(false));
-    };
-
     const handleLogin = () => {
         if (!username || !password) return;
         setLoading(true);
@@ -124,14 +107,16 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         // Show registration wizard
         if (showRegistrationWizard) {
             return (
-                <RegistrationWizard
-                    onSuccess={(token, user) => {
-                        if (user && user.rpg) setRpg(user.rpg);
-                        onLogin(token, user);
-                        setShowRegistrationWizard(false);
-                    }}
-                    onCancel={() => setShowRegistrationWizard(false)}
-                />
+                <React.Suspense fallback={<div className="profile-box">Loading registration…</div>}>
+                    <RegistrationWizard
+                        onSuccess={(token, user) => {
+                            if (user && user.rpg) setRpg(user.rpg);
+                            onLogin(token, user);
+                            setShowRegistrationWizard(false);
+                        }}
+                        onCancel={() => setShowRegistrationWizard(false)}
+                    />
+                </React.Suspense>
             );
         }
 

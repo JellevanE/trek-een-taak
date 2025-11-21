@@ -26,6 +26,17 @@
     -->
   <title>Task Track — Neo‑Retro</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script>
+    (function bootstrapTheme(){
+      try{
+        var storedTheme = localStorage.getItem('theme') || 'neon_arcade';
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      } catch (error){
+        document.documentElement.setAttribute('data-theme', 'neon_arcade');
+      }
+      document.documentElement.setAttribute('data-theme-ready', 'false');
+    })();
+  </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

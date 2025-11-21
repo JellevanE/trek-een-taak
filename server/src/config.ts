@@ -40,6 +40,13 @@ function resolveJwtSecrets(): string[] {
         if (process.env.NODE_ENV === 'test') {
             return ['test-secret'];
         }
+        if (process.env.NODE_ENV !== 'production') {
+            const fallback = 'dev-local-secret';
+            console.warn(
+                'JWT secret not configured. Using insecure development fallback. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE to override.',
+            );
+            return [fallback];
+        }
         throw new Error('JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.');
     }
 

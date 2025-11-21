@@ -170,7 +170,13 @@ export const useCampaigns = ({
                     },
                     onUnauthorized
                 );
-                
+                if (created && created.id) {
+                    setCampaigns((prev) => {
+                        const exists = prev.some((campaign) => campaign && campaign.id === created.id);
+                        if (exists) return prev;
+                        return [...prev, created];
+                    });
+                }
                 closeCampaignForm();
                 pushToast('Campaign created', 'success');
                 const reloadTasks = reloadTasksRef.current;

@@ -55,6 +55,12 @@ const SideQuestItem = ({
     };
 
     const handleStatusChange = (status) => withStop(() => setSideQuestStatus(quest.id, sideQuest.id, status));
+    const descriptionClasses = [
+        'side-quest-desc',
+        sideStatus === 'in_progress' ? 'in-progress' : '',
+        sideStatus === 'done' ? 'completed' : '',
+        pulsingClass
+    ].filter(Boolean).join(' ');
 
     return (
         <div
@@ -65,6 +71,7 @@ const SideQuestItem = ({
             ].filter(Boolean).join(' ')}
             role="listitem"
             data-dragging={isDragging ? 'true' : undefined}
+            data-status={sideStatus}
         >
             <div
                 className={`task-row ${sideEditing ? 'editing' : ''}`}
@@ -146,12 +153,7 @@ const SideQuestItem = ({
                         </div>
                     ) : (
                         <div
-                            className={[
-                                'side-quest-desc',
-                                sideStatus === 'in_progress' ? 'in-progress' : '',
-                            sideStatus === 'done' ? 'started' : '',
-                                pulsingClass
-                            ].filter(Boolean).join(' ')}
+                            className={descriptionClasses}
                             style={{ flex: 1 }}
                             title={safeSideDescription}
                         >

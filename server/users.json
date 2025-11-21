@@ -50,8 +50,8 @@
         "bio": "FIREBALLZ"
       },
       "rpg": {
-        "level": 1,
-        "xp": 41,
+        "level": 7,
+        "xp": 1381,
         "hp": 20,
         "mp": 5,
         "coins": 0,
@@ -61,6 +61,117 @@
           "items": []
         },
         "xp_log": [
+          {
+            "amount": 85,
+            "reason": "task_complete",
+            "message": "Quest complete +85 XP",
+            "metadata": {
+              "task_id": 39,
+              "task_level": 3,
+              "priority": "high"
+            },
+            "at": "2025-11-11T09:59:28.891Z",
+            "level_before": 7,
+            "level_after": 7,
+            "xp_before": 1296,
+            "xp_after": 1381,
+            "xp_into_level": 181,
+            "xp_for_level": 340,
+            "xp_to_next": 159,
+            "leveled_up": false
+          },
+          {
+            "amount": 27,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +27 XP",
+            "metadata": {
+              "task_id": 38,
+              "task_level": 3,
+              "subtask_id": 1,
+              "priority": "low"
+            },
+            "at": "2025-11-11T09:59:19.822Z",
+            "level_before": 7,
+            "level_after": 7,
+            "xp_before": 1269,
+            "xp_after": 1296,
+            "xp_into_level": 96,
+            "xp_for_level": 340,
+            "xp_to_next": 244,
+            "leveled_up": false
+          },
+          {
+            "amount": 99,
+            "reason": "task_complete",
+            "message": "Quest complete +99 XP",
+            "metadata": {
+              "task_id": 40,
+              "task_level": 4,
+              "priority": "high"
+            },
+            "at": "2025-11-11T08:18:46.041Z",
+            "level_before": 6,
+            "level_after": 7,
+            "xp_before": 1170,
+            "xp_after": 1269,
+            "xp_into_level": 69,
+            "xp_for_level": 340,
+            "xp_to_next": 271,
+            "leveled_up": true
+          },
+          {
+            "amount": 30,
+            "reason": "daily_focus",
+            "message": "Daily focus bonus +30 XP",
+            "metadata": {
+              "date": "2025-11-10"
+            },
+            "at": "2025-11-10T17:24:29.370Z",
+            "level_before": 6,
+            "level_after": 6,
+            "xp_before": 1140,
+            "xp_after": 1170,
+            "xp_into_level": 270,
+            "xp_for_level": 300,
+            "xp_to_next": 30,
+            "leveled_up": false
+          },
+          {
+            "amount": 1000,
+            "reason": "debug_adjustment",
+            "message": "Gained +1000 XP",
+            "metadata": {
+              "amount": 1000
+            },
+            "at": "2025-11-10T17:23:40.800Z",
+            "level_before": 2,
+            "level_after": 6,
+            "xp_before": 140,
+            "xp_after": 1140,
+            "xp_into_level": 240,
+            "xp_for_level": 300,
+            "xp_to_next": 60,
+            "leveled_up": true
+          },
+          {
+            "amount": 99,
+            "reason": "task_complete",
+            "message": "Quest complete +99 XP",
+            "metadata": {
+              "task_id": 19,
+              "task_level": 4,
+              "priority": "high"
+            },
+            "at": "2025-11-10T16:38:14.583Z",
+            "level_before": 1,
+            "level_after": 2,
+            "xp_before": 41,
+            "xp_after": 140,
+            "xp_into_level": 40,
+            "xp_for_level": 140,
+            "xp_to_next": 100,
+            "leveled_up": true
+          },
           {
             "amount": 41,
             "reason": "subtask_complete",
@@ -81,12 +192,12 @@
             "leveled_up": false
           }
         ],
-        "last_daily_reward_at": null,
-        "last_xp_award_at": "2025-10-30T15:29:20.552Z",
+        "last_daily_reward_at": "2025-11-10",
+        "last_xp_award_at": "2025-11-11T09:59:28.891Z",
         "counters": {
-          "tasks_completed": 0,
-          "subtasks_completed": 1,
-          "daily_rewards_claimed": 0
+          "tasks_completed": 3,
+          "subtasks_completed": 2,
+          "daily_rewards_claimed": 1
         },
         "flags": {},
         "metrics": {}
