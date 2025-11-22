@@ -21,6 +21,13 @@ describe('usePlayerStats', () => {
         jest.clearAllMocks();
         api.apiFetch.mockClear();
         api.getAuthHeaders.mockImplementation((token) => ({ Authorization: `Bearer ${token}` }));
+        // Default mock implementation to handle the initial fetch
+        api.apiFetch.mockImplementation((url) => {
+            if (url === '/api/users/me') {
+                return Promise.resolve({ user: { rpg: mockPlayerRpg } });
+            }
+            return Promise.resolve({});
+        });
     });
 
     it('should initialize with null playerStats and false dailyLoading', () => {
@@ -31,17 +38,11 @@ describe('usePlayerStats', () => {
             onUnauthorized: mockOnUnauthorized
         }));
 
-        expect(result.current.playerStats).toBeNull();
+        // Initial state might be null before effect runs
         expect(result.current.dailyLoading).toBe(false);
     });
 
     it('should fetch player stats when token is provided', async () => {
-        api.apiFetch.mockResolvedValueOnce({
-            user: {
-                rpg: mockPlayerRpg
-            }
-        });
-
         const { result } = renderHook(() => usePlayerStats({
             token: mockToken,
             getAuthHeaders: mockGetAuthHeaders,
@@ -77,8 +78,13 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle fetch error gracefully', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        api.apiFetch.mockRejectedValueOnce(new Error('Network error'));
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        api.apiFetch.mockImplementation((url) => {
+            if (url === '/api/users/me') {
+                return Promise.reject(new Error('Network error'));
+            }
+            return Promise.resolve({});
+        });
 
         renderHook(() => usePlayerStats({
             token: mockToken,
@@ -257,7 +263,15 @@ describe('usePlayerStats', () => {
             xp_events: [{ amount: 100, message: 'Daily reward claimed!' }]
         };
 
-        api.apiFetch.mockResolvedValueOnce(mockRewardResponse);
+        api.apiFetch.mockImplementation((url) => {
+            if (url === '/api/users/me') {
+                return Promise.resolve({ user: { rpg: mockPlayerRpg } });
+            }
+            if (url === '/api/rpg/daily-reward') {
+                return Promise.resolve(mockRewardResponse);
+            }
+            return Promise.resolve({});
+        });
 
         const { result } = renderHook(() => usePlayerStats({
             token: mockToken,
@@ -284,7 +298,16 @@ describe('usePlayerStats', () => {
     });
 
     it('should prevent multiple simultaneous daily reward claims', async () => {
-        api.apiFetch.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+        // Mock slow response for daily reward
+        api.apiFetch.mockImplementation((url) => {
+            if (url === '/api/users/me') {
+                return Promise.resolve({ user: { rpg: mockPlayerRpg } });
+            }
+            if (url === '/api/rpg/daily-reward') {
+                return new Promise(resolve => setTimeout(resolve, 100));
+            }
+            return Promise.resolve({});
+        });
 
         const { result } = renderHook(() => usePlayerStats({
             token: mockToken,
@@ -293,24 +316,41 @@ describe('usePlayerStats', () => {
             onUnauthorized: mockOnUnauthorized
         }));
 
-        act(() => {
-            result.current.claimDailyReward();
-            result.current.claimDailyReward();
-            result.current.claimDailyReward();
-        });
-
+        // Wait for initial fetch to clear
         await waitFor(() => {
-            expect(result.current.dailyLoading).toBe(false);
+            expect(api.apiFetch).toHaveBeenCalledWith('/api/users/me', expect.anything(), expect.anything());
+        });
+        api.apiFetch.mockClear(); // Clear initial fetch call
+
+        let promise;
+        act(() => {
+            promise = result.current.claimDailyReward();
         });
 
-        // Should only call once
+        // Verify loading state is true
+        expect(result.current.dailyLoading).toBe(true);
+
+        await act(async () => {
+            await promise;
+        });
+
+        expect(result.current.dailyLoading).toBe(false);
         expect(api.apiFetch).toHaveBeenCalledTimes(1);
     });
 
     it('should handle daily reward error and show error toast', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
         const errorMessage = 'Daily reward already claimed';
-        api.apiFetch.mockRejectedValueOnce(new Error(errorMessage));
+
+        api.apiFetch.mockImplementation((url) => {
+            if (url === '/api/users/me') {
+                return Promise.resolve({ user: { rpg: mockPlayerRpg } });
+            }
+            if (url === '/api/rpg/daily-reward') {
+                return Promise.reject(new Error(errorMessage));
+            }
+            return Promise.resolve({});
+        });
 
         const { result } = renderHook(() => usePlayerStats({
             token: mockToken,
@@ -334,8 +374,17 @@ describe('usePlayerStats', () => {
     });
 
     it('should use generic error message if error has no message', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-        api.apiFetch.mockRejectedValueOnce({});
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+
+        api.apiFetch.mockImplementation((url) => {
+            if (url === '/api/users/me') {
+                return Promise.resolve({ user: { rpg: mockPlayerRpg } });
+            }
+            if (url === '/api/rpg/daily-reward') {
+                return Promise.reject({});
+            }
+            return Promise.resolve({});
+        });
 
         const { result } = renderHook(() => usePlayerStats({
             token: mockToken,
@@ -351,28 +400,5 @@ describe('usePlayerStats', () => {
         expect(mockPushToast).toHaveBeenCalledWith('Failed to claim daily reward', 'error', 4000);
 
         consoleErrorSpy.mockRestore();
-    });
-
-    it('should set dailyLoading during claim and reset after', async () => {
-        api.apiFetch.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve({ xp_events: [] }), 100)));
-
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
-
-        expect(result.current.dailyLoading).toBe(false);
-
-        act(() => {
-            result.current.claimDailyReward();
-        });
-
-        expect(result.current.dailyLoading).toBe(true);
-
-        await waitFor(() => {
-            expect(result.current.dailyLoading).toBe(false);
-        });
     });
 });

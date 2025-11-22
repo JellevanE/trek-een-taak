@@ -5,9 +5,11 @@ describe('useSoundFx', () => {
     let mockAudioContext;
     let mockOscillator;
     let mockGainNode;
-    let mockAudioElement;
 
     beforeEach(() => {
+        // Reset all mocks before each test
+        jest.clearAllMocks();
+
         // Mock AudioContext
         mockGainNode = {
             gain: { value: 0 },
@@ -31,33 +33,48 @@ describe('useSoundFx', () => {
             close: jest.fn().mockResolvedValue(undefined)
         };
 
+        // Mock global AudioContext to prevent real instances from being created
+        // Always return the SAME mock instance to prevent reference issues
         global.AudioContext = jest.fn(() => mockAudioContext);
         global.webkitAudioContext = jest.fn(() => mockAudioContext);
 
-        // Mock HTMLAudioElement
-        mockAudioElement = {
-            preload: '',
-            volume: 1,
-            load: jest.fn(),
-            play: jest.fn().mockResolvedValue(undefined),
-            cloneNode: jest.fn(),
-            appendChild: jest.fn()
-        };
+        // Mock HTMLAudioElement prototype to prevent real audio elements
+        jest.spyOn(window.HTMLAudioElement.prototype, 'play').mockResolvedValue(undefined);
+        jest.spyOn(window.HTMLAudioElement.prototype, 'load').mockImplementation(() => { });
 
-        mockAudioElement.cloneNode.mockReturnValue({
-            ...mockAudioElement,
-            play: jest.fn().mockResolvedValue(undefined)
-        });
-
-        global.document.createElement = jest.fn((tag) => {
-            if (tag === 'audio') return mockAudioElement;
-            if (tag === 'source') return { src: '', type: '' };
-            return {};
+        // Store the original createElement before mocking
+        const originalCreateElement = document.createElement.bind(document);
+        jest.spyOn(document, 'createElement').mockImplementation((tagName) => {
+            if (tagName === 'audio') {
+                const audioElement = {
+                    preload: '',
+                    volume: 0,
+                    appendChild: jest.fn(),
+                    load: jest.fn(),
+                    play: jest.fn().mockResolvedValue(undefined),
+                    cloneNode: jest.fn(function () {
+                        return {
+                            preload: this.preload,
+                            volume: this.volume,
+                            appendChild: jest.fn(),
+                            load: jest.fn(),
+                            play: jest.fn().mockResolvedValue(undefined),
+                            cloneNode: jest.fn()
+                        };
+                    })
+                };
+                return audioElement;
+            }
+            if (tagName === 'source') {
+                return { src: '', type: '' };
+            }
+            // Fall back to real createElement for other elements
+            return originalCreateElement(tagName);
         });
     });
 
     afterEach(() => {
-        jest.clearAllMocks();
+        jest.restoreAllMocks();
     });
 
     it('should initialize with disabled state when no profile provided', () => {
@@ -67,8 +84,9 @@ describe('useSoundFx', () => {
     });
 
     it('should initialize with disabled state when profile is disabled', () => {
+        const soundFxProfile = { enabled: false };
         const { result } = renderHook(() => useSoundFx({
-            soundFxProfile: { enabled: false },
+            soundFxProfile,
             volumePercent: 100
         }));
 
@@ -76,8 +94,9 @@ describe('useSoundFx', () => {
     });
 
     it('should initialize with disabled state when volume is 0', () => {
+        const soundFxProfile = { enabled: true, events: {} };
         const { result } = renderHook(() => useSoundFx({
-            soundFxProfile: { enabled: true, events: {} },
+            soundFxProfile,
             volumePercent: 0
         }));
 
@@ -85,8 +104,9 @@ describe('useSoundFx', () => {
     });
 
     it('should initialize with disabled state when prefersReducedMotion is true', () => {
+        const soundFxProfile = { enabled: true, events: {} };
         const { result } = renderHook(() => useSoundFx({
-            soundFxProfile: { enabled: true, events: {} },
+            soundFxProfile,
             volumePercent: 100,
             prefersReducedMotion: true
         }));
@@ -95,15 +115,16 @@ describe('useSoundFx', () => {
     });
 
     it('should clamp volume to 0-100 range', () => {
+        const soundFxProfile = { enabled: true, events: {} };
         const { result: resultHigh } = renderHook(() => useSoundFx({
-            soundFxProfile: { enabled: true, events: {} },
+            soundFxProfile,
             volumePercent: 150
         }));
 
         expect(resultHigh.current.volumePercent).toBe(100);
 
         const { result: resultLow } = renderHook(() => useSoundFx({
-            soundFxProfile: { enabled: true, events: {} },
+            soundFxProfile,
             volumePercent: -50
         }));
 
@@ -111,8 +132,9 @@ describe('useSoundFx', () => {
     });
 
     it('should handle NaN volume', () => {
+        const soundFxProfile = { enabled: true, events: {} };
         const { result } = renderHook(() => useSoundFx({
-            soundFxProfile: { enabled: true, events: {} },
+            soundFxProfile,
             volumePercent: NaN
         }));
 
@@ -360,10 +382,15 @@ describe('useSoundFx', () => {
             }
         };
 
-        const { unmount } = renderHook(() => useSoundFx({
+        const { result, unmount } = renderHook(() => useSoundFx({
             soundFxProfile,
             volumePercent: 100
         }));
+
+        // Actually play a sound to create the AudioContext
+        act(() => {
+            result.current.play('beep');
+        });
 
         unmount();
 
@@ -455,7 +482,7 @@ describe('useSoundFx', () => {
     });
 
     it('should handle audio load error gracefully', () => {
-        mockAudioElement.load.mockImplementation(() => {
+        jest.spyOn(window.HTMLAudioElement.prototype, 'load').mockImplementationOnce(() => {
             throw new Error('Load failed');
         });
 
@@ -477,11 +504,7 @@ describe('useSoundFx', () => {
     });
 
     it('should handle audio play error gracefully', () => {
-        const mockClonedAudio = {
-            volume: 1,
-            play: jest.fn().mockRejectedValue(new Error('Play failed'))
-        };
-        mockAudioElement.cloneNode.mockReturnValue(mockClonedAudio);
+        jest.spyOn(window.HTMLAudioElement.prototype, 'play').mockRejectedValueOnce(new Error('Play failed'));
 
         const soundFxProfile = {
             enabled: true,

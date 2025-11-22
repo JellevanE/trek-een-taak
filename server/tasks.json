@@ -1274,24 +1274,35 @@
       ],
       "nextSubtaskId": 3,
       "due_date": "2025-11-19",
-      "status": "blocked",
-      "completed": false,
+      "status": "done",
+      "completed": true,
       "order": 11,
       "created_at": "2025-11-17T16:47:51.012Z",
-      "updated_at": "2025-11-17T16:47:51.012Z",
+      "updated_at": "2025-11-22T17:45:02.997Z",
       "status_history": [
         {
           "status": "blocked",
           "at": "2025-11-17T16:47:51.012Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-11-22T17:45:02.997Z",
           "note": null
         }
       ],
       "owner_id": 3,
       "task_level": 1,
       "rpg": {
-        "xp_awarded": false,
-        "last_reward_at": null,
-        "history": []
+        "xp_awarded": true,
+        "last_reward_at": "2025-11-22T17:45:02.998Z",
+        "history": [
+          {
+            "at": "2025-11-22T17:45:02.998Z",
+            "amount": 57,
+            "reason": "task_complete"
+          }
+        ]
       },
       "campaign_id": null
     },
@@ -1737,11 +1748,11 @@
               "note": null
             }
           ],
+          "completed": false,
           "rpg": {
             "xp_awarded": false,
             "last_reward_at": null
-          },
-          "completed": false
+          }
         }
       ],
       "side_quests": [
@@ -1844,9 +1855,9 @@
         {
           "id": 2,
           "description": "rlo",
-          "status": "done",
+          "status": "todo",
           "created_at": "2025-11-21T10:25:26.543Z",
-          "updated_at": "2025-11-21T17:13:37.968Z",
+          "updated_at": "2025-11-21T19:32:47.401Z",
           "status_history": [
             {
               "status": "todo",
@@ -1857,9 +1868,29 @@
               "status": "done",
               "at": "2025-11-21T17:13:37.968Z",
               "note": null
+            },
+            {
+              "status": "todo",
+              "at": "2025-11-21T19:32:43.931Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T19:32:45.266Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T19:32:46.299Z",
+              "note": null
+            },
+            {
+              "status": "todo",
+              "at": "2025-11-21T19:32:47.401Z",
+              "note": null
             }
           ],
-          "completed": true,
+          "completed": false,
           "rpg": {
             "xp_awarded": true,
             "last_reward_at": "2025-11-21T17:13:37.968Z"
@@ -1941,7 +1972,7 @@
       "completed": true,
       "order": 19,
       "created_at": "2025-11-21T10:17:39.328Z",
-      "updated_at": "2025-11-21T17:13:40.397Z",
+      "updated_at": "2025-11-21T19:32:47.401Z",
       "status_history": [
         {
           "status": "in_progress",
@@ -2558,7 +2589,100 @@
         ]
       },
       "campaign_id": null
+    },
+    {
+      "id": 101,
+      "description": "D:N",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "SMORGEBORG",
+          "status": "todo",
+          "created_at": "2025-11-22T17:44:43.861Z",
+          "updated_at": "2025-11-22T17:44:43.861Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-22T17:44:43.861Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "dkn",
+          "status": "todo",
+          "created_at": "2025-11-22T17:44:49.402Z",
+          "updated_at": "2025-11-22T17:44:49.402Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-22T17:44:49.402Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "SMORGEBORG",
+          "status": "todo",
+          "created_at": "2025-11-22T17:44:43.861Z",
+          "updated_at": "2025-11-22T17:44:43.861Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-22T17:44:43.861Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-22",
+      "status": "in_progress",
+      "completed": false,
+      "order": 24,
+      "created_at": "2025-11-22T17:44:34.093Z",
+      "updated_at": "2025-11-22T17:44:49.402Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-11-22T17:44:34.093Z",
+          "note": null
+        },
+        {
+          "status": "in_progress",
+          "at": "2025-11-22T17:44:37.677Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
     }
   ],
-  "nextId": 101
+  "nextId": 102
 }

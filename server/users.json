@@ -554,8 +554,8 @@
         "bio": "On the road again."
       },
       "rpg": {
-        "level": 1,
-        "xp": 86,
+        "level": 2,
+        "xp": 173,
         "hp": 20,
         "mp": 5,
         "coins": 0,
@@ -565,6 +565,42 @@
           "items": []
         },
         "xp_log": [
+          {
+            "amount": 30,
+            "reason": "daily_focus",
+            "message": "Daily focus bonus +30 XP",
+            "metadata": {
+              "date": "2025-11-22"
+            },
+            "at": "2025-11-22T17:45:05.672Z",
+            "level_before": 2,
+            "level_after": 2,
+            "xp_before": 143,
+            "xp_after": 173,
+            "xp_into_level": 73,
+            "xp_for_level": 140,
+            "xp_to_next": 67,
+            "leveled_up": false
+          },
+          {
+            "amount": 57,
+            "reason": "task_complete",
+            "message": "Quest complete +57 XP",
+            "metadata": {
+              "task_id": 78,
+              "task_level": 1,
+              "priority": "high"
+            },
+            "at": "2025-11-22T17:45:02.998Z",
+            "level_before": 1,
+            "level_after": 2,
+            "xp_before": 86,
+            "xp_after": 143,
+            "xp_into_level": 43,
+            "xp_for_level": 140,
+            "xp_to_next": 97,
+            "leveled_up": true
+          },
           {
             "amount": 86,
             "reason": "task_complete",
@@ -585,12 +621,12 @@
             "leveled_up": false
           }
         ],
-        "last_daily_reward_at": null,
-        "last_xp_award_at": "2025-11-19T12:39:02.102Z",
+        "last_daily_reward_at": "2025-11-22",
+        "last_xp_award_at": "2025-11-22T17:45:05.672Z",
         "counters": {
-          "tasks_completed": 1,
+          "tasks_completed": 2,
           "subtasks_completed": 0,
-          "daily_rewards_claimed": 0
+          "daily_rewards_claimed": 1
         },
         "flags": {},
         "metrics": {}

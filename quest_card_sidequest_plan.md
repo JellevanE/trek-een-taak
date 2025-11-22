@@ -155,7 +155,7 @@ Split App.css into 10 logically organized feature files:
 - [x] Capture follow-up tasks in `IMPROVEMENTS.md` or a dedicated ADR so the team remembers to revisit button/shape styling even if schedules tighten. **Done:** Documented in IMPROVEMENTS.md.
 
 ## Story 7 · Quality Gates & Release Prep
-- [ ] Run `deno task validate` (or `deno task test:client`) after each story; add focused jest specs where gaps exist.
-- [ ] Maintain the feature branch `feature/quest-card-sidequest-refactor`, landing one commit per completed story with descriptive messages.
+- [x] Run `deno task validate` (or `deno task test:client`) after each story; add focused jest specs where gaps exist. **Done:** Fixed `usePlayerStats` tests and added `useQuestInteractions` tests.
+- [x] Maintain the feature branch `feature/quest-card-sidequest-refactor`, landing one commit per completed story with descriptive messages. **Done:** Committed Story 6.
 - [ ] Manually QA the flows: add/remove/toggle side quests, start quests while selected, resize viewport, and drag cards across columns.
-- [ ] Draft release notes summarizing the fixes plus the planned UI button/shape polish so downstream teams know what changed and what’s next.
+- [x] Draft release notes summarizing the fixes plus the planned UI button/shape polish so downstream teams know what changed and what’s next. **Done:** Created `RELEASE_NOTES_DRAFT.md`.
