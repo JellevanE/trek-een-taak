@@ -29,6 +29,8 @@ export const useQuestSelection = ({
         setSideQuestDescriptionMap,
         addingSideQuestTo,
         setAddingSideQuestTo,
+        loadingSideQuestAdds,
+        setLoadingSideQuestAdds,
         collapsedMap,
         setCollapsedMap,
         resetSelection
@@ -45,6 +47,8 @@ export const useQuestSelection = ({
         setSideQuestDescriptionMap: state.setSideQuestDescriptionMap,
         addingSideQuestTo: state.addingSideQuestTo,
         setAddingSideQuestTo: state.setAddingSideQuestTo,
+        loadingSideQuestAdds: state.loadingSideQuestAdds,
+        setLoadingSideQuestAdds: state.setLoadingSideQuestAdds,
         collapsedMap: state.collapsedMap,
         setCollapsedMap: state.setCollapsedMap,
         resetSelection: state.resetSelection
@@ -222,6 +226,8 @@ export const useQuestSelection = ({
         setSideQuestDescriptionMap,
         addingSideQuestTo,
         setAddingSideQuestTo,
+        loadingSideQuestAdds,
+        setLoadingSideQuestAdds,
         collapsedMap,
         setCollapsedMap,
         addInputRefs,

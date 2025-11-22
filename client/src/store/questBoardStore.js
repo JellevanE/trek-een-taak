@@ -1,6 +1,11 @@
 import { create } from 'zustand';
-import { devtools, persist, createJSONStorage } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { getQuestSideQuests, idsMatch } from '../hooks/questHelpers.js';
+
+// Conditionally import devtools only in development
+const devtools = process.env.NODE_ENV === 'development'
+    ? require('zustand/middleware').devtools
+    : (config) => config; // No-op in production
 
 const memoryStorage = {
     getItem: () => null,
@@ -42,6 +47,7 @@ const baseInitialState = () => ({
     editingSideQuest: null,
     sideQuestDescriptionMap: {},
     addingSideQuestTo: null,
+    loadingSideQuestAdds: new Set(),
     collapsedMap: {},
     pulsingQuests: {},
     pulsingSideQuests: {},
@@ -76,6 +82,7 @@ const createQuestBoardStore = (set, get) => {
     const setEditingSideQuest = createSetter(set, 'editingSideQuest', 'setEditingSideQuest');
     const setSideQuestDescriptionMap = createSetter(set, 'sideQuestDescriptionMap', 'setSideQuestDescriptionMap');
     const setAddingSideQuestTo = createSetter(set, 'addingSideQuestTo', 'setAddingSideQuestTo');
+    const setLoadingSideQuestAdds = createSetter(set, 'loadingSideQuestAdds', 'setLoadingSideQuestAdds');
     const setCollapsedMap = createSetter(set, 'collapsedMap', 'setCollapsedMap');
     const setPulsingQuests = createSetter(set, 'pulsingQuests', 'setPulsingQuests');
     const setPulsingSideQuests = createSetter(set, 'pulsingSideQuests', 'setPulsingSideQuests');
@@ -98,6 +105,7 @@ const createQuestBoardStore = (set, get) => {
         setEditingSideQuest,
         setSideQuestDescriptionMap,
         setAddingSideQuestTo,
+        setLoadingSideQuestAdds,
         setCollapsedMap,
         setPulsingQuests,
         setPulsingSideQuests,

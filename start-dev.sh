@@ -28,6 +28,9 @@ if [ -z "${JWT_SECRET:-}" ]; then
   log "JWT_SECRET not set — using development fallback (override in env for custom secret)"
 fi
 
+# set server port
+export PORT=4001
+
 # start server (ts-node) and redirect logs
 npm run dev > "$ROOT_DIR/server.log" 2>&1 &
 SERVER_PID=$!
@@ -38,6 +41,10 @@ sleep 1
 
 log "Starting client..."
 cd "$ROOT_DIR/client"
+
+# set client port
+export PORT=4000
+
 # ensure client dependencies are installed
 if [ ! -d "node_modules" ] || [ -z "$(ls -A node_modules 2>/dev/null)" ]; then
   log "client/node_modules missing or empty — running npm install"
@@ -56,14 +63,37 @@ log "Client PID $CLIENT_PID (logs: $ROOT_DIR/client.log)"
 
 cleanup() {
   log "Stopping services..."
-  if kill -0 "$CLIENT_PID" 2>/dev/null; then
+  
+  # Kill the tail process if it exists
+  if [ -n "${TAIL_PID:-}" ] && kill -0 "$TAIL_PID" 2>/dev/null; then
+    kill "$TAIL_PID" 2>/dev/null || true
+  fi
+  
+  # Kill client and all its child processes
+  if [ -n "${CLIENT_PID:-}" ] && kill -0 "$CLIENT_PID" 2>/dev/null; then
+    pkill -P "$CLIENT_PID" 2>/dev/null || true
     kill "$CLIENT_PID" 2>/dev/null || true
   fi
-  if kill -0 "$SERVER_PID" 2>/dev/null; then
+  
+  # Kill server and all its child processes
+  if [ -n "${SERVER_PID:-}" ] && kill -0 "$SERVER_PID" 2>/dev/null; then
+    pkill -P "$SERVER_PID" 2>/dev/null || true
     kill "$SERVER_PID" 2>/dev/null || true
   fi
-  wait 2>/dev/null || true
+  
+  # Give processes a moment to terminate gracefully
+  sleep 0.5
+  
+  # Force kill if still running
+  if [ -n "${CLIENT_PID:-}" ] && kill -0 "$CLIENT_PID" 2>/dev/null; then
+    kill -9 "$CLIENT_PID" 2>/dev/null || true
+  fi
+  if [ -n "${SERVER_PID:-}" ] && kill -0 "$SERVER_PID" 2>/dev/null; then
+    kill -9 "$SERVER_PID" 2>/dev/null || true
+  fi
+  
   log "Stopped."
+  exit 0
 }
 
 trap cleanup SIGINT SIGTERM EXIT
@@ -72,4 +102,5 @@ log "Both services started. Press Ctrl-C to stop. Tailing logs..."
 
 # tail both logs so the script stays running and shows output
 tail -n +1 -f "$ROOT_DIR/server.log" "$ROOT_DIR/client.log" &
-wait
+TAIL_PID=$!
+wait "$TAIL_PID" 2>/dev/null || true

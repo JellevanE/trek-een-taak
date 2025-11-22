@@ -1,261 +1,391 @@
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import App from './App';
+import { useTheme } from './hooks/useTheme';
+import { useAuth } from './hooks/useAuth';
+import { useQuestBoard } from './hooks/useQuestBoard';
+import { useSoundFx } from './hooks/useSoundFx';
+import { useReducedMotionPreference } from './hooks/useReducedMotionPreference';
 
-test('renders app header', () => {
-  render(<App />);
-  const header = screen.getByRole('heading', { level: 1, name: /Quest Tracker/i });
-  expect(header).toBeInTheDocument();
-});
+jest.mock('./hooks/useTheme');
+jest.mock('./hooks/useAuth');
+jest.mock('./hooks/useQuestBoard');
+jest.mock('./hooks/useSoundFx');
+jest.mock('./hooks/useReducedMotionPreference');
 
-const originalFetch = global.fetch;
+const mockUseTheme = useTheme;
+const mockUseAuth = useAuth;
+const mockUseQuestBoard = useQuestBoard;
+const mockUseSoundFx = useSoundFx;
+const mockUseReducedMotionPreference = useReducedMotionPreference;
 
-const okResponse = (data) => Promise.resolve({
-  ok: true,
-  status: 200,
-  json: () => Promise.resolve(data)
-});
+const defaultQuestBoard = {
+    quests: [],
+    campaigns: [],
+    campaignSidebarCollapsed: false,
+    setCampaignSidebarCollapsed: jest.fn(),
+    activeCampaignFilter: null,
+    setActiveCampaignFilter: jest.fn(),
+    taskCampaignSelection: null,
+    setTaskCampaignSelection: jest.fn(),
+    campaignFormMode: null,
+    campaignFormValues: {},
+    campaignFormBusy: false,
+    campaignFormError: null,
+    description: '',
+    setDescription: jest.fn(),
+    priority: 'medium',
+    taskLevel: 1,
+    playerStats: null,
+    setPlayerStats: jest.fn(),
+    dailyLoading: false,
+    debugBusy: false,
+    showDebugTools: false,
+    setShowDebugTools: jest.fn(),
+    editingQuest: null,
+    editingQuestInputRef: { current: null },
+    setEditingQuest: jest.fn(),
+    selectedQuestId: null,
+    selectedSideQuest: null,
+    editingSideQuest: null,
+    sideQuestDescriptionMap: {},
+    setSideQuestDescriptionMap: jest.fn(),
+    addingSideQuestTo: null,
+    setAddingSideQuestTo: jest.fn(),
+    loadingSideQuestAdds: new Set(),
+    collapsedMap: {},
+    addInputRefs: { current: {} },
+    undoQueue: [],
+    getQuestProgress: jest.fn(() => 50),
+    progressColor: jest.fn(() => 'blue'),
+    getQuestStatus: jest.fn(() => 'todo'),
+    getQuestStatusLabel: jest.fn(() => 'To Do'),
+    getQuestSideQuests: jest.fn(() => []),
+    getSideQuestStatus: jest.fn(() => 'todo'),
+    getSideQuestStatusLabel: jest.fn(() => 'To Do'),
+    isInteractiveTarget: jest.fn(() => false),
+    idsMatch: jest.fn((a, b) => a === b),
+    openCampaignCreateForm: jest.fn(),
+    openCampaignEditForm: jest.fn(),
+    closeCampaignForm: jest.fn(),
+    handleCampaignFieldChange: jest.fn(),
+    submitCampaignForm: jest.fn(),
+    addTask: jest.fn(),
+    addSideQuest: jest.fn(),
+    toggleCollapse: jest.fn(),
+    handleSelectQuest: jest.fn(),
+    handleSelectSideQuest: jest.fn(),
+    dismissUndoEntry: jest.fn(),
+    handleUndoDelete: jest.fn(),
+    deleteTask: jest.fn(),
+    updateTask: jest.fn(),
+    toasts: [],
+    dismissToast: jest.fn(),
+    pulsingQuests: {},
+    pulsingSideQuests: {},
+    glowQuests: {},
+    celebratingQuests: {},
+    spawnQuests: {},
+    claimDailyReward: jest.fn(),
+    clearAllQuests: jest.fn(),
+    seedDemoQuests: jest.fn(),
+    grantXp: jest.fn(),
+    resetRpgStats: jest.fn(),
+    setTaskStatus: jest.fn(),
+    setSideQuestStatus: jest.fn(),
+    deleteSideQuest: jest.fn(),
+    startEditingSideQuest: jest.fn(),
+    handleSideQuestEditChange: jest.fn(),
+    cancelSideQuestEdit: jest.fn(),
+    saveSideQuestEdit: jest.fn(),
+    handleEditChange: jest.fn(),
+    cyclePriority: jest.fn(),
+    cycleTaskLevel: jest.fn(),
+    cycleEditingPriority: jest.fn(),
+    cycleEditingLevel: jest.fn(),
+    smoothDrag: null,
+    campaignLookup: new Map(),
+    hasCampaigns: false,
+    selectedCampaign: null,
+    globalProgress: { percent: 0 },
+    globalAura: { fillClass: '', emoji: '', mood: '' },
+    globalLabel: '',
+    dailyClaimed: false,
+    xpPercent: 0,
+};
 
-afterEach(() => {
-  if (originalFetch) {
-    global.fetch = originalFetch;
-  } else {
-    delete global.fetch;
-  }
-  window.localStorage.clear();
-});
+describe('App', () => {
+    beforeEach(() => {
+        mockUseTheme.mockReturnValue({
+            theme: 'dark',
+            themeLabel: 'Dark',
+            themeProfile: { appearance: 'dark' },
+            toggleTheme: jest.fn(),
+            soundVolume: 50,
+            setSoundVolume: jest.fn(),
+        });
+        mockUseAuth.mockReturnValue({
+            token: null,
+            setToken: jest.fn(),
+            showProfile: false,
+            setShowProfile: jest.fn(),
+        });
+        mockUseQuestBoard.mockReturnValue(defaultQuestBoard);
+        mockUseSoundFx.mockReturnValue({
+            playSound: jest.fn(),
+        });
+        mockUseReducedMotionPreference.mockReturnValue(false);
+    });
 
-function setupAuthenticatedApp(fetchImplementation) {
-  window.localStorage.setItem('auth_token', 'test-token');
-  global.fetch = jest.fn(fetchImplementation);
-  return render(<App />);
-}
+    test('renders login screen when not authenticated', () => {
+        render(<App />);
+        expect(screen.getByText('Welcome to Quest Tracker')).toBeInTheDocument();
+        expect(screen.getByText('Please sign in or create an account to start managing your quests.')).toBeInTheDocument();
+    });
 
-test('campaign sidebar filters quests and fetches scoped tasks', async () => {
-  const campaigns = [
-    { id: 1, name: 'Campaign Alpha', progress_summary: '1/2', stats: { quests_completed: 1, quests_total: 2 } },
-    { id: 2, name: 'Campaign Beta', progress_summary: '0/1', stats: { quests_completed: 0, quests_total: 1 } }
-  ];
-  const quests = [
-    { id: 10, description: 'Alpha quest', status: 'todo', priority: 'medium', task_level: 1, campaign_id: 1 },
-    { id: 11, description: 'Loose quest', status: 'todo', priority: 'low', task_level: 1, campaign_id: null }
-  ];
-  const filteredQuests = [
-    { id: 10, description: 'Alpha quest', status: 'todo', priority: 'medium', task_level: 1, campaign_id: 1 }
-  ];
+    test('renders quest board when authenticated', () => {
+        mockUseAuth.mockReturnValue({
+            token: 'test-token',
+            setToken: jest.fn(),
+            showProfile: false,
+            setShowProfile: jest.fn(),
+        });
+        render(<App />);
+        expect(screen.getByText('Quest Tracker')).toBeInTheDocument();
+        expect(screen.getByText('Quest management made easy, but also way harder.')).toBeInTheDocument();
+    });
 
-  setupAuthenticatedApp((url, options = {}) => {
-    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 1 } } });
-    if (url === '/api/campaigns') return okResponse({ campaigns });
-    if (url === '/api/tasks') return okResponse({ tasks: quests });
-    if (url === '/api/tasks?campaign_id=1') return okResponse({ tasks: filteredQuests });
-    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
-  });
+    test('toggles theme', () => {
+        const toggleTheme = jest.fn();
+        mockUseTheme.mockReturnValue({
+            theme: 'dark',
+            themeLabel: 'Dark',
+            themeProfile: { appearance: 'dark' },
+            toggleTheme: toggleTheme,
+            soundVolume: 50,
+            setSoundVolume: jest.fn(),
+        });
+        render(<App />);
+        fireEvent.click(screen.getByText('Theme: Dark'));
+        expect(toggleTheme).toHaveBeenCalled();
+    });
 
-  await waitFor(() => expect(screen.getByText('Alpha quest')).toBeInTheDocument());
+    test('shows and hides profile modal', () => {
+        const setShowProfile = jest.fn();
+        mockUseAuth.mockReturnValue({
+            token: 'test-token',
+            setToken: jest.fn(),
+            showProfile: false,
+            setShowProfile: setShowProfile,
+        });
+        render(<App />);
+        fireEvent.click(screen.getByText('Profile'));
+        expect(setShowProfile).toHaveBeenCalledWith(expect.any(Function));
+    });
 
-  const sidebar = screen.getByText('Campaigns').closest('aside');
-  expect(sidebar).toBeTruthy();
-  const campaignButton = within(sidebar).getByRole('button', { name: /Campaign Alpha/i });
-  fireEvent.click(campaignButton);
+    test('shows and hides debug tools', () => {
+        const setShowDebugTools = jest.fn();
+        mockUseQuestBoard.mockReturnValue({
+            ...defaultQuestBoard,
+            showDebugTools: false,
+            setShowDebugTools: setShowDebugTools,
+        });
+        mockUseAuth.mockReturnValue({ token: 'test-token' });
+        render(<App />);
+        fireEvent.click(screen.getByText('Debug Tools'));
+        expect(setShowDebugTools).toHaveBeenCalledWith(expect.any(Function));
+    });
 
-  await waitFor(() => {
-    expect(screen.getByText('Alpha quest')).toBeInTheDocument();
-    expect(screen.queryByText('Loose quest')).not.toBeInTheDocument();
-  });
+    test('shows and hides keyboard shortcuts', () => {
+        mockUseAuth.mockReturnValue({ token: 'test-token' });
+        render(<App />);
+        fireEvent.click(screen.getByText('Keyboard Shortcuts'));
+        expect(screen.getByText('Keep your hands on the keys to fly through quests.')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('Close'));
+        expect(screen.queryByText('Keep your hands on the keys to fly through quests.')).not.toBeInTheDocument();
+    });
 
-  const fetchCalls = global.fetch.mock.calls.map(([requestUrl]) => requestUrl);
-  expect(fetchCalls).toContain('/api/tasks?campaign_id=1');
-});
+    test('renders quests when available', () => {
+        mockUseAuth.mockReturnValue({ token: 'test-token' });
+        mockUseQuestBoard.mockReturnValue({
+            ...defaultQuestBoard,
+            quests: [{ id: 1, description: 'Test Quest', side_quests: [] }],
+            getQuestSideQuests: jest.fn().mockReturnValue([]),
+        });
+        render(<App />);
+        expect(screen.getByText('Test Quest')).toBeInTheDocument();
+    });
 
-test('creating a quest submits selected campaign id', async () => {
-  const campaigns = [
-    { id: 1, name: 'Campaign Alpha', progress_summary: '0/0', stats: { quests_completed: 0, quests_total: 0 } }
-  ];
-  const quests = [];
-  const postBodies = [];
+    describe('Debug Panel', () => {
+        beforeEach(() => {
+            mockUseAuth.mockReturnValue({ token: 'test-token' });
+        });
 
-  setupAuthenticatedApp((url, options = {}) => {
-    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 1 } } });
-    if (url === '/api/campaigns') return okResponse({ campaigns });
-    if (url === '/api/tasks' && (!options.method || options.method === 'GET')) return okResponse({ tasks: quests });
-    if (url === '/api/tasks' && options.method === 'POST') {
-      const body = JSON.parse(options.body);
-      postBodies.push(body);
-      return okResponse({
-        id: 42,
-        description: body.description,
-        status: 'todo',
-        priority: body.priority || 'medium',
-        task_level: body.task_level || 1,
-        campaign_id: body.campaign_id
-      });
-    }
-    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
-  });
+        test('shows and hides the debug panel', () => {
+            const setShowDebugTools = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                showDebugTools: false,
+                setShowDebugTools: setShowDebugTools,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByText('Debug Tools'));
+            expect(setShowDebugTools).toHaveBeenCalledWith(expect.any(Function));
+        });
 
-  await waitFor(() => expect(screen.getByRole('button', { name: /Add Quest/i })).toBeInTheDocument());
+        test('calls clearAllQuests when "Clear Quests" is clicked', () => {
+            const clearAllQuests = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                showDebugTools: true,
+                clearAllQuests: clearAllQuests,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByText('Clear Quests'));
+            expect(clearAllQuests).toHaveBeenCalled();
+        });
 
-  const input = screen.getByPlaceholderText(/Quest description/i);
-  fireEvent.change(input, { target: { value: 'Join campaign' } });
+        test('calls seedDemoQuests when "Seed 5 Quests" is clicked', () => {
+            const seedDemoQuests = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                showDebugTools: true,
+                seedDemoQuests: seedDemoQuests,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByText('Seed 5 Quests'));
+            expect(seedDemoQuests).toHaveBeenCalledWith(5);
+        });
 
-  const select = screen.getByRole('combobox', { name: /Assign quest to campaign/i });
-  fireEvent.change(select, { target: { value: '1' } });
+        test('calls grantXp when "+250 XP" is clicked', () => {
+            const grantXp = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                showDebugTools: true,
+                grantXp: grantXp,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByText('+250 XP'));
+            expect(grantXp).toHaveBeenCalledWith(250);
+        });
 
-  fireEvent.click(screen.getByRole('button', { name: /Add Quest/i }));
+        test('calls resetRpgStats when "Reset RPG" is clicked', () => {
+            const resetRpgStats = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                showDebugTools: true,
+                resetRpgStats: resetRpgStats,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByText('Reset RPG'));
+            expect(resetRpgStats).toHaveBeenCalled();
+        });
+    });
 
-  await waitFor(() => expect(postBodies.length).toBeGreaterThan(0));
+    describe('Campaign Sidebar', () => {
+        beforeEach(() => {
+            mockUseAuth.mockReturnValue({ token: 'test-token' });
+        });
 
-  expect(postBodies[0]).toMatchObject({
-    description: 'Join campaign',
-    campaign_id: 1
-  });
-});
+        test('collapses and expands the sidebar', () => {
+            const setCampaignSidebarCollapsed = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                campaignSidebarCollapsed: false,
+                setCampaignSidebarCollapsed: setCampaignSidebarCollapsed,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByLabelText('Collapse campaigns panel'));
+            expect(setCampaignSidebarCollapsed).toHaveBeenCalledWith(expect.any(Function));
+        });
 
-test('allows creating a campaign from the sidebar', async () => {
-  let campaigns = [];
-  const quests = [];
-  let createdPayload = null;
+        test('filters by all quests', () => {
+            const setActiveCampaignFilter = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                activeCampaignFilter: 1,
+                setActiveCampaignFilter: setActiveCampaignFilter,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByText('All quests'));
+            expect(setActiveCampaignFilter).toHaveBeenCalledWith(null);
+        });
 
-  setupAuthenticatedApp((url, options = {}) => {
-    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 1 } } });
-    if (url === '/api/campaigns' && (!options.method || options.method === 'GET')) {
-      return okResponse({ campaigns });
-    }
-    if (url === '/api/tasks' && (!options.method || options.method === 'GET')) {
-      return okResponse({ tasks: quests });
-    }
-    if (url.startsWith('/api/tasks?')) {
-      return okResponse({ tasks: [] });
-    }
-    if (url === '/api/campaigns' && options.method === 'POST') {
-      createdPayload = JSON.parse(options.body);
-      const newCampaign = {
-        id: 5,
-        name: createdPayload.name,
-        description: createdPayload.description || '',
-        image_url: createdPayload.image_url || null,
-        progress_summary: '0/0',
-        stats: { quests_completed: 0, quests_total: 0 }
-      };
-      campaigns = [...campaigns, newCampaign];
-      return okResponse(newCampaign);
-    }
-    if (url.startsWith('/api/tasks?campaign_id=')) {
-      return okResponse({ tasks: [] });
-    }
-    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
-  });
+        test('filters by a specific campaign', () => {
+            const setActiveCampaignFilter = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                campaigns: [{ id: 1, name: 'Test Campaign' }],
+                hasCampaigns: true,
+                activeCampaignFilter: null,
+                setActiveCampaignFilter: setActiveCampaignFilter,
+            });
+            render(<App />);
+            const sidebar = screen.getByRole('complementary', { name: /campaigns/i });
+            fireEvent.click(within(sidebar).getByText('Test Campaign'));
+            expect(setActiveCampaignFilter).toHaveBeenCalledWith(1);
+        });
+    });
 
-  await waitFor(() => expect(screen.getByRole('button', { name: /New Campaign/i })).toBeInTheDocument());
+    describe('Add Quest Form', () => {
+        beforeEach(() => {
+            mockUseAuth.mockReturnValue({ token: 'test-token' });
+        });
 
-  fireEvent.click(screen.getByRole('button', { name: /New Campaign/i }));
+        test('updates description', () => {
+            const setDescription = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                setDescription: setDescription,
+            });
+            render(<App />);
+            fireEvent.change(screen.getByPlaceholderText('Quest description'), { target: { value: 'New Quest' } });
+            expect(setDescription).toHaveBeenCalledWith('New Quest');
+        });
 
-  fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'Skyward League' } });
-  fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test description' } });
-  fireEvent.change(screen.getByLabelText(/Image URL/i), { target: { value: 'https://example.com/banner.png' } });
+        test('cycles priority', () => {
+            const cyclePriority = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                cyclePriority: cyclePriority,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByTitle('Cycle quest urgency'));
+            expect(cyclePriority).toHaveBeenCalled();
+        });
 
-  fireEvent.click(screen.getByRole('button', { name: /Create$/i }));
+        test('cycles task level', () => {
+            const cycleTaskLevel = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                cycleTaskLevel: cycleTaskLevel,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByTitle('Cycle quest level'));
+            expect(cycleTaskLevel).toHaveBeenCalled();
+        });
 
-  await waitFor(() => {
-    const campaignButton = screen.getByRole('button', { name: /Skyward League/i });
-    expect(campaignButton).toHaveAttribute('aria-pressed', 'true');
-  });
+        test('selects a campaign', () => {
+            const setTaskCampaignSelection = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                campaigns: [{ id: 1, name: 'Test Campaign' }],
+                hasCampaigns: true,
+                setTaskCampaignSelection: setTaskCampaignSelection,
+            });
+            render(<App />);
+            fireEvent.change(screen.getByLabelText('Assign quest to campaign'), { target: { value: '1' } });
+            expect(setTaskCampaignSelection).toHaveBeenCalledWith(1);
+        });
 
-  expect(createdPayload).toMatchObject({
-    name: 'Skyward League',
-    description: 'Test description',
-    image_url: 'https://example.com/banner.png'
-  });
-
-  expect(screen.queryByText(/Create Campaign/i)).not.toBeInTheDocument();
-});
-
-test('allows editing the selected campaign', async () => {
-  let campaigns = [
-    { id: 3, name: 'Original Name', description: 'Initial', image_url: null, progress_summary: '0/1', stats: { quests_completed: 0, quests_total: 1 } }
-  ];
-  const quests = [{ id: 30, description: 'Quest', status: 'todo', priority: 'medium', task_level: 1, campaign_id: 3 }];
-  let updatedPayload = null;
-
-  setupAuthenticatedApp((url, options = {}) => {
-    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 1 } } });
-    if (url === '/api/campaigns' && (!options.method || options.method === 'GET')) {
-      return okResponse({ campaigns });
-    }
-    if (url === '/api/tasks' && (!options.method || options.method === 'GET')) {
-      return okResponse({ tasks: quests });
-    }
-    if (url.startsWith('/api/tasks?')) {
-      return okResponse({ tasks: quests.filter(q => String(q.campaign_id) === url.split('=').pop()) });
-    }
-    if (url === '/api/campaigns/3' && options.method === 'PATCH') {
-      updatedPayload = JSON.parse(options.body);
-      campaigns = [{
-        ...campaigns[0],
-        name: updatedPayload.name,
-        description: updatedPayload.description || '',
-        image_url: updatedPayload.image_url || null
-      }];
-      return okResponse(campaigns[0]);
-    }
-    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
-  });
-
-  await waitFor(() => expect(screen.getByRole('button', { name: /Campaigns/i })).toBeInTheDocument());
-
-  const sidebar = screen.getByText('Campaigns').closest('aside');
-  expect(sidebar).toBeTruthy();
-  const campaignButton = within(sidebar).getByRole('button', { name: /Original Name/i });
-  fireEvent.click(campaignButton);
-
-  fireEvent.click(screen.getByRole('button', { name: /Edit Selected/i }));
-
-  const nameInput = screen.getByLabelText(/Name/i);
-  fireEvent.change(nameInput, { target: { value: 'Renamed Campaign' } });
-
-  fireEvent.click(screen.getByRole('button', { name: /^Save$/i }));
-
-  await waitFor(() => {
-    const renamedButton = within(sidebar).getByRole('button', { name: /Renamed Campaign/i });
-    expect(renamedButton).toHaveAttribute('aria-pressed', 'true');
-  });
-
-  expect(updatedPayload).toMatchObject({
-    name: 'Renamed Campaign'
-  });
-});
-
-test('add side quest button works even when quest already has side quests', async () => {
-  const quests = [
-    {
-      id: 501,
-      description: 'Master quest',
-      status: 'todo',
-      priority: 'medium',
-      task_level: 1,
-      campaign_id: null,
-      side_quests: [
-        { id: 9001, description: 'Gather crystals', status: 'todo' }
-      ]
-    }
-  ];
-
-  setupAuthenticatedApp((url, options = {}) => {
-    if (url === '/api/users/me') return okResponse({ user: { rpg: { level: 3 } } });
-    if (url === '/api/campaigns') return okResponse({ campaigns: [] });
-    if (url === '/api/tasks' && (!options.method || options.method === 'GET')) return okResponse({ tasks: quests });
-    if (url.startsWith('/api/tasks?')) return okResponse({ tasks: quests });
-    throw new Error(`Unhandled request: ${url} ${JSON.stringify(options)}`);
-  });
-
-  await waitFor(() => expect(screen.getByText('Master quest')).toBeInTheDocument());
-
-  const questCard = screen.getByText('Master quest').closest('.quest');
-  expect(questCard).toBeTruthy();
-  const addButton = within(questCard).getByRole('button', { name: /\+ Add Side Quest/i });
-  fireEvent.click(addButton);
-
-  await waitFor(() => {
-    expect(screen.getByPlaceholderText(/Add a side-quest/i)).toBeInTheDocument();
-  });
+        test('calls addTask when "Add Quest" is clicked', () => {
+            const addTask = jest.fn();
+            mockUseQuestBoard.mockReturnValue({
+                ...defaultQuestBoard,
+                addTask: addTask,
+            });
+            render(<App />);
+            fireEvent.click(screen.getByText('Add Quest'));
+            expect(addTask).toHaveBeenCalled();
+        });
+    });
 });

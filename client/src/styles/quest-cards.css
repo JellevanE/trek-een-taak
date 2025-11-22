@@ -1,0 +1,315 @@
+/* QUEST-CARDS.CSS - Quest and task card styles */
+
+.task-container,
+.quest-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--quest-card-stack-gap);
+    width:100%;
+    max-width: var(--quest-card-max-width);
+    padding: var(--arcade-space-sm);
+    margin: 0 auto;
+    box-sizing:border-box;
+}
+
+.task,
+.quest {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08));
+    border-radius: var(--quest-card-radius);
+    padding: var(--quest-card-padding-block) var(--quest-card-padding-inline);
+    margin: 0;
+    text-align: left;
+    border: 1px solid rgba(155,92,255,0.12);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--quest-card-shadow-resting, 0 8px 30px rgba(0,0,0,0.6), 0 0 18px rgba(155,92,255,0.04) inset);
+    transition: box-shadow var(--quest-card-shadow-transition, 0.22s ease), transform 0.22s ease;
+}
+
+.task::before,
+.quest::before{
+    content: "";
+    position:absolute;
+    left:-40%;
+    top:-60%;
+    width:200%;
+    height:200%;
+    background: radial-gradient(circle at 20% 20%, rgba(0,240,255,0.03), transparent 10%), radial-gradient(circle at 80% 80%, rgba(255,46,196,0.02), transparent 15%);
+    pointer-events:none;
+}
+
+.task.completed,
+.quest.completed {
+    opacity: 0.6;
+    filter: grayscale(20%);
+    text-decoration: line-through;
+}
+
+.quest.selected {
+    border-color: rgba(0,240,255,0.45);
+    box-shadow:
+        var(--quest-card-focus-outline, 0 0 0 1px rgba(0,240,255,0.3)),
+        var(--quest-card-shadow-active, 0 10px 28px rgba(0,240,255,0.1));
+    transform: translateY(-1px);
+}
+
+.quest.selected::before{
+    opacity:0.4;
+}
+
+.task h3,
+.quest h3 {
+    margin-top: 0;
+}
+
+.task.collapsed,
+.quest.collapsed {
+    max-height: 84px;
+    overflow: hidden;
+}
+
+.task.drag-over,
+.quest.drag-over {
+    outline: 2px solid rgba(0,240,255,0.14);
+    transform: translateY(-2px);
+}
+
+.task-header,
+.quest-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:var(--quest-card-gap);
+}
+
+.quest-card-shell{
+    display:flex;
+    align-items:flex-start;
+    gap:var(--quest-card-gap);
+}
+
+.quest-card-body{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:var(--quest-card-body-gap);
+}
+
+.task-header .left,
+.quest-header .left{ display:flex; flex-direction:column; align-items:flex-start; gap:var(--arcade-space-xs); flex:1; min-width:0 }
+.task-header .right,
+.quest-header .right{ display:flex; align-items:center; justify-content:flex-end }
+
+.quest-title-row{
+    width:100%;
+    display:flex;
+    align-items:flex-start;
+    gap:var(--quest-card-gap);
+    flex-wrap:wrap;
+}
+
+.quest-title-row h3{
+    flex:1;
+    min-width:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+}
+
+.quest-meta-tags{
+    display:flex;
+    align-items:center;
+    gap:var(--quest-meta-gap);
+    flex:0 1 auto;
+    flex-wrap:wrap;
+    row-gap:var(--arcade-space-xxs);
+    justify-content:flex-end;
+    margin-left:auto;
+    min-width:0;
+}
+
+.quest-meta-tags > *{
+    flex-shrink:0;
+    white-space:nowrap;
+}
+
+/* Visual cue when a task or subtask is started */
+.task.started,
+.quest.started{ box-shadow: 0 10px 30px rgba(66,153,225,0.08), 0 0 24px rgba(99,102,241,0.04) inset; border-color: rgba(59,130,246,0.12); transform: translateY(-2px); transition: transform .18s ease, box-shadow .22s ease }
+
+.task.spawn,
+.quest.spawn{
+    animation: quest-spawn-anim .55s cubic-bezier(.22,1.2,.32,1) forwards;
+}
+
+/* provide a clear inset outline for grouped fields */
+.task .panel,
+.quest .panel {
+    border: 1px solid rgba(255,255,255,0.03);
+    padding:8px;
+    border-radius:6px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
+}
+
+/* Task info hierarchy */
+.task h3,
+.quest h3{
+    color: white;
+    font-size:16px;
+    margin:0;
+    line-height:1.1;
+    text-overflow:ellipsis;
+    white-space:normal;
+    overflow:hidden;
+    word-break:break-word;
+}
+
+.priority-tag{ font-size:11px; padding:6px 10px; }
+
+.task-details,
+.quest-details{ margin-top:var(--arcade-space-sm); display:flex; gap:var(--quest-card-gap); flex-wrap:wrap }
+
+.task-details .muted,
+.quest-details .muted{ color:var(--muted); font-size:12px }
+
+.task-details .small,
+.quest-details .small{ font-size:11px; color:var(--muted) }
+
+.quest-actions{
+    margin-left:auto;
+    display:flex;
+    gap:var(--quest-actions-gap);
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+/* Per-task progress */
+.task-progress-wrap,
+.quest-progress-wrap{ width:100%; margin-bottom:var(--arcade-space-sm) }
+
+.task-progress,
+.quest-progress{ display:flex; align-items:center; gap:var(--arcade-space-sm) }
+
+.task-progress-bar,
+.quest-progress-bar{ flex:1; height:10px; background: var(--progress-track, rgba(255,255,255,0.03)); border-radius:999px; overflow:hidden; border:1px solid var(--progress-track, rgba(255,255,255,0.03)) }
+
+.task-progress-fill,
+.quest-progress-fill{ height:100%; background: var(--quest-progress-gradient, linear-gradient(90deg,var(--accent-purple),var(--accent-pink))); transition: width .24s ease }
+
+.task-progress-meta,
+.quest-progress-meta{ min-width:44px; font-weight:700; color:var(--muted); font-size:13px }
+
+/* more pronounced progress fill animation */
+.task-progress-fill, .global-progress-fill{ transition: width .6s cubic-bezier(.2,.9,.2,1), background .3s ease }
+
+/* Drag handle and insertion indicator */
+.drag-handle {
+    width:18px;
+    height:18px;
+    display:inline-block;
+    margin-right:8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06));
+    border-radius:4px;
+    border:1px solid rgba(255,255,255,0.03);
+    cursor:grab;
+    display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10px
+}
+
+/* hide the top-level task hamburger by default; show on hover to reduce visual clutter */
+.task > div > .drag-handle:first-child,
+.quest > div > .drag-handle:first-child{ opacity:0; transform:translateX(-6px); transition:opacity .12s, transform .12s }
+
+.task:hover > div > .drag-handle:first-child,
+.quest:hover > div > .drag-handle:first-child{ opacity:1; transform:translateX(0) }
+
+/* ensure top-level drag handle is visually quieter; override for top handle */
+.task > div > .drag-handle.top,
+.quest > div > .drag-handle.top{ opacity:0; transform:translateX(-6px); }
+
+.task:hover > div > .drag-handle.top,
+.quest:hover > div > .drag-handle.top{ opacity:1; transform:translateX(0) }
+
+.task[data-dragging="true"],
+.quest[data-dragging="true"]{ opacity:0.5 }
+
+.insert-indicator {
+    height: 6px;
+    background: linear-gradient(90deg, rgba(0,240,255,0.16), rgba(255,46,196,0.14));
+    border-radius:3px;
+    margin:4px 0;
+    transition: opacity .12s;
+}
+
+.drag-handle[draggable]{ cursor:grab }
+
+.insert-indicator{ z-index:2 }
+
+.task ul,
+.quest ul {
+    list-style-type: none;
+    padding-left: 12px;
+    margin: 8px 0 0;
+}
+
+.task li.completed {
+    text-decoration: line-through;
+}
+
+.task button {
+    margin-left: 8px;
+}
+
+/* small neon tag for priority */
+.priority-tag {
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:11px;
+    color:#001018;
+    font-weight:700;
+}
+
+.priority-low{ background: linear-gradient(90deg,var(--accent-purple),var(--accent-cyan));} 
+.priority-medium{ background: linear-gradient(90deg,#ffd36b,#ff6ad8);} 
+.priority-high{ background: linear-gradient(90deg,#ff6161,#ff2ec4);}
+
+.priority-pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: capitalize;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.4px;
+}
+
+.priority-pill.low{
+    background: rgba(56, 189, 248, 0.18);
+    color: #38bdf8;
+}
+
+.priority-pill.medium{
+    background: rgba(250, 204, 21, 0.22);
+    color: #facc15;
+}
+
+.priority-pill.high{
+    background: rgba(248, 113, 113, 0.22);
+    color: #f87171;
+}
+
+.level-pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    background: rgba(255,255,255,0.12);
+    color: var(--text-primary);
+}

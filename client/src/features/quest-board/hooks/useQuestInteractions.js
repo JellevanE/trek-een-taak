@@ -46,6 +46,8 @@ export const useQuestInteractions = ({
         setSideQuestDescriptionMap,
         addingSideQuestTo,
         setAddingSideQuestTo,
+        loadingSideQuestAdds,
+        setLoadingSideQuestAdds,
         collapsedMap,
         addInputRefs,
         ensureQuestExpanded,
@@ -113,18 +115,72 @@ export const useQuestInteractions = ({
     }, [createQuest, playSound, triggerQuestSpawn]);
 
     const addSideQuest = useCallback(async (questId) => {
-        const value = sideQuestDescriptionMap[questId] || '';
-        if (!value || value.trim() === '') return;
-        const updatedQuest = await createSideQuest(questId, value);
-        if (updatedQuest) {
-            setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
+        const rawValue = sideQuestDescriptionMap[questId] || '';
+        const value = rawValue.trim();
+        if (!value) return;
+
+        // Mark this quest as loading
+        setLoadingSideQuestAdds((prev) => {
+            const next = new Set(prev);
+            next.add(questId);
+            return next;
+        });
+
+        const optimisticId = `optimistic-${questId}-${Date.now()}`;
+        const optimisticSideQuest = {
+            id: optimisticId,
+            description: value,
+            status: 'todo',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            optimistic: true
+        };
+
+        setQuests((prev) => prev.map((quest) => {
+            if (!idsMatch(quest.id, questId)) return quest;
+            const nextSideQuests = [...getQuestSideQuests(quest), optimisticSideQuest];
+            return { ...quest, side_quests: nextSideQuests };
+        }));
+
+        const clearOptimistic = () => {
+            setQuests((prev) => prev.map((quest) => {
+                if (!idsMatch(quest.id, questId)) return quest;
+                const filtered = getQuestSideQuests(quest).filter((sub) => !idsMatch(sub.id, optimisticId));
+                return { ...quest, side_quests: filtered };
+            }));
+        };
+
+        setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
+
+        try {
+            const updatedQuest = await createSideQuest(questId, value);
+            if (!updatedQuest) {
+                clearOptimistic();
+                pushToast('Failed to add side quest', 'error');
+                return;
+            }
+            setQuests((prev) => prev.map((quest) => (
+                idsMatch(quest.id, updatedQuest.id) ? updatedQuest : quest
+            )));
             playSound(SOUND_EVENT_KEYS.SIDE_QUEST_ADD);
+        } catch (error) {
+            console.error('Error adding side quest:', error);
+            clearOptimistic();
+            pushToast('Failed to add side quest', 'error');
+        } finally {
+            // Clear loading state
+            setLoadingSideQuestAdds((prev) => {
+                const next = new Set(prev);
+                next.delete(questId);
+                return next;
+            });
+
             setTimeout(() => {
                 if (addInputRefs.current && addInputRefs.current[questId]) {
                     try {
                         addInputRefs.current[questId].focus();
-                    } catch (error) {
-                        console.error(error);
+                    } catch (focusError) {
+                        console.error(focusError);
                     }
                 }
             }, 10);
@@ -132,7 +188,17 @@ export const useQuestInteractions = ({
                 setTimeout(() => refreshLayout(), 50);
             }
         }
-    }, [addInputRefs, createSideQuest, playSound, refreshLayout, setSideQuestDescriptionMap, sideQuestDescriptionMap]);
+    }, [
+        addInputRefs,
+        createSideQuest,
+        playSound,
+        pushToast,
+        refreshLayout,
+        setLoadingSideQuestAdds,
+        setQuests,
+        setSideQuestDescriptionMap,
+        sideQuestDescriptionMap
+    ]);
 
     const scheduleQuestUndo = useCallback((quest) => {
         if (!quest) return;

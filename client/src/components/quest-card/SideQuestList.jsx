@@ -62,6 +62,20 @@ const SideQuestItem = ({
         pulsingClass
     ].filter(Boolean).join(' ');
 
+    const inputRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (sideEditing && inputRef.current && addInputRefs && addInputRefs.current) {
+            const refKey = `${quest.id}:${sideQuest.id}:edit`;
+            addInputRefs.current[refKey] = inputRef.current;
+            return () => {
+                if (addInputRefs.current) {
+                    delete addInputRefs.current[refKey];
+                }
+            };
+        }
+    }, [sideEditing, quest.id, sideQuest.id, addInputRefs]);
+
     return (
         <div
             className={[
@@ -72,18 +86,17 @@ const SideQuestItem = ({
             role="listitem"
             data-dragging={isDragging ? 'true' : undefined}
             data-status={sideStatus}
+            style={{ maxWidth: '100%' }}
         >
             <div
                 className={`task-row ${sideEditing ? 'editing' : ''}`}
                 role="button"
                 tabIndex={0}
                 onClick={(event) => {
-                    event.stopPropagation();
                     if (isInteractiveTarget(event.target)) return;
                     handleSelectSideQuest(quest.id, sideQuest.id);
                 }}
                 onFocus={(event) => {
-                    event.stopPropagation();
                     if (isInteractiveTarget(event.target)) return;
                     handleSelectSideQuest(quest.id, sideQuest.id);
                 }}
@@ -91,53 +104,24 @@ const SideQuestItem = ({
                     if (isInteractiveTarget(event.target)) return;
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
-                        event.stopPropagation();
                         handleSelectSideQuest(quest.id, sideQuest.id);
                     }
                 }}
+                {...sideHandleProps}
+                style={{
+                    ...sideHandleProps.style,
+                    cursor: isDragging ? 'grabbing' : 'grab'
+                }}
             >
-                <div className="side-quest-main">
-                    <button
-                        type="button"
-                        className="drag-handle"
-                        tabIndex={-1}
-                        data-drag-handle="true"
-                        aria-label="Reorder side quest"
-                        {...sideHandleProps}
-                        style={sideHandleStyle}
-                        onFocus={(event) => {
-                            event.stopPropagation();
-                            if (typeof sideHandleProps.onFocus === 'function') {
-                                sideHandleProps.onFocus(event);
-                            }
-                        }}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            if (typeof sideHandleProps.onClick === 'function') {
-                                sideHandleProps.onClick(event);
-                            }
-                        }}
-                    >
-                        ⋮
-                    </button>
+                <div className="side-quest-main" style={{ flex: 1, minWidth: 0, display: 'flex' }}>
                     {sideEditing ? (
                         <div className="side-quest-edit">
                             <input
                                 type="text"
+                                autoFocus
                                 data-subtask-edit={sideKey}
                                 value={editingSideQuest?.description || ''}
-                                ref={(element) => {
-                                    if (!addInputRefs) return;
-                                    if (!addInputRefs.current) addInputRefs.current = {};
-                                    const refKey = `${quest.id}:${sideQuest.id}:edit`;
-                                    if (element) {
-                                        addInputRefs.current[refKey] = element;
-                                    } else {
-                                        delete addInputRefs.current[refKey];
-                                    }
-                                }}
+                                ref={inputRef}
                                 onChange={handleSideQuestEditChange}
                                 onClick={(event) => event.stopPropagation()}
                                 onKeyDown={(event) => {
@@ -154,8 +138,22 @@ const SideQuestItem = ({
                     ) : (
                         <div
                             className={descriptionClasses}
-                            style={{ flex: 1 }}
+                            style={{
+                                flex: 1,
+                                minWidth: 0,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                paddingLeft: '12px',
+                                cursor: 'pointer'
+                            }}
                             title={safeSideDescription}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isDragging) {
+                                    startEditingSideQuest(quest.id, sideQuest);
+                                }
+                            }}
                         >
                             {safeSideDescription}
                             <small className="small"> - {sideStatusLabel}</small>

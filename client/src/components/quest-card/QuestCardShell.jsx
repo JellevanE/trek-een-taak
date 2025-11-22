@@ -15,33 +15,36 @@ export const QuestCardShell = ({
     cardTokens
 }) => {
     const questHandleProps = dragMeta?.handleProps || {};
-    const questHandleStyle = {
-        width: 'var(--quest-card-handle-size)',
-        height: 'var(--quest-card-handle-size)',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 'var(--quest-card-handle-font-size)',
-        cursor: 'grab',
-        ...dragMeta?.handleStyle
-    };
+
+    // Merge styles: card tokens + drag cursor
     const cardStyle = React.useMemo(() => {
-        if (!cardTokens) return undefined;
         const styleVars = {};
-        if (cardTokens.depth?.resting) {
-            styleVars['--quest-card-shadow-resting'] = cardTokens.depth.resting;
+
+        // Apply card tokens
+        if (cardTokens) {
+            if (cardTokens.depth?.resting) {
+                styleVars['--quest-card-shadow-resting'] = cardTokens.depth.resting;
+            }
+            if (cardTokens.depth?.active) {
+                styleVars['--quest-card-shadow-active'] = cardTokens.depth.active;
+            }
+            if (cardTokens.transition) {
+                styleVars['--quest-card-shadow-transition'] = cardTokens.transition;
+            }
+            if (cardTokens.focusRing) {
+                styleVars['--quest-card-focus-outline'] = cardTokens.focusRing;
+            }
         }
-        if (cardTokens.depth?.active) {
-            styleVars['--quest-card-shadow-active'] = cardTokens.depth.active;
+
+        // Apply drag cursor
+        if (dragMeta?.handleStyle?.cursor) {
+            styleVars.cursor = dragMeta.handleStyle.cursor;
+        } else {
+            styleVars.cursor = 'grab';
         }
-        if (cardTokens.transition) {
-            styleVars['--quest-card-shadow-transition'] = cardTokens.transition;
-        }
-        if (cardTokens.focusRing) {
-            styleVars['--quest-card-focus-outline'] = cardTokens.focusRing;
-        }
-        return Object.keys(styleVars).length > 0 ? styleVars : undefined;
-    }, [cardTokens]);
+
+        return styleVars;
+    }, [cardTokens, dragMeta?.handleStyle]);
 
     const handleRootInteraction = (event) => {
         if (isInteractiveTarget(event.target)) return;
@@ -49,7 +52,12 @@ export const QuestCardShell = ({
     };
 
     return (
-        <AnimatedQuestCard isNew={isNew} isCompleting={isCelebrating}>
+        <AnimatedQuestCard
+            isNew={isNew}
+            isCompleting={isCelebrating}
+            whileHover={!isDragging ? { scale: 1.015, transition: { duration: 0.2 } } : undefined}
+            whileTap={!isDragging ? { scale: 0.985 } : undefined}
+        >
             <div
                 role="button"
                 tabIndex={0}
@@ -65,33 +73,10 @@ export const QuestCardShell = ({
                         handleSelectQuest(quest.id);
                     }
                 }}
+                // Spread drag handle props (contains onPointerDown)
+                {...questHandleProps}
             >
                 <div className="quest-card-shell">
-                    <button
-                        type="button"
-                        className="drag-handle top"
-                        tabIndex={-1}
-                        data-drag-handle="true"
-                        aria-label="Reorder quest"
-                        {...questHandleProps}
-                        style={questHandleStyle}
-                        onFocus={(event) => {
-                            event.stopPropagation();
-                            if (typeof questHandleProps.onFocus === 'function') {
-                                questHandleProps.onFocus(event);
-                            }
-                        }}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            if (typeof questHandleProps.onClick === 'function') {
-                                questHandleProps.onClick(event);
-                            }
-                        }}
-                    >
-                        ≡
-                    </button>
                     <div className="quest-card-body">
                         {children}
                     </div>

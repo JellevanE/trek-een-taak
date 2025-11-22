@@ -1,7 +1,7 @@
 # Quest Hooks Improvement Notes
 
-- **Split `useQuests` into focused hooks** — The current hook mixes data fetching, keyboard shortcuts, selection state, undo logic, debug utilities, and even JSX render helpers in a single 1K+ line file. Breaking it into domain hooks (e.g., `useQuestData`, `useQuestSelection`, `useQuestDebugTools`) would improve readability, reduce prop drilling, and make targeted testing feasible.
-- **Move render helpers out of hooks** — Functions like `renderEditForm` and `renderAddSideQuestForm` return JSX from inside `useQuests`, forcing the hook to re-run when unrelated UI toggles change. Lifting these into memoized components would isolate view logic from state orchestration and shrink the dependency surface of the hook.
+- ✅ **Split `useQuests` into focused hooks** — The current hook mixes data fetching, keyboard shortcuts, selection state, undo logic, debug utilities, and even JSX render helpers in a single 1K+ line file. Breaking it into domain hooks (e.g., `useQuestData`, `useQuestSelection`, `useQuestDebugTools`) would improve readability, reduce prop drilling, and make targeted testing feasible.
+- ✅ **Move render helpers out of hooks** — Functions like `renderEditForm` and `renderAddSideQuestForm` return JSX from inside `useQuests`, forcing the hook to re-run when unrelated UI toggles change. Lifting these into memoized components would isolate view logic from state orchestration and shrink the dependency surface of the hook.
 - **Batch layout refresh triggers** — Multiple code paths schedule `refreshLayout` with `setTimeout`, which can result in redundant calls when several quest mutations run together (e.g., bulk status changes). Wrapping these in a debounced utility or leveraging `requestAnimationFrame` batching inside `useSmoothDragQuests` would cut unnecessary reflows.
 - **Generalize draggable layout** — `SmoothDraggableList` only supports a single column stack today. Extracting the physics layer from layout math would let the board offer responsive multi-column grids (or a denser masonry view) without rewriting drag logic.
 
@@ -20,9 +20,9 @@
 - **Mobile optimization**: Enhance mobile experience (320px-768px) with larger touch targets (min 44px), simplified navigation, condensed progress indicator, and optimized keyboard handling. Add tablet layout (768px-1024px) with two-column forms and side-by-side fields.
 
 ### Backend API Enhancements
-- **Email validation endpoint**: Add `POST /api/users/validate-email` endpoint for RFC-compliant email format validation to support optional email field validation.
-- **Rate limiting**: Implement 5 registration attempts per IP per hour to prevent abuse.
-- **Reserved words**: Add username blacklist for reserved words, admin terms, and system usernames.
+- ✅ **Email validation endpoint**: Add `POST /api/users/validate-email` endpoint for RFC-compliant email format validation to support optional email field validation.
+- ✅ **Rate limiting**: Implement 5 registration attempts per IP per hour to prevent abuse.
+- ✅ **Reserved words**: Add username blacklist for reserved words, admin terms, and system usernames.
 
 ### Component Refactoring Opportunities
 - **FormField component**: Create reusable form input component with built-in validation, error/success message display, and consistent styling to reduce code duplication.
@@ -40,24 +40,34 @@
 
 
 ## Future Enhancements (Post-Migration)
-- Consider ESM modules (`"type": "module"`) for modern Node.js patterns
-- Expand Zod validation across remaining controllers and responses, and align error mapping with existing API expectations
-- Implement strict null checks and enable stricter compiler options
-- Generate OpenAPI/Swagger docs from TypeScript types
+- ✅ Consider ESM modules (`"type": "module"`) for modern Node.js patterns
+- ✅ Expand Zod validation across remaining controllers and responses, and align error mapping with existing API expectations
+- ✅ Implement strict null checks and enable stricter compiler options
+- ✅ Generate OpenAPI/Swagger docs from TypeScript types
 - Add Swagger UI tooling (e.g., `swagger-cli` and `swagger-ui` preview script) so API docs stay linted and easy to browse locally
-- Add `tsc --watch` mode for development hot-reloading
+- ✅ Add `tsc --watch` mode for development hot-reloading
 - ✅ Legacy `dist/src` artifacts removed; verify future builds cleanly overwrite `dist/` outputs.
 - ✅ RPG experience utilities reshaped into `experienceEngine`, `rewardTables`, and `eventHooks`; consider data-driven tuning or event analytics as follow-up.
 - ✅ Typed hygiene guard blocks new explicit `any` usage via `npm run lint` (see `scripts/check-no-explicit-any.js`).
 
-## Estimated Timeline
-- **Minimal viable migration**: 3-4 days of focused work
-- **Complete with tests and docs**: 5-7 days
-- **Per-file average**: 15-30 minutes including testing
 
 ## Success Metrics
 - ✅ Zero TypeScript compilation errors
 - ✅ All existing Jest tests pass
-- ✅ `deno task validate` passes
+- `deno task validate` passes
 - ✅ No runtime regressions in API behavior
 - ✅ Type coverage >90% (no implicit `any` types)
+
+## Quest Card Visual Refresh (Planned)
+
+### Current Visual Issues
+- **Text Overlaps:** Long quest titles and descriptions can overlap with action buttons, especially on smaller screens or when many side quests are present.
+- **Inconsistent Heights:** Action buttons and status pills have varying heights, creating a jagged visual rhythm.
+- **Sharp Corners:** The current design uses relatively sharp corners (radius 4-6px) which feels slightly dated compared to the "pill" aesthetic used elsewhere.
+- **Status Text:** Status labels often crowd the progress bar or other metadata.
+
+### Proposed Geometric Improvements
+- **Rounded Corners:** Increase border-radius to 12px-16px for cards and 999px for buttons/pills to match a more modern, organic aesthetic.
+- **Consistent Heights:** Standardize all interactive elements to a 32px or 40px height grid.
+- **Spacing:** Increase internal padding (`--quest-card-padding-block`) to let content breathe.
+- **Typography:** Use slightly larger font sizes for titles and clearer hierarchy for metadata.

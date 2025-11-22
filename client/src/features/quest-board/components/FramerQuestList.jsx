@@ -5,7 +5,7 @@ import { DEFAULT_THEME_ID } from '../../../theme';
 import { useQuestMotionTokens } from '../hooks/useQuestMotionTokens.js';
 import { getItemKey, reconcileOrder, useNeonDragHandle } from './listUtils.js';
 
-const QuestListRow = ({ item, renderItem, motionTokens }) => {
+const QuestListRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd }) => {
     const { controls, dragMeta, setIsDragging } = useNeonDragHandle();
 
     return (
@@ -16,13 +16,21 @@ const QuestListRow = ({ item, renderItem, motionTokens }) => {
             dragListener={false}
             dragElastic={0.12}
             dragMomentum={false}
-            dragTransition={{ power: 0.2, timeConstant: 120, bounceStiffness: 520, bounceDamping: 32 }}
+            dragTransition={{ power: 0.1, timeConstant: 200, bounceStiffness: 400, bounceDamping: 40 }}
             layout
-            onDragStart={() => setIsDragging(true)}
-            onDragEnd={() => setIsDragging(false)}
+            onDragStart={() => {
+                setIsDragging(true);
+                onDragStart?.();
+            }}
+            onDragEnd={() => {
+                setIsDragging(false);
+                onDragEnd?.();
+            }}
             transition={{
-                duration: motionTokens.durations.drag,
-                ease: motionTokens.easing.drag
+                type: 'spring',
+                stiffness: 300,
+                damping: 30,
+                mass: 1
             }}
             whileDrag={{
                 scale: motionTokens.drag.scale,
@@ -63,18 +71,46 @@ export const FramerQuestList = ({
     themeName
 }) => {
     const motionTokens = useQuestMotionTokens(themeName);
+    const containerRef = React.useRef(null);
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [dimensions, setDimensions] = React.useState(null);
+
+
+
     const [order, setOrder] = React.useState(() => (Array.isArray(items) ? items : []));
+    const latestOrderRef = React.useRef(order);
 
     React.useEffect(() => {
-        setOrder((prev) => reconcileOrder(items, prev));
-    }, [items, refreshToken]);
+        if (isDragging) return;
+        setOrder((prev) => {
+            const next = reconcileOrder(items, prev);
+            latestOrderRef.current = next;
+            return next;
+        });
+    }, [items, refreshToken, isDragging]);
+
+    const handleDragStart = React.useCallback(() => {
+        if (containerRef.current) {
+            const { width, height } = containerRef.current.getBoundingClientRect();
+            setDimensions({ width, height });
+        }
+        setIsDragging(true);
+    }, []);
+
+
+
+    const handleDragEnd = React.useCallback(() => {
+        setIsDragging(false);
+        setDimensions(null);
+        if (onReorder && latestOrderRef.current) {
+            onReorder(latestOrderRef.current);
+        }
+    }, [onReorder]);
 
     const handleReorder = React.useCallback((next) => {
         setOrder(next);
-        if (typeof onReorder === 'function') {
-            onReorder(next);
-        }
-    }, [onReorder]);
+        latestOrderRef.current = next;
+    }, []);
 
     if (!order || order.length === 0) {
         return null;
@@ -82,6 +118,7 @@ export const FramerQuestList = ({
 
     return (
         <Reorder.Group
+            ref={containerRef}
             key={`quest-list-${refreshToken}`}
             axis="y"
             values={order}
@@ -92,7 +129,10 @@ export const FramerQuestList = ({
                 flexDirection: 'column',
                 gap: itemGap,
                 position: 'relative',
-                minHeight: itemHeight > 0 ? itemHeight : undefined
+                minHeight: itemHeight > 0 ? itemHeight : undefined,
+                width: isDragging && dimensions ? dimensions.width : '100%',
+                // We don't lock height to allow reordering to change list height naturally,
+                // but locking width prevents column jumping.
             }}
         >
             {order.map((item, index) => (
@@ -101,6 +141,8 @@ export const FramerQuestList = ({
                     item={item}
                     renderItem={renderItem}
                     motionTokens={motionTokens}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
                 />
             ))}
         </Reorder.Group>

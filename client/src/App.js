@@ -165,6 +165,7 @@ function App() {
         setSideQuestDescriptionMap,
         addingSideQuestTo,
         setAddingSideQuestTo,
+        loadingSideQuestAdds,
         collapsedMap,
         addInputRefs,
         undoQueue,
@@ -300,6 +301,7 @@ function App() {
         editingQuest,
         editingSideQuest,
         addingSideQuestTo,
+        loadingSideQuestAdds,
         collapsedMap,
         pulsingQuests,
         pulsingSideQuests,
@@ -345,6 +347,7 @@ function App() {
         editingQuest,
         editingSideQuest,
         addingSideQuestTo,
+        loadingSideQuestAdds,
         collapsedMap,
         pulsingQuests,
         pulsingSideQuests,
@@ -683,7 +686,11 @@ function App() {
                 </div>
             )}
             <div className="board-layout">
-                <aside className={`campaign-sidebar ${campaignSidebarCollapsed ? 'collapsed' : ''}`}>
+                <aside
+                    className={`campaign-sidebar ${campaignSidebarCollapsed ? 'collapsed' : ''}`}
+                    role="complementary"
+                    aria-label="Campaigns"
+                >
                     <div className="campaign-sidebar-header">
                         <button
                             type="button"

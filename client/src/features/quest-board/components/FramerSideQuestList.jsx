@@ -5,7 +5,7 @@ import { DEFAULT_THEME_ID } from '../../../theme';
 import { useQuestMotionTokens } from '../hooks/useQuestMotionTokens.js';
 import { getItemKey, reconcileOrder, useNeonDragHandle } from './listUtils.js';
 
-const SideQuestRow = ({ item, renderItem, motionTokens }) => {
+const SideQuestRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd }) => {
     const { controls, dragMeta, setIsDragging } = useNeonDragHandle();
     const dragScale = Math.max(1, motionTokens.drag.scale - 0.01);
 
@@ -19,11 +19,19 @@ const SideQuestRow = ({ item, renderItem, motionTokens }) => {
             dragMomentum={false}
             dragTransition={{ power: 0.18, timeConstant: 120, bounceStiffness: 520, bounceDamping: 34 }}
             layout
-            onDragStart={() => setIsDragging(true)}
-            onDragEnd={() => setIsDragging(false)}
+            onDragStart={() => {
+                setIsDragging(true);
+                onDragStart?.();
+            }}
+            onDragEnd={() => {
+                setIsDragging(false);
+                onDragEnd?.();
+            }}
             transition={{
-                duration: motionTokens.durations.drag,
-                ease: motionTokens.easing.drag
+                type: 'spring',
+                stiffness: 300,
+                damping: 30,
+                mass: 1
             }}
             whileDrag={{
                 scale: dragScale,
@@ -64,12 +72,42 @@ export const FramerSideQuestList = ({
 }) => {
     const motionTokens = useQuestMotionTokens(themeName);
     const [order, setOrder] = React.useState(() => (Array.isArray(sideQuests) ? sideQuests : []));
+    const latestOrderRef = React.useRef(order);
     const containerRef = React.useRef(null);
+    const reorderGroupRef = React.useRef(null);
     const [isOverflowing, setIsOverflowing] = React.useState(false);
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [dimensions, setDimensions] = React.useState(null);
 
     React.useEffect(() => {
-        setOrder((prev) => reconcileOrder(sideQuests, prev));
-    }, [sideQuests, refreshToken, questId]);
+        if (isDragging) return;
+        setOrder((prev) => {
+            const next = reconcileOrder(sideQuests, prev);
+            latestOrderRef.current = next;
+            return next;
+        });
+    }, [sideQuests, refreshToken, questId, isDragging]);
+
+    const handleDragStart = React.useCallback(() => {
+        if (reorderGroupRef.current) {
+            const { width, height } = reorderGroupRef.current.getBoundingClientRect();
+            setDimensions({ width, height });
+        }
+        setIsDragging(true);
+    }, []);
+
+    const handleDragEnd = React.useCallback(() => {
+        setIsDragging(false);
+        setDimensions(null);
+        if (onReorder && latestOrderRef.current) {
+            onReorder(latestOrderRef.current);
+        }
+    }, [onReorder]);
+
+    const handleReorder = React.useCallback((next) => {
+        setOrder(next);
+        latestOrderRef.current = next;
+    }, []);
 
     React.useEffect(() => {
         if (!maxContainerHeight || !containerRef.current) {
@@ -88,13 +126,6 @@ export const FramerSideQuestList = ({
         return undefined;
     }, [order, maxContainerHeight, itemGap]);
 
-    const handleReorder = React.useCallback((next) => {
-        setOrder(next);
-        if (typeof onReorder === 'function') {
-            onReorder(next);
-        }
-    }, [onReorder]);
-
     const wrapperStyle = {
         maxHeight: typeof maxContainerHeight === 'number' && maxContainerHeight > 0
             ? maxContainerHeight
@@ -102,12 +133,14 @@ export const FramerSideQuestList = ({
         overflowY: typeof maxContainerHeight === 'number' && maxContainerHeight > 0
             ? 'auto'
             : 'visible',
+        overflowX: 'hidden',
         paddingRight: isOverflowing ? 6 : 0
     };
 
     return (
         <div ref={containerRef} style={wrapperStyle}>
             <Reorder.Group
+                ref={reorderGroupRef}
                 key={`sidequest-list-${questId}-${refreshToken}`}
                 axis="y"
                 values={order}
@@ -117,7 +150,8 @@ export const FramerSideQuestList = ({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: itemGap,
-                    minHeight: itemHeight > 0 ? itemHeight : undefined
+                    minHeight: itemHeight > 0 ? itemHeight : undefined,
+                    width: isDragging && dimensions ? dimensions.width : '100%'
                 }}
             >
                 {order.map((item, index) => (
@@ -126,6 +160,8 @@ export const FramerSideQuestList = ({
                         item={item}
                         renderItem={renderItem}
                         motionTokens={motionTokens}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
                     />
                 ))}
             </Reorder.Group>

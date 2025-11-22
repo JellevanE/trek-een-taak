@@ -1,84 +1,206 @@
 {
   "tasks": [
     {
-      "id": 38,
-      "description": "Refine spell catalysts",
-      "priority": "low",
+      "id": 67,
+      "description": "Calibrate the chrono-compass",
+      "priority": "high",
       "sub_tasks": [
         {
           "id": 1,
-          "description": "Meet with ally",
-          "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T09:59:19.822Z",
+          "description": "Update quest board",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T21:20:31.505Z",
           "status_history": [
             {
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            },
+            {
               "status": "in_progress",
-              "at": "2025-11-11T08:17:31.083Z",
+              "at": "2025-11-11T16:45:49.313Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:45:51.946Z",
               "note": null
             },
             {
               "status": "done",
-              "at": "2025-11-11T09:59:19.822Z",
+              "at": "2025-11-11T16:55:14.386Z",
+              "note": null
+            },
+            {
+              "status": "todo",
+              "at": "2025-11-11T21:20:30.595Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T21:20:31.505Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:55:14.386Z"
+          }
+        },
+        {
+          "id": 2,
+          "description": "ad 1",
+          "status": "done",
+          "created_at": "2025-11-11T16:45:55.559Z",
+          "updated_at": "2025-11-11T16:55:13.130Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:45:55.559Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:55:11.843Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:55:13.130Z",
               "note": null
             }
           ],
           "completed": true,
           "rpg": {
             "xp_awarded": true,
-            "last_reward_at": "2025-11-11T09:59:19.822Z"
-          }
-        },
-        {
-          "id": 2,
-          "description": "big baddy",
-          "status": "todo",
-          "created_at": "2025-11-11T09:59:12.334Z",
-          "updated_at": "2025-11-11T09:59:12.334Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-11-11T09:59:12.334Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
+            "last_reward_at": "2025-11-11T16:55:13.130Z"
           }
         },
         {
           "id": 3,
-          "description": "bad",
-          "status": "todo",
-          "created_at": "2025-11-11T09:59:15.300Z",
-          "updated_at": "2025-11-11T09:59:15.300Z",
+          "description": "make a third",
+          "status": "done",
+          "created_at": "2025-11-11T16:55:22.541Z",
+          "updated_at": "2025-11-11T16:55:26.376Z",
           "status_history": [
             {
               "status": "todo",
-              "at": "2025-11-11T09:59:15.300Z",
+              "at": "2025-11-11T16:55:22.541Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:55:25.583Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:55:26.376Z",
               "note": null
             }
           ],
-          "completed": false,
+          "completed": true,
           "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:55:26.376Z"
+          }
+        },
+        {
+          "id": 4,
+          "description": "and 5",
+          "status": "done",
+          "created_at": "2025-11-11T16:55:30.027Z",
+          "updated_at": "2025-11-11T16:55:41.916Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:55:30.027Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:55:41.916Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:55:41.916Z"
+          }
+        },
+        {
+          "id": 5,
+          "description": "4",
+          "status": "done",
+          "created_at": "2025-11-11T16:55:32.521Z",
+          "updated_at": "2025-11-11T16:57:10.161Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:55:32.521Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:55:46.359Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:57:10.161Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:57:10.161Z"
+          }
+        },
+        {
+          "id": 6,
+          "description": "amazing grace",
+          "status": "done",
+          "created_at": "2025-11-11T16:55:37.242Z",
+          "updated_at": "2025-11-11T16:55:44.759Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:55:37.242Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:55:38.438Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:55:44.759Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:55:44.759Z"
           }
         }
       ],
       "side_quests": [
         {
           "id": 1,
-          "description": "Meet with ally",
-          "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
+          "description": "Update quest board",
+          "status": "todo",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
           "status_history": [
             {
-              "status": "in_progress",
-              "at": "2025-11-11T08:17:31.083Z",
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
               "note": null
             }
           ],
@@ -89,361 +211,190 @@
           }
         }
       ],
-      "nextSubtaskId": 4,
-      "due_date": "2025-11-10",
-      "status": "blocked",
+      "nextSubtaskId": 7,
+      "due_date": "2025-11-09",
+      "status": "in_progress",
       "completed": false,
       "order": 0,
-      "created_at": "2025-11-11T08:17:31.083Z",
-      "updated_at": "2025-11-11T09:59:19.822Z",
-      "status_history": [
-        {
-          "status": "blocked",
-          "at": "2025-11-11T08:17:31.083Z",
-          "note": null
-        }
-      ],
-      "owner_id": 2,
-      "task_level": 3,
-      "rpg": {
-        "xp_awarded": false,
-        "last_reward_at": null,
-        "history": [
-          {
-            "at": "2025-11-11T09:59:19.822Z",
-            "amount": 27,
-            "reason": "subtask_complete",
-            "subtask_id": 1
-          }
-        ]
-      },
-      "campaign_id": null
-    },
-    {
-      "id": 39,
-      "description": "Upgrade camp defenses",
-      "priority": "high",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "Meet with ally",
-          "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": true,
-          "rpg": {
-            "xp_awarded": true,
-            "last_reward_at": null
-          }
-        },
-        {
-          "id": 2,
-          "description": "Gather components",
-          "status": "todo",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "side_quests": [
-        {
-          "id": 1,
-          "description": "Meet with ally",
-          "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": true,
-          "rpg": {
-            "xp_awarded": true,
-            "last_reward_at": null
-          }
-        },
-        {
-          "id": 2,
-          "description": "Gather components",
-          "status": "todo",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "nextSubtaskId": 3,
-      "due_date": "2025-11-11",
-      "status": "done",
-      "completed": true,
-      "order": 1,
-      "created_at": "2025-11-11T08:17:31.083Z",
-      "updated_at": "2025-11-11T09:59:28.891Z",
+      "created_at": "2025-11-11T16:45:47.269Z",
+      "updated_at": "2025-11-11T21:20:31.505Z",
       "status_history": [
         {
           "status": "in_progress",
-          "at": "2025-11-11T08:17:31.083Z",
-          "note": null
-        },
-        {
-          "status": "done",
-          "at": "2025-11-11T09:59:28.891Z",
-          "note": null
-        }
-      ],
-      "owner_id": 2,
-      "task_level": 3,
-      "rpg": {
-        "xp_awarded": true,
-        "last_reward_at": "2025-11-11T09:59:28.891Z",
-        "history": [
-          {
-            "at": "2025-11-11T09:59:28.891Z",
-            "amount": 85,
-            "reason": "task_complete"
-          }
-        ]
-      },
-      "campaign_id": null
-    },
-    {
-      "id": 40,
-      "description": "Refine spell catalysts",
-      "priority": "high",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "Sharpen gear",
-          "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:18:44.029Z",
-          "status_history": [
-            {
-              "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            },
-            {
-              "status": "in_progress",
-              "at": "2025-11-11T08:18:41.574Z",
-              "note": null
-            },
-            {
-              "status": "todo",
-              "at": "2025-11-11T08:18:43.422Z",
-              "note": null
-            },
-            {
-              "status": "in_progress",
-              "at": "2025-11-11T08:18:44.029Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": true,
-            "last_reward_at": null
-          }
-        },
-        {
-          "id": 2,
-          "description": "Meet with ally",
-          "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": true,
-          "rpg": {
-            "xp_awarded": true,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "side_quests": [
-        {
-          "id": 1,
-          "description": "Sharpen gear",
-          "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": true,
-          "rpg": {
-            "xp_awarded": true,
-            "last_reward_at": null
-          }
-        },
-        {
-          "id": 2,
-          "description": "Meet with ally",
-          "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": true,
-          "rpg": {
-            "xp_awarded": true,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "nextSubtaskId": 3,
-      "due_date": "2025-11-12",
-      "status": "done",
-      "completed": true,
-      "order": 2,
-      "created_at": "2025-11-11T08:17:31.083Z",
-      "updated_at": "2025-11-11T08:18:46.040Z",
-      "status_history": [
-        {
-          "status": "todo",
-          "at": "2025-11-11T08:17:31.083Z",
-          "note": null
-        },
-        {
-          "status": "done",
-          "at": "2025-11-11T08:18:46.040Z",
+          "at": "2025-11-11T16:45:47.269Z",
           "note": null
         }
       ],
       "owner_id": 2,
       "task_level": 4,
       "rpg": {
-        "xp_awarded": true,
-        "last_reward_at": "2025-11-11T08:18:46.041Z",
+        "xp_awarded": false,
+        "last_reward_at": null,
         "history": [
           {
-            "at": "2025-11-11T08:18:46.041Z",
-            "amount": 99,
-            "reason": "task_complete"
+            "at": "2025-11-11T16:57:10.161Z",
+            "amount": 41,
+            "reason": "subtask_complete",
+            "subtask_id": 5
+          },
+          {
+            "at": "2025-11-11T16:55:44.759Z",
+            "amount": 41,
+            "reason": "subtask_complete",
+            "subtask_id": 6
+          },
+          {
+            "at": "2025-11-11T16:55:41.916Z",
+            "amount": 41,
+            "reason": "subtask_complete",
+            "subtask_id": 4
+          },
+          {
+            "at": "2025-11-11T16:55:26.376Z",
+            "amount": 41,
+            "reason": "subtask_complete",
+            "subtask_id": 3
+          },
+          {
+            "at": "2025-11-11T16:55:14.386Z",
+            "amount": 41,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          },
+          {
+            "at": "2025-11-11T16:55:13.130Z",
+            "amount": 41,
+            "reason": "subtask_complete",
+            "subtask_id": 2
           }
         ]
       },
       "campaign_id": null
     },
     {
-      "id": 41,
-      "description": "Interview guild recruits",
+      "id": 69,
+      "description": "Upgrade camp defenses",
       "priority": "high",
+      "sub_tasks": [],
+      "side_quests": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-11-14",
+      "status": "done",
+      "completed": true,
+      "order": 2,
+      "created_at": "2025-11-11T16:45:47.269Z",
+      "updated_at": "2025-11-11T16:45:47.269Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-11-11T16:45:47.269Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 5,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 70,
+      "description": "Refine spell catalysts",
+      "priority": "low",
       "sub_tasks": [
         {
           "id": 1,
-          "description": "Visit quartermaster",
-          "status": "todo",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
+          "description": "Sharpen gear",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T20:49:13.678Z",
           "status_history": [
             {
+              "status": "done",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:46:53.108Z",
+              "note": null
+            },
+            {
               "status": "todo",
-              "at": "2025-11-11T08:17:31.083Z",
+              "at": "2025-11-11T16:46:53.847Z",
+              "note": null
+            },
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:46:55.796Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T20:49:10.599Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T20:49:11.985Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T20:49:13.678Z",
               "note": null
             }
           ],
           "completed": false,
           "rpg": {
-            "xp_awarded": false,
+            "xp_awarded": true,
             "last_reward_at": null
           }
         },
         {
           "id": 2,
-          "description": "Gather components",
+          "description": "BIG ONE",
           "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
+          "created_at": "2025-11-11T16:46:36.284Z",
+          "updated_at": "2025-11-11T20:49:16.778Z",
           "status_history": [
             {
+              "status": "todo",
+              "at": "2025-11-11T16:46:36.284Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T20:49:15.359Z",
+              "note": null
+            },
+            {
               "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
+              "at": "2025-11-11T20:49:16.778Z",
               "note": null
             }
           ],
           "completed": true,
           "rpg": {
             "xp_awarded": true,
-            "last_reward_at": null
+            "last_reward_at": "2025-11-11T20:49:16.778Z"
           }
         }
       ],
       "side_quests": [
         {
           "id": 1,
-          "description": "Visit quartermaster",
-          "status": "todo",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "todo",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
-          }
-        },
-        {
-          "id": 2,
-          "description": "Gather components",
+          "description": "Sharpen gear",
           "status": "done",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
           "status_history": [
             {
               "status": "done",
-              "at": "2025-11-11T08:17:31.083Z",
+              "at": "2025-11-11T16:45:47.269Z",
               "note": null
             }
           ],
@@ -456,15 +407,15 @@
       ],
       "nextSubtaskId": 3,
       "due_date": "2025-11-11",
-      "status": "blocked",
+      "status": "todo",
       "completed": false,
       "order": 3,
-      "created_at": "2025-11-11T08:17:31.083Z",
-      "updated_at": "2025-11-11T08:17:31.083Z",
+      "created_at": "2025-11-11T16:45:47.269Z",
+      "updated_at": "2025-11-11T20:49:16.778Z",
       "status_history": [
         {
-          "status": "blocked",
-          "at": "2025-11-11T08:17:31.083Z",
+          "status": "todo",
+          "at": "2025-11-11T16:45:47.269Z",
           "note": null
         }
       ],
@@ -473,25 +424,32 @@
       "rpg": {
         "xp_awarded": false,
         "last_reward_at": null,
-        "history": []
+        "history": [
+          {
+            "at": "2025-11-11T20:49:16.778Z",
+            "amount": 22,
+            "reason": "subtask_complete",
+            "subtask_id": 2
+          }
+        ]
       },
       "campaign_id": null
     },
     {
-      "id": 42,
-      "description": "Scout the northern ridge",
-      "priority": "high",
+      "id": 71,
+      "description": "Decode ancient glyphs",
+      "priority": "medium",
       "sub_tasks": [
         {
           "id": 1,
-          "description": "Meditate before battle",
+          "description": "Update quest board",
           "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
           "status_history": [
             {
               "status": "in_progress",
-              "at": "2025-11-11T08:17:31.083Z",
+              "at": "2025-11-11T16:45:47.269Z",
               "note": null
             }
           ],
@@ -505,152 +463,14 @@
       "side_quests": [
         {
           "id": 1,
-          "description": "Meditate before battle",
+          "description": "Update quest board",
           "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
           "status_history": [
             {
               "status": "in_progress",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "nextSubtaskId": 2,
-      "due_date": "2025-11-10",
-      "status": "done",
-      "completed": true,
-      "order": 4,
-      "created_at": "2025-11-11T08:17:31.083Z",
-      "updated_at": "2025-11-11T08:17:31.083Z",
-      "status_history": [
-        {
-          "status": "done",
-          "at": "2025-11-11T08:17:31.083Z",
-          "note": null
-        }
-      ],
-      "owner_id": 2,
-      "task_level": 1,
-      "rpg": {
-        "xp_awarded": true,
-        "last_reward_at": null,
-        "history": []
-      },
-      "campaign_id": null
-    },
-    {
-      "id": 43,
-      "description": "Brew restorative potions",
-      "priority": "high",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "Visit quartermaster",
-          "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "in_progress",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "side_quests": [
-        {
-          "id": 1,
-          "description": "Visit quartermaster",
-          "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.083Z",
-          "updated_at": "2025-11-11T08:17:31.083Z",
-          "status_history": [
-            {
-              "status": "in_progress",
-              "at": "2025-11-11T08:17:31.083Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "nextSubtaskId": 2,
-      "due_date": "2025-11-12",
-      "status": "in_progress",
-      "completed": false,
-      "order": 5,
-      "created_at": "2025-11-11T08:17:31.083Z",
-      "updated_at": "2025-11-11T08:17:31.083Z",
-      "status_history": [
-        {
-          "status": "in_progress",
-          "at": "2025-11-11T08:17:31.083Z",
-          "note": null
-        }
-      ],
-      "owner_id": 2,
-      "task_level": 5,
-      "rpg": {
-        "xp_awarded": false,
-        "last_reward_at": null,
-        "history": []
-      },
-      "campaign_id": null
-    },
-    {
-      "id": 44,
-      "description": "Scout the northern ridge",
-      "priority": "low",
-      "sub_tasks": [
-        {
-          "id": 1,
-          "description": "Write expedition log",
-          "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.084Z",
-          "updated_at": "2025-11-11T08:17:31.084Z",
-          "status_history": [
-            {
-              "status": "in_progress",
-              "at": "2025-11-11T08:17:31.084Z",
-              "note": null
-            }
-          ],
-          "completed": false,
-          "rpg": {
-            "xp_awarded": false,
-            "last_reward_at": null
-          }
-        }
-      ],
-      "side_quests": [
-        {
-          "id": 1,
-          "description": "Write expedition log",
-          "status": "in_progress",
-          "created_at": "2025-11-11T08:17:31.084Z",
-          "updated_at": "2025-11-11T08:17:31.084Z",
-          "status_history": [
-            {
-              "status": "in_progress",
-              "at": "2025-11-11T08:17:31.084Z",
+              "at": "2025-11-11T16:45:47.269Z",
               "note": null
             }
           ],
@@ -665,13 +485,260 @@
       "due_date": "2025-11-09",
       "status": "done",
       "completed": true,
-      "order": 6,
-      "created_at": "2025-11-11T08:17:31.084Z",
-      "updated_at": "2025-11-11T08:17:31.084Z",
+      "order": 4,
+      "created_at": "2025-11-11T16:45:47.269Z",
+      "updated_at": "2025-11-11T16:45:47.269Z",
       "status_history": [
         {
           "status": "done",
-          "at": "2025-11-11T08:17:31.084Z",
+          "at": "2025-11-11T16:45:47.269Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 2,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 72,
+      "description": "Scout the northern ridge",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "done",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:57:16.465Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:57:16.465Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:57:16.465Z"
+          }
+        },
+        {
+          "id": 2,
+          "description": "Visit quartermaster",
+          "status": "done",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:57:17.070Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:57:17.070Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:57:17.070Z"
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "todo",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Visit quartermaster",
+          "status": "todo",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-13",
+      "status": "blocked",
+      "completed": false,
+      "order": 5,
+      "created_at": "2025-11-11T16:45:47.269Z",
+      "updated_at": "2025-11-11T16:57:17.070Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-11-11T16:45:47.269Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 1,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": [
+          {
+            "at": "2025-11-11T16:57:17.070Z",
+            "amount": 18,
+            "reason": "subtask_complete",
+            "subtask_id": 2
+          },
+          {
+            "at": "2025-11-11T16:57:16.465Z",
+            "amount": 18,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          }
+        ]
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 73,
+      "description": "Train with sparring golems",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Visit quartermaster",
+          "status": "todo",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Visit quartermaster",
+          "status": "todo",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-14",
+      "status": "done",
+      "completed": true,
+      "order": 6,
+      "created_at": "2025-11-11T16:45:47.269Z",
+      "updated_at": "2025-11-11T17:11:29.510Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-11-11T16:45:47.269Z",
+          "note": null
+        },
+        {
+          "status": "in_progress",
+          "at": "2025-11-11T17:11:27.369Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-11-11T17:11:29.510Z",
           "note": null
         }
       ],
@@ -685,22 +752,100 @@
       "campaign_id": null
     },
     {
-      "id": 45,
+      "id": 74,
       "description": "Decode ancient glyphs",
-      "priority": "high",
-      "sub_tasks": [],
-      "side_quests": [],
-      "nextSubtaskId": 1,
-      "due_date": "2025-11-13",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Meditate before battle",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meet with ally",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Meditate before battle",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meet with ally",
+          "status": "in_progress",
+          "created_at": "2025-11-11T16:45:47.269Z",
+          "updated_at": "2025-11-11T16:45:47.269Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:45:47.269Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-14",
       "status": "in_progress",
       "completed": false,
       "order": 7,
-      "created_at": "2025-11-11T08:17:31.084Z",
-      "updated_at": "2025-11-11T08:17:31.084Z",
+      "created_at": "2025-11-11T16:45:47.269Z",
+      "updated_at": "2025-11-11T16:45:47.269Z",
       "status_history": [
         {
           "status": "in_progress",
-          "at": "2025-11-11T08:17:31.084Z",
+          "at": "2025-11-11T16:45:47.269Z",
           "note": null
         }
       ],
@@ -712,7 +857,1832 @@
         "history": []
       },
       "campaign_id": null
+    },
+    {
+      "id": 75,
+      "description": "Quest for testing",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Fire up",
+          "status": "done",
+          "created_at": "2025-11-11T16:47:34.114Z",
+          "updated_at": "2025-11-11T16:47:41.303Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:47:34.114Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-11T16:47:39.634Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-11T16:47:41.303Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-11T16:47:41.303Z"
+          }
+        },
+        {
+          "id": 2,
+          "description": "The batmobile",
+          "status": "todo",
+          "created_at": "2025-11-11T16:47:37.916Z",
+          "updated_at": "2025-11-11T16:47:37.916Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:47:37.916Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 3,
+          "description": "Or chariot",
+          "status": "todo",
+          "created_at": "2025-11-11T16:47:57.998Z",
+          "updated_at": "2025-11-11T16:47:57.998Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:47:57.998Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 4,
+          "description": "Or even more",
+          "status": "todo",
+          "created_at": "2025-11-11T20:51:03.609Z",
+          "updated_at": "2025-11-11T20:51:03.609Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T20:51:03.609Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Fire up",
+          "status": "todo",
+          "created_at": "2025-11-11T16:47:34.114Z",
+          "updated_at": "2025-11-11T16:47:34.114Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-11T16:47:34.114Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 5,
+      "due_date": "2025-11-11",
+      "status": "todo",
+      "completed": false,
+      "order": 8,
+      "created_at": "2025-11-11T16:47:28.433Z",
+      "updated_at": "2025-11-11T20:51:03.609Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-11-11T16:47:28.433Z",
+          "note": null
+        }
+      ],
+      "owner_id": 2,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": [
+          {
+            "at": "2025-11-11T16:47:41.303Z",
+            "amount": 35,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          }
+        ]
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 76,
+      "description": "Train with sparring golems",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Update quest board",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Update quest board",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-11-18",
+      "status": "done",
+      "completed": true,
+      "order": 9,
+      "created_at": "2025-11-17T16:47:51.012Z",
+      "updated_at": "2025-11-19T12:39:02.102Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-11-17T16:47:51.012Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-11-19T12:39:02.102Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-11-19T12:39:02.102Z",
+        "history": [
+          {
+            "at": "2025-11-19T12:39:02.102Z",
+            "amount": 86,
+            "reason": "task_complete"
+          }
+        ]
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 77,
+      "description": "Scout the northern ridge",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meditate before battle",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meditate before battle",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-17",
+      "status": "blocked",
+      "completed": false,
+      "order": 10,
+      "created_at": "2025-11-17T16:47:51.012Z",
+      "updated_at": "2025-11-17T16:47:51.012Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-11-17T16:47:51.012Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 5,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 78,
+      "description": "Train with sparring golems",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Meet with ally",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Meet with ally",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-19",
+      "status": "done",
+      "completed": true,
+      "order": 11,
+      "created_at": "2025-11-17T16:47:51.012Z",
+      "updated_at": "2025-11-22T17:45:02.997Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-11-17T16:47:51.012Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-11-22T17:45:02.997Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 1,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-11-22T17:45:02.998Z",
+        "history": [
+          {
+            "at": "2025-11-22T17:45:02.998Z",
+            "amount": 57,
+            "reason": "task_complete"
+          }
+        ]
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 79,
+      "description": "Refine spell catalysts",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Sharpen gear",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "todo",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Sharpen gear",
+          "status": "done",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "todo",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-17",
+      "status": "blocked",
+      "completed": false,
+      "order": 12,
+      "created_at": "2025-11-17T16:47:51.012Z",
+      "updated_at": "2025-11-17T16:47:51.012Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-11-17T16:47:51.012Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 1,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 80,
+      "description": "Draft trading manifests",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "todo",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "todo",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.012Z",
+          "updated_at": "2025-11-17T16:47:51.012Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.012Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-15",
+      "status": "done",
+      "completed": true,
+      "order": 13,
+      "created_at": "2025-11-17T16:47:51.012Z",
+      "updated_at": "2025-11-17T16:47:51.012Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-11-17T16:47:51.012Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 81,
+      "description": "Decode ancient glyphs",
+      "priority": "low",
+      "sub_tasks": [],
+      "side_quests": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-11-18",
+      "status": "in_progress",
+      "completed": false,
+      "order": 14,
+      "created_at": "2025-11-17T16:47:51.012Z",
+      "updated_at": "2025-11-17T16:47:51.012Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-11-17T16:47:51.012Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 2,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 82,
+      "description": "Interview guild recruits",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.013Z",
+          "updated_at": "2025-11-17T16:47:51.013Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.013Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "in_progress",
+          "created_at": "2025-11-17T16:47:51.013Z",
+          "updated_at": "2025-11-17T16:47:51.013Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-17T16:47:51.013Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-11-20",
+      "status": "in_progress",
+      "completed": false,
+      "order": 15,
+      "created_at": "2025-11-17T16:47:51.013Z",
+      "updated_at": "2025-11-17T16:47:51.013Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-11-17T16:47:51.013Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 4,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 83,
+      "description": "Brew restorative potions",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Update quest board",
+          "status": "todo",
+          "created_at": "2025-11-17T16:47:51.013Z",
+          "updated_at": "2025-11-17T16:47:51.013Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-17T16:47:51.013Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Update quest board",
+          "status": "todo",
+          "created_at": "2025-11-17T16:47:51.013Z",
+          "updated_at": "2025-11-17T16:47:51.013Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-17T16:47:51.013Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-11-19",
+      "status": "done",
+      "completed": true,
+      "order": 16,
+      "created_at": "2025-11-17T16:47:51.013Z",
+      "updated_at": "2025-11-17T16:47:51.013Z",
+      "status_history": [
+        {
+          "status": "done",
+          "at": "2025-11-17T16:47:51.013Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 93,
+      "description": "Calibrate the chrono-compass",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Update quest board",
+          "status": "todo",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T11:49:40.793Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            },
+            {
+              "status": "todo",
+              "at": "2025-11-21T11:49:40.793Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meet with ally",
+          "status": "todo",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 3,
+          "description": "Slump",
+          "status": "todo",
+          "created_at": "2025-11-21T19:29:35.547Z",
+          "updated_at": "2025-11-21T19:29:35.547Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T19:29:35.547Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Update quest board",
+          "status": "done",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meet with ally",
+          "status": "todo",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 4,
+      "due_date": "2025-11-21",
+      "status": "in_progress",
+      "completed": false,
+      "order": 18,
+      "created_at": "2025-11-21T10:17:39.328Z",
+      "updated_at": "2025-11-21T19:29:35.547Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-11-21T10:17:39.328Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 94,
+      "description": "Interview guild recruits",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Bingus",
+          "status": "done",
+          "created_at": "2025-11-21T10:25:23.611Z",
+          "updated_at": "2025-11-21T17:13:39.750Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:25:23.611Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T10:25:28.707Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T17:13:39.750Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-21T17:13:39.751Z"
+          }
+        },
+        {
+          "id": 2,
+          "description": "rlo",
+          "status": "todo",
+          "created_at": "2025-11-21T10:25:26.543Z",
+          "updated_at": "2025-11-21T19:32:47.401Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:25:26.543Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T17:13:37.968Z",
+              "note": null
+            },
+            {
+              "status": "todo",
+              "at": "2025-11-21T19:32:43.931Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T19:32:45.266Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T19:32:46.299Z",
+              "note": null
+            },
+            {
+              "status": "todo",
+              "at": "2025-11-21T19:32:47.401Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-21T17:13:37.968Z"
+          }
+        },
+        {
+          "id": 3,
+          "description": "Massive",
+          "status": "done",
+          "created_at": "2025-11-21T10:27:16.770Z",
+          "updated_at": "2025-11-21T17:13:35.714Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:27:16.770Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T17:13:35.714Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-21T17:13:35.714Z"
+          }
+        },
+        {
+          "id": 4,
+          "description": "updata",
+          "status": "done",
+          "created_at": "2025-11-21T10:27:19.706Z",
+          "updated_at": "2025-11-21T17:13:36.955Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:27:19.706Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T17:13:36.955Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-21T17:13:36.956Z"
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Bingus",
+          "status": "todo",
+          "created_at": "2025-11-21T10:25:23.611Z",
+          "updated_at": "2025-11-21T10:25:23.611Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:25:23.611Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 5,
+      "due_date": "2025-11-19",
+      "status": "done",
+      "completed": true,
+      "order": 19,
+      "created_at": "2025-11-21T10:17:39.328Z",
+      "updated_at": "2025-11-21T19:32:47.401Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-11-21T10:17:39.328Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-11-21T17:13:40.397Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 2,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-11-21T17:13:40.397Z",
+        "history": [
+          {
+            "at": "2025-11-21T17:13:40.397Z",
+            "amount": 71,
+            "reason": "task_complete"
+          },
+          {
+            "at": "2025-11-21T17:13:39.751Z",
+            "amount": 28,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          },
+          {
+            "at": "2025-11-21T17:13:37.968Z",
+            "amount": 28,
+            "reason": "subtask_complete",
+            "subtask_id": 2
+          },
+          {
+            "at": "2025-11-21T17:13:36.956Z",
+            "amount": 28,
+            "reason": "subtask_complete",
+            "subtask_id": 4
+          },
+          {
+            "at": "2025-11-21T17:13:35.714Z",
+            "amount": 28,
+            "reason": "subtask_complete",
+            "subtask_id": 3
+          }
+        ]
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 95,
+      "description": "Decode ancient glyphs",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "BINGUS",
+          "status": "done",
+          "created_at": "2025-11-21T17:12:20.951Z",
+          "updated_at": "2025-11-21T17:12:32.674Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T17:12:20.951Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T17:12:32.674Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-21T17:12:32.674Z"
+          }
+        },
+        {
+          "id": 2,
+          "description": "Bongus",
+          "status": "in_progress",
+          "created_at": "2025-11-21T17:12:24.857Z",
+          "updated_at": "2025-11-21T17:12:31.513Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T17:12:24.857Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T17:12:31.513Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "BINGUS",
+          "status": "todo",
+          "created_at": "2025-11-21T17:12:20.951Z",
+          "updated_at": "2025-11-21T17:12:20.951Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T17:12:20.951Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-24",
+      "status": "done",
+      "completed": true,
+      "order": 20,
+      "created_at": "2025-11-21T10:17:39.328Z",
+      "updated_at": "2025-11-21T17:13:32.464Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-11-21T10:17:39.328Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-11-21T17:13:32.464Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-11-21T17:13:32.464Z",
+        "history": [
+          {
+            "at": "2025-11-21T17:13:32.464Z",
+            "amount": 67,
+            "reason": "task_complete"
+          },
+          {
+            "at": "2025-11-21T17:12:32.674Z",
+            "amount": 27,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          }
+        ]
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 96,
+      "description": "Interview guild recruits",
+      "priority": "medium",
+      "sub_tasks": [],
+      "side_quests": [],
+      "nextSubtaskId": 1,
+      "due_date": "2025-11-22",
+      "status": "in_progress",
+      "completed": false,
+      "order": 21,
+      "created_at": "2025-11-21T10:17:39.328Z",
+      "updated_at": "2025-11-21T10:17:39.328Z",
+      "status_history": [
+        {
+          "status": "in_progress",
+          "at": "2025-11-21T10:17:39.328Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 97,
+      "description": "Scout the northern ridge",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Sharpen gear",
+          "status": "done",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Sharpen gear",
+          "status": "done",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-11-20",
+      "status": "blocked",
+      "completed": false,
+      "order": 22,
+      "created_at": "2025-11-21T10:17:39.328Z",
+      "updated_at": "2025-11-21T10:17:39.328Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-11-21T10:17:39.328Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 98,
+      "description": "Decode ancient glyphs",
+      "priority": "low",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "in_progress",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "in_progress",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Write expedition log",
+          "status": "in_progress",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "Sharpen gear",
+          "status": "in_progress",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-23",
+      "status": "blocked",
+      "completed": false,
+      "order": 23,
+      "created_at": "2025-11-21T10:17:39.328Z",
+      "updated_at": "2025-11-21T10:17:39.328Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-11-21T10:17:39.328Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 5,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 99,
+      "description": "Interview guild recruits",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "done",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "Gather components",
+          "status": "done",
+          "created_at": "2025-11-21T10:17:39.328Z",
+          "updated_at": "2025-11-21T10:17:39.328Z",
+          "status_history": [
+            {
+              "status": "done",
+              "at": "2025-11-21T10:17:39.328Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 2,
+      "due_date": "2025-11-23",
+      "status": "blocked",
+      "completed": false,
+      "order": 24,
+      "created_at": "2025-11-21T10:17:39.328Z",
+      "updated_at": "2025-11-21T10:17:39.328Z",
+      "status_history": [
+        {
+          "status": "blocked",
+          "at": "2025-11-21T10:17:39.328Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 1,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 100,
+      "description": "Kanonnenvoer",
+      "priority": "high",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "wicked and wild",
+          "status": "done",
+          "created_at": "2025-11-21T10:27:42.496Z",
+          "updated_at": "2025-11-21T10:27:55.810Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:27:42.496Z",
+              "note": null
+            },
+            {
+              "status": "in_progress",
+              "at": "2025-11-21T10:27:44.543Z",
+              "note": null
+            },
+            {
+              "status": "done",
+              "at": "2025-11-21T10:27:55.810Z",
+              "note": null
+            }
+          ],
+          "completed": true,
+          "rpg": {
+            "xp_awarded": true,
+            "last_reward_at": "2025-11-21T10:27:55.810Z"
+          }
+        },
+        {
+          "id": 2,
+          "description": "Meag",
+          "status": "todo",
+          "created_at": "2025-11-21T10:27:48.342Z",
+          "updated_at": "2025-11-21T10:27:48.342Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:27:48.342Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 3,
+          "description": "smruf",
+          "status": "todo",
+          "created_at": "2025-11-21T10:27:51.171Z",
+          "updated_at": "2025-11-21T10:27:51.171Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:27:51.171Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 4,
+          "description": "moroon",
+          "status": "todo",
+          "created_at": "2025-11-21T11:51:22.435Z",
+          "updated_at": "2025-11-21T11:51:22.435Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T11:51:22.435Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 5,
+          "description": "born",
+          "status": "todo",
+          "created_at": "2025-11-21T11:51:25.704Z",
+          "updated_at": "2025-11-21T11:51:25.704Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T11:51:25.704Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "wicked and wild",
+          "status": "todo",
+          "created_at": "2025-11-21T10:27:42.496Z",
+          "updated_at": "2025-11-21T10:27:42.496Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-21T10:27:42.496Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 6,
+      "due_date": "2025-11-21",
+      "status": "done",
+      "completed": true,
+      "order": 23,
+      "created_at": "2025-11-21T10:27:30.156Z",
+      "updated_at": "2025-11-21T17:13:27.275Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-11-21T10:27:30.156Z",
+          "note": null
+        },
+        {
+          "status": "in_progress",
+          "at": "2025-11-21T10:27:53.394Z",
+          "note": null
+        },
+        {
+          "status": "done",
+          "at": "2025-11-21T17:13:27.275Z",
+          "note": null
+        }
+      ],
+      "owner_id": 4,
+      "task_level": 2,
+      "rpg": {
+        "xp_awarded": true,
+        "last_reward_at": "2025-11-21T17:13:27.275Z",
+        "history": [
+          {
+            "at": "2025-11-21T17:13:27.275Z",
+            "amount": 71,
+            "reason": "task_complete"
+          },
+          {
+            "at": "2025-11-21T10:27:55.810Z",
+            "amount": 28,
+            "reason": "subtask_complete",
+            "subtask_id": 1
+          }
+        ]
+      },
+      "campaign_id": null
+    },
+    {
+      "id": 101,
+      "description": "D:N",
+      "priority": "medium",
+      "sub_tasks": [
+        {
+          "id": 1,
+          "description": "SMORGEBORG",
+          "status": "todo",
+          "created_at": "2025-11-22T17:44:43.861Z",
+          "updated_at": "2025-11-22T17:44:43.861Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-22T17:44:43.861Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        },
+        {
+          "id": 2,
+          "description": "dkn",
+          "status": "todo",
+          "created_at": "2025-11-22T17:44:49.402Z",
+          "updated_at": "2025-11-22T17:44:49.402Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-22T17:44:49.402Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "side_quests": [
+        {
+          "id": 1,
+          "description": "SMORGEBORG",
+          "status": "todo",
+          "created_at": "2025-11-22T17:44:43.861Z",
+          "updated_at": "2025-11-22T17:44:43.861Z",
+          "status_history": [
+            {
+              "status": "todo",
+              "at": "2025-11-22T17:44:43.861Z",
+              "note": null
+            }
+          ],
+          "completed": false,
+          "rpg": {
+            "xp_awarded": false,
+            "last_reward_at": null
+          }
+        }
+      ],
+      "nextSubtaskId": 3,
+      "due_date": "2025-11-22",
+      "status": "in_progress",
+      "completed": false,
+      "order": 24,
+      "created_at": "2025-11-22T17:44:34.093Z",
+      "updated_at": "2025-11-22T17:44:49.402Z",
+      "status_history": [
+        {
+          "status": "todo",
+          "at": "2025-11-22T17:44:34.093Z",
+          "note": null
+        },
+        {
+          "status": "in_progress",
+          "at": "2025-11-22T17:44:37.677Z",
+          "note": null
+        }
+      ],
+      "owner_id": 3,
+      "task_level": 3,
+      "rpg": {
+        "xp_awarded": false,
+        "last_reward_at": null,
+        "history": []
+      },
+      "campaign_id": null
     }
   ],
-  "nextId": 46
+  "nextId": 102
 }

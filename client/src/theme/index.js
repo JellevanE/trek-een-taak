@@ -58,9 +58,13 @@ const createAnimationTokens = (overrides = {}) => ({
 export const SOUND_EVENT_KEYS = Object.freeze({
     QUEST_ADD: 'quest_add',
     QUEST_COMPLETE: 'quest_complete',
+    QUEST_DELETE: 'quest_delete',
     SIDE_QUEST_ADD: 'side_quest_add',
+    SIDE_QUEST_COMPLETE: 'side_quest_complete',
     PRIORITY_CYCLE: 'priority_cycle',
-    LEVEL_UP: 'level_up'
+    LEVEL_UP: 'level_up',
+    NOTIFICATION: 'notification',
+    INTERFACE_CLICK: 'interface_click'
 });
 
 export const DEFAULT_THEME_ID = 'neon_arcade';
@@ -104,23 +108,66 @@ export const THEME_PROFILES = Object.freeze({
             events: {
                 [SOUND_EVENT_KEYS.QUEST_ADD]: {
                     label: 'Quest added',
-                    tone: { type: 'triangle', frequency: 560, duration: 0.28 }
+                    sources: [
+                        { src: '/sounds/463202_kenneth_cooney_one_beep.webm', type: 'audio/webm' },
+                        { src: '/sounds/463202_kenneth_cooney_one_beep.mp3', type: 'audio/mpeg' }
+                    ]
                 },
                 [SOUND_EVENT_KEYS.QUEST_COMPLETE]: {
                     label: 'Quest completed',
-                    tone: { type: 'sawtooth', frequency: 720, duration: 0.34 }
+                    sources: [
+                        { src: '/sounds/609336_kenneth_cooney_completed.webm', type: 'audio/webm' },
+                        { src: '/sounds/609336_kenneth_cooney_completed.mp3', type: 'audio/mpeg' }
+                    ]
+                },
+                [SOUND_EVENT_KEYS.QUEST_DELETE]: {
+                    label: 'Quest deleted',
+                    sources: [
+                        { src: '/sounds/580307_colorscrimsontears_slash-rpg.webm', type: 'audio/webm' },
+                        { src: '/sounds/580307_colorscrimsontears_slash-rpg.mp3', type: 'audio/mpeg' }
+                    ]
                 },
                 [SOUND_EVENT_KEYS.SIDE_QUEST_ADD]: {
                     label: 'Side quest added',
-                    tone: { type: 'square', frequency: 640, duration: 0.2 }
+                    sources: [
+                        { src: '/sounds/692109_samuel54tw_pop-videogame-sound.webm', type: 'audio/webm' },
+                        { src: '/sounds/692109_samuel54tw_pop-videogame-sound.mp3', type: 'audio/mpeg' }
+                    ]
+                },
+                [SOUND_EVENT_KEYS.SIDE_QUEST_COMPLETE]: {
+                    label: 'Side quest completed',
+                    sources: [
+                        { src: '/sounds/758956_ksaplay_8-bit-rebound-2.webm', type: 'audio/webm' },
+                        { src: '/sounds/758956_ksaplay_8-bit-rebound-2.mp3', type: 'audio/mpeg' }
+                    ]
                 },
                 [SOUND_EVENT_KEYS.PRIORITY_CYCLE]: {
                     label: 'Priority cycled',
-                    tone: { type: 'triangle', frequency: 420, duration: 0.16 }
+                    sources: [
+                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.webm', type: 'audio/webm' },
+                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.mp3', type: 'audio/mpeg' }
+                    ]
                 },
                 [SOUND_EVENT_KEYS.LEVEL_UP]: {
                     label: 'Level up',
-                    tone: { type: 'sine', frequency: 880, duration: 0.5 }
+                    sources: [
+                        { src: '/sounds/609335_kenneth_cooney_levelup.webm', type: 'audio/webm' },
+                        { src: '/sounds/609335_kenneth_cooney_levelup.mp3', type: 'audio/mpeg' }
+                    ]
+                },
+                [SOUND_EVENT_KEYS.NOTIFICATION]: {
+                    label: 'Notification',
+                    sources: [
+                        { src: '/sounds/750608_deadrobotmusic_notification-sound-2.webm', type: 'audio/webm' },
+                        { src: '/sounds/750608_deadrobotmusic_notification-sound-2.mp3', type: 'audio/mpeg' }
+                    ]
+                },
+                [SOUND_EVENT_KEYS.INTERFACE_CLICK]: {
+                    label: 'Interface click',
+                    sources: [
+                        { src: '/sounds/827638_elliottliu_interface8.webm', type: 'audio/webm' },
+                        { src: '/sounds/827638_elliottliu_interface8.mp3', type: 'audio/mpeg' }
+                    ]
                 }
             }
         }

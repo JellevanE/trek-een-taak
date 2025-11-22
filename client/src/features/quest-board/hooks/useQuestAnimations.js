@@ -104,6 +104,9 @@ export const useQuestAnimations = ({
     const setTaskStatusWithFx = useCallback(async (id, status, note) => {
         const updatedQuest = await mutateTaskStatus(id, status, note);
         if (!updatedQuest) return;
+        setQuests((prev) => prev.map((quest) => (
+            idsMatch(quest.id, updatedQuest.id) ? updatedQuest : quest
+        )));
         setPulsingQuests((prev) => ({ ...prev, [id]: 'full' }));
         setTimeout(() => setPulsingQuests((prev) => {
             const copy = { ...prev };
@@ -126,11 +129,22 @@ export const useQuestAnimations = ({
             }), 1400);
             scheduleCollapseAndMove(id);
         }
-    }, [mutateTaskStatus, playSound, scheduleCollapseAndMove, setCelebratingQuests, setGlowQuests, setPulsingQuests]);
+    }, [
+        mutateTaskStatus,
+        playSound,
+        scheduleCollapseAndMove,
+        setCelebratingQuests,
+        setGlowQuests,
+        setPulsingQuests,
+        setQuests
+    ]);
 
     const setSideQuestStatusWithFx = useCallback(async (taskId, subTaskId, status, note) => {
         const normalized = await mutateSideQuestStatus(taskId, subTaskId, status, note);
         if (!normalized) return;
+        setQuests((prev) => prev.map((quest) => (
+            idsMatch(quest.id, normalized.id) ? normalized : quest
+        )));
         const subStatus = getSideQuestStatus(findSideQuestById(normalized, subTaskId), normalized);
         setPulsingSideQuests((prev) => ({
             ...prev,
@@ -147,7 +161,7 @@ export const useQuestAnimations = ({
         if (refreshLayout) {
             setTimeout(() => refreshLayout(), 50);
         }
-    }, [ensureQuestExpanded, mutateSideQuestStatus, refreshLayout, setPulsingSideQuests]);
+    }, [ensureQuestExpanded, mutateSideQuestStatus, refreshLayout, setPulsingSideQuests, setQuests]);
 
     return {
         pulsingQuests,
