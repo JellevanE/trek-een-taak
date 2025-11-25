@@ -22,14 +22,14 @@ import { DEFAULT_THEME_ID } from '../theme';
  * }
  */
 
-export const useSmoothDragQuests = ({ quests, setQuests }) => {
+export const useSmoothDragQuests = ({ quests, setQuests, playSound }) => {
     // Store quests in a ref so we can read the latest value without triggering re-memoization
     const questsRef = useRef(quests);
     questsRef.current = quests;
     const [refreshToken, setRefreshToken] = useState(0);
     const refreshTokenRef = useRef(refreshToken);
     refreshTokenRef.current = refreshToken;
-    
+
     // Handle quest reordering
     const handleQuestReorder = useCallback((reorderedQuests) => {
         setQuests(reorderedQuests);
@@ -50,6 +50,12 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
         setRefreshToken((prev) => prev + 1);
     }, []);
 
+    const handleDragEnd = useCallback(() => {
+        if (typeof playSound === 'function') {
+            playSound('quest_drag');
+        }
+    }, [playSound]);
+
     // Create stable wrapper components
     // These are created ONCE and never change
     const QuestList = useCallback(({
@@ -63,6 +69,7 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
             <FramerQuestList
                 items={currentQuests}
                 onReorder={handleQuestReorder}
+                onDragEnd={handleDragEnd}
                 renderItem={renderItem}
                 itemHeight={itemHeight}
                 itemGap={itemGap}
@@ -70,7 +77,7 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
                 themeName={themeName}
             />
         );
-    }, [handleQuestReorder]);
+    }, [handleDragEnd, handleQuestReorder]);
 
     const SideQuestList = useCallback(({
         questId,
@@ -85,6 +92,7 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
             questId={questId}
             sideQuests={Array.isArray(sideQuests) ? sideQuests : []}
             onReorder={(reordered) => handleSideQuestReorder(questId, reordered)}
+            onDragEnd={handleDragEnd}
             renderItem={renderItem}
             itemHeight={itemHeight}
             itemGap={itemGap}
@@ -92,7 +100,7 @@ export const useSmoothDragQuests = ({ quests, setQuests }) => {
             maxContainerHeight={maxContainerHeight}
             themeName={themeName}
         />
-    ), [handleSideQuestReorder]);
+    ), [handleDragEnd, handleSideQuestReorder]);
 
     // Return the stable components directly
     // No need to create new wrappers - components read from questsRef

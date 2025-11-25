@@ -63,6 +63,7 @@ export const FramerSideQuestList = ({
     questId,
     sideQuests,
     onReorder,
+    onDragEnd,
     itemGap,
     itemHeight,
     renderItem,
@@ -102,7 +103,10 @@ export const FramerSideQuestList = ({
         if (onReorder && latestOrderRef.current) {
             onReorder(latestOrderRef.current);
         }
-    }, [onReorder]);
+        if (onDragEnd) {
+            onDragEnd();
+        }
+    }, [onReorder, onDragEnd]);
 
     const handleReorder = React.useCallback((next) => {
         setOrder(next);
@@ -173,6 +177,7 @@ FramerSideQuestList.propTypes = {
     questId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     sideQuests: PropTypes.arrayOf(PropTypes.any).isRequired,
     onReorder: PropTypes.func,
+    onDragEnd: PropTypes.func,
     itemGap: PropTypes.number,
     itemHeight: PropTypes.number,
     renderItem: PropTypes.func.isRequired,

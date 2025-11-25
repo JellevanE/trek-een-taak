@@ -156,12 +156,13 @@ export const useQuestAnimations = ({
             return copy;
         }), 700);
         if (subStatus === 'done') {
+            playSound(SOUND_EVENT_KEYS.SIDE_QUEST_COMPLETE);
             ensureQuestExpanded(taskId);
         }
         if (refreshLayout) {
             setTimeout(() => refreshLayout(), 50);
         }
-    }, [ensureQuestExpanded, mutateSideQuestStatus, refreshLayout, setPulsingSideQuests, setQuests]);
+    }, [ensureQuestExpanded, mutateSideQuestStatus, playSound, refreshLayout, setPulsingSideQuests, setQuests]);
 
     return {
         pulsingQuests,

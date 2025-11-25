@@ -157,6 +157,7 @@ export const useQuestInteractions = ({
             if (!updatedQuest) {
                 clearOptimistic();
                 pushToast('Failed to add side quest', 'error');
+                playSound(SOUND_EVENT_KEYS.ERROR);
                 return;
             }
             setQuests((prev) => prev.map((quest) => (
@@ -167,6 +168,7 @@ export const useQuestInteractions = ({
             console.error('Error adding side quest:', error);
             clearOptimistic();
             pushToast('Failed to add side quest', 'error');
+            playSound(SOUND_EVENT_KEYS.ERROR);
         } finally {
             // Clear loading state
             setLoadingSideQuestAdds((prev) => {
@@ -249,13 +251,14 @@ export const useQuestInteractions = ({
     const deleteTask = useCallback(async (id) => {
         const questToDelete = quests.find((quest) => idsMatch(quest.id, id));
         if (!questToDelete) return;
+        playSound(SOUND_EVENT_KEYS.QUEST_DELETE);
         setQuests((prev) => prev.filter((quest) => !idsMatch(quest.id, id)));
         if (editingQuest && idsMatch(editingQuest.id, id)) {
             setEditingQuest(null);
         }
         scheduleQuestUndo(questToDelete);
         await deleteQuest(id);
-    }, [deleteQuest, editingQuest, quests, scheduleQuestUndo, setQuests]);
+    }, [deleteQuest, editingQuest, playSound, quests, scheduleQuestUndo, setQuests]);
 
     const updateTask = useCallback(async (id, updatedTask) => {
         const payload = { ...updatedTask };
@@ -312,6 +315,7 @@ export const useQuestInteractions = ({
         const nextDescription = (editingSideQuest.description || '').trim();
         if (!nextDescription) {
             pushToast('Description cannot be empty', 'error');
+            playSound(SOUND_EVENT_KEYS.INVALID_INPUT);
             return;
         }
         updateSideQuest(questId, subTaskId, { description: nextDescription })
@@ -322,8 +326,9 @@ export const useQuestInteractions = ({
             .catch((error) => {
                 console.error('Error updating side-quest:', error);
                 pushToast('Failed to update side-quest', 'error');
+                playSound(SOUND_EVENT_KEYS.ERROR);
             });
-    }, [editingSideQuest, pushToast, setEditingSideQuest, updateSideQuest]);
+    }, [editingSideQuest, playSound, pushToast, setEditingSideQuest, updateSideQuest]);
 
     const cyclePriority = useCallback(() => {
         playSound(SOUND_EVENT_KEYS.PRIORITY_CYCLE);
@@ -331,7 +336,7 @@ export const useQuestInteractions = ({
     }, [playSound, setPriority]);
 
     const cycleTaskLevel = useCallback(() => {
-        playSound(SOUND_EVENT_KEYS.LEVEL_UP);
+        playSound(SOUND_EVENT_KEYS.PRIORITY_CYCLE);
         setTaskLevel((prev) => getNextLevel(prev));
     }, [playSound, setTaskLevel]);
 
@@ -341,7 +346,7 @@ export const useQuestInteractions = ({
     }, [playSound, setEditingQuest]);
 
     const cycleEditingLevel = useCallback(() => {
-        playSound(SOUND_EVENT_KEYS.LEVEL_UP);
+        playSound(SOUND_EVENT_KEYS.PRIORITY_CYCLE);
         setEditingQuest((prev) => (prev ? { ...prev, task_level: getNextLevel(prev.task_level || 1) } : prev));
     }, [playSound, setEditingQuest]);
 
