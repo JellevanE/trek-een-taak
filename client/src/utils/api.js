@@ -12,23 +12,24 @@ export async function handleApiResponse(res, onUnauthorized = null) {
     if (res.ok) {
         return res.json();
     }
-    
+
     if (res.status === 401 && onUnauthorized) {
         onUnauthorized();
         throw new Error('Authentication expired');
     }
-    
+
+    let error;
     try {
         const body = await res.json();
         const message = body?.error || `Request failed with status ${res.status}`;
-        const error = new Error(message);
-        error.status = res.status;
-        throw error;
+        error = new Error(message);
     } catch {
-        const error = new Error(`Request failed with status ${res.status}`);
-        error.status = res.status;
-        throw error;
+        error = new Error(`Request failed with status ${res.status}`);
     }
+
+    error.status = res.status;
+    throw error;
+
 }
 
 /**

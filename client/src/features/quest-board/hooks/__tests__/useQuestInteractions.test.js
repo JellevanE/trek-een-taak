@@ -683,6 +683,62 @@ describe('useQuestInteractions', () => {
 
             document.body.removeChild(input);
         });
+
+        it('expands and selects first side quest with ArrowRight', () => {
+            const props = baseProps();
+            const quest = { id: 1, side_quests: [{ id: 11 }] };
+            props.quests = [quest];
+            props.selection.selectedQuestId = 1;
+            props.selection.findQuestById.mockReturnValue(quest);
+
+            renderHook(() => useQuestInteractions(props));
+
+            act(() => {
+                dispatchKeyEvent('ArrowRight');
+            });
+
+            expect(props.selection.ensureQuestExpanded).toHaveBeenCalledWith(1);
+            expect(props.selection.selectFirstSideQuest).toHaveBeenCalledWith(1);
+        });
+
+        it('selects parent quest with ArrowLeft', () => {
+            const props = baseProps();
+            const quest = { id: 1 };
+            props.quests = [quest];
+            props.selection.selectedSideQuest = { questId: 1, sideQuestId: 11 };
+            props.selection.selectedQuestId = 1;
+            props.selection.findQuestById.mockReturnValue(quest);
+
+
+            renderHook(() => useQuestInteractions(props));
+
+            act(() => {
+                dispatchKeyEvent('ArrowLeft');
+            });
+
+            expect(props.selection.setSelectedSideQuest).toHaveBeenCalledWith(null);
+            expect(props.selection.handleSelectQuest).toHaveBeenCalledWith(1);
+        });
+
+        it('deletes quest with Delete key', () => {
+            const props = baseProps();
+            const quest = { id: 1, description: 'Delete me' };
+            props.quests = [quest];
+            props.selection.selectedQuestId = 1;
+            props.selection.findQuestById.mockReturnValue(quest);
+            props.deleteQuest.mockResolvedValue(true);
+
+            jest.spyOn(window, 'confirm').mockReturnValue(true);
+
+            renderHook(() => useQuestInteractions(props));
+
+            act(() => {
+                dispatchKeyEvent('Delete');
+            });
+
+            expect(props.deleteQuest).toHaveBeenCalledWith(1);
+        });
     });
+
 });
 
