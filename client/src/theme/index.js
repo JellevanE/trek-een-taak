@@ -63,8 +63,10 @@ export const SOUND_EVENT_KEYS = Object.freeze({
     SIDE_QUEST_COMPLETE: 'side_quest_complete',
     PRIORITY_CYCLE: 'priority_cycle',
     LEVEL_UP: 'level_up',
-    NOTIFICATION: 'notification',
-    INTERFACE_CLICK: 'interface_click'
+    INTERFACE_CLICK: 'interface_click',
+    QUEST_DRAG: 'quest_drag',
+    INVALID_INPUT: 'invalid_input',
+    ERROR: 'error'
 });
 
 export const DEFAULT_THEME_ID = 'neon_arcade';
@@ -109,64 +111,78 @@ export const THEME_PROFILES = Object.freeze({
                 [SOUND_EVENT_KEYS.QUEST_ADD]: {
                     label: 'Quest added',
                     sources: [
-                        { src: '/sounds/463202_kenneth_cooney_one_beep.webm', type: 'audio/webm' },
-                        { src: '/sounds/463202_kenneth_cooney_one_beep.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
+                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' }
                     ]
                 },
                 [SOUND_EVENT_KEYS.QUEST_COMPLETE]: {
                     label: 'Quest completed',
                     sources: [
-                        { src: '/sounds/609336_kenneth_cooney_completed.webm', type: 'audio/webm' },
-                        { src: '/sounds/609336_kenneth_cooney_completed.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/complete_quest.webm', type: 'audio/webm' },
+                        { src: '/sounds/complete_quest.mp3', type: 'audio/mpeg' }
                     ]
                 },
                 [SOUND_EVENT_KEYS.QUEST_DELETE]: {
                     label: 'Quest deleted',
                     sources: [
-                        { src: '/sounds/580307_colorscrimsontears_slash-rpg.webm', type: 'audio/webm' },
-                        { src: '/sounds/580307_colorscrimsontears_slash-rpg.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/error_beep_short.webm', type: 'audio/webm' },
+                        { src: '/sounds/error_beep_short.mp3', type: 'audio/mpeg' }
                     ]
                 },
                 [SOUND_EVENT_KEYS.SIDE_QUEST_ADD]: {
                     label: 'Side quest added',
                     sources: [
-                        { src: '/sounds/692109_samuel54tw_pop-videogame-sound.webm', type: 'audio/webm' },
-                        { src: '/sounds/692109_samuel54tw_pop-videogame-sound.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
+                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' }
                     ]
                 },
                 [SOUND_EVENT_KEYS.SIDE_QUEST_COMPLETE]: {
                     label: 'Side quest completed',
                     sources: [
-                        { src: '/sounds/758956_ksaplay_8-bit-rebound-2.webm', type: 'audio/webm' },
-                        { src: '/sounds/758956_ksaplay_8-bit-rebound-2.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/complete_sidequest.webm', type: 'audio/webm' },
+                        { src: '/sounds/complete_sidequest.mp3', type: 'audio/mpeg' }
                     ]
                 },
                 [SOUND_EVENT_KEYS.PRIORITY_CYCLE]: {
                     label: 'Priority cycled',
                     sources: [
-                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.webm', type: 'audio/webm' },
-                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/priority_cycle.webm', type: 'audio/webm' },
+                        { src: '/sounds/priority_cycle.mp3', type: 'audio/mpeg' }
                     ]
                 },
                 [SOUND_EVENT_KEYS.LEVEL_UP]: {
                     label: 'Level up',
                     sources: [
-                        { src: '/sounds/609335_kenneth_cooney_levelup.webm', type: 'audio/webm' },
-                        { src: '/sounds/609335_kenneth_cooney_levelup.mp3', type: 'audio/mpeg' }
-                    ]
-                },
-                [SOUND_EVENT_KEYS.NOTIFICATION]: {
-                    label: 'Notification',
-                    sources: [
-                        { src: '/sounds/750608_deadrobotmusic_notification-sound-2.webm', type: 'audio/webm' },
-                        { src: '/sounds/750608_deadrobotmusic_notification-sound-2.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/level_up.webm', type: 'audio/webm' },
+                        { src: '/sounds/level_up.mp3', type: 'audio/mpeg' }
                     ]
                 },
                 [SOUND_EVENT_KEYS.INTERFACE_CLICK]: {
                     label: 'Interface click',
                     sources: [
-                        { src: '/sounds/827638_elliottliu_interface8.webm', type: 'audio/webm' },
-                        { src: '/sounds/827638_elliottliu_interface8.mp3', type: 'audio/mpeg' }
+                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.webm', type: 'audio/webm' },
+                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.mp3', type: 'audio/mpeg' }
+                    ]
+                },
+                [SOUND_EVENT_KEYS.QUEST_DRAG]: {
+                    label: 'Quest drag',
+                    sources: [
+                        { src: '/sounds/drag_quest_card.webm', type: 'audio/webm' },
+                        { src: '/sounds/drag_quest_card.mp3', type: 'audio/mpeg' }
+                    ]
+                },
+                [SOUND_EVENT_KEYS.INVALID_INPUT]: {
+                    label: 'Invalid input',
+                    sources: [
+                        { src: '/sounds/invalid_input.webm', type: 'audio/webm' },
+                        { src: '/sounds/invalid_input.mp3', type: 'audio/mpeg' }
+                    ]
+                },
+                [SOUND_EVENT_KEYS.ERROR]: {
+                    label: 'Error',
+                    sources: [
+                        { src: '/sounds/error_beep_short.webm', type: 'audio/webm' },
+                        { src: '/sounds/error_beep_short.mp3', type: 'audio/mpeg' }
                     ]
                 }
             }

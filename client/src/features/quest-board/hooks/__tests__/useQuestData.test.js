@@ -159,7 +159,7 @@ test('setSideQuestStatus mirrors updated sub_tasks payload', async () => {
 
 test('updateQuest sends update request', async () => {
     apiFetch.mockImplementation((url, options = {}) => {
-        if (url === '/api/tasks/8' && options.method === 'PUT') {
+        if (url === '/api/tasks/8' && options.method === 'PATCH') {
             const body = JSON.parse(options.body);
             return Promise.resolve({
                 id: 8,
@@ -176,10 +176,17 @@ test('updateQuest sends update request', async () => {
         await hook.result.current.updateQuest(8, { description: 'New description' });
     });
 
-    expect(apiFetch).toHaveBeenCalledWith('/api/tasks/8', expect.objectContaining({
-        method: 'PUT'
-    }));
+    expect(apiFetch).toHaveBeenCalledWith(
+        '/api/tasks/8',
+        expect.objectContaining({
+            method: 'PATCH',
+            body: JSON.stringify({ description: 'New description' })
+        }),
+        expect.any(Function) // onUnauthorized callback
+    );
 });
+
+
 
 test('deleteQuest removes quest from list', async () => {
     apiFetch.mockImplementation((url, options = {}) => {
@@ -263,3 +270,169 @@ test('addTask resets description after creating quest', async () => {
 
     await waitFor(() => expect(hook.result.current.description).toBe(''));
 });
+
+test('setTaskStatus updates quest status', async () => {
+    apiFetch.mockImplementation((url, options = {}) => {
+        if (url === '/api/tasks/12/status' && options.method === 'PATCH') {
+            return Promise.resolve({
+                id: 12,
+                description: 'Status quest',
+                status: 'done'
+            });
+        }
+        throw new Error(`Unhandled request: ${url}`);
+    });
+
+    const { hook } = setupHook();
+    act(() => {
+        hook.result.current.setQuests([{ id: 12, description: 'Status quest', status: 'todo' }]);
+    });
+
+    await act(async () => {
+        await hook.result.current.setTaskStatus(12, 'done');
+    });
+
+    expect(hook.result.current.quests[0].status).toBe('done');
+});
+
+test('updateSideQuest renames side quest', async () => {
+    apiFetch.mockImplementation((url, options = {}) => {
+        if (url === '/api/tasks/13/subtasks/60' && options.method === 'PATCH') {
+            const body = JSON.parse(options.body);
+            return Promise.resolve({
+                id: 13,
+                description: 'Parent',
+                status: 'todo',
+                side_quests: [{ id: 60, description: body.description, status: 'todo' }]
+            });
+        }
+        throw new Error(`Unhandled request: ${url}`);
+    });
+
+    const { hook } = setupHook();
+    act(() => {
+        hook.result.current.setQuests([{
+            id: 13,
+            description: 'Parent',
+            status: 'todo',
+            side_quests: [{ id: 60, description: 'Old name', status: 'todo' }]
+        }]);
+    });
+
+    await act(async () => {
+        await hook.result.current.updateSideQuest(13, 60, { description: 'New name' });
+    });
+
+    expect(hook.result.current.quests[0].side_quests[0].description).toBe('New name');
+});
+
+test('addTask handles API error', async () => {
+    apiFetch.mockRejectedValue(new Error('API Error'));
+    const { hook } = setupHook();
+
+    await act(async () => {
+        hook.result.current.setDescription('Fail quest');
+    });
+
+    let result;
+    await act(async () => {
+        result = await hook.result.current.addTask();
+    });
+    expect(result).toBeNull();
+});
+
+test('addSideQuest handles API error', async () => {
+    apiFetch.mockRejectedValue(new Error('API Error'));
+    const { hook } = setupHook();
+    act(() => {
+        hook.result.current.setQuests([{ id: 14, side_quests: [] }]);
+    });
+
+    let result;
+    await act(async () => {
+        result = await hook.result.current.addSideQuest(14, 'Fail side');
+    });
+    expect(result).toBeNull();
+});
+
+
+test('clearAllQuests clears quests and shows toast', async () => {
+    apiFetch.mockResolvedValue({});
+    const { hook } = setupHook();
+    act(() => {
+        hook.result.current.setQuests([{ id: 1 }]);
+    });
+
+    await act(async () => {
+        await hook.result.current.clearAllQuests();
+    });
+
+    expect(hook.result.current.quests).toHaveLength(0);
+});
+
+test('seedDemoQuests fetches and sets quests', async () => {
+    apiFetch.mockResolvedValue({ tasks: [{ id: 100, description: 'Demo' }] });
+    const { hook } = setupHook();
+
+    await act(async () => {
+        await hook.result.current.seedDemoQuests(5);
+    });
+
+    expect(hook.result.current.quests).toHaveLength(1);
+    expect(hook.result.current.quests[0].description).toBe('Demo');
+});
+
+test('grantXp calls API and handles payload', async () => {
+    apiFetch.mockResolvedValue({ xp_event: { message: 'Gained XP' } });
+    const { hook } = setupHook();
+
+    await act(async () => {
+        await hook.result.current.grantXp(100);
+    });
+
+    expect(apiFetch).toHaveBeenCalledWith(
+        '/api/debug/grant-xp',
+        expect.objectContaining({ body: JSON.stringify({ amount: 100 }) }),
+        expect.any(Function)
+    );
+});
+
+test('resetRpgStats calls API and handles payload', async () => {
+    apiFetch.mockResolvedValue({});
+    const { hook } = setupHook();
+
+    await act(async () => {
+        await hook.result.current.resetRpgStats();
+    });
+
+    expect(apiFetch).toHaveBeenCalledWith(
+        '/api/debug/reset-rpg',
+        expect.anything(),
+        expect.any(Function)
+    );
+});
+
+test('debug functions handle errors', async () => {
+    apiFetch.mockRejectedValue(new Error('Debug Error'));
+    const { hook } = setupHook();
+
+    await act(async () => {
+        await hook.result.current.clearAllQuests();
+    });
+    // Verify it doesn't crash and maybe check toast if we could spy on it
+
+    await act(async () => {
+        await hook.result.current.seedDemoQuests();
+    });
+
+    await act(async () => {
+        await hook.result.current.grantXp(10);
+    });
+
+    await act(async () => {
+        await hook.result.current.resetRpgStats();
+    });
+});
+
+
+

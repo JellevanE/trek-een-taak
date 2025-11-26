@@ -64,6 +64,7 @@ QuestListRow.propTypes = {
 export const FramerQuestList = ({
     items,
     onReorder,
+    onDragEnd,
     itemGap,
     itemHeight,
     renderItem,
@@ -105,7 +106,10 @@ export const FramerQuestList = ({
         if (onReorder && latestOrderRef.current) {
             onReorder(latestOrderRef.current);
         }
-    }, [onReorder]);
+        if (onDragEnd) {
+            onDragEnd();
+        }
+    }, [onReorder, onDragEnd]);
 
     const handleReorder = React.useCallback((next) => {
         setOrder(next);
@@ -152,6 +156,7 @@ export const FramerQuestList = ({
 FramerQuestList.propTypes = {
     items: PropTypes.arrayOf(PropTypes.any).isRequired,
     onReorder: PropTypes.func,
+    onDragEnd: PropTypes.func,
     itemGap: PropTypes.number,
     itemHeight: PropTypes.number,
     renderItem: PropTypes.func.isRequired,

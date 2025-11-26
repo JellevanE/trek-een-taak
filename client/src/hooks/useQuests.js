@@ -67,15 +67,15 @@ export const useQuests = ({
         createQuestSnapshot
     } = questData;
 
-    const smoothDrag = useSmoothDragQuests({ quests, setQuests });
-    const refreshLayout = smoothDrag && typeof smoothDrag.refresh === 'function'
-        ? smoothDrag.refresh
-        : null;
-
     const playSound = useCallback((eventKey) => {
         if (!soundFx || typeof soundFx.play !== 'function' || !eventKey) return;
         soundFx.play(eventKey);
     }, [soundFx]);
+
+    const smoothDrag = useSmoothDragQuests({ quests, setQuests, playSound });
+    const refreshLayout = smoothDrag && typeof smoothDrag.refresh === 'function'
+        ? smoothDrag.refresh
+        : null;
 
     const selection = useQuestSelection({ quests, refreshLayout });
     const animations = useQuestAnimations({

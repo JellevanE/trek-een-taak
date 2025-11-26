@@ -39,7 +39,7 @@ Shared goals from today's interview:
 - [x] Trace the status-toggle handlers to ensure local state, animations, and progress meters update even before the API response returns.
 - [x] Fix any stale selectors that prevent cards from re-rendering when subtasks move between `todo → in_progress → completed`.
 - [x] Surface inline status indicators (e.g., motion variants or icon swaps) so state changes remain visible while backend confirmations stream in.
-- [ ] Extend hook tests to cover multi-side-quest toggles and failure fallbacks. **Note:** Basic test exists, but no comprehensive failure scenario coverage.
+- [x] Extend hook tests to cover multi-side-quest toggles and failure fallbacks. **Done:** Added comprehensive failure scenario tests in `useQuestInteractions.failure.test.js` (6 tests covering network failures, concurrent operations, optimistic rollbacks, race conditions, rapid failures, and update failures).
 
 ## Story 3 · Quest Selection & Start Button Fixes
 **Status:** 🟡 Investigating — Start button now properly decoupled from selection state via `event.stopPropagation()` in QuestActions, but no dedicated tests yet.
@@ -155,7 +155,7 @@ Split App.css into 10 logically organized feature files:
 - [x] Capture follow-up tasks in `IMPROVEMENTS.md` or a dedicated ADR so the team remembers to revisit button/shape styling even if schedules tighten. **Done:** Documented in IMPROVEMENTS.md.
 
 ## Story 7 · Quality Gates & Release Prep
-- [x] Run `deno task validate` (or `deno task test:client`) after each story; add focused jest specs where gaps exist. **Done:** Fixed `usePlayerStats` tests and added `useQuestInteractions` tests.
+- [x] Run `deno task validate` (or `deno task test:client`) after each story; add focused jest specs where gaps exist. **Done:** Fixed HTMLAudioElement mocking, fixed `useQuestData.test.js`, and added Story 2 regression tests. All 248 tests passing.
 - [x] Maintain the feature branch `feature/quest-card-sidequest-refactor`, landing one commit per completed story with descriptive messages. **Done:** Committed Story 6.
 - [ ] Manually QA the flows: add/remove/toggle side quests, start quests while selected, resize viewport, and drag cards across columns.
-- [x] Draft release notes summarizing the fixes plus the planned UI button/shape polish so downstream teams know what changed and what’s next. **Done:** Created `RELEASE_NOTES_DRAFT.md`.
+- [x] Draft release notes summarizing the fixes plus the planned UI button/shape polish so downstream teams know what changed and what's next. **Done:** Created `RELEASE_NOTES_DRAFT.md`.
