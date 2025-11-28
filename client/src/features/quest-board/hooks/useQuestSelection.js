@@ -55,6 +55,7 @@ export const useQuestSelection = ({
     })));
     const editingQuestInputRef = useRef(null);
     const addInputRefs = useRef({});
+    const prevEditingQuestIdRef = useRef(null);
 
     const ensureQuestExpanded = useCallback((questId) => {
         if (questId === undefined || questId === null) return;
@@ -203,14 +204,20 @@ export const useQuestSelection = ({
         return () => document.removeEventListener('click', handleClick);
     }, [editingQuest, setEditingQuest]);
 
+    // Focus the edit input only when starting to edit a new quest
+    // (i.e., when editingQuest.id changes), not on every keystroke
+    const currentEditingQuestId = editingQuest?.id ?? null;
     useEffect(() => {
+        if (currentEditingQuestId === prevEditingQuestIdRef.current) return;
+        prevEditingQuestIdRef.current = currentEditingQuestId;
+        if (currentEditingQuestId === null) return;
         if (!editingQuestInputRef.current) return;
         try {
             editingQuestInputRef.current.focus();
         } catch (error) {
             console.error(error);
         }
-    }, [editingQuest]);
+    }, [currentEditingQuestId]);
 
     return {
         editingQuest,

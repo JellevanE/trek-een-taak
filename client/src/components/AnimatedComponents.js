@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 
 export const AnimatedQuestCard = ({ children, isNew = false, isCompleting = false, ...props }) => (
     <motion.div
-        layout
         initial={isNew ? { opacity: 0, y: -20, scale: 0.85 } : { opacity: 1, y: 0, scale: 1 }}
         animate={{ opacity: 1, y: 0, scale: isCompleting ? 1.05 : 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}

@@ -302,10 +302,16 @@ describe('useQuestInteractions', () => {
             const { result } = renderHook(() => useQuestInteractions(props));
 
             await act(async () => {
-                await result.current.updateTask(400, { description: 'New' });
+                await result.current.updateTask(400, { description: 'New', priority: 'medium', task_level: 1 });
             });
 
-            expect(props.updateQuest).toHaveBeenCalledWith(400, { description: 'New' });
+            expect(props.updateQuest).toHaveBeenCalledWith(400, {
+                description: 'New',
+                priority: 'medium',
+                task_level: 1,
+                due_date: null,
+                campaign_id: null
+            });
             expect(props.selection.setEditingQuest).toHaveBeenCalledWith(null);
         });
 
@@ -316,10 +322,16 @@ describe('useQuestInteractions', () => {
             const { result } = renderHook(() => useQuestInteractions(props));
 
             await act(async () => {
-                await result.current.updateTask(500, { task_level: '3' });
+                await result.current.updateTask(500, { task_level: '3', description: 'Test', priority: 'low' });
             });
 
-            expect(props.updateQuest).toHaveBeenCalledWith(500, { task_level: 3 });
+            expect(props.updateQuest).toHaveBeenCalledWith(500, {
+                description: 'Test',
+                priority: 'low',
+                task_level: 3,
+                due_date: null,
+                campaign_id: null
+            });
         });
     });
 

@@ -49,13 +49,16 @@ describe('QuestEditForm', () => {
         expect(screen.getByDisplayValue('Campaign A')).toBeInTheDocument();
     });
 
-    it('calls onChange when description changes', () => {
+    it('updates local state when description changes (not parent onChange)', () => {
         render(<QuestEditForm {...defaultProps} />);
 
         const input = screen.getByDisplayValue('Test Quest');
         fireEvent.change(input, { target: { value: 'Updated Quest' } });
 
-        expect(defaultProps.onChange).toHaveBeenCalled();
+        // Description changes are kept in local state, not propagated immediately
+        expect(defaultProps.onChange).not.toHaveBeenCalled();
+        // But the input value should be updated locally
+        expect(screen.getByDisplayValue('Updated Quest')).toBeInTheDocument();
     });
 
     it('calls onChange when campaign changes', () => {
@@ -94,13 +97,16 @@ describe('QuestEditForm', () => {
         expect(defaultProps.onCancel).toHaveBeenCalled();
     });
 
-    it('calls onSave when save button clicked', () => {
+    it('calls onSave with final data when save button clicked', () => {
         render(<QuestEditForm {...defaultProps} />);
 
         const button = screen.getByText('Save');
         fireEvent.click(button);
 
-        expect(defaultProps.onSave).toHaveBeenCalled();
+        expect(defaultProps.onSave).toHaveBeenCalledWith({
+            ...mockEditingQuest,
+            description: mockEditingQuest.description
+        });
     });
 
     it('handles no campaigns state', () => {

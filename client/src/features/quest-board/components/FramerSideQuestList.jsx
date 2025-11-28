@@ -5,7 +5,7 @@ import { DEFAULT_THEME_ID } from '../../../theme';
 import { useQuestMotionTokens } from '../hooks/useQuestMotionTokens.js';
 import { getItemKey, reconcileOrder, useNeonDragHandle } from './listUtils.js';
 
-const SideQuestRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd }) => {
+const SideQuestRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd, listIsDragging }) => {
     const { controls, dragMeta, setIsDragging } = useNeonDragHandle();
     const dragScale = Math.max(1, motionTokens.drag.scale - 0.01);
 
@@ -18,7 +18,7 @@ const SideQuestRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd }
             dragElastic={0.1}
             dragMomentum={false}
             dragTransition={{ power: 0.18, timeConstant: 120, bounceStiffness: 520, bounceDamping: 34 }}
-            layout
+            layout={listIsDragging ? 'position' : false}
             onDragStart={() => {
                 setIsDragging(true);
                 onDragStart?.();
@@ -28,10 +28,12 @@ const SideQuestRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd }
                 onDragEnd?.();
             }}
             transition={{
-                type: 'spring',
-                stiffness: 300,
-                damping: 30,
-                mass: 1
+                layout: {
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 30,
+                    mass: 1
+                }
             }}
             whileDrag={{
                 scale: dragScale,
@@ -56,7 +58,10 @@ SideQuestRow.propTypes = {
         easing: PropTypes.object,
         drag: PropTypes.object
     }).isRequired,
-    renderItem: PropTypes.func.isRequired
+    renderItem: PropTypes.func.isRequired,
+    onDragStart: PropTypes.func,
+    onDragEnd: PropTypes.func,
+    listIsDragging: PropTypes.bool
 };
 
 export const FramerSideQuestList = ({
@@ -166,6 +171,7 @@ export const FramerSideQuestList = ({
                         motionTokens={motionTokens}
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
+                        listIsDragging={isDragging}
                     />
                 ))}
             </Reorder.Group>

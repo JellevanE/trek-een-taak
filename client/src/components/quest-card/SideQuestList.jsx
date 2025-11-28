@@ -31,6 +31,12 @@ const SideQuestItem = ({
     const sideEditing = !!(editingSideQuest
         && idsMatch(editingSideQuest.questId, quest.id)
         && idsMatch(editingSideQuest.sideQuestId, sideQuest.id));
+
+    // DEBUG: Trace side quest editing
+    if (sideEditing) {
+        console.log(`[SideQuestItem:${sideQuest.id}] editing. Value: '${editingSideQuest?.description}'`);
+    }
+
     const sideKey = `${quest.id}:${sideQuest.id}`;
     const sideHandleProps = dragMeta?.handleProps || {};
     const sideHandleStyle = {
@@ -164,12 +170,14 @@ const SideQuestItem = ({
                     {sideEditing ? (
                         <>
                             <button
+                                type="button"
                                 className="btn-primary btn-small"
                                 onClick={withStop(() => saveSideQuestEdit(quest.id, sideQuest.id))}
                             >
                                 Save
                             </button>
                             <button
+                                type="button"
                                 className="btn-ghost btn-small"
                                 onClick={withStop(() => cancelSideQuestEdit())}
                             >
@@ -179,12 +187,14 @@ const SideQuestItem = ({
                     ) : sideSelected ? (
                         <>
                             <button
+                                type="button"
                                 className="btn-ghost btn-small"
                                 onClick={withStop(() => startEditingSideQuest(quest.id, sideQuest))}
                             >
                                 Edit
                             </button>
                             <button
+                                type="button"
                                 className="btn-danger btn-small"
                                 onClick={withStop(() => deleteSideQuest(quest.id, sideQuest.id))}
                             >
@@ -195,6 +205,7 @@ const SideQuestItem = ({
                         <>
                             {sideStatus !== 'in_progress' && (
                                 <button
+                                    type="button"
                                     className="btn-start btn-small"
                                     onClick={handleStatusChange('in_progress')}
                                 >
@@ -203,6 +214,7 @@ const SideQuestItem = ({
                             )}
                             {sideStatus !== 'done' && (
                                 <button
+                                    type="button"
                                     className="btn-complete btn-small"
                                     onClick={handleStatusChange('done')}
                                 >
@@ -211,6 +223,7 @@ const SideQuestItem = ({
                             )}
                             {sideStatus === 'done' && (
                                 <button
+                                    type="button"
                                     className="btn-ghost btn-small"
                                     onClick={handleStatusChange('todo')}
                                 >
@@ -274,6 +287,17 @@ export const SideQuestList = ({
     sideQuestFooter,
     ...itemProps
 }) => {
+    // Memoize renderItem to prevent unnecessary re-renders
+    const renderItem = React.useCallback((sideQuest, isDragging, dragMeta = {}) => (
+        <SideQuestItem
+            quest={quest}
+            sideQuest={sideQuest}
+            isDragging={isDragging}
+            dragMeta={dragMeta}
+            {...itemProps}
+        />
+    ), [quest, itemProps]);
+
     if (!sideQuests || sideQuests.length === 0) {
         return (
             <div className="side-quest-empty">
@@ -305,15 +329,7 @@ export const SideQuestList = ({
                         itemGap={sideQuestGap}
                         maxContainerHeight={sideQuestMaxHeight}
                         themeName={themeName}
-                        renderItem={(sideQuest, isDragging, dragMeta = {}) => (
-                            <SideQuestItem
-                                quest={quest}
-                                sideQuest={sideQuest}
-                                isDragging={isDragging}
-                                dragMeta={dragMeta}
-                                {...itemProps}
-                            />
-                        )}
+                        renderItem={renderItem}
                     />
                 ) : (
                     sideQuests.map((sideQuest) => (

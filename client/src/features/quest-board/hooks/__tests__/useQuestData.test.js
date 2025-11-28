@@ -179,7 +179,7 @@ test('updateQuest sends update request', async () => {
     expect(apiFetch).toHaveBeenCalledWith(
         '/api/tasks/8',
         expect.objectContaining({
-            method: 'PATCH',
+            method: 'PUT',
             body: JSON.stringify({ description: 'New description' })
         }),
         expect.any(Function) // onUnauthorized callback
@@ -297,7 +297,7 @@ test('setTaskStatus updates quest status', async () => {
 
 test('updateSideQuest renames side quest', async () => {
     apiFetch.mockImplementation((url, options = {}) => {
-        if (url === '/api/tasks/13/subtasks/60' && options.method === 'PATCH') {
+        if (url === '/api/tasks/13/subtasks/60' && options.method === 'PUT') {
             const body = JSON.parse(options.body);
             return Promise.resolve({
                 id: 13,

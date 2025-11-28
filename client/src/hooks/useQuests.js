@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuestData } from '../features/quest-board/hooks/useQuestData.js';
 import { useQuestSelection } from '../features/quest-board/hooks/useQuestSelection.js';
 import { useQuestAnimations } from '../features/quest-board/hooks/useQuestAnimations.js';
@@ -67,10 +67,16 @@ export const useQuests = ({
         createQuestSnapshot
     } = questData;
 
-    const playSound = useCallback((eventKey) => {
-        if (!soundFx || typeof soundFx.play !== 'function' || !eventKey) return;
-        soundFx.play(eventKey);
+    const soundFxRef = useRef(soundFx);
+    useEffect(() => {
+        soundFxRef.current = soundFx;
     }, [soundFx]);
+
+    const playSound = useCallback((eventKey) => {
+        const fx = soundFxRef.current;
+        if (!fx || typeof fx.play !== 'function' || !eventKey) return;
+        fx.play(eventKey);
+    }, []);
 
     const smoothDrag = useSmoothDragQuests({ quests, setQuests, playSound });
     const refreshLayout = smoothDrag && typeof smoothDrag.refresh === 'function'
