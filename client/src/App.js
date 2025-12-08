@@ -102,7 +102,7 @@ const formatKeyLabel = (key) => KEY_LABEL_MAP[key] || key;
 
 function App() {
     console.log('[App] Re-rendering');
-    
+
     const { theme, themeLabel, themeProfile, toggleTheme, soundVolume, setSoundVolume } = useTheme();
     const prefersReducedMotion = useReducedMotionPreference();
     const soundFxController = useSoundFx({
@@ -260,10 +260,10 @@ function App() {
         updateTask
     ]);
 
-    const renderAddSideQuestForm = React.useCallback((questId) => (
+    const renderAddSideQuestForm = React.useCallback((questId, value) => (
         <AddSideQuestForm
             questId={questId}
-            value={sideQuestDescriptionMap[questId] || ''}
+            value={value}
             inputRef={(el) => {
                 if (!addInputRefs.current) addInputRefs.current = {};
                 if (el) {
@@ -289,8 +289,7 @@ function App() {
         addInputRefs,
         addSideQuest,
         setAddingSideQuestTo,
-        setSideQuestDescriptionMap,
-        sideQuestDescriptionMap
+        setSideQuestDescriptionMap
     ]);
 
     const questBoardContextValue = React.useMemo(() => ({
@@ -310,6 +309,9 @@ function App() {
         spawnQuests,
         campaignLookup,
         hasCampaigns,
+        campaigns,
+        sideQuestDescriptionMap,
+        setSideQuestDescriptionMap,
         getQuestStatus,
         getQuestStatusLabel,
         getQuestSideQuests,
@@ -332,10 +334,16 @@ function App() {
         saveSideQuestEdit,
         toggleCollapse,
         setAddingSideQuestTo,
+        addSideQuest,
         renderEditForm,
         renderAddSideQuestForm,
         smoothDrag,
         addInputRefs,
+        editingQuestInputRef,
+        handleEditChange,
+        updateTask,
+        cycleEditingPriority,
+        cycleEditingLevel,
         sideQuestItemHeight: SIDE_QUEST_ITEM_HEIGHT,
         soundFxEnabled: soundFxController.enabled,
         soundFxVolume: soundVolume
@@ -356,6 +364,9 @@ function App() {
         spawnQuests,
         campaignLookup,
         hasCampaigns,
+        campaigns,
+        sideQuestDescriptionMap,
+        setSideQuestDescriptionMap,
         getQuestStatus,
         getQuestStatusLabel,
         getQuestSideQuests,
@@ -378,10 +389,16 @@ function App() {
         saveSideQuestEdit,
         toggleCollapse,
         setAddingSideQuestTo,
+        addSideQuest,
         renderEditForm,
         renderAddSideQuestForm,
         smoothDrag,
         addInputRefs,
+        editingQuestInputRef,
+        handleEditChange,
+        updateTask,
+        cycleEditingPriority,
+        cycleEditingLevel,
         soundFxController.enabled,
         soundVolume
     ]);
@@ -433,17 +450,17 @@ function App() {
         return (
             <div className="App container">
                 <header className="App-header">
-                    <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:12}}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                         <div>
                             <h1>Quest Tracker</h1>
                             <div className="subtitle">Quest management made easy, but also way harder.</div>
                         </div>
-                        <div style={{display:'flex', alignItems:'center', gap:8}}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
                             {renderSoundSlider('auth')}
                             {/* TEMPORARY: Showcase button (remove when done exploring) */}
-                            <button 
-                                className="btn-ghost" 
+                            <button
+                                className="btn-ghost"
                                 onClick={() => setShowShowcase(true)}
                                 style={{
                                     background: 'var(--neon-purple, #9400d3)',
@@ -457,11 +474,11 @@ function App() {
                         </div>
                     </div>
                 </header>
-                <div style={{display:'flex', justifyContent:'center', marginTop:40}}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
                     <div className="auth-required-screen">
-                        <div style={{textAlign:'center', marginBottom:24}}>
+                        <div style={{ textAlign: 'center', marginBottom: 24 }}>
                             <h2>Welcome to Quest Tracker</h2>
-                            <p style={{color:'var(--text-muted)', marginBottom:32}}>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: 32 }}>
                                 Please sign in or create an account to start managing your quests.
                             </p>
                         </div>
@@ -564,17 +581,17 @@ function App() {
                 </div>
             </div>
             <header className="App-header">
-                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:12}}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                     <div>
                         <h1>Quest Tracker</h1>
                         <div className="subtitle">Quest management made easy, but also way harder.</div>
                     </div>
-                    <div style={{display:'flex', alignItems:'center', gap:8}}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <button className="btn-ghost" onClick={toggleTheme}>Theme: {themeLabel}</button>
                         {renderSoundSlider('main')}
                         {/* TEMPORARY: Showcase button (remove when done exploring) */}
-                        <button 
-                            className="btn-ghost" 
+                        <button
+                            className="btn-ghost"
                             onClick={() => setShowShowcase(true)}
                             style={{
                                 background: 'var(--neon-purple, #9400d3)',
@@ -879,68 +896,68 @@ function App() {
                     )}
                 </aside>
                 <div className="board-main">
-            <div className="add-task-form">
-                <input
-                    type="text"
-                    placeholder="Quest description"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTask(); } }}
-                />
-                <button
-                    type="button"
-                    className="cycle-toggle priority-toggle"
-                    onClick={cyclePriority}
-                    title="Cycle quest urgency"
-                >
-                    Urgency: <span className={`priority-pill ${priority}`}>{priority}</span>
-                </button>
-                <button
-                    type="button"
-                    className="cycle-toggle level-toggle"
-                    onClick={cycleTaskLevel}
-                    title="Cycle quest level"
-                >
-                    Lv. {taskLevel}
-                </button>
-                <div className="campaign-select">
-                    <select
-                        value={taskCampaignSelection === null ? '' : String(taskCampaignSelection)}
-                        onChange={e => {
-                            const next = e.target.value;
-                            if (next === '') {
-                                setTaskCampaignSelection(null);
-                            } else {
-                                const parsed = Number(next);
-                                setTaskCampaignSelection(Number.isNaN(parsed) ? null : parsed);
-                            }
-                        }}
-                        aria-label="Assign quest to campaign"
-                    >
-                        <option value="">{hasCampaigns ? 'No campaign' : 'No campaigns yet'}</option>
-                        {campaigns.map(campaign => (
-                            <option key={campaign.id} value={campaign.id}>
-                                {campaign.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <button className="btn-primary" onClick={addTask}>Add Quest</button>
-            </div>
-            <div className="quest-container">
-                <QuestBoardProvider value={questBoardContextValue}>
-                    {smoothDrag?.QuestList ? (
-                        <smoothDrag.QuestList
-                            itemHeight={QUEST_ITEM_HEIGHT}
-                            itemGap={QUEST_ITEM_GAP}
-                            renderItem={renderQuestCard}
-                            themeName={theme}
+                    <div className="add-task-form">
+                        <input
+                            type="text"
+                            placeholder="Quest description"
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTask(); } }}
                         />
-                    ) : (
-                        quests.map((quest) => renderQuestCard(quest))
-                    )}
-                </QuestBoardProvider>
-            </div>
+                        <button
+                            type="button"
+                            className="cycle-toggle priority-toggle"
+                            onClick={cyclePriority}
+                            title="Cycle quest urgency"
+                        >
+                            Urgency: <span className={`priority-pill ${priority}`}>{priority}</span>
+                        </button>
+                        <button
+                            type="button"
+                            className="cycle-toggle level-toggle"
+                            onClick={cycleTaskLevel}
+                            title="Cycle quest level"
+                        >
+                            Lv. {taskLevel}
+                        </button>
+                        <div className="campaign-select">
+                            <select
+                                value={taskCampaignSelection === null ? '' : String(taskCampaignSelection)}
+                                onChange={e => {
+                                    const next = e.target.value;
+                                    if (next === '') {
+                                        setTaskCampaignSelection(null);
+                                    } else {
+                                        const parsed = Number(next);
+                                        setTaskCampaignSelection(Number.isNaN(parsed) ? null : parsed);
+                                    }
+                                }}
+                                aria-label="Assign quest to campaign"
+                            >
+                                <option value="">{hasCampaigns ? 'No campaign' : 'No campaigns yet'}</option>
+                                {campaigns.map(campaign => (
+                                    <option key={campaign.id} value={campaign.id}>
+                                        {campaign.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <button className="btn-primary" onClick={addTask}>Add Quest</button>
+                    </div>
+                    <div className="quest-container">
+                        <QuestBoardProvider value={questBoardContextValue}>
+                            {smoothDrag?.QuestList ? (
+                                <smoothDrag.QuestList
+                                    itemHeight={QUEST_ITEM_HEIGHT}
+                                    itemGap={QUEST_ITEM_GAP}
+                                    renderItem={renderQuestCard}
+                                    themeName={theme}
+                                />
+                            ) : (
+                                quests.map((quest) => renderQuestCard(quest))
+                            )}
+                        </QuestBoardProvider>
+                    </div>
                 </div>
             </div>
             {/* Toasts & Undo */}
@@ -963,7 +980,7 @@ function App() {
                     ))}
                 </AnimatePresence>
             </div>
-            
+
             {/* TEMPORARY: Showcase demo (remove when done exploring) */}
             <React.Suspense fallback={null}>
                 {showShowcase && <QuickDemo onClose={() => setShowShowcase(false)} />}

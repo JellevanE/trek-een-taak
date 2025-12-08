@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export const QuestEditForm = ({
     quest,
@@ -13,6 +13,44 @@ export const QuestEditForm = ({
     onCyclePriority,
     onCycleLevel
 }) => {
+    // Local state for the description to avoid re-renders on every keystroke
+    const [localDescription, setLocalDescription] = useState(editingQuest?.description || '');
+    
+    // Sync local state when editingQuest.id changes (switching to edit a different quest)
+    const editingQuestId = editingQuest?.id;
+    useEffect(() => {
+        setLocalDescription(editingQuest?.description || '');
+    }, [editingQuestId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleLocalChange = useCallback((e) => {
+        const { name, value } = e.target;
+        if (name === 'description') {
+            setLocalDescription(value);
+        } else {
+            // For non-description fields, propagate immediately
+            onChange(e);
+        }
+    }, [onChange]);
+
+    const handleSave = useCallback(() => {
+        // Build the final payload with local description
+        const finalData = {
+            ...editingQuest,
+            description: localDescription
+        };
+        onSave(finalData);
+    }, [localDescription, editingQuest, onSave]);
+
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSave();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            onCancel();
+        }
+    }, [handleSave, onCancel]);
+
     if (!quest || !editingQuest) return null;
     const currentPriority = editingQuest.priority || 'medium';
     const currentLevel = editingQuest.task_level || 1;
@@ -25,8 +63,9 @@ export const QuestEditForm = ({
             <input
                 type="text"
                 name="description"
-                value={editingQuest.description || ''}
-                onChange={onChange}
+                value={localDescription}
+                onChange={handleLocalChange}
+                onKeyDown={handleKeyDown}
                 ref={inputRef}
             />
             <div className="edit-quest-footer">
@@ -46,7 +85,7 @@ export const QuestEditForm = ({
                                 id={`edit-campaign-${quest.id}`}
                                 name="campaign_id"
                                 value={currentCampaignId}
-                                onChange={onChange}
+                                onChange={handleLocalChange}
                             >
                                 <option value="">{hasCampaigns ? 'No campaign' : 'No campaigns yet'}</option>
                                 {campaigns.map((campaign) => (
@@ -60,7 +99,7 @@ export const QuestEditForm = ({
                 </div>
                 <div className="edit-actions">
                     <button type="button" className="btn-secondary" onClick={onCancel}>Cancel</button>
-                    <button type="button" className="btn-primary" onClick={onSave}>
+                    <button type="button" className="btn-primary" onClick={handleSave}>
                         Save
                     </button>
                 </div>

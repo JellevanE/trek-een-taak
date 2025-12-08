@@ -554,8 +554,8 @@
         "bio": "On the road again."
       },
       "rpg": {
-        "level": 4,
-        "xp": 562,
+        "level": 6,
+        "xp": 1043,
         "hp": 20,
         "mp": 5,
         "coins": 0,
@@ -565,6 +565,120 @@
           "items": []
         },
         "xp_log": [
+          {
+            "amount": 30,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +30 XP",
+            "metadata": {
+              "task_id": 149,
+              "task_level": 3,
+              "subtask_id": 1,
+              "priority": "medium"
+            },
+            "at": "2025-11-28T17:56:37.750Z",
+            "level_before": 6,
+            "level_after": 6,
+            "xp_before": 1013,
+            "xp_after": 1043,
+            "xp_into_level": 143,
+            "xp_for_level": 300,
+            "xp_to_next": 157,
+            "leveled_up": false
+          },
+          {
+            "amount": 50,
+            "reason": "task_complete",
+            "message": "Quest complete +50 XP",
+            "metadata": {
+              "task_id": 142,
+              "task_level": 1,
+              "priority": "medium"
+            },
+            "at": "2025-11-25T21:13:01.322Z",
+            "level_before": 6,
+            "level_after": 6,
+            "xp_before": 963,
+            "xp_after": 1013,
+            "xp_into_level": 113,
+            "xp_for_level": 300,
+            "xp_to_next": 187,
+            "leveled_up": false
+          },
+          {
+            "amount": 250,
+            "reason": "debug_adjustment",
+            "message": "Gained +250 XP",
+            "metadata": {
+              "amount": 250
+            },
+            "at": "2025-11-25T21:04:17.226Z",
+            "level_before": 5,
+            "level_after": 6,
+            "xp_before": 713,
+            "xp_after": 963,
+            "xp_into_level": 63,
+            "xp_for_level": 300,
+            "xp_to_next": 237,
+            "leveled_up": true
+          },
+          {
+            "amount": 57,
+            "reason": "task_complete",
+            "message": "Quest complete +57 XP",
+            "metadata": {
+              "task_id": 79,
+              "task_level": 1,
+              "priority": "high"
+            },
+            "at": "2025-11-25T20:48:42.566Z",
+            "level_before": 5,
+            "level_after": 5,
+            "xp_before": 656,
+            "xp_after": 713,
+            "xp_into_level": 73,
+            "xp_for_level": 260,
+            "xp_to_next": 187,
+            "leveled_up": false
+          },
+          {
+            "amount": 67,
+            "reason": "task_complete",
+            "message": "Quest complete +67 XP",
+            "metadata": {
+              "task_id": 104,
+              "task_level": 3,
+              "priority": "low"
+            },
+            "at": "2025-11-25T20:48:36.485Z",
+            "level_before": 4,
+            "level_after": 5,
+            "xp_before": 589,
+            "xp_after": 656,
+            "xp_into_level": 16,
+            "xp_for_level": 260,
+            "xp_to_next": 244,
+            "leveled_up": true
+          },
+          {
+            "amount": 27,
+            "reason": "subtask_complete",
+            "message": "Side-quest complete +27 XP",
+            "metadata": {
+              "task_id": 104,
+              "task_level": 3,
+              "subtask_id": 1,
+              "priority": "low"
+            },
+            "at": "2025-11-25T20:44:30.919Z",
+            "level_before": 4,
+            "level_after": 4,
+            "xp_before": 562,
+            "xp_after": 589,
+            "xp_into_level": 169,
+            "xp_for_level": 220,
+            "xp_to_next": 51,
+            "leveled_up": false
+          },
           {
             "amount": 21,
             "reason": "subtask_complete",
@@ -776,10 +890,10 @@
           }
         ],
         "last_daily_reward_at": "2025-11-25",
-        "last_xp_award_at": "2025-11-25T20:24:10.805Z",
+        "last_xp_award_at": "2025-11-28T17:56:37.750Z",
         "counters": {
-          "tasks_completed": 5,
-          "subtasks_completed": 4,
+          "tasks_completed": 8,
+          "subtasks_completed": 6,
           "daily_rewards_claimed": 2
         },
         "flags": {},

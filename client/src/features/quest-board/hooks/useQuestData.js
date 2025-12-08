@@ -175,7 +175,7 @@ export const useQuestData = ({
             const updatedTask = await apiFetch(
                 `/api/tasks/${questId}`,
                 {
-                    method: 'PATCH',
+                    method: 'PUT',
                     headers: getAuthHeaders(),
                     body: JSON.stringify(updates)
                 },
@@ -285,17 +285,20 @@ export const useQuestData = ({
     }, [getAuthHeaders, onUnauthorized, refreshCampaigns, setQuests]);
 
     const updateSideQuest = useCallback(async (questId, sideQuestId, payload) => {
+        const url = `/api/tasks/${questId}/subtasks/${sideQuestId}`;
+        console.log('[useQuestData:updateSideQuest] called with:', { questId, sideQuestId, type: typeof sideQuestId, url });
         try {
             const updatedTask = await apiFetch(
-                `/api/tasks/${questId}/subtasks/${sideQuestId}`,
+                url,
                 {
-                    method: 'PATCH',
+                    method: 'PUT',
                     headers: getAuthHeaders(),
                     body: JSON.stringify(payload)
                 },
                 onUnauthorized
             );
             if (updatedTask) {
+                console.log('[updateSideQuest] API response:', updatedTask);
                 const normalized = normalizeQuest(updatedTask);
                 setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
                 refreshCampaigns();

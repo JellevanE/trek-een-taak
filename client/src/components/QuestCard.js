@@ -7,6 +7,7 @@ import { QuestProgress } from './quest-card/QuestProgress.jsx';
 import { QuestActions } from './quest-card/QuestActions.jsx';
 import { SideQuestList } from './quest-card/SideQuestList.jsx';
 import { ActionButton } from './ActionButton.jsx';
+import { AddSideQuestForm, QuestEditForm } from '../features/quest-board/components/forms';
 
 import './../styles/quest-card-refresh.css';
 
@@ -38,6 +39,8 @@ const QuestCard = React.memo(({
         spawnQuests,
         campaignLookup,
         hasCampaigns,
+        campaigns,
+        sideQuestDescriptionMap,
         getQuestStatus,
         getQuestStatusLabel,
         getQuestSideQuests,
@@ -60,10 +63,15 @@ const QuestCard = React.memo(({
         saveSideQuestEdit,
         toggleCollapse,
         setAddingSideQuestTo,
-        renderEditForm,
-        renderAddSideQuestForm,
+        setSideQuestDescriptionMap,
+        addSideQuest,
         smoothDrag,
         addInputRefs,
+        editingQuestInputRef,
+        handleEditChange,
+        updateTask,
+        cycleEditingPriority,
+        cycleEditingLevel,
         sideQuestItemHeight,
         soundFxEnabled
     } = useQuestBoardContext();
@@ -93,16 +101,49 @@ const QuestCard = React.memo(({
         return themeProfile.soundFx;
     }, [soundFxEnabled, themeProfile]);
 
-    const sideQuestFooter = (
+    // Extract this quest's specific value to avoid depending on entire map
+    const currentValue = sideQuestDescriptionMap[quest.id] || '';
+    const isAddingToThisQuest = addingSideQuestTo === quest.id;
+    const isLoading = loadingSideQuestAdds.has(quest.id);
+
+    const sideQuestFooter = React.useMemo(() => (
         <div className="side-quest-footer">
-            {addingSideQuestTo === quest.id ? (
-                renderAddSideQuestForm(quest.id)
+            {isAddingToThisQuest ? (
+                <AddSideQuestForm
+                    key={`add-sidequest-${quest.id}`}
+                    questId={quest.id}
+                    value={currentValue}
+                    inputRef={(el) => {
+                        if (!addInputRefs.current) addInputRefs.current = {};
+                        if (el) {
+                            addInputRefs.current[quest.id] = el;
+                        } else {
+                            delete addInputRefs.current[quest.id];
+                        }
+                    }}
+                    onChange={(value) => {
+                        setSideQuestDescriptionMap((prev) => ({ ...prev, [quest.id]: value }));
+                    }}
+                    onAdd={() => {
+                        addSideQuest(quest.id);
+                    }}
+                    onCancel={() => {
+                        setSideQuestDescriptionMap((prev) => ({ ...prev, [quest.id]: '' }));
+                        setAddingSideQuestTo(null);
+                    }}
+                    onFocus={() => setAddingSideQuestTo(quest.id)}
+                    onBlur={() => {
+                        setTimeout(() => {
+                            setAddingSideQuestTo((prev) => (prev === quest.id ? null : prev));
+                        }, 100);
+                    }}
+                />
             ) : (
                 <ActionButton
                     variant="primary"
                     size="large"
                     className="add-side-quest-button"
-                    loading={loadingSideQuestAdds.has(quest.id)}
+                    loading={isLoading}
                     onClick={() => {
                         handleSelectQuest(quest.id);
                         setAddingSideQuestTo(quest.id);
@@ -112,7 +153,18 @@ const QuestCard = React.memo(({
                 </ActionButton>
             )}
         </div>
-    );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    ), [
+        isAddingToThisQuest,
+        currentValue,
+        isLoading,
+        quest.id,
+        addInputRefs,
+        setSideQuestDescriptionMap,
+        addSideQuest,
+        setAddingSideQuestTo,
+        handleSelectQuest
+    ]);
 
     const questClassName = [
         'quest',
@@ -130,6 +182,7 @@ const QuestCard = React.memo(({
     ].filter(Boolean).join(' ');
     const isNewQuest = !!spawnQuests[quest.id];
     const isCelebrating = !!celebratingQuests[quest.id];
+    const isEditingThisQuest = editingQuest && idsMatch(editingQuest.id, quest.id);
 
     return (
         <QuestCardShell
@@ -143,8 +196,20 @@ const QuestCard = React.memo(({
             isInteractiveTarget={isInteractiveTarget}
             cardTokens={cardTokens}
         >
-            {editingQuest && editingQuest.id === quest.id ? (
-                renderEditForm(quest)
+            {isEditingThisQuest ? (
+                <QuestEditForm
+                    key={`edit-quest-${quest.id}`}
+                    quest={quest}
+                    editingQuest={editingQuest}
+                    inputRef={editingQuestInputRef}
+                    campaigns={campaigns}
+                    hasCampaigns={hasCampaigns}
+                    onChange={handleEditChange}
+                    onCancel={() => setEditingQuest(null)}
+                    onSave={(finalData) => updateTask(quest.id, finalData)}
+                    onCyclePriority={cycleEditingPriority}
+                    onCycleLevel={cycleEditingLevel}
+                />
             ) : (
                 <>
                     <QuestHeader

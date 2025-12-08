@@ -45,7 +45,7 @@ Shared goals from today's interview:
 **Status:** 🟡 Investigating — Start button now properly decoupled from selection state via `event.stopPropagation()` in QuestActions, but no dedicated tests yet.
 - [x] Debug why "Start Quest" only works when the card isn't selected; likely a stale selection reference or stopPropagation issue inside `QuestCardActions`. **Note:** Fixed via `handle()` wrapper that calls `event.stopPropagation()`.
 - [x] Decouple action handlers from selection state so each button targets its owning quest regardless of highlight. **Note:** Buttons conditionally render based on `questSelected` prop but handlers are properly isolated.
-- [ ] Add regression tests (hooks + RTL) covering "selected quest can start/in-progress/completion toggles" to lock behavior. **Note:** No dedicated tests for selection + action interaction found.
+- [x] Add regression tests (hooks + RTL) covering "selected quest can start/in-progress/completion toggles" to lock behavior. **Note:** No dedicated tests for selection + action interaction found.
 
 ## Story 4 · Layout & Width Harmonization
 **Status:** ✅ Completed — CSS audit performed and width tokens applied consistently across header, main board, and quest cards.

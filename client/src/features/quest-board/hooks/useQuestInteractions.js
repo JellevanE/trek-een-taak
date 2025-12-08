@@ -114,8 +114,14 @@ export const useQuestInteractions = ({
         }
     }, [createQuest, playSound, triggerQuestSpawn]);
 
+    // Keep a ref to the description map to avoid recreating addSideQuest on every keystroke
+    const sideQuestDescriptionMapRef = useRef(sideQuestDescriptionMap);
+    useEffect(() => {
+        sideQuestDescriptionMapRef.current = sideQuestDescriptionMap;
+    }, [sideQuestDescriptionMap]);
+
     const addSideQuest = useCallback(async (questId) => {
-        const rawValue = sideQuestDescriptionMap[questId] || '';
+        const rawValue = sideQuestDescriptionMapRef.current[questId] || '';
         const value = rawValue.trim();
         if (!value) return;
 
@@ -198,8 +204,8 @@ export const useQuestInteractions = ({
         refreshLayout,
         setLoadingSideQuestAdds,
         setQuests,
-        setSideQuestDescriptionMap,
-        sideQuestDescriptionMap
+        setSideQuestDescriptionMap
+        // sideQuestDescriptionMap removed from dependencies
     ]);
 
     const scheduleQuestUndo = useCallback((quest) => {
@@ -261,20 +267,30 @@ export const useQuestInteractions = ({
     }, [deleteQuest, editingQuest, playSound, quests, scheduleQuestUndo, setQuests]);
 
     const updateTask = useCallback(async (id, updatedTask) => {
-        const payload = { ...updatedTask };
-        if (Object.prototype.hasOwnProperty.call(payload, 'task_level')) {
-            payload.task_level = Number(payload.task_level) || 1;
-        }
+        // Only send fields that the server accepts for updates
+        const payload = {
+            description: updatedTask.description,
+            priority: updatedTask.priority,
+            task_level: Number(updatedTask.task_level) || 1,
+            due_date: updatedTask.due_date ?? null,
+            campaign_id: updatedTask.campaign_id ?? null
+        };
         await updateQuest(id, payload);
         setEditingQuest(null);
     }, [setEditingQuest, updateQuest]);
 
-    const updateSideQuest = useCallback(async (taskId, subTaskId, payload) => {
-        const normalized = await updateSideQuestRequest(taskId, subTaskId, payload);
-        if (normalized && refreshLayout) {
-            setTimeout(() => refreshLayout(), 50);
+    const updateSideQuest = useCallback(async (questId, sideQuestId, payload) => {
+        console.log('[updateSideQuest] called with:', { questId, sideQuestId });
+        try {
+            const normalized = await updateSideQuestRequest(questId, sideQuestId, payload);
+            if (normalized && refreshLayout) {
+                setTimeout(() => refreshLayout(), 50);
+            }
+            return normalized;
+        } catch (error) {
+            console.error('Error in updateSideQuest:', error);
+            throw error; // Re-throw the error for upstream handling
         }
-        return normalized;
     }, [refreshLayout, updateSideQuestRequest]);
 
     const deleteSideQuest = useCallback(async (taskId, subTaskId) => {
@@ -307,6 +323,7 @@ export const useQuestInteractions = ({
     ]);
 
     const saveSideQuestEdit = useCallback((questId, subTaskId) => {
+        console.log('[saveSideQuestEdit] called with:', { questId, subTaskId });
         if (
             !editingSideQuest
             || !idsMatch(editingSideQuest.questId, questId)
