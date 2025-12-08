@@ -25,6 +25,7 @@ import {
     type ListCampaignsQuery,
     type UpdateCampaignPayload
 } from '../validation/schemas/campaigns.js';
+import { StorylineService } from '../services/storyline.service.js';
 
 type BaseAuthedRequest<
     P extends ParamsDictionary = ParamsDictionary,
@@ -108,8 +109,8 @@ export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCa
         payload.image_url === null
             ? null
             : typeof payload.image_url === 'string' && payload.image_url.length > 0
-            ? payload.image_url
-            : null;
+                ? payload.image_url
+                : null;
 
     const newCampaign: CampaignRecord = {
         id: campaignsData.nextId,
@@ -121,6 +122,17 @@ export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCa
         created_at: now,
         updated_at: now
     };
+
+    try {
+        const storyline = StorylineService.createStoryline(newCampaign.id);
+        newCampaign.storyline_id = storyline.id;
+    } catch (e) {
+        console.error('Failed to create storyline for campaign', e);
+        // We continue without storyline if it fails, or we could fail the request.
+        // Plan says: "Automatic creation - every campaign gets a storyline"
+        // Ideally we should fail, but for V1 proto keeping it robust is arguably better?
+        // Let's log and continue for now, as it's optional in CampaignRecord.
+    }
 
     campaignsData.campaigns.push(newCampaign);
     campaignsData.nextId += 1;
@@ -238,6 +250,12 @@ export function deleteCampaign(req: BaseAuthedRequest<{ id: string }>, res: Resp
         writeCampaigns(campaignsData);
     } catch (error) {
         return sendError(res, 500, 'Failed to persist campaign removal');
+    }
+
+    try {
+        StorylineService.deleteStoryline(removed.id);
+    } catch (e) {
+        console.error('Failed to delete associated storyline', e);
     }
 
     const tasksData = readTasks();

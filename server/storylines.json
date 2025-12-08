@@ -1,0 +1,37 @@
+[
+  {
+    "id": "71accba5-cf0d-47aa-b9a7-ae7cb40675f2",
+    "campaignId": 1,
+    "theme": "fantasy",
+    "narrativeState": {
+      "chapter": 2,
+      "currentObjective": "Embark on the grand adventure that will define Ellaria's legacy",
+      "summary": "Ellaria, a young adventurer from the small farming village of Oakhurst, sets out on a grand adventure to rise to the challenge and prove herself worthy of the mantle of hero, as dark forces gather in the north and ancient relics await discovery.",
+      "characters": [
+        "Ellaria"
+      ],
+      "locations": [
+        "Trelan",
+        "Oakhurst"
+      ],
+      "keyPlotPoints": [
+        "Rumors of dark forces gathering in the north",
+        "Whispers of ancient relics waiting to be unearthed"
+      ],
+      "progressPercentage": 0
+    },
+    "updates": [
+      {
+        "id": "051ab0c5-a4cf-4cbd-be6b-0e414f9cab17",
+        "type": "intro",
+        "text": "Here is a 288-word story introduction that sets the scene, establishes the hero's background, references the upcoming quests, and ends with a clear call to action in the style of a classic fantasy RPG:\n\nThe sun was setting over the rolling hills and dense forests of Trelan, painting the sky in vibrant hues of orange and pink. Amidst the fading light, a lone figure made their way down the well-worn path, the gentle clink of armor and the crunch of leaves underfoot the only sounds to break the peaceful silence. \n\nThis was Ellaria, a young adventurer whose thirst for discovery and desire to make her mark on the world had led her far from her humble beginnings. Born and raised in the small farming village of Oakhurst, Ellaria had always felt a restless spirit stirring within her - a longing to explore the vast unknown that lay beyond the cozy confines of her home. \n\nAnd now, after years of training and preparation, the time had finally come for her to embark on the grand adventure that would define her legacy. The road ahead was shrouded in mystery, with rumors of dark forces gathering in the north and whispers of ancient relics waiting to be unearthed. But Ellaria was undaunted, her heart filled with a burning determination to rise to the challenge and prove herself worthy of the mantle of hero.\n\nAs the last rays of the sun dipped below the horizon, Ellaria paused, taking a deep breath and squaring her shoulders. The journey was just beginning, but she knew in her bones that this was her calling - to be the light that shines through the darkness, the champion who answers the world's call for aid. With renewed vigor, she set off down the path, ready to face whatever trials lay ahead.",
+        "generatedAt": "2025-12-08T19:47:18.763Z",
+        "tasksCompleted": []
+      }
+    ],
+    "createdAt": "2025-12-08T16:58:39.168Z",
+    "lastGeneratedAt": "2025-12-08T19:47:18.763Z",
+    "lastVisitDate": "2025-12-08T19:47:18.763Z",
+    "generationFailures": 0
+  }
+]

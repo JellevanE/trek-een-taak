@@ -10,6 +10,7 @@ import rpgRouter from './routes/rpg.js';
 import tasksRouter from './routes/tasks.js';
 import usersRouter from './routes/users.js';
 import docsRouter from './routes/docs.js';
+import storylinesRouter from './routes/storylines.js';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/campaigns', campaignsRouter);
 app.use('/api/rpg', rpgRouter);
+app.use('/api/storylines', storylinesRouter);
 app.use('/api/debug', debugRouter);
 
 export default app;

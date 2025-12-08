@@ -10,6 +10,7 @@ import { useReducedMotionPreference } from './hooks/useReducedMotionPreference.j
 import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
 import { QuestEditForm, AddSideQuestForm } from './features/quest-board/components/forms';
+import { StorylineCard } from './features/quest-board/components/StorylineCard.jsx';
 import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
 // Theme preview + showcase demos are lazy so they stay out of the main bundle
 const ThemePreviewPage = React.lazy(() => import('./theme/ThemePreviewPage.jsx'));
@@ -224,7 +225,11 @@ function App() {
         globalAura,
         globalLabel,
         dailyClaimed,
-        xpPercent
+        xpPercent,
+        storyline,
+        storylineHasUpdate,
+        storylineIsGenerating,
+        checkStorylineUpdate,
     } = useQuestBoard({ token, setToken, soundFx: soundFxController });
 
     // Constants for item heights
@@ -705,7 +710,6 @@ function App() {
             <div className="board-layout">
                 <aside
                     className={`campaign-sidebar ${campaignSidebarCollapsed ? 'collapsed' : ''}`}
-                    role="complementary"
                     aria-label="Campaigns"
                 >
                     <div className="campaign-sidebar-header">
@@ -896,6 +900,16 @@ function App() {
                     )}
                 </aside>
                 <div className="board-main">
+                    {/* Storyline Card */}
+                    {storyline && (
+                        <StorylineCard
+                            storyline={storyline}
+                            hasUpdate={storylineHasUpdate}
+                            onCheckUpdate={() => checkStorylineUpdate(storyline.campaignId)}
+                            isGenerating={storylineIsGenerating}
+                        />
+                    )}
+
                     <div className="add-task-form">
                         <input
                             type="text"

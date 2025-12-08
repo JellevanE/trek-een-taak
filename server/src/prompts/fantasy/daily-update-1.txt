@@ -1,0 +1,20 @@
+Campaign: {campaignName}
+Hero: {userName}, Level {userLevel} {userClass}
+
+Narrative Context:
+Summary: {narrativeSummary}
+Objective: {currentObjective}
+Locations: {locations}
+Characters: {characters}
+
+Completed Quests:
+{tasksCompleted}
+
+Create a daily story update (150-250 words) that:
+- Describes the hero completing the specific quests listed above
+- Advances the plot towards the current objective
+- Mentions relevant locations or characters if appropriate
+- Ends with a cliffhanger or setup for the next day
+
+Style: Classic fantasy RPG
+Tone: Heroic and rewarding

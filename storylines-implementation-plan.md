@@ -3,6 +3,36 @@
 ## Overview
 Add narrative storylines to campaigns with daily updates, quest log, and typewriter text effects. Start with classic fantasy theme, but architect for future flexibility.
 
+## Quick Reference: Key Decisions
+
+**Architecture:**
+- Storyline is a **separate entity** linked to Campaign via `storylineId`
+- **One storyline per campaign** (expandable later)
+- **Automatic creation** - every campaign gets a storyline
+- **Cascade delete** - storyline deleted when campaign is deleted
+
+**Generation:**
+- **Daily updates** group all completed tasks into one narrative per campaign
+- **Two-call process**: Sonnet 4.5 for story text, Haiku 4.5 for extracting narrative state
+- **Includes subtasks** in story generation alongside main tasks
+- **Async generation** (no queue system for V1)
+
+**Security & Limits:**
+- **Rate limiting**: 10 generations/day per user, max 5 active storyline campaigns
+- **Input validation**: Length checks and sanitization to prevent prompt injection
+- **API key** in `.env` file
+
+**Frontend:**
+- **Separate zustand store** (`useStorylineStore`)
+- **Campaign page redesign** - collapsible panel → full page with tabs
+- **Typewriter effect** is core UX, not polish
+- **Desktop-first** - mobile not prioritized for V1
+
+**Development:**
+- **Local dev only** - no migration needed, can wipe storage
+- **Fantasy theme first** - architecture supports future themes
+
+
 ---
 
 ## Phase 1: Data Model & Backend Foundation
@@ -560,14 +590,14 @@ export const storylineConfig = {
 ## Implementation Order
 
 ### Sprint 1: Backend Foundation
-1. Create `Storyline` data model
-2. Add `storylineId` to Campaign model
-3. Create storyline service with basic CRUD
-4. **Hook storyline creation into campaign creation endpoint**
-5. **Hook storyline deletion into campaign deletion endpoint**
-6. Set up Claude API integration (SDK, `.env` config)
-7. Create prompt template system
-8. **Implement rate limiting middleware** (generation limits per user/day)
+1. [x] Create `Storyline` data model
+2. [x] Add `storylineId` to Campaign model
+3. [x] Create storyline service with basic CRUD
+4. [x] **Hook storyline creation into campaign creation endpoint**
+5. [x] **Hook storyline deletion into campaign deletion endpoint**
+6. [ ] Set up Claude API integration (SDK, `.env` config)
+7. [ ] Create prompt template system
+8. [ ] **Implement rate limiting middleware** (generation limits per user/day)
 
 ### Sprint 2: Generation Logic
 1. **Implement input validation and sanitization** (length checks, prompt injection prevention)
@@ -725,4 +755,3 @@ export const storylineConfig = {
 - Non-fantasy themes (sci-fi, mystery, etc.)
 - Sound effects on story updates
 - Advanced notification UX (toasts, animations)
-- Mobile optimization

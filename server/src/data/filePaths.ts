@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-type DataFileKey = 'tasks' | 'users' | 'campaigns';
+type DataFileKey = 'tasks' | 'users' | 'campaigns' | 'storylines';
 
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(MODULE_DIR, '..', '..');
@@ -9,13 +9,15 @@ const ROOT_DIR = path.resolve(MODULE_DIR, '..', '..');
 const defaults: Record<DataFileKey, string> = {
     tasks: path.join(ROOT_DIR, 'tasks.json'),
     users: path.join(ROOT_DIR, 'users.json'),
-    campaigns: path.join(ROOT_DIR, 'campaigns.json')
+    campaigns: path.join(ROOT_DIR, 'campaigns.json'),
+    storylines: path.join(ROOT_DIR, 'storylines.json')
 };
 
 const envVars: Record<DataFileKey, string> = {
     tasks: 'TASKS_FILE',
     users: 'USERS_FILE',
-    campaigns: 'CAMPAIGNS_FILE'
+    campaigns: 'CAMPAIGNS_FILE',
+    storylines: 'STORYLINES_FILE'
 };
 
 const overrides: Partial<Record<DataFileKey, string>> = {};
@@ -38,6 +40,10 @@ export function getUsersFile(): string {
 
 export function getCampaignsFile(): string {
     return resolvePath('campaigns');
+}
+
+export function getStorylinesFile(): string {
+    return resolvePath('storylines');
 }
 
 export function configureDataFiles(paths: Partial<Record<DataFileKey, string>>): void {

@@ -1,0 +1,15 @@
+Campaign: {campaignName}
+Hero: {userName}, Level {userLevel} {userClass}
+Current Objective: {currentObjective}
+
+Upcoming Quests:
+{tasksSummary}
+
+Create an engaging story introduction (200-300 words) that:
+- Sets the scene and establishes the adventure's tone
+- Incorporates the hero's name and background
+- References the upcoming quests naturally
+- Ends with a clear call to action
+
+Style: Classic fantasy RPG (Dragon Quest, Final Fantasy)
+Tone: Heroic and adventurous

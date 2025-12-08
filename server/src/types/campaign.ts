@@ -4,6 +4,7 @@ export interface CampaignRecord {
     description: string;
     image_url: string | null;
     owner_id: number;
+    storyline_id?: string;
     archived: boolean;
     created_at: string;
     updated_at: string;
