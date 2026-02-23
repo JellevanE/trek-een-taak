@@ -12,7 +12,7 @@ import {
     updateSubtaskStatus,
     updateTask,
     updateTaskOrder,
-    updateTaskStatus
+    updateTaskStatus,
 } from '../controllers/tasksController.js';
 
 const router = Router();

@@ -5,19 +5,26 @@ import { DEFAULT_THEME_ID } from '../../../theme';
 import { useQuestMotionTokens } from '../hooks/useQuestMotionTokens.js';
 import { getItemKey, reconcileOrder, useNeonDragHandle } from './listUtils.js';
 
-const SideQuestRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd, listIsDragging }) => {
+const SideQuestRow = (
+    { item, renderItem, motionTokens, onDragStart, onDragEnd, listIsDragging },
+) => {
     const { controls, dragMeta, setIsDragging } = useNeonDragHandle();
     const dragScale = Math.max(1, motionTokens.drag.scale - 0.01);
 
     return (
         <Reorder.Item
-            as="div"
+            as='div'
             value={item}
             dragControls={controls}
             dragListener={false}
             dragElastic={0.1}
             dragMomentum={false}
-            dragTransition={{ power: 0.18, timeConstant: 120, bounceStiffness: 520, bounceDamping: 34 }}
+            dragTransition={{
+                power: 0.18,
+                timeConstant: 120,
+                bounceStiffness: 520,
+                bounceDamping: 34,
+            }}
             layout={listIsDragging ? 'position' : false}
             onDragStart={() => {
                 setIsDragging(true);
@@ -32,15 +39,15 @@ const SideQuestRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd, 
                     type: 'spring',
                     stiffness: 300,
                     damping: 30,
-                    mass: 1
-                }
+                    mass: 1,
+                },
             }}
             whileDrag={{
                 scale: dragScale,
                 boxShadow: motionTokens.drag.shadow,
                 filter: motionTokens.drag.glow === 'none'
                     ? undefined
-                    : `drop-shadow(${motionTokens.drag.glow})`
+                    : `drop-shadow(${motionTokens.drag.glow})`,
             }}
             style={{ listStyle: 'none' }}
         >
@@ -56,12 +63,12 @@ SideQuestRow.propTypes = {
     motionTokens: PropTypes.shape({
         durations: PropTypes.object,
         easing: PropTypes.object,
-        drag: PropTypes.object
+        drag: PropTypes.object,
     }).isRequired,
     renderItem: PropTypes.func.isRequired,
     onDragStart: PropTypes.func,
     onDragEnd: PropTypes.func,
-    listIsDragging: PropTypes.bool
+    listIsDragging: PropTypes.bool,
 };
 
 export const FramerSideQuestList = ({
@@ -74,7 +81,7 @@ export const FramerSideQuestList = ({
     renderItem,
     maxContainerHeight,
     refreshToken,
-    themeName
+    themeName,
 }) => {
     const motionTokens = useQuestMotionTokens(themeName);
     const [order, setOrder] = React.useState(() => (Array.isArray(sideQuests) ? sideQuests : []));
@@ -143,7 +150,7 @@ export const FramerSideQuestList = ({
             ? 'auto'
             : 'visible',
         overflowX: 'hidden',
-        paddingRight: isOverflowing ? 6 : 0
+        paddingRight: isOverflowing ? 6 : 0,
     };
 
     return (
@@ -151,7 +158,7 @@ export const FramerSideQuestList = ({
             <Reorder.Group
                 ref={reorderGroupRef}
                 key={`sidequest-list-${questId}-${refreshToken}`}
-                axis="y"
+                axis='y'
                 values={order}
                 onReorder={handleReorder}
                 layoutScroll
@@ -160,7 +167,7 @@ export const FramerSideQuestList = ({
                     flexDirection: 'column',
                     gap: itemGap,
                     minHeight: itemHeight > 0 ? itemHeight : undefined,
-                    width: isDragging && dimensions ? dimensions.width : '100%'
+                    width: isDragging && dimensions ? dimensions.width : '100%',
                 }}
             >
                 {order.map((item, index) => (
@@ -189,7 +196,7 @@ FramerSideQuestList.propTypes = {
     renderItem: PropTypes.func.isRequired,
     maxContainerHeight: PropTypes.number,
     refreshToken: PropTypes.number,
-    themeName: PropTypes.string
+    themeName: PropTypes.string,
 };
 
 FramerSideQuestList.defaultProps = {
@@ -199,7 +206,7 @@ FramerSideQuestList.defaultProps = {
     itemHeight: 0,
     maxContainerHeight: null,
     refreshToken: 0,
-    themeName: DEFAULT_THEME_ID
+    themeName: DEFAULT_THEME_ID,
 };
 
 export default FramerSideQuestList;

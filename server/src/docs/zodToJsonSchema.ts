@@ -1,15 +1,15 @@
 import {
-    ZodFirstPartyTypeKind,
     type ZodArray,
     type ZodDefault,
     type ZodEffects,
+    ZodFirstPartyTypeKind,
     type ZodLazy,
     type ZodNullable,
     type ZodObject,
     type ZodOptional,
     type ZodRawShape,
     type ZodRecord,
-    type ZodTypeAny
+    type ZodTypeAny,
 } from 'zod';
 
 export type JsonSchema = Record<string, unknown>;
@@ -33,7 +33,10 @@ interface UnwrappedSchema {
     defaultValue?: unknown;
 }
 
-function isZodType<T extends ZodTypeAny>(schema: ZodTypeAny, kind: ZodFirstPartyTypeKind): schema is T {
+function isZodType<T extends ZodTypeAny>(
+    schema: ZodTypeAny,
+    kind: ZodFirstPartyTypeKind,
+): schema is T {
     return schema._def.typeName === kind;
 }
 
@@ -262,7 +265,9 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
         mergeNullable(itemsSchema, itemsConverted.nullable);
 
         const arraySchema: JsonSchema = { type: 'array', items: itemsSchema };
-        const { checks } = def as ZodArray<ZodTypeAny>['_def'] & { checks?: Array<Record<string, unknown>> };
+        const { checks } = def as ZodArray<ZodTypeAny>['_def'] & {
+            checks?: Array<Record<string, unknown>>;
+        };
         if (Array.isArray(checks)) {
             checks.forEach((check) => {
                 if (check.kind === 'min' && typeof check.value === 'number') {
@@ -283,7 +288,12 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
             mergeNullable(json, converted.nullable);
             return json;
         });
-        const tupleSchema: JsonSchema = { type: 'array', prefixItems: items, minItems: items.length, maxItems: items.length };
+        const tupleSchema: JsonSchema = {
+            type: 'array',
+            prefixItems: items,
+            minItems: items.length,
+            maxItems: items.length,
+        };
         return { schema: tupleSchema, nullable: false };
     }
 
@@ -294,8 +304,7 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
         let unionNullable = false;
 
         optionResults.forEach((result: ConvertedSchema) => {
-            const isNullEnum =
-                Array.isArray(result.schema.enum) &&
+            const isNullEnum = Array.isArray(result.schema.enum) &&
                 result.schema.enum.length === 1 &&
                 result.schema.enum[0] === null;
 
@@ -341,13 +350,16 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
         return {
             schema: {
                 type: 'object',
-                additionalProperties: additional
+                additionalProperties: additional,
             },
-            nullable: false
+            nullable: false,
         };
     }
 
-    if (isZodType(schema, ZodFirstPartyTypeKind.ZodAny) || isZodType(schema, ZodFirstPartyTypeKind.ZodUnknown)) {
+    if (
+        isZodType(schema, ZodFirstPartyTypeKind.ZodAny) ||
+        isZodType(schema, ZodFirstPartyTypeKind.ZodUnknown)
+    ) {
         return { schema: {}, nullable: false };
     }
 
@@ -367,11 +379,11 @@ function convertBaseSchema(schema: ZodTypeAny, seen: Set<ZodTypeAny>): BaseSchem
                 type: 'array',
                 prefixItems: [
                     mergeNullable(cloneSchema(key.schema), key.nullable),
-                    mergeNullable(cloneSchema(value.schema), value.nullable)
+                    mergeNullable(cloneSchema(value.schema), value.nullable),
                 ],
                 minItems: 2,
-                maxItems: 2
-            }
+                maxItems: 2,
+            },
         };
         return { schema: mapSchema, nullable: false };
     }
@@ -386,7 +398,7 @@ export function convert(schema: ZodTypeAny, seen: Set<ZodTypeAny> = new Set()): 
         schema: base.schema,
         nullable: unwrapped.nullable || base.nullable,
         optional: unwrapped.optional,
-        defaultValue: unwrapped.defaultValue
+        defaultValue: unwrapped.defaultValue,
     };
 }
 

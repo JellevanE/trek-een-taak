@@ -1,17 +1,12 @@
 import type { Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 
-import {
-    buildDemoTasks,
-    readTasks,
-    serializeTaskList,
-    writeTasks
-} from '../data/taskStore.js';
+import { buildDemoTasks, readTasks, serializeTaskList, writeTasks } from '../data/taskStore.js';
 import { sendError } from '../utils/http.js';
 import { assertAuthenticated } from '../utils/authGuard.js';
 import type { AuthenticatedRequest } from '../types/auth.js';
 import { validateRequest } from '../validation/index.js';
-import { seedTasksSchema, type SeedTasksPayload } from '../validation/schemas/debug.js';
+import { type SeedTasksPayload, seedTasksSchema } from '../validation/schemas/debug.js';
 
 type BaseAuthedRequest<B = unknown> = AuthenticatedRequest<ParamsDictionary, unknown, B>;
 
@@ -51,13 +46,14 @@ export function seedTasks(req: BaseAuthedRequest<SeedTasksPayload>, res: Respons
     const tasksData = readTasks();
     const existing = tasksData.tasks.filter((task) => task.owner_id !== req.user.id);
     const userTasksRemoved = tasksData.tasks.length - existing.length;
-    const orderStart = existing.reduce((max, task) => (task.order > max ? task.order : max), -1) + 1;
+    const orderStart = existing.reduce((max, task) => (task.order > max ? task.order : max), -1) +
+        1;
 
     const demo = buildDemoTasks({
         count: seedCount,
         nextId: tasksData.nextId,
         ownerId: req.user.id,
-        startingOrder: orderStart
+        startingOrder: orderStart,
     });
 
     tasksData.tasks = [...existing, ...demo.tasks];
@@ -68,7 +64,7 @@ export function seedTasks(req: BaseAuthedRequest<SeedTasksPayload>, res: Respons
         return res.json({
             created: demo.tasks.length,
             removedBeforeSeed: userTasksRemoved,
-            tasks: serializeTaskList(demo.tasks)
+            tasks: serializeTaskList(demo.tasks),
         });
     } catch (error) {
         return sendError(res, 500, 'Failed to seed tasks');
@@ -77,7 +73,7 @@ export function seedTasks(req: BaseAuthedRequest<SeedTasksPayload>, res: Respons
 
 const controller = {
     clearTasks,
-    seedTasks
+    seedTasks,
 };
 
 export default controller;

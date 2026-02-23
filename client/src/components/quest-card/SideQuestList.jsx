@@ -21,20 +21,22 @@ const SideQuestItem = ({
     cancelSideQuestEdit,
     saveSideQuestEdit,
     addInputRefs,
-    pulsingSideQuests
+    pulsingSideQuests,
 }) => {
     const sideStatus = getSideQuestStatus(sideQuest, quest);
     const sideStatusLabel = getSideQuestStatusLabel(sideQuest, quest);
-    const sideSelected = !!(selectedSideQuest
-        && idsMatch(selectedSideQuest.questId, quest.id)
-        && idsMatch(selectedSideQuest.sideQuestId, sideQuest.id));
-    const sideEditing = !!(editingSideQuest
-        && idsMatch(editingSideQuest.questId, quest.id)
-        && idsMatch(editingSideQuest.sideQuestId, sideQuest.id));
+    const sideSelected = !!(selectedSideQuest &&
+        idsMatch(selectedSideQuest.questId, quest.id) &&
+        idsMatch(selectedSideQuest.sideQuestId, sideQuest.id));
+    const sideEditing = !!(editingSideQuest &&
+        idsMatch(editingSideQuest.questId, quest.id) &&
+        idsMatch(editingSideQuest.sideQuestId, sideQuest.id));
 
     // DEBUG: Trace side quest editing
     if (sideEditing) {
-        console.log(`[SideQuestItem:${sideQuest.id}] editing. Value: '${editingSideQuest?.description}'`);
+        console.log(
+            `[SideQuestItem:${sideQuest.id}] editing. Value: '${editingSideQuest?.description}'`,
+        );
     }
 
     const sideKey = `${quest.id}:${sideQuest.id}`;
@@ -47,11 +49,11 @@ const SideQuestItem = ({
         justifyContent: 'center',
         fontSize: 'var(--side-quest-handle-font-size)',
         cursor: 'grab',
-        ...dragMeta?.handleStyle
+        ...dragMeta?.handleStyle,
     };
     const pulsingClass = pulsingSideQuests?.[sideKey] ? 'pulse-subtle' : '';
-    const safeSideDescription = typeof sideQuest.description === 'string'
-        && sideQuest.description.trim().length
+    const safeSideDescription = typeof sideQuest.description === 'string' &&
+            sideQuest.description.trim().length
         ? sideQuest.description.trim()
         : 'Untitled side quest';
 
@@ -60,12 +62,13 @@ const SideQuestItem = ({
         fn(event);
     };
 
-    const handleStatusChange = (status) => withStop(() => setSideQuestStatus(quest.id, sideQuest.id, status));
+    const handleStatusChange = (status) =>
+        withStop(() => setSideQuestStatus(quest.id, sideQuest.id, status));
     const descriptionClasses = [
         'side-quest-desc',
         sideStatus === 'in_progress' ? 'in-progress' : '',
         sideStatus === 'done' ? 'completed' : '',
-        pulsingClass
+        pulsingClass,
     ].filter(Boolean).join(' ');
 
     const inputRef = React.useRef(null);
@@ -87,16 +90,16 @@ const SideQuestItem = ({
             className={[
                 sideStatus === 'done' ? 'completed' : '',
                 sideSelected ? 'selected' : '',
-                isDragging ? 'dragging' : ''
+                isDragging ? 'dragging' : '',
             ].filter(Boolean).join(' ')}
-            role="listitem"
+            role='listitem'
             data-dragging={isDragging ? 'true' : undefined}
             data-status={sideStatus}
             style={{ maxWidth: '100%' }}
         >
             <div
                 className={`task-row ${sideEditing ? 'editing' : ''}`}
-                role="button"
+                role='button'
                 tabIndex={0}
                 onClick={(event) => {
                     if (isInteractiveTarget(event.target)) return;
@@ -116,122 +119,134 @@ const SideQuestItem = ({
                 {...sideHandleProps}
                 style={{
                     ...sideHandleProps.style,
-                    cursor: isDragging ? 'grabbing' : 'grab'
+                    cursor: isDragging ? 'grabbing' : 'grab',
                 }}
             >
-                <div className="side-quest-main" style={{ flex: 1, minWidth: 0, display: 'flex' }}>
-                    {sideEditing ? (
-                        <div className="side-quest-edit">
-                            <input
-                                type="text"
-                                autoFocus
-                                data-subtask-edit={sideKey}
-                                value={editingSideQuest?.description || ''}
-                                ref={inputRef}
-                                onChange={handleSideQuestEditChange}
-                                onClick={(event) => event.stopPropagation()}
-                                onKeyDown={(event) => {
-                                    if (event.key === 'Enter') {
-                                        event.preventDefault();
-                                        saveSideQuestEdit(quest.id, sideQuest.id);
-                                    } else if (event.key === 'Escape') {
-                                        event.preventDefault();
-                                        cancelSideQuestEdit();
+                <div className='side-quest-main' style={{ flex: 1, minWidth: 0, display: 'flex' }}>
+                    {sideEditing
+                        ? (
+                            <div className='side-quest-edit'>
+                                <input
+                                    type='text'
+                                    autoFocus
+                                    data-subtask-edit={sideKey}
+                                    value={editingSideQuest?.description || ''}
+                                    ref={inputRef}
+                                    onChange={handleSideQuestEditChange}
+                                    onClick={(event) => event.stopPropagation()}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault();
+                                            saveSideQuestEdit(quest.id, sideQuest.id);
+                                        } else if (event.key === 'Escape') {
+                                            event.preventDefault();
+                                            cancelSideQuestEdit();
+                                        }
+                                    }}
+                                />
+                            </div>
+                        )
+                        : (
+                            <div
+                                className={descriptionClasses}
+                                style={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    paddingLeft: '12px',
+                                    cursor: 'pointer',
+                                }}
+                                title={safeSideDescription}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!isDragging) {
+                                        startEditingSideQuest(quest.id, sideQuest);
                                     }
                                 }}
-                            />
-                        </div>
-                    ) : (
-                        <div
-                            className={descriptionClasses}
-                            style={{
-                                flex: 1,
-                                minWidth: 0,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                paddingLeft: '12px',
-                                cursor: 'pointer'
-                            }}
-                            title={safeSideDescription}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (!isDragging) {
-                                    startEditingSideQuest(quest.id, sideQuest);
-                                }
-                            }}
-                        >
-                            {safeSideDescription}
-                            <small className="small"> - {sideStatusLabel}</small>
-                        </div>
-                    )}
+                            >
+                                {safeSideDescription}
+                                <small className='small'>- {sideStatusLabel}</small>
+                            </div>
+                        )}
                 </div>
-                <div className="task-row-actions">
-                    {sideEditing ? (
-                        <>
-                            <button
-                                type="button"
-                                className="btn-primary btn-small"
-                                onClick={withStop(() => saveSideQuestEdit(quest.id, sideQuest.id))}
-                            >
-                                Save
-                            </button>
-                            <button
-                                type="button"
-                                className="btn-ghost btn-small"
-                                onClick={withStop(() => cancelSideQuestEdit())}
-                            >
-                                Cancel
-                            </button>
-                        </>
-                    ) : sideSelected ? (
-                        <>
-                            <button
-                                type="button"
-                                className="btn-ghost btn-small"
-                                onClick={withStop(() => startEditingSideQuest(quest.id, sideQuest))}
-                            >
-                                Edit
-                            </button>
-                            <button
-                                type="button"
-                                className="btn-danger btn-small"
-                                onClick={withStop(() => deleteSideQuest(quest.id, sideQuest.id))}
-                            >
-                                Delete
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            {sideStatus !== 'in_progress' && (
+                <div className='task-row-actions'>
+                    {sideEditing
+                        ? (
+                            <>
                                 <button
-                                    type="button"
-                                    className="btn-start btn-small"
-                                    onClick={handleStatusChange('in_progress')}
+                                    type='button'
+                                    className='btn-primary btn-small'
+                                    onClick={withStop(() =>
+                                        saveSideQuestEdit(quest.id, sideQuest.id)
+                                    )}
                                 >
-                                    Start
+                                    Save
                                 </button>
-                            )}
-                            {sideStatus !== 'done' && (
                                 <button
-                                    type="button"
-                                    className="btn-complete btn-small"
-                                    onClick={handleStatusChange('done')}
+                                    type='button'
+                                    className='btn-ghost btn-small'
+                                    onClick={withStop(() => cancelSideQuestEdit())}
                                 >
-                                    Complete
+                                    Cancel
                                 </button>
-                            )}
-                            {sideStatus === 'done' && (
+                            </>
+                        )
+                        : sideSelected
+                        ? (
+                            <>
                                 <button
-                                    type="button"
-                                    className="btn-ghost btn-small"
-                                    onClick={handleStatusChange('todo')}
+                                    type='button'
+                                    className='btn-ghost btn-small'
+                                    onClick={withStop(() =>
+                                        startEditingSideQuest(quest.id, sideQuest)
+                                    )}
                                 >
-                                    Undo
+                                    Edit
                                 </button>
-                            )}
-                        </>
-                    )}
+                                <button
+                                    type='button'
+                                    className='btn-danger btn-small'
+                                    onClick={withStop(() =>
+                                        deleteSideQuest(quest.id, sideQuest.id)
+                                    )}
+                                >
+                                    Delete
+                                </button>
+                            </>
+                        )
+                        : (
+                            <>
+                                {sideStatus !== 'in_progress' && (
+                                    <button
+                                        type='button'
+                                        className='btn-start btn-small'
+                                        onClick={handleStatusChange('in_progress')}
+                                    >
+                                        Start
+                                    </button>
+                                )}
+                                {sideStatus !== 'done' && (
+                                    <button
+                                        type='button'
+                                        className='btn-complete btn-small'
+                                        onClick={handleStatusChange('done')}
+                                    >
+                                        Complete
+                                    </button>
+                                )}
+                                {sideStatus === 'done' && (
+                                    <button
+                                        type='button'
+                                        className='btn-ghost btn-small'
+                                        onClick={handleStatusChange('todo')}
+                                    >
+                                        Undo
+                                    </button>
+                                )}
+                            </>
+                        )}
                 </div>
             </div>
         </div>
@@ -245,12 +260,12 @@ SideQuestItem.propTypes = {
     dragMeta: PropTypes.object,
     selectedSideQuest: PropTypes.shape({
         questId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-        sideQuestId: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+        sideQuestId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     }),
     editingSideQuest: PropTypes.shape({
         questId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
         sideQuestId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-        description: PropTypes.string
+        description: PropTypes.string,
     }),
     idsMatch: PropTypes.func.isRequired,
     handleSelectSideQuest: PropTypes.func.isRequired,
@@ -264,7 +279,7 @@ SideQuestItem.propTypes = {
     cancelSideQuestEdit: PropTypes.func.isRequired,
     saveSideQuestEdit: PropTypes.func.isRequired,
     addInputRefs: PropTypes.shape({ current: PropTypes.object }),
-    pulsingSideQuests: PropTypes.object
+    pulsingSideQuests: PropTypes.object,
 };
 
 SideQuestItem.defaultProps = {
@@ -273,7 +288,7 @@ SideQuestItem.defaultProps = {
     selectedSideQuest: null,
     editingSideQuest: null,
     addInputRefs: null,
-    pulsingSideQuests: null
+    pulsingSideQuests: null,
 };
 
 export const SideQuestList = ({
@@ -300,7 +315,7 @@ export const SideQuestList = ({
 
     if (!sideQuests || sideQuests.length === 0) {
         return (
-            <div className="side-quest-empty">
+            <div className='side-quest-empty'>
                 {sideQuestFooter}
             </div>
         );
@@ -308,41 +323,41 @@ export const SideQuestList = ({
 
     const SideQuestListComponent = smoothDrag?.SideQuestList || null;
 
-    const scrollStyle = sideQuestMaxHeight
-        ? { maxHeight: sideQuestMaxHeight }
-        : undefined;
+    const scrollStyle = sideQuestMaxHeight ? { maxHeight: sideQuestMaxHeight } : undefined;
 
     return (
-        <div className="side-quest-panel">
+        <div className='side-quest-panel'>
             <h4>Side-quests:</h4>
             <div
-                className="side-quest-scroll"
-                role="list"
+                className='side-quest-scroll'
+                role='list'
                 style={scrollStyle}
                 data-scrollable={sideQuestMaxHeight ? 'true' : undefined}
             >
-                {SideQuestListComponent ? (
-                    <SideQuestListComponent
-                        questId={quest.id}
-                        sideQuests={sideQuests}
-                        itemHeight={sideQuestItemHeight}
-                        itemGap={sideQuestGap}
-                        maxContainerHeight={sideQuestMaxHeight}
-                        themeName={themeName}
-                        renderItem={renderItem}
-                    />
-                ) : (
-                    sideQuests.map((sideQuest) => (
-                        <SideQuestItem
-                            key={`${quest.id}:${sideQuest.id}`}
-                            quest={quest}
-                            sideQuest={sideQuest}
-                            {...itemProps}
+                {SideQuestListComponent
+                    ? (
+                        <SideQuestListComponent
+                            questId={quest.id}
+                            sideQuests={sideQuests}
+                            itemHeight={sideQuestItemHeight}
+                            itemGap={sideQuestGap}
+                            maxContainerHeight={sideQuestMaxHeight}
+                            themeName={themeName}
+                            renderItem={renderItem}
                         />
-                    ))
-                )}
+                    )
+                    : (
+                        sideQuests.map((sideQuest) => (
+                            <SideQuestItem
+                                key={`${quest.id}:${sideQuest.id}`}
+                                quest={quest}
+                                sideQuest={sideQuest}
+                                {...itemProps}
+                            />
+                        ))
+                    )}
             </div>
-            <div className="side-quest-footer-wrapper">
+            <div className='side-quest-footer-wrapper'>
                 {sideQuestFooter}
             </div>
         </div>
@@ -353,13 +368,13 @@ SideQuestList.propTypes = {
     quest: PropTypes.object.isRequired,
     sideQuests: PropTypes.arrayOf(PropTypes.object).isRequired,
     smoothDrag: PropTypes.shape({
-        SideQuestList: PropTypes.elementType
+        SideQuestList: PropTypes.elementType,
     }),
     themeName: PropTypes.string,
     sideQuestItemHeight: PropTypes.number,
     sideQuestGap: PropTypes.number,
     sideQuestMaxHeight: PropTypes.number,
-    sideQuestFooter: PropTypes.node
+    sideQuestFooter: PropTypes.node,
 };
 
 SideQuestList.defaultProps = {
@@ -368,7 +383,7 @@ SideQuestList.defaultProps = {
     sideQuestItemHeight: 60,
     sideQuestGap: 8,
     sideQuestMaxHeight: null,
-    sideQuestFooter: null
+    sideQuestFooter: null,
 };
 
 export default SideQuestList;

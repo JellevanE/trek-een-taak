@@ -7,12 +7,12 @@ import { resetRegistrationRateLimiter } from '../src/security/registrationRateLi
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
-    JsonRecord,
     configureDataFiles,
-    resetDataFileOverrides,
+    JsonRecord,
     resetCampaignStore,
+    resetDataFileOverrides,
     resetTaskStore,
-    resetUserStore
+    resetUserStore,
 } from '../src/testing/fixtures';
 
 let dataDir: string;
@@ -43,7 +43,7 @@ beforeEach(() => {
 beforeEach(async () => {
     const res = await client.post('/api/users/register', {
         body: { username: `testuser_${Date.now()}`, password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     const body = res.body as JsonRecord | null;
     authToken = typeof body?.token === 'string' ? body.token : null;
@@ -59,7 +59,7 @@ afterAll(() => {
 test('creates campaign and aggregates quest stats', async () => {
     const createRes = await client.post('/api/campaigns', {
         body: { name: 'Atlas Campaign', description: 'Bring quests together' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(createRes.status).toBe(201);
     const campaignBody = createRes.body as JsonRecord;
@@ -69,56 +69,60 @@ test('creates campaign and aggregates quest stats', async () => {
 
     const firstTask = await client.post('/api/tasks', {
         body: { description: 'Scout ruins', campaign_id: campaignId },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(firstTask.status).toBe(201);
 
     const secondTask = await client.post('/api/tasks', {
         body: { description: 'Draft expedition plan', campaign_id: campaignId },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(secondTask.status).toBe(201);
 
     const statusRes = await client.patch(`/api/tasks/${(firstTask.body as JsonRecord).id}/status`, {
         body: { status: 'done' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(statusRes.status).toBe(200);
 
     const listRes = await client.get('/api/campaigns', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(listRes.status).toBe(200);
     const listBody = listRes.body as { campaigns: Array<JsonRecord> };
     expect(Array.isArray(listBody.campaigns)).toBe(true);
     expect(listBody.campaigns.length).toBe(1);
     const campaign = listBody.campaigns[0] as JsonRecord;
-    expect(campaign.stats).toMatchObject({ quests_total: 2, quests_completed: 1, completion_percent: 50 });
+    expect(campaign.stats).toMatchObject({
+        quests_total: 2,
+        quests_completed: 1,
+        completion_percent: 50,
+    });
     expect(campaign.progress_summary).toBe('1/2');
 });
 
 test('filters tasks by campaign via query parameter', async () => {
     const campaignRes = await client.post('/api/campaigns', {
         body: { name: 'Questline', description: '' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const campaignBody = campaignRes.body as JsonRecord;
     const campaignId = campaignBody.id as number;
 
     const associated = await client.post('/api/tasks', {
         body: { description: 'Linked quest', campaign_id: campaignId },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(associated.status).toBe(201);
 
     const standalone = await client.post('/api/tasks', {
         body: { description: 'Unlinked quest' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(standalone.status).toBe(201);
 
     const filtered = await client.get(`/api/tasks?campaign_id=${campaignId}`, {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(filtered.status).toBe(200);
     const filteredBody = filtered.body as { tasks: Array<JsonRecord> };
@@ -127,7 +131,7 @@ test('filters tasks by campaign via query parameter', async () => {
     expect(filteredTask.campaign_id).toBe(campaignId);
 
     const uncategorized = await client.get('/api/tasks?campaign_id=null', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(uncategorized.status).toBe(200);
     const uncategorizedBody = uncategorized.body as { tasks: Array<JsonRecord> };
@@ -139,7 +143,7 @@ test('filters tasks by campaign via query parameter', async () => {
 test('rejects task creation when campaign is missing', async () => {
     const res = await client.post('/api/tasks', {
         body: { description: 'Invalid quest', campaign_id: 999 },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(res.status).toBe(404);
     const body = res.body as JsonRecord;
@@ -149,7 +153,7 @@ test('rejects task creation when campaign is missing', async () => {
 test('rejects campaign creation without a valid name', async () => {
     const res = await client.post('/api/campaigns', {
         body: { name: '   ', description: 'Missing name' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(res.status).toBe(400);
     const body = res.body as JsonRecord;
@@ -159,27 +163,27 @@ test('rejects campaign creation without a valid name', async () => {
 test('rejects campaign updates with invalid fields', async () => {
     const create = await client.post('/api/campaigns', {
         body: { name: 'Field Checks' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(create.status).toBe(201);
     const id = (create.body as JsonRecord).id as number;
 
     const invalidDescription = await client.patch(`/api/campaigns/${id}`, {
         body: { description: 42 },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(invalidDescription.status).toBe(400);
 
     const invalidArchived = await client.patch(`/api/campaigns/${id}`, {
         body: { archived: 'yes' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(invalidArchived.status).toBe(400);
 });
 
 test('returns not found when deleting a missing campaign', async () => {
     const res = await client.delete('/api/campaigns/999', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(res.status).toBe(404);
     const body = res.body as JsonRecord;
@@ -189,19 +193,19 @@ test('returns not found when deleting a missing campaign', async () => {
 test('cannot access campaigns owned by another user', async () => {
     const create = await client.post('/api/campaigns', {
         body: { name: 'Secret Operations' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(create.status).toBe(201);
     const campaignId = (create.body as JsonRecord).id as number;
 
     const secondUser = await client.post('/api/users/register', {
         body: { username: `intruder_${Date.now()}`, password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     const otherToken = (secondUser.body as JsonRecord).token as string;
 
     const getRes = await client.get(`/api/campaigns/${campaignId}`, {
-        headers: { authorization: `Bearer ${otherToken}` }
+        headers: { authorization: `Bearer ${otherToken}` },
     });
     expect(getRes.status).toBe(404);
 });
@@ -209,17 +213,17 @@ test('cannot access campaigns owned by another user', async () => {
 test('retrieves campaign detail with related quests', async () => {
     const campaignRes = await client.post('/api/campaigns', {
         body: { name: 'Detail Run' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const campaignId = (campaignRes.body as JsonRecord).id as number;
 
     await client.post('/api/tasks', {
         body: { description: 'Linked quest', campaign_id: campaignId },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
 
     const detail = await client.get(`/api/campaigns/${campaignId}`, {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(detail.status).toBe(200);
     const body = detail.body as JsonRecord;
@@ -232,7 +236,7 @@ test('retrieves campaign detail with related quests', async () => {
 test('updates campaign fields and respects archived filters', async () => {
     const createRes = await client.post('/api/campaigns', {
         body: { name: 'Archivists' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const campaignId = (createRes.body as JsonRecord).id as number;
 
@@ -241,9 +245,9 @@ test('updates campaign fields and respects archived filters', async () => {
             name: 'Archivists United',
             description: 'Maintaining coverage history',
             image_url: '  ',
-            archived: true
+            archived: true,
         },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(updateRes.status).toBe(200);
     const updated = updateRes.body as JsonRecord;
@@ -251,17 +255,17 @@ test('updates campaign fields and respects archived filters', async () => {
         name: 'Archivists United',
         description: 'Maintaining coverage history',
         image_url: null,
-        archived: true
+        archived: true,
     });
 
     const withoutArchived = await client.get('/api/campaigns', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const listBody = withoutArchived.body as { campaigns: Array<JsonRecord> };
     expect(listBody.campaigns).toEqual([]);
 
     const withArchived = await client.get('/api/campaigns?include_archived=true', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const archivedList = withArchived.body as { campaigns: Array<JsonRecord> };
     expect(archivedList.campaigns.length).toBe(1);
@@ -271,22 +275,22 @@ test('updates campaign fields and respects archived filters', async () => {
 test('deletes campaign and detaches related tasks', async () => {
     const createRes = await client.post('/api/campaigns', {
         body: { name: 'Cleanup Crew' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const campaignId = (createRes.body as JsonRecord).id as number;
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'Detach me', campaign_id: campaignId },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskId = (taskRes.body as JsonRecord).id as number;
 
     const deleteRes = await client.delete(`/api/campaigns/${campaignId}`, {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(deleteRes.status).toBe(204);
 
     const taskDetail = await client.get('/api/tasks', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const tasks = (taskDetail.body as { tasks: Array<JsonRecord> }).tasks;
     const detached = tasks.find((task) => task.id === taskId);

@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { usePlayerStats } from '../usePlayerStats.js';
 import * as api from '../../utils/api.js';
 
@@ -14,7 +14,7 @@ describe('usePlayerStats', () => {
         level: 5,
         xp: 1200,
         xp_to_next_level: 2000,
-        gold: 500
+        gold: 500,
     };
 
     beforeEach(() => {
@@ -31,24 +31,28 @@ describe('usePlayerStats', () => {
     });
 
     it('should initialize with null playerStats and false dailyLoading', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         // Initial state might be null before effect runs
         expect(result.current.dailyLoading).toBe(false);
     });
 
     it('should fetch player stats when token is provided', async () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         await waitFor(() => {
             expect(result.current.playerStats).toEqual(mockPlayerRpg);
@@ -57,19 +61,20 @@ describe('usePlayerStats', () => {
         expect(api.apiFetch).toHaveBeenCalledWith(
             '/api/users/me',
             { headers: { Authorization: `Bearer ${mockToken}` } },
-            mockOnUnauthorized
+            mockOnUnauthorized,
         );
     });
 
     it('should clear playerStats when token is null', () => {
         const { result, rerender } = renderHook(
-            ({ token }) => usePlayerStats({
-                token,
-                getAuthHeaders: mockGetAuthHeaders,
-                pushToast: mockPushToast,
-                onUnauthorized: mockOnUnauthorized
-            }),
-            { initialProps: { token: mockToken } }
+            ({ token }) =>
+                usePlayerStats({
+                    token,
+                    getAuthHeaders: mockGetAuthHeaders,
+                    pushToast: mockPushToast,
+                    onUnauthorized: mockOnUnauthorized,
+                }),
+            { initialProps: { token: mockToken } },
         );
 
         rerender({ token: null });
@@ -78,7 +83,7 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle fetch error gracefully', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         api.apiFetch.mockImplementation((url) => {
             if (url === '/api/users/me') {
                 return Promise.reject(new Error('Network error'));
@@ -86,17 +91,19 @@ describe('usePlayerStats', () => {
             return Promise.resolve({});
         });
 
-        renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         await waitFor(() => {
             expect(consoleErrorSpy).toHaveBeenCalledWith(
                 'Error fetching player stats:',
-                expect.any(Error)
+                expect.any(Error),
             );
         });
 
@@ -104,16 +111,18 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle XP payload with player_rpg', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         const payload = {
             player_rpg: mockPlayerRpg,
-            xp_events: []
+            xp_events: [],
         };
 
         act(() => {
@@ -124,18 +133,20 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle XP events array and show toast', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         const payload = {
             xp_events: [
                 { amount: 50, message: 'Completed quest!' },
-                { amount: 100, message: 'Bonus XP!' }
-            ]
+                { amount: 100, message: 'Bonus XP!' },
+            ],
         };
 
         act(() => {
@@ -148,15 +159,17 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle single XP event (xp_event)', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         const payload = {
-            xp_event: { amount: 75, message: 'Daily reward!' }
+            xp_event: { amount: 75, message: 'Daily reward!' },
         };
 
         act(() => {
@@ -167,12 +180,14 @@ describe('usePlayerStats', () => {
     });
 
     it('should show level up toast when leveling up', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         const payload = {
             xp_events: [
@@ -180,9 +195,9 @@ describe('usePlayerStats', () => {
                     amount: 1000,
                     message: 'Quest completed!',
                     leveled_up: true,
-                    level_after: 6
-                }
-            ]
+                    level_after: 6,
+                },
+            ],
         };
 
         act(() => {
@@ -194,15 +209,17 @@ describe('usePlayerStats', () => {
     });
 
     it('should use default message when event has no message', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         const payload = {
-            xp_events: [{ amount: 50 }]
+            xp_events: [{ amount: 50 }],
         };
 
         act(() => {
@@ -213,12 +230,14 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle null/undefined payload gracefully', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         act(() => {
             result.current.handleXpPayload(null);
@@ -234,19 +253,21 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle null events in xp_events array', () => {
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         const payload = {
             xp_events: [
                 null,
                 { amount: 50, message: 'Valid event' },
-                undefined
-            ]
+                undefined,
+            ],
         };
 
         act(() => {
@@ -260,7 +281,7 @@ describe('usePlayerStats', () => {
     it('should claim daily reward successfully', async () => {
         const mockRewardResponse = {
             player_rpg: { ...mockPlayerRpg, gold: 600 },
-            xp_events: [{ amount: 100, message: 'Daily reward claimed!' }]
+            xp_events: [{ amount: 100, message: 'Daily reward claimed!' }],
         };
 
         api.apiFetch.mockImplementation((url) => {
@@ -273,12 +294,14 @@ describe('usePlayerStats', () => {
             return Promise.resolve({});
         });
 
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         await act(async () => {
             await result.current.claimDailyReward();
@@ -288,9 +311,9 @@ describe('usePlayerStats', () => {
             '/api/rpg/daily-reward',
             {
                 method: 'POST',
-                headers: mockGetAuthHeaders()
+                headers: mockGetAuthHeaders(),
             },
-            mockOnUnauthorized
+            mockOnUnauthorized,
         );
 
         expect(result.current.playerStats).toEqual(mockRewardResponse.player_rpg);
@@ -304,21 +327,27 @@ describe('usePlayerStats', () => {
                 return Promise.resolve({ user: { rpg: mockPlayerRpg } });
             }
             if (url === '/api/rpg/daily-reward') {
-                return new Promise(resolve => setTimeout(resolve, 100));
+                return new Promise((resolve) => setTimeout(resolve, 100));
             }
             return Promise.resolve({});
         });
 
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         // Wait for initial fetch to clear
         await waitFor(() => {
-            expect(api.apiFetch).toHaveBeenCalledWith('/api/users/me', expect.anything(), expect.anything());
+            expect(api.apiFetch).toHaveBeenCalledWith(
+                '/api/users/me',
+                expect.anything(),
+                expect.anything(),
+            );
         });
         api.apiFetch.mockClear(); // Clear initial fetch call
 
@@ -339,7 +368,7 @@ describe('usePlayerStats', () => {
     });
 
     it('should handle daily reward error and show error toast', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         const errorMessage = 'Daily reward already claimed';
 
         api.apiFetch.mockImplementation((url) => {
@@ -352,12 +381,14 @@ describe('usePlayerStats', () => {
             return Promise.resolve({});
         });
 
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         await act(async () => {
             await result.current.claimDailyReward();
@@ -365,7 +396,7 @@ describe('usePlayerStats', () => {
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'Error claiming daily reward:',
-            expect.any(Error)
+            expect.any(Error),
         );
         expect(mockPushToast).toHaveBeenCalledWith(errorMessage, 'error', 4000);
         expect(result.current.dailyLoading).toBe(false);
@@ -374,7 +405,7 @@ describe('usePlayerStats', () => {
     });
 
     it('should use generic error message if error has no message', async () => {
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
         api.apiFetch.mockImplementation((url) => {
             if (url === '/api/users/me') {
@@ -386,12 +417,14 @@ describe('usePlayerStats', () => {
             return Promise.resolve({});
         });
 
-        const { result } = renderHook(() => usePlayerStats({
-            token: mockToken,
-            getAuthHeaders: mockGetAuthHeaders,
-            pushToast: mockPushToast,
-            onUnauthorized: mockOnUnauthorized
-        }));
+        const { result } = renderHook(() =>
+            usePlayerStats({
+                token: mockToken,
+                getAuthHeaders: mockGetAuthHeaders,
+                pushToast: mockPushToast,
+                onUnauthorized: mockOnUnauthorized,
+            })
+        );
 
         await act(async () => {
             await result.current.claimDailyReward();

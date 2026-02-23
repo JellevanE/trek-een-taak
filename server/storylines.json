@@ -1,37 +1,48 @@
 [
-  {
-    "id": "71accba5-cf0d-47aa-b9a7-ae7cb40675f2",
-    "campaignId": 1,
-    "theme": "fantasy",
-    "narrativeState": {
-      "chapter": 2,
-      "currentObjective": "Embark on the grand adventure that will define Ellaria's legacy",
-      "summary": "Ellaria, a young adventurer from the small farming village of Oakhurst, sets out on a grand adventure to rise to the challenge and prove herself worthy of the mantle of hero, as dark forces gather in the north and ancient relics await discovery.",
-      "characters": [
-        "Ellaria"
-      ],
-      "locations": [
-        "Trelan",
-        "Oakhurst"
-      ],
-      "keyPlotPoints": [
-        "Rumors of dark forces gathering in the north",
-        "Whispers of ancient relics waiting to be unearthed"
-      ],
-      "progressPercentage": 0
-    },
-    "updates": [
-      {
-        "id": "051ab0c5-a4cf-4cbd-be6b-0e414f9cab17",
-        "type": "intro",
-        "text": "Here is a 288-word story introduction that sets the scene, establishes the hero's background, references the upcoming quests, and ends with a clear call to action in the style of a classic fantasy RPG:\n\nThe sun was setting over the rolling hills and dense forests of Trelan, painting the sky in vibrant hues of orange and pink. Amidst the fading light, a lone figure made their way down the well-worn path, the gentle clink of armor and the crunch of leaves underfoot the only sounds to break the peaceful silence. \n\nThis was Ellaria, a young adventurer whose thirst for discovery and desire to make her mark on the world had led her far from her humble beginnings. Born and raised in the small farming village of Oakhurst, Ellaria had always felt a restless spirit stirring within her - a longing to explore the vast unknown that lay beyond the cozy confines of her home. \n\nAnd now, after years of training and preparation, the time had finally come for her to embark on the grand adventure that would define her legacy. The road ahead was shrouded in mystery, with rumors of dark forces gathering in the north and whispers of ancient relics waiting to be unearthed. But Ellaria was undaunted, her heart filled with a burning determination to rise to the challenge and prove herself worthy of the mantle of hero.\n\nAs the last rays of the sun dipped below the horizon, Ellaria paused, taking a deep breath and squaring her shoulders. The journey was just beginning, but she knew in her bones that this was her calling - to be the light that shines through the darkness, the champion who answers the world's call for aid. With renewed vigor, she set off down the path, ready to face whatever trials lay ahead.",
-        "generatedAt": "2025-12-08T19:47:18.763Z",
-        "tasksCompleted": []
-      }
-    ],
-    "createdAt": "2025-12-08T16:58:39.168Z",
-    "lastGeneratedAt": "2025-12-08T19:47:18.763Z",
-    "lastVisitDate": "2025-12-08T19:47:18.763Z",
-    "generationFailures": 0
-  }
+    {
+        "id": "a39cde1d-98c2-426c-ad4d-2a470d071337",
+        "campaignId": 2,
+        "theme": "fantasy",
+        "narrativeState": {
+            "summary": "Friendo66, a young Level 3 warrior, awakens in a tavern in the kingdom of Aethermoor with a letter from the Grand Council describing disturbances across the realm—mysterious disappearances, strange lights, and an ancient evil stirring. The tavern keeper provides supplies as friendo66 prepares to embark on their first true adventure, facing a choice between three paths: the Whispering Woods, Cragspire Mountains, or Sunken Ruins.",
+            "currentObjective": "Choose a path and investigate the disturbances across Aethermoor to uncover the source of the ancient evil",
+            "chapter": 1,
+            "characters": [
+                "friendo66",
+                "Tavern Keeper",
+                "Grand Council of Aethermoor"
+            ],
+            "locations": [
+                "Aethermoor",
+                "Capital",
+                "Tavern",
+                "Whispering Woods",
+                "Cragspire Mountains",
+                "Sunken Ruins"
+            ],
+            "keyPlotPoints": [
+                "Friendo66 reaches Level 3 and completes training",
+                "Letter received from Grand Council describing realm disturbances",
+                "Mysterious disappearances in northern forests",
+                "Strange lights over eastern mountains",
+                "Ancient evil stirring beneath the world",
+                "Tavern keeper provides traveler's pack",
+                "Three paths presented for adventure"
+            ],
+            "progressPercentage": 0
+        },
+        "updates": [
+            {
+                "id": "793e14bd-5f1e-4dad-86b9-7ee92e514754",
+                "type": "intro",
+                "text": "# The Legend of Friendo66 Begins\n\nThe morning sun breaks across the sprawling kingdom of Aethermoor, casting long shadows across cobblestone streets worn by countless travelers. In a modest tavern on the outskirts of the capital, a young warrior named **friendo66** stirs awake, clutching a worn map and a letter sealed with the royal crest.\n\nYou've trained hard to reach Level 3, mastering basic sword techniques and the courage needed to face the unknown. But training in the village garrison has left you restless—your spirit yearns for something greater, something that only true adventure can provide.\n\nThe letter is from the Grand Council of Aethermoor. They speak of disturbances across the realm: mysterious disappearances in the northern forests, strange lights dancing over the eastern mountains, and whispers of an ancient evil stirring beneath the world. They need heroes. They need *you*.\n\nThe tavern keeper approaches with a knowing nod. \"So, you're finally heading out, are you?\" he says, sliding a worn traveler's pack across the bar. \"Many challenges await on the horizon, young warrior. Monsters, riddles, treasures beyond imagination—and dangers that would make seasoned adventurers tremble.\"\n\nYou look down at your sword, feeling its weight in your grip. Your heart races with equal parts excitement and trepidation. This is the moment you've dreamed of since childhood.\n\nThe map before you shows multiple paths: the Whispering Woods to the north, the Cragspire Mountains to the east, and the Sunken Ruins to the south. Each holds secrets. Each holds danger.\n\n**The adventure awaits, friendo66. The choice is yours—which path will you take first?**",
+                "generatedAt": "2026-02-23T19:00:53.041Z",
+                "tasksCompleted": []
+            }
+        ],
+        "createdAt": "2026-02-23T19:00:44.582Z",
+        "lastGeneratedAt": "2026-02-23T19:00:53.041Z",
+        "lastVisitDate": "2026-02-23T19:00:53.041Z",
+        "generationFailures": 0
+    }
 ]

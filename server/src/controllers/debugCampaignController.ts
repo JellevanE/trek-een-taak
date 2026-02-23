@@ -1,8 +1,8 @@
 import type { Response } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
 
-import { readCampaigns, writeCampaigns, serializeCampaign } from '../data/campaignStore.js';
-import { readTasks, writeTasks, buildDemoTasks } from '../data/taskStore.js';
+import { readCampaigns, serializeCampaign, writeCampaigns } from '../data/campaignStore.js';
+import { buildDemoTasks, readTasks, writeTasks } from '../data/taskStore.js';
 import { readStorylines, writeStorylines } from '../data/storylineStore.js';
 import { StorylineService } from '../services/storyline.service.js';
 import { sendError } from '../utils/http.js';
@@ -12,11 +12,11 @@ import type { AuthenticatedRequest } from '../types/auth.js';
 type BaseAuthedRequest<B = unknown> = AuthenticatedRequest<ParamsDictionary, unknown, B>;
 
 const CAMPAIGN_NAMES = [
-    'The Dragon\'s Crusade',
+    "The Dragon's Crusade",
     'Moonlit Expedition',
     'Siege of the Crystal Spire',
     'Shadow Caravan',
-    'The Alchemist\'s Riddle',
+    "The Alchemist's Riddle",
 ];
 
 interface SeedCampaignPayload {
@@ -140,7 +140,10 @@ export function clearCampaigns(req: BaseAuthedRequest, res: Response) {
     const tasksData = readTasks();
     let tasksUpdated = false;
     tasksData.tasks.forEach((task) => {
-        if (task.owner_id === req.user.id && task.campaign_id !== null && removedIds.includes(task.campaign_id)) {
+        if (
+            task.owner_id === req.user.id && task.campaign_id !== null &&
+            removedIds.includes(task.campaign_id)
+        ) {
             task.campaign_id = null;
             tasksUpdated = true;
         }

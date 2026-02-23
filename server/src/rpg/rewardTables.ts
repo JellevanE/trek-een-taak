@@ -1,4 +1,4 @@
-import type { TaskPriority, SubTask, TaskRecord, TaskStatus } from '../types/task.js';
+import type { SubTask, TaskPriority, TaskRecord, TaskStatus } from '../types/task.js';
 
 export const XP_CONFIG = {
     baseTaskXp: 50,
@@ -11,7 +11,7 @@ export const XP_CONFIG = {
     maxTaskLevel: 10,
     levelBaseRequirement: 100,
     levelStepRequirement: 40,
-    xpLogLimit: 30
+    xpLogLimit: 30,
 } as const;
 
 type PartialTask = Partial<TaskRecord> | null | undefined;
@@ -50,7 +50,9 @@ export function getPriorityMultiplier(priority: unknown): number {
 
 function resolveTaskStatus(task: Partial<TaskRecord>): TaskStatus {
     const status = task.status;
-    if (status === 'todo' || status === 'in_progress' || status === 'blocked' || status === 'done') {
+    if (
+        status === 'todo' || status === 'in_progress' || status === 'blocked' || status === 'done'
+    ) {
         return status;
     }
     return 'todo';
@@ -67,14 +69,17 @@ export function computeTaskXp(task: PartialTask): TaskRewardBreakdown {
     return { amount, level, multiplier, base };
 }
 
-export function computeSubtaskXp(task: PartialTask, subtask: PartialSubtask): SubtaskRewardBreakdown {
+export function computeSubtaskXp(
+    task: PartialTask,
+    subtask: PartialSubtask,
+): SubtaskRewardBreakdown {
     const baseTask = computeTaskXp(task);
 
     if (!task || typeof task !== 'object') {
         return {
             ...baseTask,
             weight: 1,
-            source_priority: undefined
+            source_priority: undefined,
         };
     }
 
@@ -92,7 +97,7 @@ export function computeSubtaskXp(task: PartialTask, subtask: PartialSubtask): Su
         multiplier,
         base,
         weight,
-        source_priority: prioritySource
+        source_priority: prioritySource,
     };
 }
 
@@ -100,10 +105,12 @@ export function computeDailyBaseXp(): DailyReward {
     return { amount: XP_CONFIG.dailyBaseXp, reason: 'daily_focus' };
 }
 
-export function summarizeTaskReward(task: PartialTask): TaskRewardBreakdown & { status: TaskStatus } {
+export function summarizeTaskReward(
+    task: PartialTask,
+): TaskRewardBreakdown & { status: TaskStatus } {
     const reward = computeTaskXp(task);
     return {
         ...reward,
-        status: task && typeof task === 'object' ? resolveTaskStatus(task) : 'todo'
+        status: task && typeof task === 'object' ? resolveTaskStatus(task) : 'todo',
     };
 }

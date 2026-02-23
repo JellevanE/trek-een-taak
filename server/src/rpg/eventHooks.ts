@@ -1,10 +1,10 @@
 import {
     type MutableUser,
+    type PublicUserRpgState,
     type PublicXpEvent,
     type UserRpgCounters,
     type UserRpgEvent,
     type UserRpgState,
-    type PublicUserRpgState
 } from './experienceTypes.js';
 import { ensureUserRpg, getLevelProgress } from './experienceEngine.js';
 
@@ -31,14 +31,17 @@ export function buildPublicRpgState(rpg: UserRpgState | null | undefined): Publi
         stats: {
             hp: normalized.hp,
             mp: normalized.mp,
-            coins: normalized.coins
+            coins: normalized.coins,
         },
         achievements: Array.isArray(normalized.achievements) ? [...normalized.achievements] : [],
-        inventory:
-            normalized.inventory && typeof normalized.inventory === 'object'
-                ? { items: Array.isArray(normalized.inventory.items) ? [...normalized.inventory.items] : [] }
-                : { items: [] },
-        recent_events: recentEvents
+        inventory: normalized.inventory && typeof normalized.inventory === 'object'
+            ? {
+                items: Array.isArray(normalized.inventory.items)
+                    ? [...normalized.inventory.items]
+                    : [],
+            }
+            : { items: [] },
+        recent_events: recentEvents,
     };
 }
 
@@ -56,13 +59,13 @@ export function toPublicXpEvent(event: UserRpgEvent | null | undefined): PublicX
         xp_into_level: event.xp_into_level,
         xp_for_level: event.xp_for_level,
         xp_to_next: event.xp_to_next,
-        leveled_up: !!event.leveled_up
+        leveled_up: !!event.leveled_up,
     };
 }
 
 export function incrementCounter(
     rpg: UserRpgState | null | undefined,
-    counter: keyof UserRpgCounters | string
+    counter: keyof UserRpgCounters | string,
 ): void {
     if (!rpg || typeof rpg !== 'object') return;
     if (!rpg.counters || typeof rpg.counters !== 'object') {

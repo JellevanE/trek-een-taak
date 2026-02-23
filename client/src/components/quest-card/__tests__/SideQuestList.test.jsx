@@ -6,7 +6,7 @@ import { QUEST_LAYOUT_TOKENS } from '../../../features/quest-board/tokens/spacin
 
 const baseQuest = { id: 1 };
 
-const noop = () => { };
+const noop = () => {};
 
 const requiredProps = {
     quest: baseQuest,
@@ -15,7 +15,7 @@ const requiredProps = {
     sideQuestItemHeight: 80,
     sideQuestGap: QUEST_LAYOUT_TOKENS.sideQuestGap,
     sideQuestMaxHeight: null,
-    sideQuestFooter: <div data-testid="footer">footer</div>,
+    sideQuestFooter: <div data-testid='footer'>footer</div>,
     selectedSideQuest: null,
     editingSideQuest: null,
     idsMatch: (a, b) => Number(a) === Number(b),
@@ -30,7 +30,7 @@ const requiredProps = {
     cancelSideQuestEdit: noop,
     saveSideQuestEdit: noop,
     addInputRefs: { current: {} },
-    pulsingSideQuests: {}
+    pulsingSideQuests: {},
 };
 
 describe('SideQuestList', () => {
@@ -39,7 +39,7 @@ describe('SideQuestList', () => {
             <SideQuestList
                 {...requiredProps}
                 sideQuests={[]}
-            />
+            />,
         );
 
         expect(screen.getByTestId('footer')).toBeInTheDocument();
@@ -54,9 +54,9 @@ describe('SideQuestList', () => {
                 sideQuests={[
                     { id: 11, description: 'First' },
                     { id: 12, description: 'Second' },
-                    { id: 13, description: 'Third' }
+                    { id: 13, description: 'Third' },
                 ]}
-            />
+            />,
         );
 
         expect(screen.getByText('Side-quests:')).toBeInTheDocument();
@@ -76,9 +76,9 @@ describe('SideQuestList', () => {
                     { id: 23, description: 'Three' },
                     { id: 24, description: 'Four' },
                     { id: 25, description: 'Five' },
-                    { id: 26, description: 'Six' }
+                    { id: 26, description: 'Six' },
                 ]}
-            />
+            />,
         );
 
         const scrollRegion = screen.getByRole('list');
@@ -90,9 +90,9 @@ describe('SideQuestList', () => {
             <SideQuestList
                 {...requiredProps}
                 sideQuests={[
-                    createSideQuestFixture({ id: 31, description: '   ' })
+                    createSideQuestFixture({ id: 31, description: '   ' }),
                 ]}
-            />
+            />,
         );
 
         expect(screen.getByText('Untitled side quest')).toBeInTheDocument();
@@ -105,9 +105,9 @@ describe('SideQuestList', () => {
                 getSideQuestStatus={() => 'done'}
                 getSideQuestStatusLabel={() => 'Done'}
                 sideQuests={[
-                    createSideQuestFixture({ id: 51, description: 'Victory lap' })
+                    createSideQuestFixture({ id: 51, description: 'Victory lap' }),
                 ]}
-            />
+            />,
         );
 
         const description = screen.getByText('Victory lap');
@@ -124,13 +124,16 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     startEditingSideQuest={startEditingSideQuest}
                     sideQuests={[{ id: 60, description: 'Edit me' }]}
-                />
+                />,
             );
 
             const description = screen.getByText('Edit me');
             description.click();
 
-            expect(startEditingSideQuest).toHaveBeenCalledWith(1, { id: 60, description: 'Edit me' });
+            expect(startEditingSideQuest).toHaveBeenCalledWith(1, {
+                id: 60,
+                description: 'Edit me',
+            });
         });
 
         it('renders edit input when editing a side quest', () => {
@@ -139,7 +142,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     editingSideQuest={{ questId: 1, sideQuestId: 61, description: 'Old text' }}
                     sideQuests={[{ id: 61, description: 'Old text' }]}
-                />
+                />,
             );
 
             const input = screen.getByDisplayValue('Old text');
@@ -155,7 +158,7 @@ describe('SideQuestList', () => {
                     saveSideQuestEdit={saveSideQuestEdit}
                     editingSideQuest={{ questId: 1, sideQuestId: 62, description: 'Editing' }}
                     sideQuests={[{ id: 62, description: 'Editing' }]}
-                />
+                />,
             );
 
             const saveButton = screen.getByText('Save');
@@ -172,7 +175,7 @@ describe('SideQuestList', () => {
                     cancelSideQuestEdit={cancelSideQuestEdit}
                     editingSideQuest={{ questId: 1, sideQuestId: 63, description: 'Editing' }}
                     sideQuests={[{ id: 63, description: 'Editing' }]}
-                />
+                />,
             );
 
             const cancelButton = screen.getByText('Cancel');
@@ -189,7 +192,7 @@ describe('SideQuestList', () => {
                     saveSideQuestEdit={saveSideQuestEdit}
                     editingSideQuest={{ questId: 1, sideQuestId: 64, description: 'Text' }}
                     sideQuests={[{ id: 64, description: 'Text' }]}
-                />
+                />,
             );
 
             const input = screen.getByDisplayValue('Text');
@@ -207,7 +210,7 @@ describe('SideQuestList', () => {
                     cancelSideQuestEdit={cancelSideQuestEdit}
                     editingSideQuest={{ questId: 1, sideQuestId: 65, description: 'Text' }}
                     sideQuests={[{ id: 65, description: 'Text' }]}
-                />
+                />,
             );
 
             const input = screen.getByDisplayValue('Text');
@@ -225,7 +228,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     getSideQuestStatus={() => 'todo'}
                     sideQuests={[{ id: 70, description: 'Not started' }]}
-                />
+                />,
             );
 
             expect(screen.getByText('Start')).toBeInTheDocument();
@@ -240,7 +243,7 @@ describe('SideQuestList', () => {
                     setSideQuestStatus={setSideQuestStatus}
                     getSideQuestStatus={() => 'todo'}
                     sideQuests={[{ id: 71, description: 'Start me' }]}
-                />
+                />,
             );
 
             const startButton = screen.getByText('Start');
@@ -255,7 +258,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     getSideQuestStatus={() => 'in_progress'}
                     sideQuests={[{ id: 72, description: 'In progress' }]}
-                />
+                />,
             );
 
             expect(screen.queryByText('Start')).not.toBeInTheDocument();
@@ -270,7 +273,7 @@ describe('SideQuestList', () => {
                     setSideQuestStatus={setSideQuestStatus}
                     getSideQuestStatus={() => 'in_progress'}
                     sideQuests={[{ id: 73, description: 'Complete me' }]}
-                />
+                />,
             );
 
             const completeButton = screen.getByText('Complete');
@@ -285,7 +288,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     getSideQuestStatus={() => 'done'}
                     sideQuests={[{ id: 74, description: 'Done' }]}
-                />
+                />,
             );
 
             expect(screen.getByText('Undo')).toBeInTheDocument();
@@ -301,7 +304,7 @@ describe('SideQuestList', () => {
                     setSideQuestStatus={setSideQuestStatus}
                     getSideQuestStatus={() => 'done'}
                     sideQuests={[{ id: 75, description: 'Undo me' }]}
-                />
+                />,
             );
 
             const undoButton = screen.getByText('Undo');
@@ -318,7 +321,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     selectedSideQuest={{ questId: 1, sideQuestId: 80 }}
                     sideQuests={[{ id: 80, description: 'Selected' }]}
-                />
+                />,
             );
 
             expect(screen.getByText('Edit')).toBeInTheDocument();
@@ -333,13 +336,16 @@ describe('SideQuestList', () => {
                     startEditingSideQuest={startEditingSideQuest}
                     selectedSideQuest={{ questId: 1, sideQuestId: 81 }}
                     sideQuests={[{ id: 81, description: 'Edit via button' }]}
-                />
+                />,
             );
 
             const editButton = screen.getByText('Edit');
             editButton.click();
 
-            expect(startEditingSideQuest).toHaveBeenCalledWith(1, { id: 81, description: 'Edit via button' });
+            expect(startEditingSideQuest).toHaveBeenCalledWith(1, {
+                id: 81,
+                description: 'Edit via button',
+            });
         });
 
         it('calls deleteSideQuest when Delete button is clicked', () => {
@@ -350,7 +356,7 @@ describe('SideQuestList', () => {
                     deleteSideQuest={deleteSideQuest}
                     selectedSideQuest={{ questId: 1, sideQuestId: 82 }}
                     sideQuests={[{ id: 82, description: 'Delete me' }]}
-                />
+                />,
             );
 
             const deleteButton = screen.getByText('Delete');
@@ -365,7 +371,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     selectedSideQuest={{ questId: 1, sideQuestId: 83 }}
                     sideQuests={[{ id: 83, description: 'Selected item' }]}
-                />
+                />,
             );
 
             const description = screen.getByText('Selected item');
@@ -382,7 +388,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     handleSelectSideQuest={handleSelectSideQuest}
                     sideQuests={[{ id: 90, description: 'Keyboard select' }]}
-                />
+                />,
             );
 
             const taskRow = screen.getByText('Keyboard select').closest('.task-row');
@@ -399,7 +405,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     handleSelectSideQuest={handleSelectSideQuest}
                     sideQuests={[{ id: 91, description: 'Space select' }]}
-                />
+                />,
             );
 
             const taskRow = screen.getByText('Space select').closest('.task-row');
@@ -417,7 +423,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     pulsingSideQuests={{ '1:95': true }}
                     sideQuests={[{ id: 95, description: 'Pulsing' }]}
-                />
+                />,
             );
 
             const description = screen.getByText('Pulsing');
@@ -430,7 +436,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     pulsingSideQuests={{}}
                     sideQuests={[{ id: 96, description: 'Not pulsing' }]}
-                />
+                />,
             );
 
             const description = screen.getByText('Not pulsing');
@@ -441,8 +447,8 @@ describe('SideQuestList', () => {
     describe('Drag Integration', () => {
         it('renders with smoothDrag component when provided', () => {
             const MockSideQuestList = ({ renderItem, sideQuests }) => (
-                <div data-testid="smooth-drag-list">
-                    {sideQuests.map(sq => renderItem(sq, false, {}))}
+                <div data-testid='smooth-drag-list'>
+                    {sideQuests.map((sq) => renderItem(sq, false, {}))}
                 </div>
             );
 
@@ -451,7 +457,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     smoothDrag={{ SideQuestList: MockSideQuestList }}
                     sideQuests={[{ id: 100, description: 'Draggable' }]}
-                />
+                />,
             );
 
             expect(screen.getByTestId('smooth-drag-list')).toBeInTheDocument();
@@ -461,7 +467,9 @@ describe('SideQuestList', () => {
         it('applies dragging class when isDragging is true', () => {
             const MockSideQuestList = ({ renderItem, sideQuests }) => (
                 <div>
-                    {sideQuests.map(sq => renderItem(sq, true, { handleProps: {}, handleStyle: {} }))}
+                    {sideQuests.map((sq) =>
+                        renderItem(sq, true, { handleProps: {}, handleStyle: {} })
+                    )}
                 </div>
             );
 
@@ -470,7 +478,7 @@ describe('SideQuestList', () => {
                     {...requiredProps}
                     smoothDrag={{ SideQuestList: MockSideQuestList }}
                     sideQuests={[{ id: 101, description: 'Being dragged' }]}
-                />
+                />,
             );
 
             const description = screen.getByText('Being dragged');

@@ -3,14 +3,14 @@ import React, { useState } from 'react';
 // Simple progress indicator component
 function ProgressIndicator({ currentStep, totalSteps }) {
     return (
-        <div className="progress-indicator">
-            <div className="progress-bar">
-                <div 
-                    className="progress-fill" 
+        <div className='progress-indicator'>
+            <div className='progress-bar'>
+                <div
+                    className='progress-fill'
                     style={{ width: `${(currentStep / totalSteps) * 100}%` }}
                 />
             </div>
-            <div className="progress-text">
+            <div className='progress-text'>
                 Step {currentStep} of {totalSteps}
             </div>
         </div>
@@ -24,7 +24,7 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
 
     const validateField = (name, value) => {
         const newErrors = { ...errors };
-        
+
         switch (name) {
             case 'username':
                 if (!value.trim()) {
@@ -34,12 +34,13 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                 } else if (value.length > 20) {
                     newErrors.username = 'Username must be less than 20 characters';
                 } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-                    newErrors.username = 'Username can only contain letters, numbers, and underscores';
+                    newErrors.username =
+                        'Username can only contain letters, numbers, and underscores';
                 } else {
                     delete newErrors.username;
                 }
                 break;
-                
+
             case 'password':
                 if (!value) {
                     newErrors.password = 'Password is required';
@@ -55,7 +56,7 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                     }
                 }
                 break;
-                
+
             case 'confirmPassword':
                 if (!value) {
                     newErrors.confirmPassword = 'Please confirm your password';
@@ -65,7 +66,7 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                     delete newErrors.confirmPassword;
                 }
                 break;
-                
+
             case 'email':
                 // Email is optional, but if provided must be valid
                 if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
@@ -74,32 +75,32 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                     delete newErrors.email;
                 }
                 break;
-                
+
             default:
                 break;
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        
+        setFormData((prev) => ({ ...prev, [name]: value }));
+
         // Real-time validation
         setTimeout(() => validateField(name, value), 300);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         // Validate all fields
         const fields = ['username', 'password', 'confirmPassword'];
         if (formData.email) fields.push('email');
-        
+
         let isValid = true;
-        fields.forEach(field => {
+        fields.forEach((field) => {
             if (!validateField(field, formData[field])) {
                 isValid = false;
             }
@@ -111,106 +112,116 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
     };
 
     return (
-        <div className="registration-step">
-            <div className="step-header">
+        <div className='registration-step'>
+            <div className='step-header'>
                 <h2>Create Your Account</h2>
                 <p>Choose a username and secure password to get started</p>
             </div>
-            
-            <form onSubmit={handleSubmit} className="registration-form">
-                <div className="form-group">
-                    <label htmlFor="username">Username *</label>
+
+            <form onSubmit={handleSubmit} className='registration-form'>
+                <div className='form-group'>
+                    <label htmlFor='username'>Username *</label>
                     <input
-                        type="text"
-                        id="username"
-                        name="username"
+                        type='text'
+                        id='username'
+                        name='username'
                         value={formData.username}
                         onChange={handleChange}
                         className={errors.username ? 'error' : ''}
-                        placeholder="Enter your username"
+                        placeholder='Enter your username'
                         required
-                        autoComplete="username"
+                        autoComplete='username'
                     />
-                    {errors.username && <div className="error-message">{errors.username}</div>}
+                    {errors.username && <div className='error-message'>{errors.username}</div>}
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="email">Email (Optional)</label>
+                <div className='form-group'>
+                    <label htmlFor='email'>Email (Optional)</label>
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
+                        type='email'
+                        id='email'
+                        name='email'
                         value={formData.email}
                         onChange={handleChange}
                         className={errors.email ? 'error' : ''}
-                        placeholder="Enter your email"
-                        autoComplete="email"
+                        placeholder='Enter your email'
+                        autoComplete='email'
                     />
-                    {errors.email && <div className="error-message">{errors.email}</div>}
+                    {errors.email && <div className='error-message'>{errors.email}</div>}
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="password">Password *</label>
-                    <div className="password-input-container">
+                <div className='form-group'>
+                    <label htmlFor='password'>Password *</label>
+                    <div className='password-input-container'>
                         <input
                             type={showPassword ? 'text' : 'password'}
-                            id="password"
-                            name="password"
+                            id='password'
+                            name='password'
                             value={formData.password}
                             onChange={handleChange}
                             className={errors.password ? 'error' : ''}
-                            placeholder="Enter your password"
+                            placeholder='Enter your password'
                             required
-                            autoComplete="new-password"
+                            autoComplete='new-password'
                         />
                         <button
-                            type="button"
-                            className="password-toggle"
+                            type='button'
+                            className='password-toggle'
                             onClick={() => setShowPassword(!showPassword)}
                             aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                             {showPassword ? '👁️' : '👁️‍🗨️'}
                         </button>
                     </div>
-                    {errors.password && <div className="error-message">{errors.password}</div>}
-                    
+                    {errors.password && <div className='error-message'>{errors.password}</div>}
+
                     {/* Simple password strength indicator */}
                     {formData.password && (
-                        <div className="password-strength">
-                            <div className={`strength-meter ${
-                                formData.password.length >= 8 ? 'strong' : 
-                                formData.password.length >= 6 ? 'medium' : 'weak'
-                            }`}>
-                                <div className="strength-fill" />
+                        <div className='password-strength'>
+                            <div
+                                className={`strength-meter ${
+                                    formData.password.length >= 8
+                                        ? 'strong'
+                                        : formData.password.length >= 6
+                                        ? 'medium'
+                                        : 'weak'
+                                }`}
+                            >
+                                <div className='strength-fill' />
                             </div>
-                            <div className="strength-text">
-                                {formData.password.length >= 8 ? 'Strong' : 
-                                 formData.password.length >= 6 ? 'Good' : 'Weak'}
+                            <div className='strength-text'>
+                                {formData.password.length >= 8
+                                    ? 'Strong'
+                                    : formData.password.length >= 6
+                                    ? 'Good'
+                                    : 'Weak'}
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="confirmPassword">Confirm Password *</label>
+                <div className='form-group'>
+                    <label htmlFor='confirmPassword'>Confirm Password *</label>
                     <input
                         type={showPassword ? 'text' : 'password'}
-                        id="confirmPassword"
-                        name="confirmPassword"
+                        id='confirmPassword'
+                        name='confirmPassword'
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         className={errors.confirmPassword ? 'error' : ''}
-                        placeholder="Confirm your password"
+                        placeholder='Confirm your password'
                         required
-                        autoComplete="new-password"
+                        autoComplete='new-password'
                     />
-                    {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
+                    {errors.confirmPassword && (
+                        <div className='error-message'>{errors.confirmPassword}</div>
+                    )}
                 </div>
 
-                <div className="form-actions">
-                    <button 
-                        type="submit" 
-                        className="btn-primary"
+                <div className='form-actions'>
+                    <button
+                        type='submit'
+                        className='btn-primary'
                         disabled={loading || Object.keys(errors).length > 0}
                     >
                         {loading ? 'Creating Account...' : 'Create Account'}
@@ -227,7 +238,7 @@ function ProfileSetupStep({ formData, setFormData, onNext, onBack, loading }) {
         { id: 'adventurer', name: 'Adventurer', description: 'Balanced approach to tasks' },
         { id: 'warrior', name: 'Warrior', description: 'Focus on completing difficult tasks' },
         { id: 'mage', name: 'Mage', description: 'Strategic planning and organization' },
-        { id: 'rogue', name: 'Rogue', description: 'Quick completion and efficiency' }
+        { id: 'rogue', name: 'Rogue', description: 'Quick completion and efficiency' },
     ];
 
     const handleSubmit = (e) => {
@@ -236,72 +247,74 @@ function ProfileSetupStep({ formData, setFormData, onNext, onBack, loading }) {
     };
 
     return (
-        <div className="registration-step">
-            <div className="step-header">
+        <div className='registration-step'>
+            <div className='step-header'>
                 <h2>Set Up Your Profile</h2>
                 <p>Customize your adventurer profile (you can change this later)</p>
             </div>
-            
-            <form onSubmit={handleSubmit} className="registration-form">
-                <div className="form-group">
-                    <label htmlFor="displayName">Display Name</label>
+
+            <form onSubmit={handleSubmit} className='registration-form'>
+                <div className='form-group'>
+                    <label htmlFor='displayName'>Display Name</label>
                     <input
-                        type="text"
-                        id="displayName"
-                        name="displayName"
+                        type='text'
+                        id='displayName'
+                        name='displayName'
                         value={formData.displayName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
-                        placeholder="How others will see your name"
-                        maxLength="50"
+                        onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, displayName: e.target.value }))}
+                        placeholder='How others will see your name'
+                        maxLength='50'
                     />
                 </div>
 
-                <div className="form-group">
+                <div className='form-group'>
                     <label>Choose Your Class</label>
-                    <div className="class-selection">
-                        {classes.map(cls => (
-                            <label key={cls.id} className="class-option">
+                    <div className='class-selection'>
+                        {classes.map((cls) => (
+                            <label key={cls.id} className='class-option'>
                                 <input
-                                    type="radio"
-                                    name="class"
+                                    type='radio'
+                                    name='class'
                                     value={cls.id}
                                     checked={formData.class === cls.id}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, class: e.target.value }))}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({ ...prev, class: e.target.value }))}
                                 />
-                                <div className="class-card">
-                                    <div className="class-name">{cls.name}</div>
-                                    <div className="class-description">{cls.description}</div>
+                                <div className='class-card'>
+                                    <div className='class-name'>{cls.name}</div>
+                                    <div className='class-description'>{cls.description}</div>
                                 </div>
                             </label>
                         ))}
                     </div>
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="bio">Bio (Optional)</label>
+                <div className='form-group'>
+                    <label htmlFor='bio'>Bio (Optional)</label>
                     <textarea
-                        id="bio"
-                        name="bio"
+                        id='bio'
+                        name='bio'
                         value={formData.bio}
-                        onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                        placeholder="Tell others about yourself..."
-                        maxLength="200"
-                        rows="3"
+                        onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
+                        placeholder='Tell others about yourself...'
+                        maxLength='200'
+                        rows='3'
                     />
                 </div>
 
-                <div className="form-actions">
-                    <button 
-                        type="button" 
+                <div className='form-actions'>
+                    <button
+                        type='button'
                         onClick={onBack}
-                        className="btn-ghost"
+                        className='btn-ghost'
                         disabled={loading}
                     >
                         Back
                     </button>
-                    <button 
-                        type="submit" 
-                        className="btn-primary"
+                    <button
+                        type='submit'
+                        className='btn-primary'
                         disabled={loading}
                     >
                         {loading ? 'Finalizing...' : 'Complete Registration'}
@@ -324,7 +337,7 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
         confirmPassword: '',
         displayName: '',
         class: 'adventurer',
-        bio: ''
+        bio: '',
     });
 
     const totalSteps = 2;
@@ -334,7 +347,7 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
             setCurrentStep(currentStep + 1);
             // Auto-populate display name with username if empty
             if (currentStep === 1 && !formData.displayName) {
-                setFormData(prev => ({ ...prev, displayName: prev.username }));
+                setFormData((prev) => ({ ...prev, displayName: prev.username }));
             }
         } else {
             handleSubmit();
@@ -359,14 +372,14 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
                 profile: {
                     display_name: formData.displayName.trim() || formData.username.trim(),
                     class: formData.class,
-                    bio: formData.bio.trim()
-                }
+                    bio: formData.bio.trim(),
+                },
             };
 
             const response = await fetch('/api/users/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(registrationData)
+                body: JSON.stringify(registrationData),
             });
 
             const data = await response.json();
@@ -377,7 +390,6 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
 
             // Success! Call the success callback with the token
             onSuccess(data.token, data.user);
-            
         } catch (err) {
             console.error('Registration error:', err);
             setError(err.message || 'Registration failed. Please try again.');
@@ -387,20 +399,20 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
     };
 
     return (
-        <div className="registration-wizard">
-            <div className="wizard-header">
+        <div className='registration-wizard'>
+            <div className='wizard-header'>
                 <h1>Welcome to Task Tracker</h1>
                 <ProgressIndicator currentStep={currentStep} totalSteps={totalSteps} />
             </div>
 
             {error && (
-                <div className="error-banner">
-                    <div className="error-content">
+                <div className='error-banner'>
+                    <div className='error-content'>
                         {error}
-                        <button 
+                        <button
                             onClick={() => setError('')}
-                            className="error-dismiss"
-                            aria-label="Dismiss error"
+                            className='error-dismiss'
+                            aria-label='Dismiss error'
                         >
                             ×
                         </button>
@@ -408,7 +420,7 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
                 </div>
             )}
 
-            <div className="wizard-content">
+            <div className='wizard-content'>
                 {currentStep === 1 && (
                     <AccountDetailsStep
                         formData={formData}
@@ -429,10 +441,10 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
                 )}
             </div>
 
-            <div className="wizard-footer">
-                <button 
+            <div className='wizard-footer'>
+                <button
                     onClick={onCancel}
-                    className="btn-ghost btn-sm"
+                    className='btn-ghost btn-sm'
                     disabled={loading}
                 >
                     Already have an account? Sign in

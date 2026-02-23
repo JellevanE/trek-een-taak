@@ -5,7 +5,7 @@ import type { AuthenticatedRequest, RequestWithUser } from '../types/auth.js';
 
 export function assertAuthenticated<T extends AuthenticatedRequest>(
     req: T,
-    res: Response
+    res: Response,
 ): req is RequestWithUser<T> {
     if (!req.user) {
         sendError(res, 401, 'Authentication required');

@@ -35,7 +35,9 @@ function extractListenConfig(args: unknown[]): ListenConfig {
         config.callback = third as ListenCallback;
     } else if (config.host === undefined && typeof third === 'string') {
         config.host = third;
-    } else if (config.backlog === undefined && (typeof third === 'number' || typeof third === 'string')) {
+    } else if (
+        config.backlog === undefined && (typeof third === 'number' || typeof third === 'string')
+    ) {
         config.backlog = third;
     }
 
@@ -57,7 +59,8 @@ function buildListenArgs(config: ListenConfig): ListenArg[] {
 
 function overrideHostIfNeeded(config: ListenConfig): ListenConfig {
     const { host } = config;
-    const shouldOverride = host === undefined || host === null || host === '0.0.0.0' || host === '::';
+    const shouldOverride = host === undefined || host === null || host === '0.0.0.0' ||
+        host === '::';
     if (!shouldOverride) return config;
     const safeHost = process.env.BIND_ADDRESS || process.env.HOST || '127.0.0.1';
     return { ...config, host: safeHost };

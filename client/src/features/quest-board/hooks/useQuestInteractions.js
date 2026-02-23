@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import {
     getNextLevel,
@@ -6,7 +6,7 @@ import {
     getQuestSideQuests,
     getQuestStatus,
     idsMatch,
-    isInteractiveTarget
+    isInteractiveTarget,
 } from '../../../hooks/questHelpers.js';
 import { SOUND_EVENT_KEYS } from '../../../theme';
 import { useQuestBoardStore } from '../../../store/questBoardStore.js';
@@ -31,7 +31,7 @@ export const useQuestInteractions = ({
     deleteSideQuestRequest,
     createQuestSnapshot,
     setPriority,
-    setTaskLevel
+    setTaskLevel,
 }) => {
     const {
         selectedQuestId,
@@ -56,19 +56,19 @@ export const useQuestInteractions = ({
         clearSelection,
         findQuestById,
         moveQuestSelection,
-        selectFirstSideQuest
+        selectFirstSideQuest,
     } = selection;
 
     const {
         triggerQuestSpawn,
         setTaskStatus,
-        setSideQuestStatus
+        setSideQuestStatus,
     } = animations;
 
     const undoTimersRef = useRef({});
     const { undoQueue, setUndoQueue } = useQuestBoardStore(useShallow((state) => ({
         undoQueue: state.undoQueue,
-        setUndoQueue: state.setUndoQueue
+        setUndoQueue: state.setUndoQueue,
     })));
     const layoutRefreshRaf = useRef(null);
 
@@ -103,7 +103,7 @@ export const useQuestInteractions = ({
         selectedSideQuest,
         editingQuest,
         editingSideQuest,
-        addingSideQuestTo
+        addingSideQuestTo,
     ]);
 
     const addTask = useCallback(async () => {
@@ -139,21 +139,27 @@ export const useQuestInteractions = ({
             status: 'todo',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            optimistic: true
+            optimistic: true,
         };
 
-        setQuests((prev) => prev.map((quest) => {
-            if (!idsMatch(quest.id, questId)) return quest;
-            const nextSideQuests = [...getQuestSideQuests(quest), optimisticSideQuest];
-            return { ...quest, side_quests: nextSideQuests };
-        }));
+        setQuests((prev) =>
+            prev.map((quest) => {
+                if (!idsMatch(quest.id, questId)) return quest;
+                const nextSideQuests = [...getQuestSideQuests(quest), optimisticSideQuest];
+                return { ...quest, side_quests: nextSideQuests };
+            })
+        );
 
         const clearOptimistic = () => {
-            setQuests((prev) => prev.map((quest) => {
-                if (!idsMatch(quest.id, questId)) return quest;
-                const filtered = getQuestSideQuests(quest).filter((sub) => !idsMatch(sub.id, optimisticId));
-                return { ...quest, side_quests: filtered };
-            }));
+            setQuests((prev) =>
+                prev.map((quest) => {
+                    if (!idsMatch(quest.id, questId)) return quest;
+                    const filtered = getQuestSideQuests(quest).filter((sub) =>
+                        !idsMatch(sub.id, optimisticId)
+                    );
+                    return { ...quest, side_quests: filtered };
+                })
+            );
         };
 
         setSideQuestDescriptionMap((prev) => ({ ...prev, [questId]: '' }));
@@ -166,9 +172,11 @@ export const useQuestInteractions = ({
                 playSound(SOUND_EVENT_KEYS.ERROR);
                 return;
             }
-            setQuests((prev) => prev.map((quest) => (
-                idsMatch(quest.id, updatedQuest.id) ? updatedQuest : quest
-            )));
+            setQuests((prev) =>
+                prev.map((quest) => (
+                    idsMatch(quest.id, updatedQuest.id) ? updatedQuest : quest
+                ))
+            );
             playSound(SOUND_EVENT_KEYS.SIDE_QUEST_ADD);
         } catch (error) {
             console.error('Error adding side quest:', error);
@@ -204,7 +212,7 @@ export const useQuestInteractions = ({
         refreshLayout,
         setLoadingSideQuestAdds,
         setQuests,
-        setSideQuestDescriptionMap
+        setSideQuestDescriptionMap,
         // sideQuestDescriptionMap removed from dependencies
     ]);
 
@@ -273,7 +281,7 @@ export const useQuestInteractions = ({
             priority: updatedTask.priority,
             task_level: Number(updatedTask.task_level) || 1,
             due_date: updatedTask.due_date ?? null,
-            campaign_id: updatedTask.campaign_id ?? null
+            campaign_id: updatedTask.campaign_id ?? null,
         };
         await updateQuest(id, payload);
         setEditingQuest(null);
@@ -297,16 +305,16 @@ export const useQuestInteractions = ({
         const normalized = await deleteSideQuestRequest(taskId, subTaskId);
         if (!normalized) return;
         if (
-            selectedSideQuest
-            && idsMatch(selectedSideQuest.questId, taskId)
-            && idsMatch(selectedSideQuest.sideQuestId, subTaskId)
+            selectedSideQuest &&
+            idsMatch(selectedSideQuest.questId, taskId) &&
+            idsMatch(selectedSideQuest.sideQuestId, subTaskId)
         ) {
             setSelectedSideQuest(null);
         }
         if (
-            editingSideQuest
-            && idsMatch(editingSideQuest.questId, taskId)
-            && idsMatch(editingSideQuest.sideQuestId, subTaskId)
+            editingSideQuest &&
+            idsMatch(editingSideQuest.questId, taskId) &&
+            idsMatch(editingSideQuest.sideQuestId, subTaskId)
         ) {
             setEditingSideQuest(null);
         }
@@ -319,15 +327,15 @@ export const useQuestInteractions = ({
         refreshLayout,
         selectedSideQuest,
         setEditingSideQuest,
-        setSelectedSideQuest
+        setSelectedSideQuest,
     ]);
 
     const saveSideQuestEdit = useCallback((questId, subTaskId) => {
         console.log('[saveSideQuestEdit] called with:', { questId, subTaskId });
         if (
-            !editingSideQuest
-            || !idsMatch(editingSideQuest.questId, questId)
-            || !idsMatch(editingSideQuest.sideQuestId, subTaskId)
+            !editingSideQuest ||
+            !idsMatch(editingSideQuest.questId, questId) ||
+            !idsMatch(editingSideQuest.sideQuestId, subTaskId)
         ) return;
         const nextDescription = (editingSideQuest.description || '').trim();
         if (!nextDescription) {
@@ -359,18 +367,25 @@ export const useQuestInteractions = ({
 
     const cycleEditingPriority = useCallback(() => {
         playSound(SOUND_EVENT_KEYS.PRIORITY_CYCLE);
-        setEditingQuest((prev) => (prev ? { ...prev, priority: getNextPriority(prev.priority || 'low') } : prev));
+        setEditingQuest((
+            prev,
+        ) => (prev ? { ...prev, priority: getNextPriority(prev.priority || 'low') } : prev));
     }, [playSound, setEditingQuest]);
 
     const cycleEditingLevel = useCallback(() => {
         playSound(SOUND_EVENT_KEYS.PRIORITY_CYCLE);
-        setEditingQuest((prev) => (prev ? { ...prev, task_level: getNextLevel(prev.task_level || 1) } : prev));
+        setEditingQuest((
+            prev,
+        ) => (prev ? { ...prev, task_level: getNextLevel(prev.task_level || 1) } : prev));
     }, [playSound, setEditingQuest]);
 
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (isInteractiveTarget(event.target)) return;
-            if (event.target && typeof event.target.closest === 'function' && event.target.closest('[data-skip-shortcuts="true"]')) return;
+            if (
+                event.target && typeof event.target.closest === 'function' &&
+                event.target.closest('[data-skip-shortcuts="true"]')
+            ) return;
             if (!quests.length) return;
             const currentQuest = selectedQuestId !== null ? findQuestById(selectedQuestId) : null;
             switch (event.key) {
@@ -392,7 +407,9 @@ export const useQuestInteractions = ({
                 case 'Enter': {
                     if (!currentQuest) break;
                     event.preventDefault();
-                    const nextStatus = getQuestStatus(currentQuest) === 'done' ? 'in_progress' : 'done';
+                    const nextStatus = getQuestStatus(currentQuest) === 'done'
+                        ? 'in_progress'
+                        : 'done';
                     setTaskStatus(currentQuest.id, nextStatus);
                     break;
                 }
@@ -418,7 +435,9 @@ export const useQuestInteractions = ({
                         event.preventDefault();
                         const subs = getQuestSideQuests(currentQuest);
                         const idx = selectedSideQuest
-                            ? subs.findIndex((sub) => idsMatch(sub.id, selectedSideQuest.sideQuestId))
+                            ? subs.findIndex((sub) =>
+                                idsMatch(sub.id, selectedSideQuest.sideQuestId)
+                            )
                             : subs.length - 1;
                         if (idx > 0) {
                             handleSelectSideQuest(currentQuest.id, subs[idx - 1].id);
@@ -431,12 +450,16 @@ export const useQuestInteractions = ({
                     event.preventDefault();
                     if (selectedSideQuest) {
                         const subs = getQuestSideQuests(currentQuest);
-                        const idx = subs.findIndex((sub) => idsMatch(sub.id, selectedSideQuest.sideQuestId));
+                        const idx = subs.findIndex((sub) =>
+                            idsMatch(sub.id, selectedSideQuest.sideQuestId)
+                        );
                         if (idx !== -1 && idx < subs.length - 1) {
                             handleSelectSideQuest(currentQuest.id, subs[idx + 1].id);
                             return;
                         }
-                        const next = quests.findIndex((quest) => idsMatch(quest.id, currentQuest.id));
+                        const next = quests.findIndex((quest) =>
+                            idsMatch(quest.id, currentQuest.id)
+                        );
                         if (next !== -1 && next < quests.length - 1) {
                             handleSelectQuest(quests[next + 1].id);
                         }
@@ -450,7 +473,9 @@ export const useQuestInteractions = ({
                     if (selectedSideQuest) break;
                     if (currentQuest) {
                         ensureQuestExpanded(currentQuest.id);
-                        const subs = Array.isArray(currentQuest.side_quests) ? currentQuest.side_quests : [];
+                        const subs = Array.isArray(currentQuest.side_quests)
+                            ? currentQuest.side_quests
+                            : [];
                         if (subs.length > 0) {
                             event.preventDefault();
                             selectFirstSideQuest(currentQuest.id);
@@ -471,10 +496,17 @@ export const useQuestInteractions = ({
                     if (selectedSideQuest && currentQuest) {
                         event.preventDefault();
                         const subs = getQuestSideQuests(currentQuest);
-                        const match = subs.find((sub) => idsMatch(sub.id, selectedSideQuest.sideQuestId));
-                        const label = match && match.description ? match.description : 'this side-quest';
+                        const match = subs.find((sub) =>
+                            idsMatch(sub.id, selectedSideQuest.sideQuestId)
+                        );
+                        const label = match && match.description
+                            ? match.description
+                            : 'this side-quest';
                         if (window.confirm(`Delete ${label}?`)) {
-                            deleteSideQuest(selectedSideQuest.questId, selectedSideQuest.sideQuestId);
+                            deleteSideQuest(
+                                selectedSideQuest.questId,
+                                selectedSideQuest.sideQuestId,
+                            );
                         }
                     } else if (selectedQuestId !== null && currentQuest) {
                         event.preventDefault();
@@ -508,7 +540,7 @@ export const useQuestInteractions = ({
         selectedQuestId,
         selectedSideQuest,
         setSelectedSideQuest,
-        setTaskStatus
+        setTaskStatus,
     ]);
 
     return {
@@ -531,6 +563,6 @@ export const useQuestInteractions = ({
         cyclePriority,
         cycleTaskLevel,
         cycleEditingPriority,
-        cycleEditingLevel
+        cycleEditingLevel,
     };
 };

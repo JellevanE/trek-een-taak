@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import App from './App';
 import { useTheme } from './hooks/useTheme';
 import { useAuth } from './hooks/useAuth';
@@ -139,7 +139,9 @@ describe('App', () => {
     test('renders login screen when not authenticated', () => {
         render(<App />);
         expect(screen.getByText('Welcome to Quest Tracker')).toBeInTheDocument();
-        expect(screen.getByText('Please sign in or create an account to start managing your quests.')).toBeInTheDocument();
+        expect(
+            screen.getByText('Please sign in or create an account to start managing your quests.'),
+        ).toBeInTheDocument();
     });
 
     test('renders quest board when authenticated', () => {
@@ -151,7 +153,8 @@ describe('App', () => {
         });
         render(<App />);
         expect(screen.getByText('Quest Tracker')).toBeInTheDocument();
-        expect(screen.getByText('Quest management made easy, but also way harder.')).toBeInTheDocument();
+        expect(screen.getByText('Quest management made easy, but also way harder.'))
+            .toBeInTheDocument();
     });
 
     test('toggles theme', () => {
@@ -199,9 +202,11 @@ describe('App', () => {
         mockUseAuth.mockReturnValue({ token: 'test-token' });
         render(<App />);
         fireEvent.click(screen.getByText('Keyboard Shortcuts'));
-        expect(screen.getByText('Keep your hands on the keys to fly through quests.')).toBeInTheDocument();
+        expect(screen.getByText('Keep your hands on the keys to fly through quests.'))
+            .toBeInTheDocument();
         fireEvent.click(screen.getByText('Close'));
-        expect(screen.queryByText('Keep your hands on the keys to fly through quests.')).not.toBeInTheDocument();
+        expect(screen.queryByText('Keep your hands on the keys to fly through quests.')).not
+            .toBeInTheDocument();
     });
 
     test('renders quests when available', () => {
@@ -338,7 +343,9 @@ describe('App', () => {
                 setDescription: setDescription,
             });
             render(<App />);
-            fireEvent.change(screen.getByPlaceholderText('Quest description'), { target: { value: 'New Quest' } });
+            fireEvent.change(screen.getByPlaceholderText('Quest description'), {
+                target: { value: 'New Quest' },
+            });
             expect(setDescription).toHaveBeenCalledWith('New Quest');
         });
 
@@ -373,7 +380,9 @@ describe('App', () => {
                 setTaskCampaignSelection: setTaskCampaignSelection,
             });
             render(<App />);
-            fireEvent.change(screen.getByLabelText('Assign quest to campaign'), { target: { value: '1' } });
+            fireEvent.change(screen.getByLabelText('Assign quest to campaign'), {
+                target: { value: '1' },
+            });
             expect(setTaskCampaignSelection).toHaveBeenCalledWith(1);
         });
 

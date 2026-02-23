@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, getAuthHeaders as getAuthHeadersUtil } from '../utils/api.js';
 
 export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorized }) => {
@@ -10,13 +10,13 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorize
             setPlayerStats(null);
             return;
         }
-        
+
         const fetchPlayerStats = async () => {
             try {
                 const data = await apiFetch(
                     '/api/users/me',
                     { headers: getAuthHeadersUtil(token) },
-                    onUnauthorized
+                    onUnauthorized,
                 );
                 if (data && data.user && data.user.rpg) {
                     setPlayerStats(data.user.rpg);
@@ -25,7 +25,7 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorize
                 console.error('Error fetching player stats:', error);
             }
         };
-        
+
         fetchPlayerStats();
     }, [token, onUnauthorized]);
 
@@ -50,15 +50,15 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorize
     const claimDailyReward = useCallback(async () => {
         if (dailyLoading) return;
         setDailyLoading(true);
-        
+
         try {
             const data = await apiFetch(
                 '/api/rpg/daily-reward',
                 {
                     method: 'POST',
-                    headers: getAuthHeaders()
+                    headers: getAuthHeaders(),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             handleXpPayload(data);
         } catch (error) {
@@ -76,6 +76,6 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorize
         dailyLoading,
         setDailyLoading,
         handleXpPayload,
-        claimDailyReward
+        claimDailyReward,
     };
 };

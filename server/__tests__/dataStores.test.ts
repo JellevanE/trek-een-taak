@@ -6,7 +6,7 @@ import { jest } from '@jest/globals';
 import { configureDataFiles, resetDataFileOverrides } from '../src/testing/fixtures';
 import { getTasksFile } from '../src/data/filePaths';
 import { readTasks, writeTasks } from '../src/data/taskStore';
-import { readUsers, writeUsers, sanitizeUser } from '../src/data/userStore';
+import { readUsers, sanitizeUser, writeUsers } from '../src/data/userStore';
 import { readCampaigns, writeCampaigns } from '../src/data/campaignStore';
 import type { TaskStoreData } from '../src/types/task';
 import type { UserStoreData } from '../src/types/user';
@@ -46,8 +46,8 @@ describe('data stores', () => {
                             updated_at: null,
                             status_history: null,
                             completed: undefined,
-                            rpg: { xp_awarded: 'nope', last_reward_at: 123 }
-                        }
+                            rpg: { xp_awarded: 'nope', last_reward_at: 123 },
+                        },
                     ],
                     side_quests: null,
                     nextSubtaskId: null,
@@ -56,10 +56,10 @@ describe('data stores', () => {
                     updated_at: null,
                     owner_id: null,
                     task_level: '4',
-                    rpg: { xp_awarded: 'yes', history: [{ at: 123 }] }
-                } as unknown) as TaskStoreData['tasks'][number]
+                    rpg: { xp_awarded: 'yes', history: [{ at: 123 }] },
+                } as unknown) as TaskStoreData['tasks'][number],
             ],
-            nextId: null as unknown as number
+            nextId: null as unknown as number,
         };
         writeFileSync(tasksFile, JSON.stringify(malformed));
         // ensure users file exists for owner resolution
@@ -108,7 +108,7 @@ describe('data stores', () => {
             updated_at: new Date().toISOString(),
             profile: {
                 display_name: 'Archivist',
-                avatar: null
+                avatar: null,
             },
             // minimal RPG state
             rpg: {
@@ -123,8 +123,8 @@ describe('data stores', () => {
                 xp_log: [],
                 last_daily_reward_at: null,
                 last_xp_award_at: null,
-                counters: { tasks_completed: 0, subtasks_completed: 0, daily_rewards_claimed: 0 }
-            }
+                counters: { tasks_completed: 0, subtasks_completed: 0, daily_rewards_claimed: 0 },
+            },
         });
         users.nextId += 1;
         expect(writeUsers(users)).toBe(true);
@@ -155,10 +155,10 @@ describe('data stores', () => {
                     owner_id: 1,
                     archived: false,
                     created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }
+                    updated_at: new Date().toISOString(),
+                },
             ],
-            nextId: 2
+            nextId: 2,
         };
         expect(writeCampaigns(snapshot)).toBe(true);
         const reread = readCampaigns();

@@ -16,7 +16,7 @@ const optionalString = z
 const optionalNullableString = z
     .union([
         z.string().transform((value) => value.trim()),
-        z.null()
+        z.null(),
     ])
     .optional();
 
@@ -28,13 +28,13 @@ export const createTaskSchema = z
         priority: z.enum(taskPriorityValues).optional(),
         due_date: optionalString,
         task_level: taskLevelSchema,
-        campaign_id: optionalNumericId
+        campaign_id: optionalNumericId,
     })
     .strict();
 
 export const createSubtaskSchema = z
     .object({
-        description: z.string().trim().min(1)
+        description: z.string().trim().min(1),
     })
     .strict();
 
@@ -43,8 +43,8 @@ export const updateStatusSchema = z
         status: z.enum(taskStatusValues),
         note: z.union([
             z.string(),
-            z.null()
-        ]).optional()
+            z.null(),
+        ]).optional(),
     })
     .strict();
 
@@ -54,7 +54,7 @@ export const updateTaskSchema = z
         priority: z.string().trim().min(1),
         due_date: optionalNullableString,
         task_level: taskLevelSchema,
-        campaign_id: optionalNumericId
+        campaign_id: optionalNumericId,
     })
     .strict()
     .partial();
@@ -64,14 +64,14 @@ export const updateSubtaskSchema = z
         description: z.string().trim().min(1),
         status: z.string().trim().min(1),
         weight: optionalNumber,
-        priority: z.string().trim().min(1)
+        priority: z.string().trim().min(1),
     })
     .strict()
     .partial();
 
 export const updateOrderSchema = z
     .object({
-        order: z.array(z.coerce.number().int().nonnegative())
+        order: z.array(z.coerce.number().int().nonnegative()),
     })
     .strict();
 

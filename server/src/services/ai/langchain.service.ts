@@ -43,7 +43,7 @@ export class LangChainService {
                     setTimeout(
                         () => reject(new Error(`Generation timed out after ${timeoutMs}ms`)),
                         timeoutMs,
-                    ),
+                    )
                 );
 
                 const result = await Promise.race([chain.invoke(variables), timeoutPromise]);
@@ -55,7 +55,10 @@ export class LangChainService {
                 return result;
             } catch (error) {
                 lastError = error instanceof Error ? error : new Error(String(error));
-                console.error(`Generation attempt ${attempt}/${retryAttempts} failed:`, lastError.message);
+                console.error(
+                    `Generation attempt ${attempt}/${retryAttempts} failed:`,
+                    lastError.message,
+                );
 
                 if (attempt < retryAttempts) {
                     const backoffMs = Math.pow(2, attempt) * 500;

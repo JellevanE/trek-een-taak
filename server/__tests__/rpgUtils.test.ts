@@ -1,19 +1,11 @@
+import { applyXp, createInitialRpgState, ensureUserRpg } from '../src/rpg/experienceEngine';
+import { buildPublicRpgState, incrementCounter, toPublicXpEvent } from '../src/rpg/eventHooks';
 import {
-    applyXp,
-    createInitialRpgState,
-    ensureUserRpg
-} from '../src/rpg/experienceEngine';
-import {
-    buildPublicRpgState,
-    incrementCounter,
-    toPublicXpEvent
-} from '../src/rpg/eventHooks';
-import {
-    XP_CONFIG,
     computeDailyBaseXp,
     computeSubtaskXp,
     computeTaskXp,
-    summarizeTaskReward
+    summarizeTaskReward,
+    XP_CONFIG,
 } from '../src/rpg/rewardTables';
 import type { SubTask, TaskRecord } from '../src/types/task';
 import type { UserRpgEvent, UserRpgState } from '../src/types/user';
@@ -29,7 +21,7 @@ describe('rpg experience utilities', () => {
                 xp: Number.NaN as unknown as number,
                 xp_log: null as unknown as UserRpgEvent[],
                 inventory: {
-                    items: 'not-an-array' as unknown as UserRpgState['inventory']['items']
+                    items: 'not-an-array' as unknown as UserRpgState['inventory']['items'],
                 } as unknown as UserRpgState['inventory'],
                 achievements: null as unknown as UserRpgState['achievements'],
                 hp: Number.NaN as unknown as number,
@@ -39,13 +31,13 @@ describe('rpg experience utilities', () => {
                 counters: {
                     tasks_completed: 'bad' as unknown as number,
                     subtasks_completed: null as unknown as number,
-                    daily_rewards_claimed: undefined as unknown as number
+                    daily_rewards_claimed: undefined as unknown as number,
                 },
                 flags: null as unknown as UserRpgState['flags'],
                 metrics: null as unknown as UserRpgState['metrics'],
                 last_daily_reward_at: 123 as unknown as string,
-                last_xp_award_at: 42 as unknown as string
-            }
+                last_xp_award_at: 42 as unknown as string,
+            },
         };
         const repaired = ensureUserRpg(damaged);
         expect(repaired?.inventory.items).toEqual([]);
@@ -71,7 +63,7 @@ describe('rpg experience utilities', () => {
             xp_into_level: 0,
             xp_for_level: 100,
             xp_to_next: 100,
-            leveled_up: false
+            leveled_up: false,
         });
         const overflowLog = Array.from({ length: XP_CONFIG.xpLogLimit + 8 }, baseEvent);
         const target: { rpg: UserRpgState } = {
@@ -89,14 +81,14 @@ describe('rpg experience utilities', () => {
                 last_xp_award_at: null,
                 counters: { tasks_completed: 0, subtasks_completed: 0, daily_rewards_claimed: 0 },
                 flags: {},
-                metrics: {}
-            }
+                metrics: {},
+            },
         };
 
         const event = applyXp(target, 120, 'task_complete', {
             task_id: 99,
             task_level: 1,
-            priority: 'medium'
+            priority: 'medium',
         });
         expect(event).not.toBeNull();
         expect(target.rpg.xp_log.length).toBe(XP_CONFIG.xpLogLimit);
@@ -121,8 +113,8 @@ describe('rpg experience utilities', () => {
                 xp_into_level: index,
                 xp_for_level: 120,
                 xp_to_next: 90,
-                leveled_up: false
-            }))
+                leveled_up: false,
+            })),
         });
         const snapshot = buildPublicRpgState(rpg);
         expect(snapshot.recent_events.length).toBeLessThanOrEqual(5);
@@ -155,7 +147,7 @@ describe('rpg reward calculations', () => {
 
         const task = computeTaskXp({
             task_level: 99,
-            priority: 'high'
+            priority: 'high',
         } as Partial<TaskRecord>);
         expect(task.level).toBeLessThanOrEqual(XP_CONFIG.maxTaskLevel);
         expect(task.amount).toBeGreaterThan(0);
@@ -178,7 +170,9 @@ describe('rpg reward calculations', () => {
         const daily = computeDailyBaseXp();
         expect(daily).toEqual({ amount: XP_CONFIG.dailyBaseXp, reason: 'daily_focus' });
 
-        const summary = summarizeTaskReward({ task_level: 2, status: 'mystery' } as unknown as Partial<TaskRecord>);
+        const summary = summarizeTaskReward(
+            { task_level: 2, status: 'mystery' } as unknown as Partial<TaskRecord>,
+        );
         expect(summary.status).toBe('todo');
         expect(summary.amount).toBeGreaterThan(0);
     });

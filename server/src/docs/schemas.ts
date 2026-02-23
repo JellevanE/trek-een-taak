@@ -4,7 +4,14 @@ import { allowedProfileClasses } from '../validation/schemas/auth.js';
 
 const taskPriorityValues = ['low', 'medium', 'high'] as const;
 const taskStatusValues = ['todo', 'in_progress', 'blocked', 'done'] as const;
-const xpReasons = ['task_complete', 'subtask_complete', 'daily_focus', 'debug_adjustment', 'xp_gain', 'legacy'] as const;
+const xpReasons = [
+    'task_complete',
+    'subtask_complete',
+    'daily_focus',
+    'debug_adjustment',
+    'xp_gain',
+    'legacy',
+] as const;
 
 const jsonPrimitiveSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 const jsonObjectSchema = z.record(z.unknown());
@@ -12,7 +19,7 @@ const jsonMetadataSchema = z.record(z.union([z.string(), z.number(), z.boolean()
 
 export const errorSchema = z
     .object({
-        error: z.string()
+        error: z.string(),
     })
     .strict();
 
@@ -22,7 +29,7 @@ export const userProfileSchema = z
         avatar: z.string().nullable(),
         class: z.enum(allowedProfileClasses).optional(),
         bio: z.string().optional(),
-        prefs: jsonObjectSchema.optional()
+        prefs: jsonObjectSchema.optional(),
     })
     .strict();
 
@@ -35,7 +42,7 @@ const rpgInventoryItemSchema = z
         rarity: z.enum(['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']).optional(),
         acquired_at: z.string().optional(),
         equipped: z.boolean().optional(),
-        tags: z.array(z.string()).optional()
+        tags: z.array(z.string()).optional(),
     })
     .strict();
 
@@ -46,7 +53,7 @@ const rpgAchievementSchema = z
         description: z.string().optional(),
         unlocked_at: z.string().optional(),
         points: z.number().optional(),
-        tags: z.array(z.string()).optional()
+        tags: z.array(z.string()).optional(),
     })
     .strict();
 
@@ -64,7 +71,7 @@ const userRpgEventSchema = z
         xp_into_level: z.number(),
         xp_for_level: z.number(),
         xp_to_next: z.number(),
-        leveled_up: z.boolean()
+        leveled_up: z.boolean(),
     })
     .strict();
 
@@ -81,7 +88,7 @@ export const publicXpEventSchema = z
         xp_into_level: z.number(),
         xp_for_level: z.number(),
         xp_to_next: z.number(),
-        leveled_up: z.boolean()
+        leveled_up: z.boolean(),
     })
     .strict();
 
@@ -101,16 +108,16 @@ export const publicUserRpgStateSchema = z
             .object({
                 hp: z.number(),
                 mp: z.number(),
-                coins: z.number()
+                coins: z.number(),
             })
             .strict(),
         achievements: z.array(rpgAchievementSchema),
         inventory: z
             .object({
-                items: z.array(rpgInventoryItemSchema)
+                items: z.array(rpgInventoryItemSchema),
             })
             .strict(),
-        recent_events: z.array(userRpgEventSchema)
+        recent_events: z.array(userRpgEventSchema),
     })
     .strict();
 
@@ -122,20 +129,20 @@ export const publicUserSchema = z
         created_at: z.string(),
         updated_at: z.string(),
         profile: userProfileSchema,
-        rpg: publicUserRpgStateSchema
+        rpg: publicUserRpgStateSchema,
     })
     .strict();
 
 export const authSuccessResponseSchema = z
     .object({
         token: z.string(),
-        user: publicUserSchema
+        user: publicUserSchema,
     })
     .strict();
 
 export const currentUserResponseSchema = z
     .object({
-        user: publicUserSchema
+        user: publicUserSchema,
     })
     .strict();
 
@@ -143,7 +150,7 @@ export const usernameAvailabilitySchema = z
     .object({
         available: z.boolean(),
         reserved: z.boolean().optional(),
-        suggestions: z.array(z.string()).optional()
+        suggestions: z.array(z.string()).optional(),
     })
     .strict();
 
@@ -151,7 +158,7 @@ export const emailValidationResponseSchema = z
     .object({
         valid: z.boolean(),
         normalized_email: z.string(),
-        reason: z.string().optional()
+        reason: z.string().optional(),
     })
     .strict();
 
@@ -159,7 +166,7 @@ const statusHistoryEntrySchema = z
     .object({
         status: z.enum(taskStatusValues),
         at: z.string(),
-        note: z.string().nullable()
+        note: z.string().nullable(),
     })
     .strict();
 
@@ -168,14 +175,14 @@ const taskRewardHistoryEntrySchema = z
         at: z.string(),
         amount: z.number(),
         reason: z.string(),
-        subtask_id: z.number().optional()
+        subtask_id: z.number().optional(),
     })
     .strict();
 
 const subtaskRpgSchema = z
     .object({
         xp_awarded: z.boolean(),
-        last_reward_at: z.string().nullable()
+        last_reward_at: z.string().nullable(),
     })
     .strict();
 
@@ -190,7 +197,7 @@ const subtaskSchema = z
         completed: z.boolean().optional(),
         rpg: subtaskRpgSchema,
         priority: z.enum(taskPriorityValues).optional(),
-        weight: z.number().optional()
+        weight: z.number().optional(),
     })
     .strict();
 
@@ -198,7 +205,7 @@ const taskRpgSchema = z
     .object({
         xp_awarded: z.boolean(),
         last_reward_at: z.string().nullable(),
-        history: z.array(taskRewardHistoryEntrySchema)
+        history: z.array(taskRewardHistoryEntrySchema),
     })
     .strict();
 
@@ -221,33 +228,33 @@ export const taskSchema = z
         rpg: taskRpgSchema,
         campaign_id: z.number().nullable(),
         owner_id: z.number(),
-        nextId: z.number().optional()
+        nextId: z.number().optional(),
     })
     .strict();
 
 export const taskWithXpSchema = taskSchema
     .extend({
         xp_events: z.array(publicXpEventSchema).optional(),
-        player_rpg: publicUserRpgStateSchema.nullable().optional()
+        player_rpg: publicUserRpgStateSchema.nullable().optional(),
     })
     .strict();
 
 export const taskListResponseSchema = z
     .object({
         tasks: z.array(taskSchema),
-        nextId: z.number()
+        nextId: z.number(),
     })
     .strict();
 
 export const taskOrderResponseSchema = z
     .object({
-        tasks: z.array(taskSchema)
+        tasks: z.array(taskSchema),
     })
     .strict();
 
 export const taskHistoryResponseSchema = z
     .object({
-        history: z.array(statusHistoryEntrySchema)
+        history: z.array(statusHistoryEntrySchema),
     })
     .strict();
 
@@ -257,7 +264,7 @@ const campaignStatsSchema = z
         quests_completed: z.number(),
         quests_remaining: z.number(),
         quests_in_progress: z.number(),
-        completion_percent: z.number()
+        completion_percent: z.number(),
     })
     .strict();
 
@@ -272,20 +279,20 @@ export const campaignSchema = z
         created_at: z.string(),
         updated_at: z.string(),
         stats: campaignStatsSchema.optional(),
-        progress_summary: z.string().optional()
+        progress_summary: z.string().optional(),
     })
     .strict();
 
 export const campaignListResponseSchema = z
     .object({
-        campaigns: z.array(campaignSchema)
+        campaigns: z.array(campaignSchema),
     })
     .strict();
 
 export const campaignDetailsResponseSchema = z
     .object({
         campaign: campaignSchema,
-        quests: z.array(taskSchema)
+        quests: z.array(taskSchema),
     })
     .strict();
 
@@ -293,26 +300,26 @@ export const seedTasksResponseSchema = z
     .object({
         created: z.number(),
         removedBeforeSeed: z.number(),
-        tasks: z.array(taskSchema)
+        tasks: z.array(taskSchema),
     })
     .strict();
 
 export const clearTasksResponseSchema = z
     .object({
-        removed: z.number()
+        removed: z.number(),
     })
     .strict();
 
 export const xpGrantResponseSchema = z
     .object({
         xp_event: publicXpEventSchema,
-        player_rpg: publicUserRpgStateSchema
+        player_rpg: publicUserRpgStateSchema,
     })
     .strict();
 
 export const playerSnapshotResponseSchema = z
     .object({
-        player_rpg: publicUserRpgStateSchema
+        player_rpg: publicUserRpgStateSchema,
     })
     .strict();
 

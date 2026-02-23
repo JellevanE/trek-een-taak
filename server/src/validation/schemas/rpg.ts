@@ -5,7 +5,7 @@ export const grantXpSchema = z
         amount: z
             .coerce
             .number()
-            .refine((value) => value !== 0, { message: 'Amount cannot be zero' })
+            .refine((value) => value !== 0, { message: 'Amount cannot be zero' }),
     })
     .strict();
 

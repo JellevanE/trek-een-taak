@@ -2,16 +2,16 @@
 
 ## 🎯 Quick Reference
 
-| Component | Use Case | Key Props | Inspiration From |
-|-----------|----------|-----------|------------------|
-| **PixelButton** | Actions, CTAs | `variant`, `size`, `onClick` | inspiration.html `.add-btn` |
-| **GlitchText** | Titles, notifications | `continuous`, `glitchOnHover`, `color` | inspiration.html `@keyframes glitch` |
-| **PowerUpEffect** | Quest completion | `active`, `position`, `particleCount` | inspiration.html `.quest-complete` |
-| **LevelUpAnimation** | Major achievements | `active`, `level`, `onComplete` | inspiration.html `@keyframes levelUp` |
-| **CRTOverlay** | Retro atmosphere | `enabled`, `intensity` | inspiration.html CRT effects |
-| **HealthBar** | Progress tracking | `current`, `max`, `style`, `color` | inspiration.html `.progress-bar` |
-| **RetroLoadingSpinner** | Loading states | `type`, `color`, `size` | Custom 8-bit spinners |
-| **ArcadeModal** | Dialogs, confirmations | `isOpen`, `title`, `onClose` | inspiration.html `.container` corners |
+| Component               | Use Case               | Key Props                              | Inspiration From                      |
+| ----------------------- | ---------------------- | -------------------------------------- | ------------------------------------- |
+| **PixelButton**         | Actions, CTAs          | `variant`, `size`, `onClick`           | inspiration.html `.add-btn`           |
+| **GlitchText**          | Titles, notifications  | `continuous`, `glitchOnHover`, `color` | inspiration.html `@keyframes glitch`  |
+| **PowerUpEffect**       | Quest completion       | `active`, `position`, `particleCount`  | inspiration.html `.quest-complete`    |
+| **LevelUpAnimation**    | Major achievements     | `active`, `level`, `onComplete`        | inspiration.html `@keyframes levelUp` |
+| **CRTOverlay**          | Retro atmosphere       | `enabled`, `intensity`                 | inspiration.html CRT effects          |
+| **HealthBar**           | Progress tracking      | `current`, `max`, `style`, `color`     | inspiration.html `.progress-bar`      |
+| **RetroLoadingSpinner** | Loading states         | `type`, `color`, `size`                | Custom 8-bit spinners                 |
+| **ArcadeModal**         | Dialogs, confirmations | `isOpen`, `title`, `onClose`           | inspiration.html `.container` corners |
 
 ## 💡 Integration Ideas for Your Quest Board
 
@@ -21,7 +21,7 @@
    ```jsx
    // Before:
    <button onClick={addTask}>Add Quest</button>
-   
+
    // After:
    <PixelButton variant="primary" onClick={addTask}>
      START QUEST
@@ -31,31 +31,31 @@
 2. **Add GlitchText to page title**
    ```jsx
    <h1>
-     <GlitchText continuous color="var(--neon-cyan)">
-       [ QUEST BOARD ]
-     </GlitchText>
-   </h1>
+       <GlitchText continuous color='var(--neon-cyan)'>
+           [ QUEST BOARD ]
+       </GlitchText>
+   </h1>;
    ```
 
 3. **Celebrate quest completion with PowerUpEffect**
    ```jsx
    // When marking quest complete:
    const [showEffect, setShowEffect] = useState(false);
-   
+
    const handleComplete = (questId, event) => {
-     setShowEffect(true);
-     setEffectPosition({ 
-       x: event.clientX, 
-       y: event.clientY 
-     });
-     // ... existing complete logic
+       setShowEffect(true);
+       setEffectPosition({
+           x: event.clientX,
+           y: event.clientY,
+       });
+       // ... existing complete logic
    };
-   
-   <PowerUpEffect 
-     active={showEffect} 
-     position={effectPosition}
-     particleSymbol="⭐"
-   />
+
+   <PowerUpEffect
+       active={showEffect}
+       position={effectPosition}
+       particleSymbol='⭐'
+   />;
    ```
 
 ### Medium Effort Features
@@ -90,8 +90,9 @@
 ## 🎨 Styling Notes
 
 All components use your existing CSS variables:
+
 - `--neon-cyan` → Primary accent
-- `--neon-pink` → Secondary accent  
+- `--neon-pink` → Secondary accent
 - `--neon-green` → Success states
 - `--neon-red` → Danger/delete
 - `--neon-yellow` → Warnings/highlights
@@ -106,45 +107,47 @@ This means they **already match your theme** without additional styling!
 Components mark sound effect points but don't include audio. To add sounds:
 
 1. **Create sound utility** (`utils/sounds.js`):
+
 ```javascript
 class RetroSoundManager {
-  constructor() {
-    this.enabled = localStorage.getItem('soundEnabled') !== 'false';
-    this.audioContext = null;
-  }
+    constructor() {
+        this.enabled = localStorage.getItem('soundEnabled') !== 'false';
+        this.audioContext = null;
+    }
 
-  init() {
-    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
+    init() {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
 
-  playButtonPress() {
-    if (!this.enabled) return;
-    // Play 8-bit blip sound
-  }
+    playButtonPress() {
+        if (!this.enabled) return;
+        // Play 8-bit blip sound
+    }
 
-  playQuestComplete() {
-    if (!this.enabled) return;
-    // Play victory chime
-  }
-  
-  // ... more sounds
+    playQuestComplete() {
+        if (!this.enabled) return;
+        // Play victory chime
+    }
+
+    // ... more sounds
 }
 
 export const soundManager = new RetroSoundManager();
 ```
 
 2. **Hook into components**:
+
 ```javascript
 import { soundManager } from './utils/sounds';
 
-<PixelButton 
-  onClick={() => {
-    soundManager.playButtonPress();
-    handleClick();
-  }}
+<PixelButton
+    onClick={() => {
+        soundManager.playButtonPress();
+        handleClick();
+    }}
 >
-  START
-</PixelButton>
+    START
+</PixelButton>;
 ```
 
 3. **Preload audio files**:
@@ -160,20 +163,24 @@ See `inspiration.html` lines 1027-1192 for complete Web Audio API implementation
 For your frontend overhaul (Stories 3-6):
 
 ### Story 3 (Layout Refresh):
+
 - ✅ Use `HealthBar` for quest progress
 - ✅ Add `RetroLoadingSpinner` for side-quest loading states
 
 ### Story 4 (Theme Tokens):
+
 - ✅ Study how showcase components consume theme tokens
 - ✅ Consider `GlitchText` for dynamic quest titles
 - ✅ Optional: Add `CRTOverlay` as theme option
 
 ### Story 5 (State Store):
+
 - ✅ Use `ArcadeModal` for delete confirmations
 - ✅ Add `PowerUpEffect` for quest completion
 - ✅ `LevelUpAnimation` for level-up events
 
 ### Story 6 (Validation):
+
 - ✅ Replace generic buttons with `PixelButton`
 - ✅ Measure animation performance
 - ✅ Test reduced-motion compliance
@@ -181,6 +188,7 @@ For your frontend overhaul (Stories 3-6):
 ## 📦 No Dependencies Added
 
 All components use:
+
 - ✅ React 19 (already in your project)
 - ✅ Framer Motion (already in your project)
 - ✅ Your existing CSS variables

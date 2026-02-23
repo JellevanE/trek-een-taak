@@ -7,7 +7,7 @@ describe('api utils', () => {
             const headers = getAuthHeaders(token);
             expect(headers).toEqual({
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer fake-token'
+                'Authorization': 'Bearer fake-token',
             });
         });
     });
@@ -17,7 +17,7 @@ describe('api utils', () => {
             const mockData = { success: true };
             const res = {
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockData)
+                json: jest.fn().mockResolvedValue(mockData),
             };
 
             const result = await handleApiResponse(res);
@@ -28,7 +28,7 @@ describe('api utils', () => {
             const onUnauthorized = jest.fn();
             const res = {
                 ok: false,
-                status: 401
+                status: 401,
             };
 
             await expect(handleApiResponse(res, onUnauthorized))
@@ -40,7 +40,7 @@ describe('api utils', () => {
             const res = {
                 ok: false,
                 status: 400,
-                json: jest.fn().mockResolvedValue({ error: 'Bad Request' })
+                json: jest.fn().mockResolvedValue({ error: 'Bad Request' }),
             };
 
             await expect(handleApiResponse(res))
@@ -51,7 +51,7 @@ describe('api utils', () => {
             const res = {
                 ok: false,
                 status: 500,
-                json: jest.fn().mockRejectedValue(new Error('Parse error'))
+                json: jest.fn().mockRejectedValue(new Error('Parse error')),
             };
 
             await expect(handleApiResponse(res))
@@ -72,7 +72,7 @@ describe('api utils', () => {
             const mockData = { data: 'test' };
             global.fetch.mockResolvedValue({
                 ok: true,
-                json: jest.fn().mockResolvedValue(mockData)
+                json: jest.fn().mockResolvedValue(mockData),
             });
 
             const result = await apiFetch('/api/test', { method: 'GET' });
@@ -85,7 +85,7 @@ describe('api utils', () => {
             const onUnauthorized = jest.fn();
             global.fetch.mockResolvedValue({
                 ok: false,
-                status: 401
+                status: 401,
             });
 
             await expect(apiFetch('/api/test', {}, onUnauthorized))

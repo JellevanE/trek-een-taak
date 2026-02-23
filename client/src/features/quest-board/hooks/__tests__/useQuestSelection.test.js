@@ -6,7 +6,7 @@ describe('useQuestSelection', () => {
     const mockQuests = [
         { id: 1, description: 'Quest 1', side_quests: [{ id: 101, description: 'Side 1' }] },
         { id: 2, description: 'Quest 2', side_quests: [] },
-        { id: 3, description: 'Quest 3', side_quests: [] }
+        { id: 3, description: 'Quest 3', side_quests: [] },
     ];
 
     beforeEach(async () => {
@@ -14,11 +14,13 @@ describe('useQuestSelection', () => {
     });
 
     const setupHook = (props = {}) => {
-        return renderHook(() => useQuestSelection({
-            quests: mockQuests,
-            refreshLayout: jest.fn(),
-            ...props
-        }));
+        return renderHook(() =>
+            useQuestSelection({
+                quests: mockQuests,
+                refreshLayout: jest.fn(),
+                ...props,
+            })
+        );
     };
 
     it('ensureQuestExpanded expands the quest', () => {
@@ -153,7 +155,7 @@ describe('useQuestSelection', () => {
         expect(result.current.editingSideQuest).toEqual({
             questId: 1,
             sideQuestId: 101,
-            description: 'Side 1'
+            description: 'Side 1',
         });
     });
 
@@ -196,10 +198,11 @@ describe('useQuestSelection', () => {
     });
 
     it('clears selection if quest no longer exists', () => {
-        const { result, rerender } = renderHook((props) => useQuestSelection({
-            quests: props.quests,
-            refreshLayout: jest.fn()
-        }), { initialProps: { quests: mockQuests } });
+        const { result, rerender } = renderHook((props) =>
+            useQuestSelection({
+                quests: props.quests,
+                refreshLayout: jest.fn(),
+            }), { initialProps: { quests: mockQuests } });
 
         act(() => {
             result.current.setSelectedQuestId(1);

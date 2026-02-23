@@ -3,7 +3,7 @@ import { useQuestData } from '../useQuestData.js';
 import { resetQuestBoardStore } from '../../../../store/questBoardStore.js';
 
 jest.mock('../../../../utils/api.js', () => ({
-    apiFetch: jest.fn()
+    apiFetch: jest.fn(),
 }));
 
 const { apiFetch } = jest.requireMock('../../../../utils/api.js');
@@ -12,28 +12,30 @@ const createCampaignApi = () => ({
     activeCampaignFilter: null,
     taskCampaignSelection: null,
     refreshCampaigns: jest.fn(),
-    getTasksEndpoint: () => '/api/tasks'
+    getTasksEndpoint: () => '/api/tasks',
 });
 
 const createPlayerStatsApi = () => ({
     setPlayerStats: jest.fn(),
-    handleXpPayload: jest.fn()
+    handleXpPayload: jest.fn(),
 });
 
 const setupHook = () => {
     const reloadTasksRef = { current: () => Promise.resolve() };
     const campaignApi = createCampaignApi();
     const playerStatsApi = createPlayerStatsApi();
-    const hook = renderHook(() => useQuestData({
-        token: null,
-        getAuthHeaders: () => ({ Authorization: 'Bearer test-token' }),
-        onUnauthorized: jest.fn(),
-        pushToast: jest.fn(),
-        campaignApi,
-        playerStatsApi,
-        reloadTasksRef,
-        skipInitialFetch: true
-    }));
+    const hook = renderHook(() =>
+        useQuestData({
+            token: null,
+            getAuthHeaders: () => ({ Authorization: 'Bearer test-token' }),
+            onUnauthorized: jest.fn(),
+            pushToast: jest.fn(),
+            campaignApi,
+            playerStatsApi,
+            reloadTasksRef,
+            skipInitialFetch: true,
+        })
+    );
     return { hook, campaignApi };
 };
 
@@ -49,7 +51,7 @@ test('addTask persists new quest and resets composer fields', async () => {
             return Promise.resolve({
                 id: 42,
                 description: body.description,
-                status: 'todo'
+                status: 'todo',
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -65,7 +67,9 @@ test('addTask persists new quest and resets composer fields', async () => {
     });
 
     await waitFor(() => expect(hook.result.current.description).toBe(''));
-    await waitFor(() => expect(hook.result.current.quests[0]).toMatchObject({ id: 42, description: 'Write tests' }));
+    await waitFor(() =>
+        expect(hook.result.current.quests[0]).toMatchObject({ id: 42, description: 'Write tests' })
+    );
 });
 
 test('addSideQuest updates quest list when API succeeds', async () => {
@@ -75,7 +79,7 @@ test('addSideQuest updates quest list when API succeeds', async () => {
                 id: 7,
                 description: 'Parent quest',
                 status: 'todo',
-                side_quests: [{ id: 99, description: 'Nested task', status: 'todo' }]
+                side_quests: [{ id: 99, description: 'Nested task', status: 'todo' }],
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -83,7 +87,12 @@ test('addSideQuest updates quest list when API succeeds', async () => {
 
     const { hook } = setupHook();
     act(() => {
-        hook.result.current.setQuests([{ id: 7, description: 'Parent quest', status: 'todo', side_quests: [] }]);
+        hook.result.current.setQuests([{
+            id: 7,
+            description: 'Parent quest',
+            status: 'todo',
+            side_quests: [],
+        }]);
     });
 
     await act(async () => {
@@ -104,35 +113,8 @@ test('addSideQuest falls back to sub_tasks when side_quests is stale', async () 
                 side_quests: [{ id: 1, description: 'Only original', status: 'todo' }],
                 sub_tasks: [
                     { id: 1, description: 'Only original', status: 'todo' },
-                    { id: 2, description: 'Fresh task', status: 'todo' }
-                ]
-            });
-        }
-        throw new Error(`Unhandled request: ${url}`);
-    });
-
-    const { hook } = setupHook();
-    act(() => {
-        hook.result.current.setQuests([{ id: 7, description: 'Parent quest', status: 'todo', side_quests: [] }]);
-    });
-
-    await act(async () => {
-        await hook.result.current.addSideQuest(7, 'Fresh task');
-    });
-
-    expect(hook.result.current.quests[0].side_quests).toHaveLength(2);
-    expect(hook.result.current.quests[0].side_quests[1]).toMatchObject({ id: 2, description: 'Fresh task' });
-});
-
-test('setSideQuestStatus mirrors updated sub_tasks payload', async () => {
-    apiFetch.mockImplementation((url, options = {}) => {
-        if (url === '/api/tasks/7/subtasks/1/status' && options.method === 'PATCH') {
-            return Promise.resolve({
-                id: 7,
-                description: 'Parent quest',
-                status: 'todo',
-                side_quests: [{ id: 1, description: 'Only original', status: 'todo' }],
-                sub_tasks: [{ id: 1, description: 'Only original', status: 'done' }]
+                    { id: 2, description: 'Fresh task', status: 'todo' },
+                ],
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -144,7 +126,42 @@ test('setSideQuestStatus mirrors updated sub_tasks payload', async () => {
             id: 7,
             description: 'Parent quest',
             status: 'todo',
-            side_quests: [{ id: 1, description: 'Only original', status: 'todo' }]
+            side_quests: [],
+        }]);
+    });
+
+    await act(async () => {
+        await hook.result.current.addSideQuest(7, 'Fresh task');
+    });
+
+    expect(hook.result.current.quests[0].side_quests).toHaveLength(2);
+    expect(hook.result.current.quests[0].side_quests[1]).toMatchObject({
+        id: 2,
+        description: 'Fresh task',
+    });
+});
+
+test('setSideQuestStatus mirrors updated sub_tasks payload', async () => {
+    apiFetch.mockImplementation((url, options = {}) => {
+        if (url === '/api/tasks/7/subtasks/1/status' && options.method === 'PATCH') {
+            return Promise.resolve({
+                id: 7,
+                description: 'Parent quest',
+                status: 'todo',
+                side_quests: [{ id: 1, description: 'Only original', status: 'todo' }],
+                sub_tasks: [{ id: 1, description: 'Only original', status: 'done' }],
+            });
+        }
+        throw new Error(`Unhandled request: ${url}`);
+    });
+
+    const { hook } = setupHook();
+    act(() => {
+        hook.result.current.setQuests([{
+            id: 7,
+            description: 'Parent quest',
+            status: 'todo',
+            side_quests: [{ id: 1, description: 'Only original', status: 'todo' }],
         }]);
     });
 
@@ -164,7 +181,7 @@ test('updateQuest sends update request', async () => {
             return Promise.resolve({
                 id: 8,
                 description: body.description,
-                status: 'todo'
+                status: 'todo',
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -180,13 +197,11 @@ test('updateQuest sends update request', async () => {
         '/api/tasks/8',
         expect.objectContaining({
             method: 'PUT',
-            body: JSON.stringify({ description: 'New description' })
+            body: JSON.stringify({ description: 'New description' }),
         }),
-        expect.any(Function) // onUnauthorized callback
+        expect.any(Function), // onUnauthorized callback
     );
 });
-
-
 
 test('deleteQuest removes quest from list', async () => {
     apiFetch.mockImplementation((url, options = {}) => {
@@ -200,7 +215,7 @@ test('deleteQuest removes quest from list', async () => {
     act(() => {
         hook.result.current.setQuests([
             { id: 9, description: 'To delete', status: 'todo' },
-            { id: 10, description: 'To keep', status: 'todo' }
+            { id: 10, description: 'To keep', status: 'todo' },
         ]);
     });
 
@@ -219,7 +234,7 @@ test('deleteSideQuest removes side quest from parent', async () => {
                 id: 11,
                 description: 'Parent',
                 status: 'todo',
-                side_quests: []
+                side_quests: [],
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -231,7 +246,7 @@ test('deleteSideQuest removes side quest from parent', async () => {
             id: 11,
             description: 'Parent',
             status: 'todo',
-            side_quests: [{ id: 50, description: 'Child', status: 'todo' }]
+            side_quests: [{ id: 50, description: 'Child', status: 'todo' }],
         }]);
     });
 
@@ -250,7 +265,7 @@ test('addTask resets description after creating quest', async () => {
             return Promise.resolve({
                 id: 999,
                 description: 'Created',
-                status: 'todo'
+                status: 'todo',
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -277,7 +292,7 @@ test('setTaskStatus updates quest status', async () => {
             return Promise.resolve({
                 id: 12,
                 description: 'Status quest',
-                status: 'done'
+                status: 'done',
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -303,7 +318,7 @@ test('updateSideQuest renames side quest', async () => {
                 id: 13,
                 description: 'Parent',
                 status: 'todo',
-                side_quests: [{ id: 60, description: body.description, status: 'todo' }]
+                side_quests: [{ id: 60, description: body.description, status: 'todo' }],
             });
         }
         throw new Error(`Unhandled request: ${url}`);
@@ -315,7 +330,7 @@ test('updateSideQuest renames side quest', async () => {
             id: 13,
             description: 'Parent',
             status: 'todo',
-            side_quests: [{ id: 60, description: 'Old name', status: 'todo' }]
+            side_quests: [{ id: 60, description: 'Old name', status: 'todo' }],
         }]);
     });
 
@@ -355,7 +370,6 @@ test('addSideQuest handles API error', async () => {
     expect(result).toBeNull();
 });
 
-
 test('clearAllQuests clears quests and shows toast', async () => {
     apiFetch.mockResolvedValue({});
     const { hook } = setupHook();
@@ -393,7 +407,7 @@ test('grantXp calls API and handles payload', async () => {
     expect(apiFetch).toHaveBeenCalledWith(
         '/api/debug/grant-xp',
         expect.objectContaining({ body: JSON.stringify({ amount: 100 }) }),
-        expect.any(Function)
+        expect.any(Function),
     );
 });
 
@@ -408,7 +422,7 @@ test('resetRpgStats calls API and handles payload', async () => {
     expect(apiFetch).toHaveBeenCalledWith(
         '/api/debug/reset-rpg',
         expect.anything(),
-        expect.any(Function)
+        expect.any(Function),
     );
 });
 
@@ -433,6 +447,3 @@ test('debug functions handle errors', async () => {
         await hook.result.current.resetRpgStats();
     });
 });
-
-
-

@@ -26,12 +26,14 @@ The project has a well-defined roadmap focused on modernization and user experie
 ## 4. Tech Stack
 
 **Frontend (`client/`):**
+
 - **Framework:** React
 - **State Management:** `zustand`
 - **Animations:** `framer-motion`
 - **Styling:** CSS with a custom theming system
 
 **Backend (`server/`):**
+
 - **Runtime/Framework:** Node.js with Express
 - **Language:** TypeScript
 - **Authentication:** JWT (`jsonwebtoken`, `bcryptjs`)

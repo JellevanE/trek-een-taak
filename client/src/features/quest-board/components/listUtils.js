@@ -13,7 +13,7 @@ export const reconcileOrder = (incoming, previous) => {
         return sanitizedIncoming.slice();
     }
     const incomingMap = new Map(
-        sanitizedIncoming.map((item, index) => [getItemKey(item, index), item])
+        sanitizedIncoming.map((item, index) => [getItemKey(item, index), item]),
     );
     const merged = [];
     previous.forEach((prevItem, idx) => {
@@ -40,7 +40,9 @@ export const useNeonDragHandle = () => {
     const startDrag = React.useCallback((event) => {
         // Don't start drag if interacting with a button, input, or other interactive element
         const target = event.target;
-        const interactive = target.closest('button, a, input, textarea, select, [role="button"], [data-no-drag], .quest-card-actions, .action-button');
+        const interactive = target.closest(
+            'button, a, input, textarea, select, [role="button"], [data-no-drag], .quest-card-actions, .action-button',
+        );
 
         if (interactive && !interactive.hasAttribute('data-drag-handle')) {
             return;
@@ -64,10 +66,10 @@ export const useNeonDragHandle = () => {
         handleProps: {
             'data-drag-handle': 'true',
             'aria-grabbed': isDragging ? 'true' : 'false',
-            onPointerDown: startDrag
+            onPointerDown: startDrag,
         },
         handleStyle: { cursor: isDragging ? 'grabbing' : 'grab' },
-        isDragging
+        isDragging,
     }), [isDragging, startDrag]);
 
     return { controls, dragMeta, setIsDragging };

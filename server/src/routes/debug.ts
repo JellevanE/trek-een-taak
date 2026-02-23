@@ -3,7 +3,11 @@ import { Router } from 'express';
 import { ensureAuth } from '../middleware/auth.js';
 import { clearTasks, seedTasks } from '../controllers/debugController.js';
 import { grantXp, resetRpg } from '../controllers/rpgController.js';
-import { seedCampaigns, clearCampaigns, completeCampaignTasks } from '../controllers/debugCampaignController.js';
+import {
+    clearCampaigns,
+    completeCampaignTasks,
+    seedCampaigns,
+} from '../controllers/debugCampaignController.js';
 
 const router = Router();
 

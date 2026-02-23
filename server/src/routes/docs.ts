@@ -11,7 +11,7 @@ router.get('/openapi.json', (_req, res) => {
 router.get('/', (_req, res) => {
     return res.json({
         message: 'Task Tracker API documentation',
-        openapi: '/api/docs/openapi.json'
+        openapi: '/api/docs/openapi.json',
     });
 });
 

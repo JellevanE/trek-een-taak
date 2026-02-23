@@ -14,14 +14,14 @@ export const normalizeQuest = (task) => {
     const canonicalSubs = Array.isArray(task.sub_tasks) && task.sub_tasks.length > 0
         ? task.sub_tasks
         : Array.isArray(task.side_quests)
-            ? task.side_quests
-            : [];
+        ? task.side_quests
+        : [];
     const sideQuests = canonicalSubs.map(normalizeSideQuest);
     const taskLevel = typeof task.task_level === 'number' ? task.task_level : 1;
     return {
         ...task,
         side_quests: sideQuests,
-        task_level: taskLevel
+        task_level: taskLevel,
     };
 };
 
@@ -44,7 +44,8 @@ export const getSideQuestStatus = (sideQuest, parent) => {
     return sideQuest.status || (sideQuest.completed ? 'done' : 'todo');
 };
 
-export const getSideQuestStatusLabel = (sideQuest, parent) => getSideQuestStatus(sideQuest, parent).replace('_', ' ');
+export const getSideQuestStatusLabel = (sideQuest, parent) =>
+    getSideQuestStatus(sideQuest, parent).replace('_', ' ');
 
 export const idsMatch = (a, b) => String(a) === String(b);
 
@@ -57,8 +58,8 @@ export const findSideQuestById = (quest, sideQuestId) =>
     getQuestSideQuests(quest).find((sub) => idsMatch(sub?.id, sideQuestId)) || null;
 
 export const isInteractiveTarget = (target) =>
-    target && typeof target.closest === 'function'
-    && target.closest('input,textarea,button,select,[contenteditable=\"true\"]');
+    target && typeof target.closest === 'function' &&
+    target.closest('input,textarea,button,select,[contenteditable="true"]');
 
 export const priorityWeight = (priority) => {
     if (!priority) return 1.0;
@@ -122,65 +123,68 @@ export const getProgressAura = (pct) => {
     if (pct >= 90) return { emoji: '🌟', mood: 'Legendary focus', fillClass: 'progress-legend' };
     if (pct >= 70) return { emoji: '🚀', mood: 'Momentum rising', fillClass: 'progress-heroic' };
     if (pct >= 40) return { emoji: '⚔️', mood: 'Battle ready', fillClass: 'progress-ready' };
-    if (pct >= 15) return { emoji: '🛠️', mood: 'Forge in progress', fillClass: 'progress-building' };
+    if (pct >= 15) {
+        return { emoji: '🛠️', mood: 'Forge in progress', fillClass: 'progress-building' };
+    }
     return { emoji: '💤', mood: 'Boot sequence idle', fillClass: 'progress-idle' };
 };
 
-export const useGlobalProgress = (quests) => useMemo(() => {
-    if (!Array.isArray(quests) || quests.length === 0) {
-        return {
-            percent: 0,
-            count: 0,
-            todayCount: 0,
-            backlogCount: 0,
-            totalCount: 0,
-            weightingToday: false
-        };
-    }
-
-    const todayKey = new Date().toISOString().split('T')[0];
-    const today = quests.filter((quest) => quest && quest.due_date === todayKey);
-    const backlog = quests.filter((quest) => quest && quest.due_date !== todayKey);
-    const weightingToday = today.length > 0;
-
-    let weightSum = 0;
-    let weightedProgressSum = 0;
-
-    const contribute = (task, multiplier = 1) => {
-        if (!task) return;
-        const baseWeight = priorityWeight(task.priority);
-        const subs = getQuestSideQuests(task);
-        const subWeightSum = subs.reduce((sum, sub) => sum + sideQuestWeight(sub, task), 0);
-        const questWeight = (baseWeight + subWeightSum) * Math.max(multiplier, 0);
-        if (questWeight <= 0) return;
-        weightSum += questWeight;
-        weightedProgressSum += (getQuestProgress(task) || 0) * questWeight;
-    };
-
-    today.forEach((task) => contribute(task, 1));
-    backlog.forEach((task) => {
-        const dueDate = task && typeof task.due_date === 'string' ? task.due_date : null;
-        let multiplier = 1;
-        if (weightingToday) {
-            if (dueDate && dueDate < todayKey) {
-                multiplier = 0.75;
-            } else {
-                multiplier = 0.4;
-            }
+export const useGlobalProgress = (quests) =>
+    useMemo(() => {
+        if (!Array.isArray(quests) || quests.length === 0) {
+            return {
+                percent: 0,
+                count: 0,
+                todayCount: 0,
+                backlogCount: 0,
+                totalCount: 0,
+                weightingToday: false,
+            };
         }
-        contribute(task, multiplier);
-    });
 
-    const percent = weightSum > 0 ? Math.round(weightedProgressSum / weightSum) : 0;
-    return {
-        percent,
-        count: weightingToday ? today.length : quests.length,
-        todayCount: today.length,
-        backlogCount: backlog.length,
-        totalCount: quests.length,
-        weightingToday
-    };
-}, [quests]);
+        const todayKey = new Date().toISOString().split('T')[0];
+        const today = quests.filter((quest) => quest && quest.due_date === todayKey);
+        const backlog = quests.filter((quest) => quest && quest.due_date !== todayKey);
+        const weightingToday = today.length > 0;
+
+        let weightSum = 0;
+        let weightedProgressSum = 0;
+
+        const contribute = (task, multiplier = 1) => {
+            if (!task) return;
+            const baseWeight = priorityWeight(task.priority);
+            const subs = getQuestSideQuests(task);
+            const subWeightSum = subs.reduce((sum, sub) => sum + sideQuestWeight(sub, task), 0);
+            const questWeight = (baseWeight + subWeightSum) * Math.max(multiplier, 0);
+            if (questWeight <= 0) return;
+            weightSum += questWeight;
+            weightedProgressSum += (getQuestProgress(task) || 0) * questWeight;
+        };
+
+        today.forEach((task) => contribute(task, 1));
+        backlog.forEach((task) => {
+            const dueDate = task && typeof task.due_date === 'string' ? task.due_date : null;
+            let multiplier = 1;
+            if (weightingToday) {
+                if (dueDate && dueDate < todayKey) {
+                    multiplier = 0.75;
+                } else {
+                    multiplier = 0.4;
+                }
+            }
+            contribute(task, multiplier);
+        });
+
+        const percent = weightSum > 0 ? Math.round(weightedProgressSum / weightSum) : 0;
+        return {
+            percent,
+            count: weightingToday ? today.length : quests.length,
+            todayCount: today.length,
+            backlogCount: backlog.length,
+            totalCount: quests.length,
+            weightingToday,
+        };
+    }, [quests]);
 
 export const calculateGlobalProgress = (quests) => {
     if (!Array.isArray(quests) || quests.length === 0) {
@@ -190,7 +194,7 @@ export const calculateGlobalProgress = (quests) => {
             todayCount: 0,
             backlogCount: 0,
             totalCount: 0,
-            weightingToday: false
+            weightingToday: false,
         };
     }
 
@@ -234,7 +238,7 @@ export const calculateGlobalProgress = (quests) => {
         todayCount: today.length,
         backlogCount: backlog.length,
         totalCount: quests.length,
-        weightingToday
+        weightingToday,
     };
 };
 

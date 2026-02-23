@@ -11,7 +11,7 @@ export const QuestBoardProvider = ({ value, children }) => (
 
 QuestBoardProvider.propTypes = {
     value: PropTypes.object.isRequired,
-    children: PropTypes.node.isRequired
+    children: PropTypes.node.isRequired,
 };
 
 export const useQuestBoardContext = () => {

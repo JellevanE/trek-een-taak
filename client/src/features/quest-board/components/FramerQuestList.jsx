@@ -5,18 +5,25 @@ import { DEFAULT_THEME_ID } from '../../../theme';
 import { useQuestMotionTokens } from '../hooks/useQuestMotionTokens.js';
 import { getItemKey, reconcileOrder, useNeonDragHandle } from './listUtils.js';
 
-const QuestListRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd, listIsDragging }) => {
+const QuestListRow = (
+    { item, renderItem, motionTokens, onDragStart, onDragEnd, listIsDragging },
+) => {
     const { controls, dragMeta, setIsDragging } = useNeonDragHandle();
 
     return (
         <Reorder.Item
-            as="div"
+            as='div'
             value={item}
             dragControls={controls}
             dragListener={false}
             dragElastic={0.12}
             dragMomentum={false}
-            dragTransition={{ power: 0.1, timeConstant: 200, bounceStiffness: 400, bounceDamping: 40 }}
+            dragTransition={{
+                power: 0.1,
+                timeConstant: 200,
+                bounceStiffness: 400,
+                bounceDamping: 40,
+            }}
             layout={listIsDragging ? 'position' : false}
             onDragStart={() => {
                 setIsDragging(true);
@@ -31,19 +38,19 @@ const QuestListRow = ({ item, renderItem, motionTokens, onDragStart, onDragEnd, 
                     type: 'spring',
                     stiffness: 300,
                     damping: 30,
-                    mass: 1
-                }
+                    mass: 1,
+                },
             }}
             whileDrag={{
                 scale: motionTokens.drag.scale,
                 boxShadow: motionTokens.drag.shadow,
                 filter: motionTokens.drag.glow === 'none'
                     ? undefined
-                    : `drop-shadow(${motionTokens.drag.glow})`
+                    : `drop-shadow(${motionTokens.drag.glow})`,
             }}
             whileTap={{ scale: motionTokens.drag.scale }}
             style={{
-                listStyle: 'none'
+                listStyle: 'none',
             }}
         >
             <div style={{ width: '100%' }}>
@@ -58,12 +65,12 @@ QuestListRow.propTypes = {
     motionTokens: PropTypes.shape({
         durations: PropTypes.object,
         easing: PropTypes.object,
-        drag: PropTypes.object
+        drag: PropTypes.object,
     }).isRequired,
     renderItem: PropTypes.func.isRequired,
     onDragStart: PropTypes.func,
     onDragEnd: PropTypes.func,
-    listIsDragging: PropTypes.bool
+    listIsDragging: PropTypes.bool,
 };
 
 export const FramerQuestList = ({
@@ -74,14 +81,12 @@ export const FramerQuestList = ({
     itemHeight,
     renderItem,
     refreshToken,
-    themeName
+    themeName,
 }) => {
     const motionTokens = useQuestMotionTokens(themeName);
     const containerRef = React.useRef(null);
     const [isDragging, setIsDragging] = React.useState(false);
     const [dimensions, setDimensions] = React.useState(null);
-
-
 
     const [order, setOrder] = React.useState(() => (Array.isArray(items) ? items : []));
     const latestOrderRef = React.useRef(order);
@@ -102,8 +107,6 @@ export const FramerQuestList = ({
         }
         setIsDragging(true);
     }, []);
-
-
 
     const handleDragEnd = React.useCallback(() => {
         setIsDragging(false);
@@ -129,7 +132,7 @@ export const FramerQuestList = ({
         <Reorder.Group
             ref={containerRef}
             key={`quest-list-${refreshToken}`}
-            axis="y"
+            axis='y'
             values={order}
             onReorder={handleReorder}
             layoutScroll
@@ -167,7 +170,7 @@ FramerQuestList.propTypes = {
     itemHeight: PropTypes.number,
     renderItem: PropTypes.func.isRequired,
     refreshToken: PropTypes.number,
-    themeName: PropTypes.string
+    themeName: PropTypes.string,
 };
 
 FramerQuestList.defaultProps = {
@@ -175,7 +178,7 @@ FramerQuestList.defaultProps = {
     itemGap: 0,
     itemHeight: 0,
     refreshToken: 0,
-    themeName: DEFAULT_THEME_ID
+    themeName: DEFAULT_THEME_ID,
 };
 
 export default FramerQuestList;

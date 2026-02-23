@@ -15,22 +15,23 @@ import { getClientIp } from '../utils/ip.js';
 import { registrationRateLimiter } from '../security/registrationRateLimiter.js';
 import { isUsernameReserved } from '../security/reservedUsernames.js';
 import {
+    type EmailValidationPayload,
     emailValidationRequestSchema,
-    loginUserSchema,
-    profileUpdateSchema,
-    registerUserSchema,
     isEmailFormatValid,
     type LoginUserPayload,
+    loginUserSchema,
     type ProfileUpdatePayload,
+    profileUpdateSchema,
     type RegisterUserPayload,
-    type EmailValidationPayload
+    registerUserSchema,
 } from '../validation/schemas/auth.js';
 
-type BaseAuthedRequest<P extends ParamsDictionary = ParamsDictionary, B = unknown> = AuthenticatedRequest<
-    P,
-    unknown,
-    B
->;
+type BaseAuthedRequest<P extends ParamsDictionary = ParamsDictionary, B = unknown> =
+    AuthenticatedRequest<
+        P,
+        unknown,
+        B
+    >;
 
 export function getCurrentUser(req: BaseAuthedRequest, res: Response) {
     if (!assertAuthenticated(req, res)) return;
@@ -42,7 +43,10 @@ export function getCurrentUser(req: BaseAuthedRequest, res: Response) {
     return res.json({ user: safeUser });
 }
 
-export function updateCurrentUser(req: BaseAuthedRequest<Record<string, string>, ProfileUpdatePayload>, res: Response) {
+export function updateCurrentUser(
+    req: BaseAuthedRequest<Record<string, string>, ProfileUpdatePayload>,
+    res: Response,
+) {
     if (!assertAuthenticated(req, res)) return;
     const validation = validateRequest(req, { body: profileUpdateSchema });
     if (!validation.success) {
@@ -57,7 +61,13 @@ export function updateCurrentUser(req: BaseAuthedRequest<Record<string, string>,
     const userRecord = usersData.users[userIndex];
     if (!userRecord) return sendError(res, 404, 'User not found');
 
-    const allowedProfile: Array<keyof ProfileUpdatePayload> = ['display_name', 'avatar', 'class', 'bio', 'prefs'];
+    const allowedProfile: Array<keyof ProfileUpdatePayload> = [
+        'display_name',
+        'avatar',
+        'class',
+        'bio',
+        'prefs',
+    ];
     const profile: UserRecord['profile'] = { ...userRecord.profile };
 
     allowedProfile.forEach((key) => {
@@ -72,7 +82,7 @@ export function updateCurrentUser(req: BaseAuthedRequest<Record<string, string>,
     const updatedUser: UserRecord = {
         ...userRecord,
         profile,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
     };
     usersData.users[userIndex] = updatedUser;
 
@@ -86,7 +96,10 @@ export function updateCurrentUser(req: BaseAuthedRequest<Record<string, string>,
     }
 }
 
-export function checkUsernameAvailability(req: BaseAuthedRequest<{ username: string }>, res: Response) {
+export function checkUsernameAvailability(
+    req: BaseAuthedRequest<{ username: string }>,
+    res: Response,
+) {
     const { username } = req.params;
     if (!username || typeof username !== 'string' || !username.trim()) {
         return sendError(res, 400, 'Invalid username');
@@ -97,15 +110,17 @@ export function checkUsernameAvailability(req: BaseAuthedRequest<{ username: str
     if (isUsernameReserved(normalized)) {
         const suggestions = [
             `${username}${Math.floor(Math.random() * 100)}`,
-            `${username}_${Math.floor(Math.random() * 10)}`
+            `${username}_${Math.floor(Math.random() * 10)}`,
         ];
         return res.json({ available: false, reserved: true, suggestions });
     }
-    const isTaken = usersData.users.some((user) => typeof user.username === 'string' && user.username.toLowerCase() === normalized);
+    const isTaken = usersData.users.some((user) =>
+        typeof user.username === 'string' && user.username.toLowerCase() === normalized
+    );
     if (isTaken) {
         const suggestions = [
             `${username}${Math.floor(Math.random() * 100)}`,
-            `${username}_${Math.floor(Math.random() * 10)}`
+            `${username}_${Math.floor(Math.random() * 10)}`,
         ];
         return res.json({ available: false, suggestions });
     }
@@ -113,7 +128,10 @@ export function checkUsernameAvailability(req: BaseAuthedRequest<{ username: str
     return res.json({ available: true });
 }
 
-export function validateEmail(req: BaseAuthedRequest<Record<string, string>, EmailValidationPayload>, res: Response) {
+export function validateEmail(
+    req: BaseAuthedRequest<Record<string, string>, EmailValidationPayload>,
+    res: Response,
+) {
     const validation = validateRequest(req, { body: emailValidationRequestSchema });
     if (!validation.success) {
         return sendError(res, 400, validation.error.summary);
@@ -122,13 +140,20 @@ export function validateEmail(req: BaseAuthedRequest<Record<string, string>, Ema
     const normalizedEmail = email.trim();
 
     if (!isEmailFormatValid(normalizedEmail)) {
-        return res.json({ valid: false, normalized_email: normalizedEmail, reason: 'invalid_format' });
+        return res.json({
+            valid: false,
+            normalized_email: normalizedEmail,
+            reason: 'invalid_format',
+        });
     }
 
     return res.json({ valid: true, normalized_email: normalizedEmail });
 }
 
-export function registerUser(req: BaseAuthedRequest<Record<string, string>, RegisterUserPayload>, res: Response) {
+export function registerUser(
+    req: BaseAuthedRequest<Record<string, string>, RegisterUserPayload>,
+    res: Response,
+) {
     const clientIp = getClientIp(req);
     const rateStatus = registrationRateLimiter.attempt(clientIp);
     res.setHeader('X-RateLimit-Limit', String(rateStatus.limit));
@@ -154,7 +179,11 @@ export function registerUser(req: BaseAuthedRequest<Record<string, string>, Regi
         return sendError(res, 400, 'Username not allowed');
     }
 
-    if (usersData.users.some((user) => typeof user.username === 'string' && user.username.toLowerCase() === normalizedUsername)) {
+    if (
+        usersData.users.some((user) =>
+            typeof user.username === 'string' && user.username.toLowerCase() === normalizedUsername
+        )
+    ) {
         return sendError(res, 400, 'Username taken');
     }
 
@@ -165,7 +194,7 @@ export function registerUser(req: BaseAuthedRequest<Record<string, string>, Regi
         display_name: trimmedUsername,
         avatar: null,
         class: 'adventurer',
-        bio: ''
+        bio: '',
     };
 
     const profile: UserRecord['profile'] = { ...defaultProfile };
@@ -198,7 +227,7 @@ export function registerUser(req: BaseAuthedRequest<Record<string, string>, Regi
         created_at: now,
         updated_at: now,
         profile,
-        rpg: createInitialRpgState()
+        rpg: createInitialRpgState(),
     };
 
     usersData.users.push(user);
@@ -215,7 +244,10 @@ export function registerUser(req: BaseAuthedRequest<Record<string, string>, Regi
     }
 }
 
-export function loginUser(req: BaseAuthedRequest<Record<string, string>, LoginUserPayload>, res: Response) {
+export function loginUser(
+    req: BaseAuthedRequest<Record<string, string>, LoginUserPayload>,
+    res: Response,
+) {
     const validation = validateRequest(req, { body: loginUserSchema });
     if (!validation.success) {
         return sendError(res, 400, validation.error.summary);
@@ -228,7 +260,9 @@ export function loginUser(req: BaseAuthedRequest<Record<string, string>, LoginUs
 
     const usersData = readUsers();
     const user = usersData.users.find(
-        (record) => typeof record.username === 'string' && record.username.toLowerCase() === normalizedUsername
+        (record) =>
+            typeof record.username === 'string' &&
+            record.username.toLowerCase() === normalizedUsername,
     );
     if (!user) return sendError(res, 401, 'Invalid credentials');
 
@@ -249,7 +283,7 @@ const controller = {
     checkUsernameAvailability,
     validateEmail,
     registerUser,
-    loginUser
+    loginUser,
 };
 
 export default controller;

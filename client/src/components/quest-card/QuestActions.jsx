@@ -10,7 +10,7 @@ export const QuestActions = ({
     onComplete,
     onUndo,
     ctaTokens,
-    soundFx
+    soundFx,
 }) => {
     const ctaStyle = React.useMemo(() => {
         if (!ctaTokens) return undefined;
@@ -31,32 +31,32 @@ export const QuestActions = ({
 
     return (
         <div
-            className="quest-actions"
+            className='quest-actions'
             style={ctaStyle}
             data-sound-enabled={soundFx?.enabled ? 'true' : undefined}
         >
             {questSelected && (
                 <>
-                    <button className="btn-ghost btn-small" onClick={handle(onEdit)}>
+                    <button className='btn-ghost btn-small' onClick={handle(onEdit)}>
                         Edit
                     </button>
-                    <button className="btn-danger btn-small" onClick={handle(onDelete)}>
+                    <button className='btn-danger btn-small' onClick={handle(onDelete)}>
                         Delete
                     </button>
                 </>
             )}
             {questStatus !== 'in_progress' && (
-                <button className="btn-start btn-small" onClick={handle(onStart)}>
+                <button className='btn-start btn-small' onClick={handle(onStart)}>
                     Start
                 </button>
             )}
             {questStatus !== 'done' && (
-                <button className="btn-complete btn-small" onClick={handle(onComplete)}>
+                <button className='btn-complete btn-small' onClick={handle(onComplete)}>
                     Complete
                 </button>
             )}
             {questStatus === 'done' && (
-                <button className="btn-ghost btn-small" onClick={handle(onUndo)}>
+                <button className='btn-ghost btn-small' onClick={handle(onUndo)}>
                     Undo
                 </button>
             )}
@@ -78,18 +78,18 @@ QuestActions.propTypes = {
         hoverTranslate: PropTypes.string,
         pressShadow: PropTypes.string,
         pressTranslate: PropTypes.string,
-        focusRing: PropTypes.string
+        focusRing: PropTypes.string,
     }),
     soundFx: PropTypes.shape({
         enabled: PropTypes.bool,
-        volume: PropTypes.number
-    })
+        volume: PropTypes.number,
+    }),
 };
 
 QuestActions.defaultProps = {
     questSelected: false,
     ctaTokens: null,
-    soundFx: null
+    soundFx: null,
 };
 
 export default QuestActions;

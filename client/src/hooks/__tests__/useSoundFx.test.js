@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useSoundFx } from '../useSoundFx.js';
 
 describe('useSoundFx', () => {
@@ -13,7 +13,7 @@ describe('useSoundFx', () => {
         // Mock AudioContext
         mockGainNode = {
             gain: { value: 0 },
-            connect: jest.fn().mockReturnThis()
+            connect: jest.fn().mockReturnThis(),
         };
 
         mockOscillator = {
@@ -21,7 +21,7 @@ describe('useSoundFx', () => {
             frequency: { value: 440 },
             connect: jest.fn().mockReturnValue(mockGainNode),
             start: jest.fn(),
-            stop: jest.fn()
+            stop: jest.fn(),
         };
 
         mockAudioContext = {
@@ -30,7 +30,7 @@ describe('useSoundFx', () => {
             destination: {},
             currentTime: 0,
             resume: jest.fn().mockResolvedValue(undefined),
-            close: jest.fn().mockResolvedValue(undefined)
+            close: jest.fn().mockResolvedValue(undefined),
         };
 
         // Mock global AudioContext to prevent real instances from being created
@@ -40,7 +40,7 @@ describe('useSoundFx', () => {
 
         // Mock HTMLAudioElement prototype to prevent real audio elements
         jest.spyOn(window.HTMLAudioElement.prototype, 'play').mockResolvedValue(undefined);
-        jest.spyOn(window.HTMLAudioElement.prototype, 'load').mockImplementation(() => { });
+        jest.spyOn(window.HTMLAudioElement.prototype, 'load').mockImplementation(() => {});
 
         // Store the original createElement before mocking
         const originalCreateElement = document.createElement.bind(document);
@@ -59,9 +59,9 @@ describe('useSoundFx', () => {
                             appendChild: jest.fn(),
                             load: jest.fn(),
                             play: jest.fn().mockResolvedValue(undefined),
-                            cloneNode: jest.fn()
+                            cloneNode: jest.fn(),
                         };
-                    })
+                    }),
                 };
                 return audioElement;
             }
@@ -85,58 +85,70 @@ describe('useSoundFx', () => {
 
     it('should initialize with disabled state when profile is disabled', () => {
         const soundFxProfile = { enabled: false };
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(result.current.enabled).toBe(false);
     });
 
     it('should initialize with disabled state when volume is 0', () => {
         const soundFxProfile = { enabled: true, events: {} };
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 0
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 0,
+            })
+        );
 
         expect(result.current.enabled).toBe(false);
     });
 
     it('should initialize with disabled state when prefersReducedMotion is true', () => {
         const soundFxProfile = { enabled: true, events: {} };
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100,
-            prefersReducedMotion: true
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+                prefersReducedMotion: true,
+            })
+        );
 
         expect(result.current.enabled).toBe(false);
     });
 
     it('should clamp volume to 0-100 range', () => {
         const soundFxProfile = { enabled: true, events: {} };
-        const { result: resultHigh } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 150
-        }));
+        const { result: resultHigh } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 150,
+            })
+        );
 
         expect(resultHigh.current.volumePercent).toBe(100);
 
-        const { result: resultLow } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: -50
-        }));
+        const { result: resultLow } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: -50,
+            })
+        );
 
         expect(resultLow.current.volumePercent).toBe(0);
     });
 
     it('should handle NaN volume', () => {
         const soundFxProfile = { enabled: true, events: {} };
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: NaN
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: NaN,
+            })
+        );
 
         expect(result.current.volumePercent).toBe(0);
     });
@@ -150,16 +162,18 @@ describe('useSoundFx', () => {
                         frequency: 880,
                         duration: 0.5,
                         type: 'square',
-                        volumePercent: 80
-                    }
-                }
-            }
+                        volumePercent: 80,
+                    },
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(result.current.enabled).toBe(true);
 
@@ -179,16 +193,18 @@ describe('useSoundFx', () => {
                 clickSound: {
                     sources: [
                         { src: '/sounds/click.mp3', type: 'audio/mpeg' },
-                        { src: '/sounds/click.ogg', type: 'audio/ogg' }
-                    ]
-                }
-            }
+                        { src: '/sounds/click.ogg', type: 'audio/ogg' },
+                    ],
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(result.current.enabled).toBe(true);
         expect(document.createElement).toHaveBeenCalledWith('audio');
@@ -198,14 +214,16 @@ describe('useSoundFx', () => {
         const soundFxProfile = {
             enabled: true,
             events: {
-                invalidSound: null
-            }
+                invalidSound: null,
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(result.current.enabled).toBe(false);
     });
@@ -215,15 +233,17 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 beep: {
-                    tone: { frequency: 440 }
-                }
-            }
+                    tone: { frequency: 440 },
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         act(() => {
             result.current.play('beep');
@@ -237,15 +257,17 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 beep: {
-                    tone: { frequency: 440 }
-                }
-            }
+                    tone: { frequency: 440 },
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 0
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 0,
+            })
+        );
 
         act(() => {
             result.current.play('beep');
@@ -259,15 +281,17 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 beep: {
-                    tone: { frequency: 440 }
-                }
-            }
+                    tone: { frequency: 440 },
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         act(() => {
             result.current.play(null);
@@ -287,15 +311,17 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 beep: {
-                    tone: { frequency: 440 }
-                }
-            }
+                    tone: { frequency: 440 },
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         act(() => {
             result.current.play('nonexistent');
@@ -308,16 +334,17 @@ describe('useSoundFx', () => {
         const soundFxProfile = {
             enabled: true,
             events: {
-                beep: { tone: { frequency: 440 } }
-            }
+                beep: { tone: { frequency: 440 } },
+            },
         };
 
         const { result, rerender } = renderHook(
-            ({ volumePercent }) => useSoundFx({
-                soundFxProfile,
-                volumePercent
-            }),
-            { initialProps: { volumePercent: 100 } }
+            ({ volumePercent }) =>
+                useSoundFx({
+                    soundFxProfile,
+                    volumePercent,
+                }),
+            { initialProps: { volumePercent: 100 } },
         );
 
         expect(result.current.enabled).toBe(true);
@@ -332,15 +359,17 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 defaultTone: {
-                    tone: {}
-                }
-            }
+                    tone: {},
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         act(() => {
             result.current.play('defaultTone');
@@ -356,15 +385,17 @@ describe('useSoundFx', () => {
             events: {
                 quietSound: {
                     tone: { frequency: 440 },
-                    volumePercent: 50
-                }
-            }
+                    volumePercent: 50,
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         act(() => {
             result.current.play('quietSound');
@@ -378,14 +409,16 @@ describe('useSoundFx', () => {
         const soundFxProfile = {
             enabled: true,
             events: {
-                beep: { tone: { frequency: 440 } }
-            }
+                beep: { tone: { frequency: 440 } },
+            },
         };
 
-        const { result, unmount } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result, unmount } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         // Actually play a sound to create the AudioContext
         act(() => {
@@ -403,14 +436,16 @@ describe('useSoundFx', () => {
         const soundFxProfile = {
             enabled: true,
             events: {
-                beep: { tone: { frequency: 440 } }
-            }
+                beep: { tone: { frequency: 440 } },
+            },
         };
 
-        const { unmount } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { unmount } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(() => unmount()).not.toThrow();
     });
@@ -419,13 +454,15 @@ describe('useSoundFx', () => {
         const soundFxProfile = {
             enabled: true,
             events: {},
-            requirements: { webAudio: true }
+            requirements: { webAudio: true },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(result.current.requirements).toEqual({ webAudio: true });
     });
@@ -433,13 +470,15 @@ describe('useSoundFx', () => {
     it('should return null requirements when not provided', () => {
         const soundFxProfile = {
             enabled: true,
-            events: {}
+            events: {},
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(result.current.requirements).toBeNull();
     });
@@ -449,15 +488,17 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 noSources: {
-                    sources: []
-                }
-            }
+                    sources: [],
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(result.current.enabled).toBe(false);
     });
@@ -467,15 +508,17 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 invalidSources: {
-                    sources: [null, undefined, { src: null }]
-                }
-            }
+                    sources: [null, undefined, { src: null }],
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         // Should still create player but sources won't be added
         expect(document.createElement).toHaveBeenCalledWith('audio');
@@ -490,35 +533,41 @@ describe('useSoundFx', () => {
             enabled: true,
             events: {
                 sound: {
-                    sources: [{ src: '/test.mp3' }]
-                }
-            }
+                    sources: [{ src: '/test.mp3' }],
+                },
+            },
         };
 
         expect(() => {
-            renderHook(() => useSoundFx({
-                soundFxProfile,
-                volumePercent: 100
-            }));
+            renderHook(() =>
+                useSoundFx({
+                    soundFxProfile,
+                    volumePercent: 100,
+                })
+            );
         }).not.toThrow();
     });
 
     it('should handle audio play error gracefully', () => {
-        jest.spyOn(window.HTMLAudioElement.prototype, 'play').mockRejectedValueOnce(new Error('Play failed'));
+        jest.spyOn(window.HTMLAudioElement.prototype, 'play').mockRejectedValueOnce(
+            new Error('Play failed'),
+        );
 
         const soundFxProfile = {
             enabled: true,
             events: {
                 sound: {
-                    sources: [{ src: '/test.mp3' }]
-                }
-            }
+                    sources: [{ src: '/test.mp3' }],
+                },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(() => {
             act(() => {
@@ -533,14 +582,16 @@ describe('useSoundFx', () => {
         const soundFxProfile = {
             enabled: true,
             events: {
-                beep: { tone: { frequency: 440 } }
-            }
+                beep: { tone: { frequency: 440 } },
+            },
         };
 
-        const { result } = renderHook(() => useSoundFx({
-            soundFxProfile,
-            volumePercent: 100
-        }));
+        const { result } = renderHook(() =>
+            useSoundFx({
+                soundFxProfile,
+                volumePercent: 100,
+            })
+        );
 
         expect(() => {
             act(() => {

@@ -5,36 +5,36 @@ import { useQuestBoardContext } from '../../features/quest-board/context/QuestBo
 
 // Mock the context hook
 jest.mock('../../features/quest-board/context/QuestBoardContext.jsx', () => ({
-    useQuestBoardContext: jest.fn()
+    useQuestBoardContext: jest.fn(),
 }));
 
 // Mock child components to simplify testing
 jest.mock('../quest-card/QuestCardShell.jsx', () => ({
     QuestCardShell: ({ children, questClassName }) => (
-        <div data-testid="quest-card-shell" className={questClassName}>
+        <div data-testid='quest-card-shell' className={questClassName}>
             {children}
         </div>
-    )
+    ),
 }));
 
 jest.mock('../quest-card/QuestHeader.jsx', () => ({
-    QuestHeader: () => <div data-testid="quest-header" />
+    QuestHeader: () => <div data-testid='quest-header' />,
 }));
 
 jest.mock('../quest-card/QuestProgress.jsx', () => ({
-    QuestProgress: () => <div data-testid="quest-progress" />
+    QuestProgress: () => <div data-testid='quest-progress' />,
 }));
 
 jest.mock('../quest-card/QuestActions.jsx', () => ({
-    QuestActions: () => <div data-testid="quest-actions" />
+    QuestActions: () => <div data-testid='quest-actions' />,
 }));
 
 jest.mock('../quest-card/SideQuestList.jsx', () => ({
-    SideQuestList: () => <div data-testid="side-quest-list" />
+    SideQuestList: () => <div data-testid='side-quest-list' />,
 }));
 
 jest.mock('../ActionButton.jsx', () => ({
-    ActionButton: () => <div data-testid="action-button" />
+    ActionButton: () => <div data-testid='action-button' />,
 }));
 
 describe('QuestCard', () => {
@@ -80,7 +80,7 @@ describe('QuestCard', () => {
         id: 1,
         description: 'Test Quest',
         priority: 'high',
-        task_level: 1
+        task_level: 1,
     };
 
     it('renders without visual refresh class by default', () => {

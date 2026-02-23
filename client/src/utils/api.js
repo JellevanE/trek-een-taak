@@ -29,7 +29,6 @@ export async function handleApiResponse(res, onUnauthorized = null) {
 
     error.status = res.status;
     throw error;
-
 }
 
 /**
@@ -52,6 +51,6 @@ export async function apiFetch(url, options = {}, onUnauthorized = null) {
 export function getAuthHeaders(token) {
     return {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
     };
 }

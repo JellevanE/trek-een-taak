@@ -17,7 +17,7 @@ export const AnimatedProgressBar = ({
     className = 'quest-progress-bar',
     style = {},
     ariaProps = {},
-    children = null
+    children = null,
 }) => (
     <div
         className={className}
@@ -27,7 +27,7 @@ export const AnimatedProgressBar = ({
             borderRadius: '999px',
             overflow: 'hidden',
             position: 'relative',
-            ...style
+            ...style,
         }}
         {...ariaProps}
     >
@@ -35,7 +35,7 @@ export const AnimatedProgressBar = ({
             layout
             style={{
                 height: '100%',
-                borderRadius: '999px'
+                borderRadius: '999px',
             }}
             animate={{ width: `${percent}%`, backgroundColor: color }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
@@ -65,8 +65,9 @@ export const AnimatedToast = ({ message, type = 'info', onDismiss }) => {
                 borderRadius: '12px',
                 marginBottom: '12px',
                 border: `1px solid ${typeColors[type] ?? typeColors.info}`,
-                boxShadow: `0 10px 30px rgba(0,0,0,0.35), 0 0 25px ${(typeColors[type] ?? typeColors.info)}33`,
-                cursor: 'pointer'
+                boxShadow: `0 10px 30px rgba(0,0,0,0.35), 0 0 25px ${(typeColors[type] ??
+                    typeColors.info)}33`,
+                cursor: 'pointer',
             }}
             onClick={onDismiss}
         >

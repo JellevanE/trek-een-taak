@@ -5,14 +5,14 @@ import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <React.StrictMode>
+        <App />
+    </React.StrictMode>,
 );
 
 // Load web vitals only in development to reduce production bundle size
 if (process.env.NODE_ENV === 'development') {
-  import('./reportWebVitals').then(({ default: reportWebVitals }) => {
-    reportWebVitals();
-  });
+    import('./reportWebVitals').then(({ default: reportWebVitals }) => {
+        reportWebVitals();
+    });
 }

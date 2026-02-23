@@ -6,10 +6,10 @@
 
 ## Changed files
 
-| File | Reason |
-|------|--------|
-| `server/src/controllers/debugCampaignController.ts` | New controller with three debug endpoints (see below) |
-| `server/src/routes/debug.ts` | Wired the three new POST routes into the existing debug router |
+| File                                                | Reason                                                         |
+| --------------------------------------------------- | -------------------------------------------------------------- |
+| `server/src/controllers/debugCampaignController.ts` | New controller with three debug endpoints (see below)          |
+| `server/src/routes/debug.ts`                        | Wired the three new POST routes into the existing debug router |
 
 ## New endpoints
 

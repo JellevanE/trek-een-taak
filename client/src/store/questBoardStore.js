@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { getQuestSideQuests, idsMatch } from '../hooks/questHelpers.js';
 
 // Conditionally import devtools only in development
@@ -10,7 +10,7 @@ const devtools = process.env.NODE_ENV === 'development'
 const memoryStorage = {
     getItem: () => null,
     setItem: () => {},
-    removeItem: () => {}
+    removeItem: () => {},
 };
 
 const safeStorage = () => {
@@ -19,7 +19,10 @@ const safeStorage = () => {
             return window.localStorage;
         }
     } catch (error) {
-        console.warn('QuestBoardStore localStorage unavailable, falling back to memory storage.', error);
+        console.warn(
+            'QuestBoardStore localStorage unavailable, falling back to memory storage.',
+            error,
+        );
     }
     return memoryStorage;
 };
@@ -28,11 +31,12 @@ const resolveNextValue = (updater, current) => (
     typeof updater === 'function' ? updater(current) : updater
 );
 
-const createSetter = (set, key, action) => (updater) => set(
-    (state) => ({ [key]: resolveNextValue(updater, state[key]) }),
-    false,
-    `questBoard/${action}`
-);
+const createSetter = (set, key, action) => (updater) =>
+    set(
+        (state) => ({ [key]: resolveNextValue(updater, state[key]) }),
+        false,
+        `questBoard/${action}`,
+    );
 
 const baseInitialState = () => ({
     quests: [],
@@ -54,19 +58,19 @@ const baseInitialState = () => ({
     glowQuests: {},
     celebratingQuests: {},
     spawnQuests: {},
-    undoQueue: []
+    undoQueue: [],
 });
 
 export const getQuestBoardInitialState = () => ({
-    ...baseInitialState()
+    ...baseInitialState(),
 });
 
 const mergePersistedState = (persistedState, currentState) => ({
     ...currentState,
     collapsedMap: {
         ...currentState.collapsedMap,
-        ...(persistedState?.collapsedMap || {})
-    }
+        ...(persistedState?.collapsedMap || {}),
+    },
 });
 
 const createQuestBoardStore = (set, get) => {
@@ -80,9 +84,17 @@ const createQuestBoardStore = (set, get) => {
     const setSelectedSideQuest = createSetter(set, 'selectedSideQuest', 'setSelectedSideQuest');
     const setEditingQuest = createSetter(set, 'editingQuest', 'setEditingQuest');
     const setEditingSideQuest = createSetter(set, 'editingSideQuest', 'setEditingSideQuest');
-    const setSideQuestDescriptionMap = createSetter(set, 'sideQuestDescriptionMap', 'setSideQuestDescriptionMap');
+    const setSideQuestDescriptionMap = createSetter(
+        set,
+        'sideQuestDescriptionMap',
+        'setSideQuestDescriptionMap',
+    );
     const setAddingSideQuestTo = createSetter(set, 'addingSideQuestTo', 'setAddingSideQuestTo');
-    const setLoadingSideQuestAdds = createSetter(set, 'loadingSideQuestAdds', 'setLoadingSideQuestAdds');
+    const setLoadingSideQuestAdds = createSetter(
+        set,
+        'loadingSideQuestAdds',
+        'setLoadingSideQuestAdds',
+    );
     const setCollapsedMap = createSetter(set, 'collapsedMap', 'setCollapsedMap');
     const setPulsingQuests = createSetter(set, 'pulsingQuests', 'setPulsingQuests');
     const setPulsingSideQuests = createSetter(set, 'pulsingSideQuests', 'setPulsingSideQuests');
@@ -114,11 +126,15 @@ const createQuestBoardStore = (set, get) => {
         setSpawnQuests,
         setUndoQueue,
         resetSelection: () => {
-            set({
-                selectedQuestId: null,
-                selectedSideQuest: null,
-                editingSideQuest: null
-            }, false, 'questBoard/resetSelection');
+            set(
+                {
+                    selectedQuestId: null,
+                    selectedSideQuest: null,
+                    editingSideQuest: null,
+                },
+                false,
+                'questBoard/resetSelection',
+            );
         },
         resetEditingQuest: () => {
             set({ editingQuest: null }, false, 'questBoard/resetEditingQuest');
@@ -128,34 +144,47 @@ const createQuestBoardStore = (set, get) => {
                 set({ sideQuestDescriptionMap: {} }, false, 'questBoard/resetSideQuestDraftAll');
                 return;
             }
-            set((state) => {
-                const next = { ...state.sideQuestDescriptionMap };
-                delete next[questId];
-                return { sideQuestDescriptionMap: next };
-            }, false, 'questBoard/resetSideQuestDraft');
+            set(
+                (state) => {
+                    const next = { ...state.sideQuestDescriptionMap };
+                    delete next[questId];
+                    return { sideQuestDescriptionMap: next };
+                },
+                false,
+                'questBoard/resetSideQuestDraft',
+            );
         },
         collapseQuest: (questId, collapsed = true) => {
             if (questId === null || questId === undefined) return;
-            set((state) => ({
-                collapsedMap: {
-                    ...state.collapsedMap,
-                    [questId]: collapsed
-                }
-            }), false, 'questBoard/collapseQuest');
+            set(
+                (state) => ({
+                    collapsedMap: {
+                        ...state.collapsedMap,
+                        [questId]: collapsed,
+                    },
+                }),
+                false,
+                'questBoard/collapseQuest',
+            );
         },
-        getQuestById: (questId) => get().quests.find((quest) => idsMatch(quest?.id, questId)) || null,
+        getQuestById: (questId) =>
+            get().quests.find((quest) => idsMatch(quest?.id, questId)) || null,
         getSideQuestSubset: (questId) => {
             const quest = get().quests.find((q) => idsMatch(q?.id, questId));
             return quest ? getQuestSideQuests(quest) : [];
         },
         resetTransientState: () => {
-            set({
-                editingQuest: null,
-                editingSideQuest: null,
-                addingSideQuestTo: null,
-                selectedSideQuest: null
-            }, false, 'questBoard/resetTransientState');
-        }
+            set(
+                {
+                    editingQuest: null,
+                    editingSideQuest: null,
+                    addingSideQuestTo: null,
+                    selectedSideQuest: null,
+                },
+                false,
+                'questBoard/resetTransientState',
+            );
+        },
     };
 };
 
@@ -168,18 +197,19 @@ export const useQuestBoardStore = create(
                 version: 1,
                 storage: createJSONStorage(safeStorage),
                 partialize: (state) => ({
-                    collapsedMap: state.collapsedMap
+                    collapsedMap: state.collapsedMap,
                 }),
-                merge: mergePersistedState
-            }
+                merge: mergePersistedState,
+            },
         ),
-        { name: 'QuestBoardStore' }
-    )
+        { name: 'QuestBoardStore' },
+    ),
 );
 
 export const questBoardSelectors = {
     quests: (state) => state.quests,
-    questById: (questId) => (state) => state.quests.find((quest) => idsMatch(quest?.id, questId)) || null,
+    questById: (questId) => (state) =>
+        state.quests.find((quest) => idsMatch(quest?.id, questId)) || null,
     sideQuestsFor: (questId) => (state) => {
         const quest = state.quests.find((item) => idsMatch(item?.id, questId));
         return quest ? getQuestSideQuests(quest) : [];
@@ -190,16 +220,16 @@ export const questBoardSelectors = {
         pulsingSideQuests: state.pulsingSideQuests,
         glowQuests: state.glowQuests,
         celebratingQuests: state.celebratingQuests,
-        spawnQuests: state.spawnQuests
+        spawnQuests: state.spawnQuests,
     }),
-    undoQueue: (state) => state.undoQueue
+    undoQueue: (state) => state.undoQueue,
 };
 
 export const resetQuestBoardStore = async ({ clearPersisted = false } = {}) => {
     useQuestBoardStore.setState((state) => ({
         ...state,
         ...getQuestBoardInitialState(),
-        collapsedMap: clearPersisted ? {} : state.collapsedMap
+        collapsedMap: clearPersisted ? {} : state.collapsedMap,
     }));
     if (clearPersisted && useQuestBoardStore.persist?.clearStorage) {
         await useQuestBoardStore.persist.clearStorage();

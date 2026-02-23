@@ -8,7 +8,7 @@ const mockMatchMedia = (matches = false) => {
     global.matchMedia = jest.fn().mockImplementation(() => ({
         matches,
         addEventListener: jest.fn(),
-        removeEventListener: jest.fn()
+        removeEventListener: jest.fn(),
     }));
 };
 

@@ -5,7 +5,7 @@ export const createQuestFixture = (overrides = {}) => ({
     task_level: 3,
     campaign_id: null,
     due_date: '2024-12-31',
-    ...overrides
+    ...overrides,
 });
 
 export const createCampaignFixture = (overrides = {}) => ({
@@ -15,14 +15,14 @@ export const createCampaignFixture = (overrides = {}) => ({
     image_url: null,
     stats: {
         quests_completed: 3,
-        quests_total: 8
+        quests_total: 8,
     },
-    ...overrides
+    ...overrides,
 });
 
 export const createSideQuestFixture = (overrides = {}) => ({
     id: overrides.id ?? 101,
     description: 'Refine card glow states',
     status: 'todo',
-    ...overrides
+    ...overrides,
 });

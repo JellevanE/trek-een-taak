@@ -14,8 +14,8 @@ export async function getStoryline(req: BaseAuthedRequest, res: Response) {
 
     const storyline = StorylineService.getStoryline(campaignId);
     if (!storyline) {
-        // If no storyline exists, we could return 404. 
-        // But per plan, automatic creation happens on campaign create. 
+        // If no storyline exists, we could return 404.
+        // But per plan, automatic creation happens on campaign create.
         // If somehow missing, maybe 404 is correct.
         return sendError(res, 404, 'Storyline not found');
     }

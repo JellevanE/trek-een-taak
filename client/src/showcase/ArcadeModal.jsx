@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import './showcase.css';
 
 /**
@@ -12,7 +12,7 @@ export const ArcadeModal = ({
     title = 'NOTIFICATION',
     children,
     showCorners = true,
-    borderColor = 'var(--neon-cyan, #00ffff)'
+    borderColor = 'var(--neon-cyan, #00ffff)',
 }) => {
     // Close on escape key
     React.useEffect(() => {
@@ -21,7 +21,7 @@ export const ArcadeModal = ({
                 onClose();
             }
         };
-        
+
         if (isOpen) {
             document.addEventListener('keydown', handleEscape);
             return () => document.removeEventListener('keydown', handleEscape);
@@ -32,7 +32,7 @@ export const ArcadeModal = ({
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    className="arcade-modal-backdrop"
+                    className='arcade-modal-backdrop'
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -48,18 +48,18 @@ export const ArcadeModal = ({
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 1000,
-                        backdropFilter: 'blur(4px)'
+                        backdropFilter: 'blur(4px)',
                     }}
                 >
                     <motion.div
-                        className="arcade-modal"
+                        className='arcade-modal'
                         initial={{ scale: 0, rotate: -10 }}
                         animate={{ scale: 1, rotate: 0 }}
                         exit={{ scale: 0, rotate: 10 }}
                         transition={{
                             type: 'spring',
                             stiffness: 300,
-                            damping: 20
+                            damping: 20,
                         }}
                         onClick={(e) => e.stopPropagation()}
                         style={{
@@ -73,23 +73,43 @@ export const ArcadeModal = ({
                                 0 0 40px ${borderColor}50,
                                 inset 0 0 20px ${borderColor}20
                             `,
-                            padding: '30px'
+                            padding: '30px',
                         }}
                     >
                         {/* Corner decorations */}
                         {showCorners && (
                             <>
-                                <span className="arcade-corner" style={{ top: '10px', left: '10px' }}>+</span>
-                                <span className="arcade-corner" style={{ top: '10px', right: '10px' }}>+</span>
-                                <span className="arcade-corner" style={{ bottom: '10px', left: '10px' }}>+</span>
-                                <span className="arcade-corner" style={{ bottom: '10px', right: '10px' }}>+</span>
+                                <span
+                                    className='arcade-corner'
+                                    style={{ top: '10px', left: '10px' }}
+                                >
+                                    +
+                                </span>
+                                <span
+                                    className='arcade-corner'
+                                    style={{ top: '10px', right: '10px' }}
+                                >
+                                    +
+                                </span>
+                                <span
+                                    className='arcade-corner'
+                                    style={{ bottom: '10px', left: '10px' }}
+                                >
+                                    +
+                                </span>
+                                <span
+                                    className='arcade-corner'
+                                    style={{ bottom: '10px', right: '10px' }}
+                                >
+                                    +
+                                </span>
                             </>
                         )}
 
                         {/* Close button */}
                         {onClose && (
                             <motion.button
-                                type="button"
+                                type='button'
                                 onClick={onClose}
                                 whileHover={{ scale: 1.1, rotate: 90 }}
                                 whileTap={{ scale: 0.9 }}
@@ -108,7 +128,7 @@ export const ArcadeModal = ({
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     fontFamily: "'Press Start 2P', cursive",
-                                    boxShadow: `0 0 10px ${borderColor}50`
+                                    boxShadow: `0 0 10px ${borderColor}50`,
                                 }}
                             >
                                 ×
@@ -126,7 +146,7 @@ export const ArcadeModal = ({
                                 color: borderColor,
                                 textAlign: 'center',
                                 marginBottom: '20px',
-                                textShadow: `0 0 10px ${borderColor}`
+                                textShadow: `0 0 10px ${borderColor}`,
                             }}
                         >
                             [ {title} ]
@@ -141,7 +161,7 @@ export const ArcadeModal = ({
                                 color: 'white',
                                 fontFamily: 'VT323, monospace',
                                 fontSize: '20px',
-                                lineHeight: '1.6'
+                                lineHeight: '1.6',
                             }}
                         >
                             {children}
@@ -160,29 +180,35 @@ export const ArcadeModalShowcase = () => {
     const [modal3Open, setModal3Open] = React.useState(false);
 
     return (
-        <div style={{ 
-            padding: '40px', 
-            background: 'var(--bg-secondary, #1a1a2e)',
-            minHeight: '400px'
-        }}>
-            <h3 style={{ 
-                fontFamily: "'Press Start 2P', cursive",
-                color: 'var(--neon-cyan)',
-                fontSize: '14px',
-                marginBottom: '30px',
-                textAlign: 'center'
-            }}>
+        <div
+            style={{
+                padding: '40px',
+                background: 'var(--bg-secondary, #1a1a2e)',
+                minHeight: '400px',
+            }}
+        >
+            <h3
+                style={{
+                    fontFamily: "'Press Start 2P', cursive",
+                    color: 'var(--neon-cyan)',
+                    fontSize: '14px',
+                    marginBottom: '30px',
+                    textAlign: 'center',
+                }}
+            >
                 ARCADE MODALS
             </h3>
 
-            <div style={{ 
-                display: 'flex', 
-                gap: '20px', 
-                justifyContent: 'center',
-                flexWrap: 'wrap'
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '20px',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                }}
+            >
                 <button
-                    type="button"
+                    type='button'
                     onClick={() => setModal1Open(true)}
                     style={{
                         padding: '16px 24px',
@@ -192,14 +218,14 @@ export const ArcadeModalShowcase = () => {
                         fontFamily: "'Press Start 2P', cursive",
                         fontSize: '10px',
                         cursor: 'pointer',
-                        boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)'
+                        boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)',
                     }}
                 >
                     CYAN MODAL
                 </button>
 
                 <button
-                    type="button"
+                    type='button'
                     onClick={() => setModal2Open(true)}
                     style={{
                         padding: '16px 24px',
@@ -209,14 +235,14 @@ export const ArcadeModalShowcase = () => {
                         fontFamily: "'Press Start 2P', cursive",
                         fontSize: '10px',
                         cursor: 'pointer',
-                        boxShadow: '0 0 20px rgba(255, 0, 255, 0.5)'
+                        boxShadow: '0 0 20px rgba(255, 0, 255, 0.5)',
                     }}
                 >
                     PINK MODAL
                 </button>
 
                 <button
-                    type="button"
+                    type='button'
                     onClick={() => setModal3Open(true)}
                     style={{
                         padding: '16px 24px',
@@ -226,7 +252,7 @@ export const ArcadeModalShowcase = () => {
                         fontFamily: "'Press Start 2P', cursive",
                         fontSize: '10px',
                         cursor: 'pointer',
-                        boxShadow: '0 0 20px rgba(255, 255, 0, 0.5)'
+                        boxShadow: '0 0 20px rgba(255, 255, 0, 0.5)',
                     }}
                 >
                     YELLOW MODAL
@@ -237,21 +263,21 @@ export const ArcadeModalShowcase = () => {
             <ArcadeModal
                 isOpen={modal1Open}
                 onClose={() => setModal1Open(false)}
-                title="QUEST COMPLETED"
-                borderColor="var(--neon-cyan)"
+                title='QUEST COMPLETED'
+                borderColor='var(--neon-cyan)'
             >
                 <div style={{ textAlign: 'center' }}>
                     <p>🎮 Congratulations, brave warrior!</p>
                     <p style={{ marginTop: '15px' }}>
-                        You have successfully completed the quest
-                        and earned <strong style={{ color: 'var(--neon-yellow)' }}>+500 XP</strong>!
+                        You have successfully completed the quest and earned{' '}
+                        <strong style={{ color: 'var(--neon-yellow)' }}>+500 XP</strong>!
                     </p>
                     <motion.div
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ duration: 1, repeat: Infinity }}
-                        style={{ 
+                        style={{
                             marginTop: '20px',
-                            fontSize: '48px'
+                            fontSize: '48px',
                         }}
                     >
                         ⭐
@@ -262,22 +288,24 @@ export const ArcadeModalShowcase = () => {
             <ArcadeModal
                 isOpen={modal2Open}
                 onClose={() => setModal2Open(false)}
-                title="WARNING"
-                borderColor="var(--neon-pink)"
+                title='WARNING'
+                borderColor='var(--neon-pink)'
             >
                 <div style={{ textAlign: 'center' }}>
                     <p>⚠️ Are you sure you want to delete this quest?</p>
                     <p style={{ marginTop: '15px', color: 'var(--muted, #888)' }}>
                         This action cannot be undone!
                     </p>
-                    <div style={{ 
-                        marginTop: '25px',
-                        display: 'flex',
-                        gap: '15px',
-                        justifyContent: 'center'
-                    }}>
+                    <div
+                        style={{
+                            marginTop: '25px',
+                            display: 'flex',
+                            gap: '15px',
+                            justifyContent: 'center',
+                        }}
+                    >
                         <button
-                            type="button"
+                            type='button'
                             onClick={() => setModal2Open(false)}
                             style={{
                                 padding: '12px 20px',
@@ -286,13 +314,13 @@ export const ArcadeModalShowcase = () => {
                                 color: 'var(--bg-dark)',
                                 fontFamily: "'Press Start 2P', cursive",
                                 fontSize: '10px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
                             }}
                         >
                             CANCEL
                         </button>
                         <button
-                            type="button"
+                            type='button'
                             onClick={() => setModal2Open(false)}
                             style={{
                                 padding: '12px 20px',
@@ -301,7 +329,7 @@ export const ArcadeModalShowcase = () => {
                                 color: 'white',
                                 fontFamily: "'Press Start 2P', cursive",
                                 fontSize: '10px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
                             }}
                         >
                             DELETE
@@ -313,20 +341,20 @@ export const ArcadeModalShowcase = () => {
             <ArcadeModal
                 isOpen={modal3Open}
                 onClose={() => setModal3Open(false)}
-                title="LEVEL UP"
-                borderColor="var(--neon-yellow)"
+                title='LEVEL UP'
+                borderColor='var(--neon-yellow)'
                 showCorners={false}
             >
                 <div style={{ textAlign: 'center' }}>
                     <motion.div
                         animate={{
                             rotate: [0, 360],
-                            scale: [1, 1.2, 1]
+                            scale: [1, 1.2, 1],
                         }}
                         transition={{
                             duration: 2,
                             repeat: Infinity,
-                            ease: 'easeInOut'
+                            ease: 'easeInOut',
                         }}
                         style={{ fontSize: '64px', marginBottom: '20px' }}
                     >

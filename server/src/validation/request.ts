@@ -5,7 +5,7 @@ import {
     formatZodError,
     type ValidationErrorPayload,
     type ValidationIssue,
-    type ValidationResult
+    type ValidationResult,
 } from './helpers.js';
 
 export interface RequestSchemas<B = unknown, Q = unknown, P = unknown, H = unknown> {
@@ -22,7 +22,10 @@ export interface ValidatedRequestParts<B = unknown, Q = unknown, P = unknown, H 
     headers: H | undefined;
 }
 
-function collectIssues(existing: ValidationIssue[], payload: ValidationErrorPayload): ValidationIssue[] {
+function collectIssues(
+    existing: ValidationIssue[],
+    payload: ValidationErrorPayload,
+): ValidationIssue[] {
     existing.push(...payload.issues);
     return existing;
 }
@@ -31,7 +34,9 @@ function summarizeIssues(issues: ValidationIssue[]): string {
     if (issues.length === 0) return 'Validation passed';
     if (issues.length === 1) {
         const [singleIssue] = issues;
-        const target = singleIssue?.path && singleIssue.path.length > 0 ? singleIssue.path : 'request';
+        const target = singleIssue?.path && singleIssue.path.length > 0
+            ? singleIssue.path
+            : 'request';
         const message = singleIssue?.message ?? 'Validation failed';
         return `Invalid ${target}: ${message}`;
     }
@@ -42,17 +47,17 @@ export function validateRequest<
     B = unknown,
     Q = unknown,
     P = unknown,
-    H = unknown
+    H = unknown,
 >(
     req: Request,
-    schemas: RequestSchemas<B, Q, P, H>
+    schemas: RequestSchemas<B, Q, P, H>,
 ): ValidationResult<ValidatedRequestParts<B, Q, P, H>> {
     const issues: ValidationIssue[] = [];
     const parts: ValidatedRequestParts<B, Q, P, H> = {
         body: undefined,
         query: undefined,
         params: undefined,
-        headers: undefined
+        headers: undefined,
     };
 
     if (schemas.body) {
@@ -96,8 +101,8 @@ export function validateRequest<
             success: false,
             error: {
                 issues,
-                summary: summarizeIssues(issues)
-            }
+                summary: summarizeIssues(issues),
+            },
         };
     }
 

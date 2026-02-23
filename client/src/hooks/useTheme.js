@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     DEFAULT_THEME_ID,
     getNextThemeId,
     getThemeCssVariables,
     getThemeProfile,
-    resolveThemeId
+    resolveThemeId,
 } from '../theme';
 
 const SOUND_VOLUME_STORAGE_KEY = 'theme:soundVolume';
@@ -104,9 +104,7 @@ export const useTheme = (defaultTheme = DEFAULT_THEME_ID) => {
     const setTheme = useCallback((updater) => {
         setThemeState((prev) => {
             const previous = resolveThemeId(prev);
-            const nextValue = typeof updater === 'function'
-                ? updater(previous)
-                : updater;
+            const nextValue = typeof updater === 'function' ? updater(previous) : updater;
             return resolveThemeId(nextValue ?? previous);
         });
     }, []);
@@ -130,6 +128,6 @@ export const useTheme = (defaultTheme = DEFAULT_THEME_ID) => {
         setTheme,
         toggleTheme,
         soundVolume,
-        setSoundVolume
+        setSoundVolume,
     };
 };

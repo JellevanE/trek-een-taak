@@ -12,11 +12,11 @@ import {
     buildDefaultUser,
     buildTask,
     configureDataFiles,
+    type JsonRecord,
     resetCampaignStore,
     resetDataFileOverrides,
     resetTaskStore,
     resetUserStore,
-    type JsonRecord
 } from '../src/testing/fixtures';
 import { readTasks } from '../src/data/taskStore';
 import { readUsers } from '../src/data/userStore';
@@ -28,7 +28,7 @@ function buildLegacyRewardHistory(count: number): TaskRewardHistoryEntry[] {
     return Array.from({ length: count }, (_, index) => ({
         at: new Date(now - index * 60_000).toISOString(),
         amount: 5 + index,
-        reason: 'legacy_reward'
+        reason: 'legacy_reward',
     }));
 }
 
@@ -47,7 +47,7 @@ function buildLegacyXpEvents(count: number): UserRpgEvent[] {
         xp_into_level: 0,
         xp_for_level: 100,
         xp_to_next: 100,
-        leveled_up: false
+        leveled_up: false,
     }));
 }
 
@@ -72,7 +72,7 @@ describe('tasks controller lifecycle coverage', () => {
     beforeEach(() => {
         user = buildDefaultUser({
             id: 42,
-            username: 'coverage_knight'
+            username: 'coverage_knight',
         });
         user.rpg.xp = 0;
         user.rpg.xp_log = buildLegacyXpEvents(XP_CONFIG.xpLogLimit + 4);
@@ -90,16 +90,16 @@ describe('tasks controller lifecycle coverage', () => {
             status: 'in_progress',
             order: 0,
             task_level: 5,
-            priority: 'high'
+            priority: 'high',
         });
         firstTask.status_history = [
             { status: 'todo', at: firstTask.created_at, note: null },
-            { status: 'in_progress', at: firstTask.updated_at, note: 'Grinding' }
+            { status: 'in_progress', at: firstTask.updated_at, note: 'Grinding' },
         ];
         firstTask.rpg = {
             xp_awarded: false,
             last_reward_at: null,
-            history: buildLegacyRewardHistory(10)
+            history: buildLegacyRewardHistory(10),
         };
 
         const subtaskCreatedAt = new Date().toISOString();
@@ -109,7 +109,7 @@ describe('tasks controller lifecycle coverage', () => {
             status: 'todo',
             order: 1,
             task_level: 3,
-            priority: 'low'
+            priority: 'low',
         });
         secondTask.sub_tasks = [
             {
@@ -122,15 +122,15 @@ describe('tasks controller lifecycle coverage', () => {
                 completed: false,
                 rpg: { xp_awarded: false, last_reward_at: null },
                 priority: 'low',
-                weight: 0.25
-            }
+                weight: 0.25,
+            },
         ];
         secondTask.side_quests = [...secondTask.sub_tasks];
         secondTask.nextSubtaskId = 6;
 
         const tasksSnapshot: TaskStoreData = {
             tasks: [firstTask, secondTask],
-            nextId: 3
+            nextId: 3,
         };
         resetTaskStore(tasksFile, tasksSnapshot);
 
@@ -139,10 +139,10 @@ describe('tasks controller lifecycle coverage', () => {
                 buildCampaign({
                     id: 7,
                     owner_id: user.id,
-                    name: 'Coverage Crusade'
-                })
+                    name: 'Coverage Crusade',
+                }),
             ],
-            nextId: 8
+            nextId: 8,
         });
     });
 
@@ -158,7 +158,7 @@ describe('tasks controller lifecycle coverage', () => {
     test('manages tasks end-to-end with rewards, ordering, history, updates, and deletions', async () => {
         const statusRes = await client.patch('/api/tasks/1/status', {
             body: { status: 'done', note: 'Quest complete' },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(statusRes.status).toBe(200);
         const statusBody = statusRes.body as JsonRecord;
@@ -183,7 +183,7 @@ describe('tasks controller lifecycle coverage', () => {
 
         const subtaskRes = await client.patch('/api/tasks/2/subtasks/5/status', {
             body: { status: 'done', note: null },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(subtaskRes.status).toBe(200);
         const subTaskBody = subtaskRes.body as JsonRecord;
@@ -197,14 +197,14 @@ describe('tasks controller lifecycle coverage', () => {
 
         const reorderRes = await client.put('/api/tasks/order', {
             body: { order: [2, 1] },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(reorderRes.status).toBe(200);
         const reorderBody = reorderRes.body as { tasks: TaskRecord[] };
         expect(reorderBody.tasks.map((task) => task.id)).toEqual([2, 1]);
 
         const historyRes = await client.get('/api/tasks/1/history', {
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(historyRes.status).toBe(200);
         const historyBody = historyRes.body as { history: Array<Record<string, unknown>> };
@@ -217,16 +217,16 @@ describe('tasks controller lifecycle coverage', () => {
                 priority: 'high',
                 due_date: null,
                 task_level: 7,
-                campaign_id: 7
+                campaign_id: 7,
             },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(updateRes.status).toBe(200);
         const updateBody = updateRes.body as JsonRecord;
         expect(updateBody).toMatchObject({
             description: 'Updated coverage quest',
             priority: 'high',
-            campaign_id: 7
+            campaign_id: 7,
         });
         expect(updateBody.task_level).toBe(7);
         expect(typeof updateBody.due_date).toBe('string');
@@ -236,9 +236,9 @@ describe('tasks controller lifecycle coverage', () => {
                 description: 'Reassembled map pieces',
                 status: 'in_progress',
                 weight: 1.5,
-                priority: 'medium'
+                priority: 'medium',
             },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(subtaskUpdateRes.status).toBe(200);
         const updatedTaskData = readTasks();
@@ -250,7 +250,7 @@ describe('tasks controller lifecycle coverage', () => {
         expect(updatedSubtask.priority).toBe('medium');
 
         const deleteSubRes = await client.delete('/api/tasks/2/subtasks/5', {
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(deleteSubRes.status).toBe(204);
         const afterSubDelete = readTasks();
@@ -258,7 +258,7 @@ describe('tasks controller lifecycle coverage', () => {
         expect(withoutSubtask.sub_tasks.length).toBe(0);
 
         const deleteTaskRes = await client.delete('/api/tasks/1', {
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(deleteTaskRes.status).toBe(204);
         const finalData = readTasks();
@@ -268,7 +268,7 @@ describe('tasks controller lifecycle coverage', () => {
     test('rejects invalid reorder payload and invalid task updates', async () => {
         const reorderRes = await client.put('/api/tasks/order', {
             body: { order: 'not-an-array' },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(reorderRes.status).toBe(400);
         const reorderBody = reorderRes.body as JsonRecord;
@@ -276,7 +276,7 @@ describe('tasks controller lifecycle coverage', () => {
 
         const invalidPriorityRes = await client.put('/api/tasks/2', {
             body: { priority: 'legendary' },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(invalidPriorityRes.status).toBe(400);
         const invalidPriorityBody = invalidPriorityRes.body as JsonRecord;

@@ -1,133 +1,151 @@
-:root{
-  --bg-dark: #081020;
-  --panel-dark: #0f1724;
-  --accent-cyan: #00f0ff;
-  --accent-pink: #ff2ec4;
-  --accent-purple: #9b5cff;
-  --muted: #9aa3b2;
-  --body-background: radial-gradient(ellipse at center, rgba(20,24,35,1) 0%, rgba(8,16,32,1) 60%);
-  --progress-track: rgba(255,255,255,0.03);
-  --quest-progress-gradient: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
-  --anim-pulse-scale-up: 1.02;
-  --anim-pulse-shadow-strong: rgba(0,0,0,0.18);
-  --anim-pulse-shadow-rest: rgba(0,0,0,0.08);
-  --anim-spawn-shadow-start: rgba(0,0,0,0);
-  --anim-spawn-shadow-mid: rgba(0,0,0,0.45);
-  --anim-spawn-shadow-end: rgba(0,0,0,0.6);
-  --anim-glow-phase-1: rgba(99,102,241,0.30);
-  --anim-glow-phase-2: rgba(155,92,255,0.28);
-  --anim-glow-phase-3: rgba(99,102,241,0.18);
-  --anim-burst-ring-start: rgba(0,240,255,0.12);
-  --anim-burst-ring-mid: rgba(255,255,255,0.22);
-  --anim-burst-ring-end: rgba(255,255,255,0);
-  --anim-burst-halo-border: rgba(255,255,255,0.14);
-  --anim-burst-halo-bg: rgba(0,0,0,0.68);
+:root {
+    --bg-dark: #081020;
+    --panel-dark: #0f1724;
+    --accent-cyan: #00f0ff;
+    --accent-pink: #ff2ec4;
+    --accent-purple: #9b5cff;
+    --muted: #9aa3b2;
+    --body-background: radial-gradient(
+        ellipse at center,
+        rgba(20, 24, 35, 1) 0%,
+        rgba(8, 16, 32, 1) 60%
+    );
+    --progress-track: rgba(255, 255, 255, 0.03);
+    --quest-progress-gradient: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
+    --anim-pulse-scale-up: 1.02;
+    --anim-pulse-shadow-strong: rgba(0, 0, 0, 0.18);
+    --anim-pulse-shadow-rest: rgba(0, 0, 0, 0.08);
+    --anim-spawn-shadow-start: rgba(0, 0, 0, 0);
+    --anim-spawn-shadow-mid: rgba(0, 0, 0, 0.45);
+    --anim-spawn-shadow-end: rgba(0, 0, 0, 0.6);
+    --anim-glow-phase-1: rgba(99, 102, 241, 0.30);
+    --anim-glow-phase-2: rgba(155, 92, 255, 0.28);
+    --anim-glow-phase-3: rgba(99, 102, 241, 0.18);
+    --anim-burst-ring-start: rgba(0, 240, 255, 0.12);
+    --anim-burst-ring-mid: rgba(255, 255, 255, 0.22);
+    --anim-burst-ring-end: rgba(255, 255, 255, 0);
+    --anim-burst-halo-border: rgba(255, 255, 255, 0.14);
+    --anim-burst-halo-bg: rgba(0, 0, 0, 0.68);
 
-  /* Neon arcade spacing scale */
-  --arcade-space-xxs: 4px;
-  --arcade-space-xs: 8px;
-  --arcade-space-sm: 12px;
-  --arcade-space-md: 16px;
-  --arcade-space-lg: 24px;
-  --arcade-space-xl: 32px;
+    /* Neon arcade spacing scale */
+    --arcade-space-xxs: 4px;
+    --arcade-space-xs: 8px;
+    --arcade-space-sm: 12px;
+    --arcade-space-md: 16px;
+    --arcade-space-lg: 24px;
+    --arcade-space-xl: 32px;
 
-  /* Quest board layout tokens */
-  --quest-card-radius: 16px;
-  --quest-card-padding-block: 20px;
-  --quest-card-padding-inline: 24px;
-  --quest-card-gap: var(--arcade-space-md);
-  --quest-card-body-gap: var(--arcade-space-md);
-  --quest-card-stack-gap: var(--arcade-space-lg);
-  --quest-board-gutter: clamp(16px, 2vw, 40px);
-  --quest-board-frame-max-width: min(980px, calc(100vw - (var(--quest-board-gutter) * 2)));
-  --quest-card-max-width: var(--quest-board-frame-max-width);
-  --quest-meta-gap: var(--arcade-space-sm);
-  --quest-actions-gap: var(--arcade-space-xs);
-  --side-quest-gap: var(--arcade-space-sm);
-  --side-quest-footer-margin: var(--arcade-space-sm);
-  --quest-card-handle-size: 32px;
-  --quest-card-handle-font-size: 18px;
-  --side-quest-handle-size: 24px;
-  --side-quest-handle-font-size: 12px;
-  --quest-card-shadow-resting: 0 8px 30px rgba(0,0,0,0.6), 0 0 18px rgba(155,92,255,0.04) inset;
-  --quest-card-shadow-active: 0 0 0 1px rgba(0,240,255,0.3), 0 18px 36px rgba(0,240,255,0.15);
-  --quest-card-shadow-transition: 0.22s ease;
-  --quest-card-focus-outline: rgba(0,240,255,0.3);
-  --cta-transition: transform 0.18s ease, box-shadow 0.18s ease;
-  --cta-hover-shadow: 0 12px 24px rgba(0,0,0,0.35);
-  --cta-hover-translate: -1px;
-  --cta-press-shadow: inset 0 2px 6px rgba(0,0,0,0.45);
-  --cta-press-translate: 1px;
-  --cta-focus-ring-color: rgba(155,92,255,0.12);
-  --side-quest-completed-bg: rgba(15, 60, 36, 0.65);
-  --side-quest-completed-border: rgba(34, 197, 94, 0.45);
-  --side-quest-completed-text: #d1ffe2;
-  --side-quest-completed-subtle: rgba(187, 247, 208, 0.85);
-  --side-quest-completed-handle: rgba(34, 197, 94, 0.65);
+    /* Quest board layout tokens */
+    --quest-card-radius: 16px;
+    --quest-card-padding-block: 20px;
+    --quest-card-padding-inline: 24px;
+    --quest-card-gap: var(--arcade-space-md);
+    --quest-card-body-gap: var(--arcade-space-md);
+    --quest-card-stack-gap: var(--arcade-space-lg);
+    --quest-board-gutter: clamp(16px, 2vw, 40px);
+    --quest-board-frame-max-width: min(980px, calc(100vw - var(--quest-board-gutter) * 2));
+    --quest-card-max-width: var(--quest-board-frame-max-width);
+    --quest-meta-gap: var(--arcade-space-sm);
+    --quest-actions-gap: var(--arcade-space-xs);
+    --side-quest-gap: var(--arcade-space-sm);
+    --side-quest-footer-margin: var(--arcade-space-sm);
+    --quest-card-handle-size: 32px;
+    --quest-card-handle-font-size: 18px;
+    --side-quest-handle-size: 24px;
+    --side-quest-handle-font-size: 12px;
+    --quest-card-shadow-resting:
+        0 8px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(155, 92, 255, 0.04) inset;
+    --quest-card-shadow-active:
+        0 0 0 1px rgba(0, 240, 255, 0.3), 0 18px 36px rgba(0, 240, 255, 0.15);
+    --quest-card-shadow-transition: 0.22s ease;
+    --quest-card-focus-outline: rgba(0, 240, 255, 0.3);
+    --cta-transition: transform 0.18s ease, box-shadow 0.18s ease;
+    --cta-hover-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+    --cta-hover-translate: -1px;
+    --cta-press-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+    --cta-press-translate: 1px;
+    --cta-focus-ring-color: rgba(155, 92, 255, 0.12);
+    --side-quest-completed-bg: rgba(15, 60, 36, 0.65);
+    --side-quest-completed-border: rgba(34, 197, 94, 0.45);
+    --side-quest-completed-text: #d1ffe2;
+    --side-quest-completed-subtle: rgba(187, 247, 208, 0.85);
+    --side-quest-completed-handle: rgba(34, 197, 94, 0.65);
 }
 
 /* light theme variables override */
-[data-theme="light"] :root, [data-theme="light"],
-[data-theme="classic"] :root, [data-theme="classic"] {
-  --bg-dark: #f6fafc;
-  --panel-dark: #ffffff;
-  --accent-cyan: #0ea5e9;
-  --accent-pink: #e879f9;
-  --accent-purple: #7c3aed;
-  --muted: #415161;
-  --body-background: radial-gradient(circle at top, rgba(246,250,252,1) 0%, rgba(226,230,238,1) 65%);
-  --progress-track: rgba(15,23,42,0.08);
-  --quest-progress-gradient: linear-gradient(90deg, #7c3aed, #f472b6);
-  --anim-pulse-shadow-strong: rgba(15,23,42,0.22);
-  --anim-pulse-shadow-rest: rgba(15,23,42,0.12);
-  --anim-burst-ring-start: rgba(14,165,233,0.25);
-  --anim-burst-ring-mid: rgba(15,23,42,0.45);
-  --anim-burst-halo-border: rgba(15,23,42,0.2);
-  --anim-burst-halo-bg: rgba(246,250,252,0.92);
-  --side-quest-completed-bg: rgba(187, 247, 208, 0.55);
-  --side-quest-completed-border: rgba(34, 197, 94, 0.35);
-  --side-quest-completed-text: #14532d;
-  --side-quest-completed-subtle: rgba(21, 128, 61, 0.85);
-  --side-quest-completed-handle: rgba(34, 197, 94, 0.55);
+[data-theme='light'] :root,
+[data-theme='light'],
+[data-theme='classic'] :root,
+[data-theme='classic'] {
+    --bg-dark: #f6fafc;
+    --panel-dark: #ffffff;
+    --accent-cyan: #0ea5e9;
+    --accent-pink: #e879f9;
+    --accent-purple: #7c3aed;
+    --muted: #415161;
+    --body-background: radial-gradient(
+        circle at top,
+        rgba(246, 250, 252, 1) 0%,
+        rgba(226, 230, 238, 1) 65%
+    );
+    --progress-track: rgba(15, 23, 42, 0.08);
+    --quest-progress-gradient: linear-gradient(90deg, #7c3aed, #f472b6);
+    --anim-pulse-shadow-strong: rgba(15, 23, 42, 0.22);
+    --anim-pulse-shadow-rest: rgba(15, 23, 42, 0.12);
+    --anim-burst-ring-start: rgba(14, 165, 233, 0.25);
+    --anim-burst-ring-mid: rgba(15, 23, 42, 0.45);
+    --anim-burst-halo-border: rgba(15, 23, 42, 0.2);
+    --anim-burst-halo-bg: rgba(246, 250, 252, 0.92);
+    --side-quest-completed-bg: rgba(187, 247, 208, 0.55);
+    --side-quest-completed-border: rgba(34, 197, 94, 0.35);
+    --side-quest-completed-text: #14532d;
+    --side-quest-completed-subtle: rgba(21, 128, 61, 0.85);
+    --side-quest-completed-handle: rgba(34, 197, 94, 0.55);
 }
 
-html,body,#root{
-  height:100%;
+html, body, #root {
+    height: 100%;
 }
 
 body {
-  margin: 0;
-  background: var(--body-background, radial-gradient(ellipse at center, rgba(20,24,35,1) 0%, rgba(8,16,32,1) 60%));
-  color: var(--muted);
-  font-family: 'Press Start 2P', 'Courier New', monospace;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg-dark);
-  overflow-y: auto;
+    margin: 0;
+    background: var(
+        --body-background,
+        radial-gradient(ellipse at center, rgba(20, 24, 35, 1) 0%, rgba(8, 16, 32, 1) 60%)
+    );
+    color: var(--muted);
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-dark);
+    overflow-y: auto;
 }
 
-html[data-theme-ready="false"] body{
-  visibility: hidden;
+html[data-theme-ready='false'] body {
+    visibility: hidden;
 }
 
 /* subtle scanlines to give CRT / retro texture */
-body::before{
-  content: "";
-  pointer-events:none;
-  position:fixed;
-  left:0;right:0;top:0;bottom:0;
-  background-image: linear-gradient(rgba(0,0,0,0.03) 50%, rgba(255,255,255,0.01) 51%);
-  background-size: 100% 4px;
-  mix-blend-mode: overlay;
-  z-index:0;
+body::before {
+    content: '';
+    pointer-events: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.03) 50%, rgba(255, 255, 255, 0.01) 51%);
+    background-size: 100% 4px;
+    mix-blend-mode: overlay;
+    z-index: 0;
 }
 
 code {
-  font-family: 'Courier New', monospace;
+    font-family: 'Courier New', monospace;
 }
 
 /* tiny helper */
 .container {
-  position: relative;
-  z-index: 1; /* above scanlines */
+    position: relative;
+    z-index: 1; /* above scanlines */
 }

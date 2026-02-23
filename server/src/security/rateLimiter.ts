@@ -46,7 +46,7 @@ export function createRateLimiter(options: RateLimiterOptions) {
                 allowed: true,
                 remaining: limit - 1,
                 limit,
-                resetInMs: windowMs
+                resetInMs: windowMs,
             };
         }
 
@@ -55,7 +55,7 @@ export function createRateLimiter(options: RateLimiterOptions) {
                 allowed: false,
                 remaining: 0,
                 limit,
-                resetInMs: calculateResetInMs(existing, current)
+                resetInMs: calculateResetInMs(existing, current),
             };
         }
 
@@ -64,7 +64,7 @@ export function createRateLimiter(options: RateLimiterOptions) {
             allowed: true,
             remaining: Math.max(limit - existing.count, 0),
             limit,
-            resetInMs: calculateResetInMs(existing, current)
+            resetInMs: calculateResetInMs(existing, current),
         };
     }
 
@@ -85,6 +85,6 @@ export function createRateLimiter(options: RateLimiterOptions) {
     return {
         attempt,
         reset,
-        getSnapshot
+        getSnapshot,
     };
 }

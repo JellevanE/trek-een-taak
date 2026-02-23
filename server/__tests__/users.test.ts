@@ -7,12 +7,12 @@ import { resetRegistrationRateLimiter } from '../src/security/registrationRateLi
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
-    JsonRecord,
     configureDataFiles,
+    JsonRecord,
     resetCampaignStore,
     resetDataFileOverrides,
     resetTaskStore,
-    resetUserStore
+    resetUserStore,
 } from '../src/testing/fixtures';
 
 let dataDir: string;
@@ -39,7 +39,7 @@ beforeEach(async () => {
 
     const register = await client.post('/api/users/register', {
         body: { username: `tester_${Date.now()}`, password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     authToken = (register.body as JsonRecord).token as string;
 });
@@ -79,7 +79,7 @@ test('check username availability returns available true for new name', async ()
 test('validate email accepts RFC-compliant addresses', async () => {
     const res = await client.post('/api/users/validate-email', {
         body: { email: 'hero@example.com ' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expect(res.status).toBe(200);
     const body = res.body as JsonRecord;
@@ -90,7 +90,7 @@ test('validate email accepts RFC-compliant addresses', async () => {
 test('validate email rejects malformed addresses', async () => {
     const res = await client.post('/api/users/validate-email', {
         body: { email: 'not-an-email' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expect(res.status).toBe(200);
     const body = res.body as JsonRecord;
@@ -102,7 +102,7 @@ test('register rejects reserved usernames', async () => {
     resetRegistrationRateLimiter();
     const res = await client.post('/api/users/register', {
         body: { username: 'ADMIN', password: 'password123!' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expect(res.status).toBe(400);
     const body = res.body as JsonRecord;
@@ -115,14 +115,14 @@ test('register enforces per-ip rate limiting', async () => {
     for (let index = 0; index < 5; index += 1) {
         const attempt = await client.post('/api/users/register', {
             body: { username: `rate_limited_${Date.now()}_${index}`, password: 'secretpass1' },
-            headers
+            headers,
         });
         expect(attempt.status).toBe(201);
     }
 
     const blocked = await client.post('/api/users/register', {
         body: { username: `rate_limited_${Date.now()}_blocked`, password: 'secretpass1' },
-        headers
+        headers,
     });
     expect(blocked.status).toBe(429);
     const body = blocked.body as JsonRecord;
@@ -139,25 +139,31 @@ test('get /me requires authentication', async () => {
 test('profile update persists changes', async () => {
     const update = await client.put('/api/users/me', {
         body: { display_name: 'Arcane Wanderer', bio: 'From coverage town.' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(update.status).toBe(200);
     const body = update.body as JsonRecord;
     const user = body.user as JsonRecord;
-    expect(user.profile).toMatchObject({ display_name: 'Arcane Wanderer', bio: 'From coverage town.' });
+    expect(user.profile).toMatchObject({
+        display_name: 'Arcane Wanderer',
+        bio: 'From coverage town.',
+    });
 
     const me = await client.get('/api/users/me', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const meBody = me.body as JsonRecord;
     const current = meBody.user as JsonRecord;
-    expect(current.profile).toMatchObject({ display_name: 'Arcane Wanderer', bio: 'From coverage town.' });
+    expect(current.profile).toMatchObject({
+        display_name: 'Arcane Wanderer',
+        bio: 'From coverage town.',
+    });
 });
 
 test('profile update rejects invalid preferences', async () => {
     const res = await client.put('/api/users/me', {
         body: { prefs: 'not-an-object' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(res.status).toBe(400);
     const body = res.body as JsonRecord;

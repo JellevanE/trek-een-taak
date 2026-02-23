@@ -1,5 +1,9 @@
 import { act } from '@testing-library/react';
-import { questBoardSelectors, resetQuestBoardStore, useQuestBoardStore } from '../questBoardStore.js';
+import {
+    questBoardSelectors,
+    resetQuestBoardStore,
+    useQuestBoardStore,
+} from '../questBoardStore.js';
 
 describe('questBoardStore', () => {
     beforeEach(async () => {
@@ -10,7 +14,7 @@ describe('questBoardStore', () => {
         act(() => {
             useQuestBoardStore.getState().setQuests([
                 { id: 1, description: 'alpha' },
-                { id: 2, description: 'beta' }
+                { id: 2, description: 'beta' },
             ]);
         });
 
@@ -37,7 +41,8 @@ describe('questBoardStore', () => {
             useQuestBoardStore.getState().resetSelection();
         });
 
-        const { selectedQuestId, selectedSideQuest, editingSideQuest } = useQuestBoardStore.getState();
+        const { selectedQuestId, selectedSideQuest, editingSideQuest } = useQuestBoardStore
+            .getState();
         expect(selectedQuestId).toBeNull();
         expect(selectedSideQuest).toBeNull();
         expect(editingSideQuest).toBeNull();
@@ -62,9 +67,9 @@ describe('questBoardStore', () => {
                     id: 'q-1',
                     description: 'Quest One',
                     side_quests: [
-                        { id: 's-1', description: 'Side' }
-                    ]
-                }
+                        { id: 's-1', description: 'Side' },
+                    ],
+                },
             ]);
         });
 

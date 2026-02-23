@@ -6,7 +6,7 @@ import {
     readCampaigns,
     serializeCampaign,
     serializeCampaignList,
-    writeCampaigns
+    writeCampaigns,
 } from '../data/campaignStore.js';
 import { readTasks, serializeTaskList, writeTasks } from '../data/taskStore.js';
 import { sendError } from '../utils/http.js';
@@ -16,21 +16,21 @@ import type { CampaignExtras, CampaignRecord } from '../types/campaign.js';
 import type { TaskRecord } from '../types/task.js';
 import { validateRequest } from '../validation/index.js';
 import {
-    campaignIdParamsSchema,
-    createCampaignSchema,
-    listCampaignsQuerySchema,
-    updateCampaignSchema,
     type CampaignIdParams,
+    campaignIdParamsSchema,
     type CreateCampaignPayload,
+    createCampaignSchema,
     type ListCampaignsQuery,
-    type UpdateCampaignPayload
+    listCampaignsQuerySchema,
+    type UpdateCampaignPayload,
+    updateCampaignSchema,
 } from '../validation/schemas/campaigns.js';
 import { StorylineService } from '../services/storyline.service.js';
 
 type BaseAuthedRequest<
     P extends ParamsDictionary = ParamsDictionary,
     B = unknown,
-    Q extends ParsedQs = ParsedQs
+    Q extends ParsedQs = ParsedQs,
 > = AuthenticatedRequest<P, unknown, B, Q>;
 
 interface CampaignListQuery extends ParsedQs {
@@ -40,7 +40,7 @@ interface CampaignListQuery extends ParsedQs {
 function buildCampaignStatsMap(
     campaigns: CampaignRecord[],
     tasks: TaskRecord[],
-    ownerId: number
+    ownerId: number,
 ): Map<number, CampaignExtras> {
     const stats = new Map<number, CampaignExtras>();
     const ownerTasks = tasks.filter((task) => task && task.owner_id === ownerId);
@@ -59,9 +59,9 @@ function buildCampaignStatsMap(
                 quests_completed: completed,
                 quests_remaining: remaining,
                 quests_in_progress: inProgress,
-                completion_percent: completion
+                completion_percent: completion,
             },
-            progress_summary: `${completed}/${total}`
+            progress_summary: `${completed}/${total}`,
         });
     });
 
@@ -94,7 +94,10 @@ export function listCampaigns(req: BaseAuthedRequest, res: Response) {
     return res.json({ campaigns: serializeCampaignList(campaigns, statsMap) });
 }
 
-export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCampaignPayload>, res: Response) {
+export function createCampaign(
+    req: BaseAuthedRequest<ParamsDictionary, CreateCampaignPayload>,
+    res: Response,
+) {
     if (!assertAuthenticated(req, res)) return;
     const validation = validateRequest(req, { body: createCampaignSchema });
     if (!validation.success) {
@@ -105,12 +108,11 @@ export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCa
     const campaignsData = readCampaigns();
     const now = new Date().toISOString();
 
-    const normalizedImage =
-        payload.image_url === null
-            ? null
-            : typeof payload.image_url === 'string' && payload.image_url.length > 0
-                ? payload.image_url
-                : null;
+    const normalizedImage = payload.image_url === null
+        ? null
+        : typeof payload.image_url === 'string' && payload.image_url.length > 0
+        ? payload.image_url
+        : null;
 
     const newCampaign: CampaignRecord = {
         id: campaignsData.nextId,
@@ -120,7 +122,7 @@ export function createCampaign(req: BaseAuthedRequest<ParamsDictionary, CreateCa
         owner_id: req.user.id,
         archived: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
     };
 
     try {
@@ -160,26 +162,31 @@ export function getCampaign(req: BaseAuthedRequest<{ id: string }>, res: Respons
     const campaignId = params.id;
 
     const campaignsData = readCampaigns();
-    const campaign = campaignsData.campaigns.find((item) => item.id === campaignId && item.owner_id === req.user.id);
+    const campaign = campaignsData.campaigns.find((item) =>
+        item.id === campaignId && item.owner_id === req.user.id
+    );
     if (!campaign) return sendError(res, 404, 'Campaign not found');
 
     const tasksData = readTasks();
     const relatedTasks = tasksData.tasks.filter(
-        (task) => task.owner_id === req.user.id && task.campaign_id === campaign.id
+        (task) => task.owner_id === req.user.id && task.campaign_id === campaign.id,
     );
     const statsMap = buildCampaignStatsMap([campaign], tasksData.tasks, req.user.id);
 
     return res.json({
         campaign: serializeCampaign(campaign, statsMap.get(campaign.id) || {}),
-        quests: serializeTaskList(relatedTasks)
+        quests: serializeTaskList(relatedTasks),
     });
 }
 
-export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCampaignPayload>, res: Response) {
+export function updateCampaign(
+    req: BaseAuthedRequest<{ id: string }, UpdateCampaignPayload>,
+    res: Response,
+) {
     if (!assertAuthenticated(req, res)) return;
     const validation = validateRequest(req, {
         params: campaignIdParamsSchema,
-        body: updateCampaignSchema
+        body: updateCampaignSchema,
     });
     if (!validation.success) {
         return sendError(res, 400, validation.error.summary);
@@ -189,7 +196,7 @@ export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCamp
     const campaignId = params.id;
     const campaignsData = readCampaigns();
     const index = campaignsData.campaigns.findIndex(
-        (item) => item.id === campaignId && item.owner_id === req.user.id
+        (item) => item.id === campaignId && item.owner_id === req.user.id,
     );
     if (index === -1) return sendError(res, 404, 'Campaign not found');
 
@@ -200,7 +207,10 @@ export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCamp
     if (Object.prototype.hasOwnProperty.call(updates, 'name') && updates.name !== undefined) {
         target.name = updates.name;
     }
-    if (Object.prototype.hasOwnProperty.call(updates, 'description') && updates.description !== undefined) {
+    if (
+        Object.prototype.hasOwnProperty.call(updates, 'description') &&
+        updates.description !== undefined
+    ) {
         target.description = updates.description;
     }
     if (Object.prototype.hasOwnProperty.call(updates, 'image_url')) {
@@ -211,7 +221,9 @@ export function updateCampaign(req: BaseAuthedRequest<{ id: string }, UpdateCamp
             target.image_url = image.length > 0 ? image : null;
         }
     }
-    if (Object.prototype.hasOwnProperty.call(updates, 'archived') && updates.archived !== undefined) {
+    if (
+        Object.prototype.hasOwnProperty.call(updates, 'archived') && updates.archived !== undefined
+    ) {
         target.archived = updates.archived;
     }
 
@@ -240,7 +252,7 @@ export function deleteCampaign(req: BaseAuthedRequest<{ id: string }>, res: Resp
 
     const campaignsData = readCampaigns();
     const index = campaignsData.campaigns.findIndex(
-        (item) => item.id === campaignId && item.owner_id === req.user.id
+        (item) => item.id === campaignId && item.owner_id === req.user.id,
     );
     if (index === -1) return sendError(res, 404, 'Campaign not found');
 
@@ -283,7 +295,7 @@ const controller = {
     createCampaign,
     getCampaign,
     updateCampaign,
-    deleteCampaign
+    deleteCampaign,
 };
 
 export default controller;

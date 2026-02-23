@@ -4,7 +4,7 @@ export const ARCADE_SPACE = Object.freeze({
     sm: 12,
     md: 16,
     lg: 24,
-    xl: 32
+    xl: 32,
 });
 
 export const QUEST_LAYOUT_TOKENS = Object.freeze({
@@ -17,14 +17,14 @@ export const QUEST_LAYOUT_TOKENS = Object.freeze({
     sideQuestGap: ARCADE_SPACE.sm,
     minSideQuestRows: 3,
     maxSideQuestRows: 6,
-    sideQuestItemHeight: 80
+    sideQuestItemHeight: 80,
 });
 
 export const getSideQuestMaxHeight = (count, {
     itemHeight = QUEST_LAYOUT_TOKENS.sideQuestItemHeight,
     gap = QUEST_LAYOUT_TOKENS.sideQuestGap,
     minRows = QUEST_LAYOUT_TOKENS.minSideQuestRows,
-    maxRows = QUEST_LAYOUT_TOKENS.maxSideQuestRows
+    maxRows = QUEST_LAYOUT_TOKENS.maxSideQuestRows,
 } = {}) => {
     if (!count || count <= 0) return null;
     const rows = Math.min(Math.max(count, minRows), maxRows);

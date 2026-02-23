@@ -12,7 +12,7 @@ export const EmptyState = ({
     subMessage,
     glitchEffect = true,
     pulseEffect = false,
-    color = 'var(--muted, #888)'
+    color = 'var(--muted, #888)',
 }) => {
     const [showGlitch, setShowGlitch] = React.useState(false);
 
@@ -38,24 +38,26 @@ export const EmptyState = ({
                 justifyContent: 'center',
                 padding: '60px 40px',
                 textAlign: 'center',
-                minHeight: '200px'
+                minHeight: '200px',
             }}
         >
             {/* Icon */}
             <motion.div
-                animate={pulseEffect ? {
-                    scale: [1, 1.1, 1],
-                    opacity: [0.6, 1, 0.6]
-                } : {}}
+                animate={pulseEffect
+                    ? {
+                        scale: [1, 1.1, 1],
+                        opacity: [0.6, 1, 0.6],
+                    }
+                    : {}}
                 transition={{
                     duration: 2,
                     repeat: Infinity,
-                    ease: 'easeInOut'
+                    ease: 'easeInOut',
                 }}
                 style={{
                     fontSize: '64px',
                     marginBottom: '20px',
-                    filter: `drop-shadow(0 0 10px ${color})`
+                    filter: `drop-shadow(0 0 10px ${color})`,
                 }}
             >
                 {icon}
@@ -63,15 +65,17 @@ export const EmptyState = ({
 
             {/* Main Message */}
             <motion.h3
-                animate={showGlitch ? {
-                    x: [0, -2, 2, -2, 2, 0],
-                    textShadow: [
-                        'none',
-                        '2px 0 var(--neon-red), -2px 0 var(--neon-cyan)',
-                        '-2px 0 var(--neon-red), 2px 0 var(--neon-cyan)',
-                        'none'
-                    ]
-                } : {}}
+                animate={showGlitch
+                    ? {
+                        x: [0, -2, 2, -2, 2, 0],
+                        textShadow: [
+                            'none',
+                            '2px 0 var(--neon-red), -2px 0 var(--neon-cyan)',
+                            '-2px 0 var(--neon-red), 2px 0 var(--neon-cyan)',
+                            'none',
+                        ],
+                    }
+                    : {}}
                 transition={{ duration: 0.2 }}
                 style={{
                     fontFamily: "'Press Start 2P', cursive",
@@ -79,7 +83,7 @@ export const EmptyState = ({
                     color: color,
                     letterSpacing: '2px',
                     marginBottom: '12px',
-                    textTransform: 'uppercase'
+                    textTransform: 'uppercase',
                 }}
             >
                 {message}
@@ -87,14 +91,16 @@ export const EmptyState = ({
 
             {/* Sub Message */}
             {subMessage && (
-                <p style={{
-                    fontFamily: "'VT323', monospace",
-                    fontSize: '18px',
-                    color: 'var(--muted, #888)',
-                    maxWidth: '400px',
-                    lineHeight: '1.5',
-                    marginTop: '8px'
-                }}>
+                <p
+                    style={{
+                        fontFamily: "'VT323', monospace",
+                        fontSize: '18px',
+                        color: 'var(--muted, #888)',
+                        maxWidth: '400px',
+                        lineHeight: '1.5',
+                        marginTop: '8px',
+                    }}
+                >
                     {subMessage}
                 </p>
             )}
@@ -107,7 +113,7 @@ export const EmptyState = ({
                 style={{
                     height: '2px',
                     background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
-                    marginTop: '30px'
+                    marginTop: '30px',
                 }}
             />
         </motion.div>
@@ -119,7 +125,7 @@ export const EmptyState = ({
  */
 export const LoadingState = ({
     message = 'LOADING...',
-    color = 'var(--neon-cyan, #00ffff)'
+    color = 'var(--neon-cyan, #00ffff)',
 }) => {
     return (
         <motion.div
@@ -131,34 +137,36 @@ export const LoadingState = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '60px 40px',
-                minHeight: '200px'
+                minHeight: '200px',
             }}
         >
             {/* Animated dots */}
-            <div style={{
-                display: 'flex',
-                gap: '12px',
-                marginBottom: '30px'
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '12px',
+                    marginBottom: '30px',
+                }}
+            >
                 {[0, 1, 2].map((i) => (
                     <motion.div
                         key={i}
                         animate={{
                             y: [0, -15, 0],
-                            opacity: [0.3, 1, 0.3]
+                            opacity: [0.3, 1, 0.3],
                         }}
                         transition={{
                             duration: 1,
                             repeat: Infinity,
                             delay: i * 0.2,
-                            ease: 'easeInOut'
+                            ease: 'easeInOut',
                         }}
                         style={{
                             width: '16px',
                             height: '16px',
                             background: color,
                             borderRadius: '2px',
-                            boxShadow: `0 0 10px ${color}`
+                            boxShadow: `0 0 10px ${color}`,
                         }}
                     />
                 ))}
@@ -167,18 +175,18 @@ export const LoadingState = ({
             {/* Message */}
             <motion.h3
                 animate={{
-                    opacity: [0.5, 1, 0.5]
+                    opacity: [0.5, 1, 0.5],
                 }}
                 transition={{
                     duration: 1.5,
                     repeat: Infinity,
-                    ease: 'easeInOut'
+                    ease: 'easeInOut',
                 }}
                 style={{
                     fontFamily: "'Press Start 2P', cursive",
                     fontSize: '12px',
                     color: color,
-                    letterSpacing: '2px'
+                    letterSpacing: '2px',
                 }}
             >
                 {message}
@@ -194,7 +202,7 @@ export const ErrorState = ({
     message = 'ERROR OCCURRED',
     errorCode = '404',
     subMessage = 'Something went wrong. Please try again.',
-    onRetry
+    onRetry,
 }) => {
     return (
         <motion.div
@@ -207,17 +215,17 @@ export const ErrorState = ({
                 justifyContent: 'center',
                 padding: '60px 40px',
                 textAlign: 'center',
-                minHeight: '200px'
+                minHeight: '200px',
             }}
         >
             {/* Error Code */}
             <motion.div
                 animate={{
-                    rotate: [0, -5, 5, -5, 0]
+                    rotate: [0, -5, 5, -5, 0],
                 }}
                 transition={{
                     duration: 0.5,
-                    repeat: 3
+                    repeat: 3,
                 }}
                 style={{
                     fontFamily: "'Press Start 2P', cursive",
@@ -227,40 +235,44 @@ export const ErrorState = ({
                     textShadow: `
                         0 0 10px var(--neon-red),
                         0 0 20px var(--neon-red)
-                    `
+                    `,
                 }}
             >
                 {errorCode}
             </motion.div>
 
             {/* Message */}
-            <h3 style={{
-                fontFamily: "'Press Start 2P', cursive",
-                fontSize: '14px',
-                color: 'var(--neon-red)',
-                letterSpacing: '2px',
-                marginBottom: '12px'
-            }}>
+            <h3
+                style={{
+                    fontFamily: "'Press Start 2P', cursive",
+                    fontSize: '14px',
+                    color: 'var(--neon-red)',
+                    letterSpacing: '2px',
+                    marginBottom: '12px',
+                }}
+            >
                 {message}
             </h3>
 
             {/* Sub Message */}
-            <p style={{
-                fontFamily: "'VT323', monospace",
-                fontSize: '18px',
-                color: 'var(--muted, #888)',
-                maxWidth: '400px',
-                lineHeight: '1.5',
-                marginTop: '8px',
-                marginBottom: '30px'
-            }}>
+            <p
+                style={{
+                    fontFamily: "'VT323', monospace",
+                    fontSize: '18px',
+                    color: 'var(--muted, #888)',
+                    maxWidth: '400px',
+                    lineHeight: '1.5',
+                    marginTop: '8px',
+                    marginBottom: '30px',
+                }}
+            >
                 {subMessage}
             </p>
 
             {/* Retry Button */}
             {onRetry && (
                 <motion.button
-                    type="button"
+                    type='button'
                     onClick={onRetry}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -272,7 +284,7 @@ export const ErrorState = ({
                         fontFamily: "'Press Start 2P', cursive",
                         fontSize: '10px',
                         cursor: 'pointer',
-                        boxShadow: '0 0 20px rgba(255, 0, 64, 0.5)'
+                        boxShadow: '0 0 20px rgba(255, 0, 64, 0.5)',
                     }}
                 >
                     RETRY
@@ -289,80 +301,94 @@ export const EmptyStateShowcase = () => {
 
     return (
         <div style={{ padding: '40px' }}>
-            <h3 style={{ 
-                fontFamily: "'Press Start 2P', cursive",
-                color: 'var(--neon-cyan)',
-                fontSize: '14px',
-                marginBottom: '30px',
-                textAlign: 'center'
-            }}>
+            <h3
+                style={{
+                    fontFamily: "'Press Start 2P', cursive",
+                    color: 'var(--neon-cyan)',
+                    fontSize: '14px',
+                    marginBottom: '30px',
+                    textAlign: 'center',
+                }}
+            >
                 EMPTY & STATE COMPONENTS
             </h3>
 
-            <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '40px',
-                maxWidth: '800px',
-                margin: '0 auto'
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '40px',
+                    maxWidth: '800px',
+                    margin: '0 auto',
+                }}
+            >
                 {/* Basic Empty State */}
-                <div style={{
-                    background: 'var(--bg-secondary, #1a1a2e)',
-                    border: '2px solid var(--dark-gray)',
-                    borderRadius: '8px',
-                    overflow: 'hidden'
-                }}>
+                <div
+                    style={{
+                        background: 'var(--bg-secondary, #1a1a2e)',
+                        border: '2px solid var(--dark-gray)',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                    }}
+                >
                     <EmptyState
-                        message="NO QUESTS AVAILABLE"
-                        icon="📭"
-                        subMessage="Complete your current quests to unlock new ones!"
+                        message='NO QUESTS AVAILABLE'
+                        icon='📭'
+                        subMessage='Complete your current quests to unlock new ones!'
                     />
                 </div>
 
                 {/* Different Icons & Messages */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '20px'
-                }}>
-                    <div style={{
-                        background: 'var(--bg-secondary)',
-                        border: '2px solid var(--dark-gray)',
-                        borderRadius: '8px'
-                    }}>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gap: '20px',
+                    }}
+                >
+                    <div
+                        style={{
+                            background: 'var(--bg-secondary)',
+                            border: '2px solid var(--dark-gray)',
+                            borderRadius: '8px',
+                        }}
+                    >
                         <EmptyState
-                            message="NO RESULTS FOUND"
-                            icon="🔍"
-                            color="var(--neon-yellow)"
-                            subMessage="Try adjusting your search"
+                            message='NO RESULTS FOUND'
+                            icon='🔍'
+                            color='var(--neon-yellow)'
+                            subMessage='Try adjusting your search'
                         />
                     </div>
 
-                    <div style={{
-                        background: 'var(--bg-secondary)',
-                        border: '2px solid var(--dark-gray)',
-                        borderRadius: '8px'
-                    }}>
+                    <div
+                        style={{
+                            background: 'var(--bg-secondary)',
+                            border: '2px solid var(--dark-gray)',
+                            borderRadius: '8px',
+                        }}
+                    >
                         <EmptyState
-                            message="ALL CLEAR!"
-                            icon="✅"
-                            color="var(--neon-green)"
+                            message='ALL CLEAR!'
+                            icon='✅'
+                            color='var(--neon-green)'
                             subMessage="You've completed everything!"
                             pulseEffect
                         />
                     </div>
 
-                    <div style={{
-                        background: 'var(--bg-secondary)',
-                        border: '2px solid var(--dark-gray)',
-                        borderRadius: '8px'
-                    }}>
+                    <div
+                        style={{
+                            background: 'var(--bg-secondary)',
+                            border: '2px solid var(--dark-gray)',
+                            borderRadius: '8px',
+                        }}
+                    >
                         <EmptyState
-                            message="LOCKED"
-                            icon="🔒"
-                            color="var(--muted)"
-                            subMessage="Complete previous quests"
+                            message='LOCKED'
+                            icon='🔒'
+                            color='var(--muted)'
+                            subMessage='Complete previous quests'
                             glitchEffect={false}
                         />
                     </div>
@@ -370,16 +396,18 @@ export const EmptyStateShowcase = () => {
 
                 {/* Loading State */}
                 <div>
-                    <h4 style={{
-                        fontFamily: "'Press Start 2P', cursive",
-                        fontSize: '10px',
-                        color: 'var(--neon-cyan)',
-                        marginBottom: '15px'
-                    }}>
+                    <h4
+                        style={{
+                            fontFamily: "'Press Start 2P', cursive",
+                            fontSize: '10px',
+                            color: 'var(--neon-cyan)',
+                            marginBottom: '15px',
+                        }}
+                    >
                         LOADING STATE
                     </h4>
                     <button
-                        type="button"
+                        type='button'
                         onClick={() => {
                             setShowLoading(true);
                             setTimeout(() => setShowLoading(false), 3000);
@@ -392,34 +420,38 @@ export const EmptyStateShowcase = () => {
                             fontFamily: "'Press Start 2P', cursive",
                             fontSize: '10px',
                             cursor: 'pointer',
-                            marginBottom: '20px'
+                            marginBottom: '20px',
                         }}
                     >
                         SHOW LOADING (3s)
                     </button>
                     {showLoading && (
-                        <div style={{
-                            background: 'var(--bg-secondary)',
-                            border: '2px solid var(--dark-gray)',
-                            borderRadius: '8px'
-                        }}>
-                            <LoadingState message="FETCHING QUESTS..." />
+                        <div
+                            style={{
+                                background: 'var(--bg-secondary)',
+                                border: '2px solid var(--dark-gray)',
+                                borderRadius: '8px',
+                            }}
+                        >
+                            <LoadingState message='FETCHING QUESTS...' />
                         </div>
                     )}
                 </div>
 
                 {/* Error State */}
                 <div>
-                    <h4 style={{
-                        fontFamily: "'Press Start 2P', cursive",
-                        fontSize: '10px',
-                        color: 'var(--neon-red)',
-                        marginBottom: '15px'
-                    }}>
+                    <h4
+                        style={{
+                            fontFamily: "'Press Start 2P', cursive",
+                            fontSize: '10px',
+                            color: 'var(--neon-red)',
+                            marginBottom: '15px',
+                        }}
+                    >
                         ERROR STATE
                     </h4>
                     <button
-                        type="button"
+                        type='button'
                         onClick={() => setShowError(!showError)}
                         style={{
                             padding: '8px 16px',
@@ -429,21 +461,23 @@ export const EmptyStateShowcase = () => {
                             fontFamily: "'Press Start 2P', cursive",
                             fontSize: '10px',
                             cursor: 'pointer',
-                            marginBottom: '20px'
+                            marginBottom: '20px',
                         }}
                     >
                         {showError ? 'HIDE ERROR' : 'SHOW ERROR'}
                     </button>
                     {showError && (
-                        <div style={{
-                            background: 'var(--bg-secondary)',
-                            border: '2px solid var(--neon-red)',
-                            borderRadius: '8px'
-                        }}>
+                        <div
+                            style={{
+                                background: 'var(--bg-secondary)',
+                                border: '2px solid var(--neon-red)',
+                                borderRadius: '8px',
+                            }}
+                        >
                             <ErrorState
-                                message="CONNECTION FAILED"
-                                errorCode="500"
-                                subMessage="Unable to reach the server. Please check your connection."
+                                message='CONNECTION FAILED'
+                                errorCode='500'
+                                subMessage='Unable to reach the server. Please check your connection.'
                                 onRetry={() => alert('Retry clicked!')}
                             />
                         </div>
@@ -452,41 +486,49 @@ export const EmptyStateShowcase = () => {
 
                 {/* Different Error Codes */}
                 <div>
-                    <h4 style={{
-                        fontFamily: "'Press Start 2P', cursive",
-                        fontSize: '10px',
-                        color: 'var(--neon-cyan)',
-                        marginBottom: '15px'
-                    }}>
+                    <h4
+                        style={{
+                            fontFamily: "'Press Start 2P', cursive",
+                            fontSize: '10px',
+                            color: 'var(--neon-cyan)',
+                            marginBottom: '15px',
+                        }}
+                    >
                         COMMON ERROR CODES
                     </h4>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                        gap: '15px'
-                    }}>
-                        <div style={{
-                            background: 'var(--bg-secondary)',
-                            border: '2px solid var(--dark-gray)',
-                            borderRadius: '8px',
-                            minHeight: '200px'
-                        }}>
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                            gap: '15px',
+                        }}
+                    >
+                        <div
+                            style={{
+                                background: 'var(--bg-secondary)',
+                                border: '2px solid var(--dark-gray)',
+                                borderRadius: '8px',
+                                minHeight: '200px',
+                            }}
+                        >
                             <ErrorState
-                                errorCode="404"
-                                message="NOT FOUND"
-                                subMessage="Quest does not exist"
+                                errorCode='404'
+                                message='NOT FOUND'
+                                subMessage='Quest does not exist'
                             />
                         </div>
-                        <div style={{
-                            background: 'var(--bg-secondary)',
-                            border: '2px solid var(--dark-gray)',
-                            borderRadius: '8px',
-                            minHeight: '200px'
-                        }}>
+                        <div
+                            style={{
+                                background: 'var(--bg-secondary)',
+                                border: '2px solid var(--dark-gray)',
+                                borderRadius: '8px',
+                                minHeight: '200px',
+                            }}
+                        >
                             <ErrorState
-                                errorCode="403"
-                                message="FORBIDDEN"
-                                subMessage="Access denied"
+                                errorCode='403'
+                                message='FORBIDDEN'
+                                subMessage='Access denied'
                             />
                         </div>
                     </div>

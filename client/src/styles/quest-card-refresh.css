@@ -10,10 +10,10 @@
     --quest-card-radius: 16px;
     --quest-card-padding-block: 20px;
     --quest-card-padding-inline: 20px;
-    
+
     border-radius: var(--quest-card-radius);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.12));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.12));
 }
 
 /* More organic buttons */

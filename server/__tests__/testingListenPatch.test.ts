@@ -36,7 +36,10 @@ describe('testing listen patch utilities', () => {
         applyTestingListenPatch(app);
 
         const callback = jest.fn();
-        const result = (app.listen as unknown as (...args: unknown[]) => http.Server)(3000, callback);
+        const result = (app.listen as unknown as (...args: unknown[]) => http.Server)(
+            3000,
+            callback,
+        );
         expect(result).toBe(fakeServer);
         expect(recordedAppArgs[0]).toEqual([3000, '127.0.0.1', callback]);
 
@@ -64,7 +67,12 @@ describe('testing listen patch utilities', () => {
         applyTestingListenPatch(app);
 
         const callback = jest.fn();
-        (app.listen as unknown as (...args: unknown[]) => http.Server)(5000, '0.0.0.0', 128, callback);
+        (app.listen as unknown as (...args: unknown[]) => http.Server)(
+            5000,
+            '0.0.0.0',
+            128,
+            callback,
+        );
         expect(recordedAppArgs[0]).toEqual([5000, '10.1.0.5', 128, callback]);
 
         app.listen = originalAppListen;

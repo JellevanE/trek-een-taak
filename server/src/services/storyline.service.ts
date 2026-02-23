@@ -218,14 +218,13 @@ export class StorylineService {
         const progressPercentage = computeProgress(tasksData.tasks, storyline.campaignId);
 
         // Build the summary text for the appropriate update type
-        const tasksSummary =
-            type === 'intro'
-                ? upcomingTasks.length > 0
-                    ? upcomingTasks.map((t) => `- ${sanitize(t.description)}`).join('\n')
-                    : 'Many challenges await on the horizon.'
-                : completedTasks.length > 0
-                  ? completedTasks.map((t) => `- ${sanitize(t.description)}`).join('\n')
-                  : 'The hero rested and reflected on the journey ahead.';
+        const tasksSummary = type === 'intro'
+            ? upcomingTasks.length > 0
+                ? upcomingTasks.map((t) => `- ${sanitize(t.description)}`).join('\n')
+                : 'Many challenges await on the horizon.'
+            : completedTasks.length > 0
+            ? completedTasks.map((t) => `- ${sanitize(t.description)}`).join('\n')
+            : 'The hero rested and reflected on the journey ahead.';
 
         const context = {
             campaignName: sanitized.campaignName,

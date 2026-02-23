@@ -47,7 +47,9 @@ function resolveJwtSecrets(): string[] {
             );
             return [fallback];
         }
-        throw new Error('JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.');
+        throw new Error(
+            'JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.',
+        );
     }
 
     return uniqueSecrets;

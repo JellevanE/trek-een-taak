@@ -1,17 +1,17 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import './showcase.css';
 
 /**
  * PowerUpEffect - Celebration animation for quest completion
  * Spawns particles with arcade-style effects
  */
-export const PowerUpEffect = ({ 
-    active = false, 
+export const PowerUpEffect = ({
+    active = false,
     position = { x: 0, y: 0 },
     particleCount = 12,
     particleSymbol = '✨',
-    duration = 1.5
+    duration = 1.5,
 }) => {
     const particles = React.useMemo(() => {
         return Array.from({ length: particleCount }).map((_, i) => ({
@@ -20,55 +20,55 @@ export const PowerUpEffect = ({
             distance: 80 + Math.random() * 40,
             symbol: particleSymbol,
             rotation: Math.random() * 360,
-            scale: 0.8 + Math.random() * 0.4
+            scale: 0.8 + Math.random() * 0.4,
         }));
     }, [particleCount, particleSymbol]);
 
     return (
         <AnimatePresence>
             {active && (
-                <div 
-                    className="power-up-effect"
+                <div
+                    className='power-up-effect'
                     style={{
                         position: 'absolute',
                         left: position.x,
                         top: position.y,
                         pointerEvents: 'none',
-                        zIndex: 1000
+                        zIndex: 1000,
                     }}
                 >
                     {particles.map((particle) => (
                         <motion.div
                             key={particle.id}
-                            className="power-up-particle"
+                            className='power-up-particle'
                             initial={{
                                 x: 0,
                                 y: 0,
                                 opacity: 1,
                                 scale: 0,
-                                rotate: 0
+                                rotate: 0,
                             }}
                             animate={{
                                 x: Math.cos(particle.angle * Math.PI / 180) * particle.distance,
                                 y: Math.sin(particle.angle * Math.PI / 180) * particle.distance,
                                 opacity: 0,
                                 scale: particle.scale,
-                                rotate: particle.rotation
+                                rotate: particle.rotation,
                             }}
                             transition={{
                                 duration: duration,
-                                ease: 'easeOut'
+                                ease: 'easeOut',
                             }}
                             style={{
                                 position: 'absolute',
                                 fontSize: '24px',
-                                filter: 'drop-shadow(0 0 8px var(--neon-yellow))'
+                                filter: 'drop-shadow(0 0 8px var(--neon-yellow))',
                             }}
                         >
                             {particle.symbol}
                         </motion.div>
                     ))}
-                    
+
                     {/* Center burst ring */}
                     <motion.div
                         initial={{ scale: 0, opacity: 1 }}
@@ -82,7 +82,7 @@ export const PowerUpEffect = ({
                             borderRadius: '50%',
                             left: '-20px',
                             top: '-20px',
-                            boxShadow: '0 0 20px var(--neon-cyan)'
+                            boxShadow: '0 0 20px var(--neon-cyan)',
                         }}
                     />
                 </div>
@@ -120,19 +120,19 @@ export const LevelUpAnimation = ({ active = false, level = 1, onComplete }) => {
                         justifyContent: 'center',
                         background: 'rgba(0, 0, 0, 0.8)',
                         zIndex: 9999,
-                        pointerEvents: 'none'
+                        pointerEvents: 'none',
                     }}
                 >
                     <motion.div
                         initial={{ scale: 0, rotate: -180 }}
-                        animate={{ 
+                        animate={{
                             scale: [0, 1.2, 1],
-                            rotate: 0
+                            rotate: 0,
                         }}
                         transition={{
                             duration: 0.6,
                             times: [0, 0.6, 1],
-                            ease: 'easeOut'
+                            ease: 'easeOut',
                         }}
                         style={{
                             fontFamily: "'Press Start 2P', cursive",
@@ -143,7 +143,7 @@ export const LevelUpAnimation = ({ active = false, level = 1, onComplete }) => {
                                 0 0 20px var(--neon-yellow),
                                 0 0 40px var(--neon-yellow),
                                 0 0 60px var(--neon-yellow)
-                            `
+                            `,
                         }}
                     >
                         <motion.div
@@ -151,13 +151,13 @@ export const LevelUpAnimation = ({ active = false, level = 1, onComplete }) => {
                                 textShadow: [
                                     '0 0 20px var(--neon-yellow)',
                                     '0 0 60px var(--neon-yellow)',
-                                    '0 0 20px var(--neon-yellow)'
-                                ]
+                                    '0 0 20px var(--neon-yellow)',
+                                ],
                             }}
                             transition={{
                                 duration: 1,
                                 repeat: Infinity,
-                                ease: 'easeInOut'
+                                ease: 'easeInOut',
                             }}
                         >
                             LEVEL {level}
@@ -169,7 +169,7 @@ export const LevelUpAnimation = ({ active = false, level = 1, onComplete }) => {
                             style={{
                                 fontSize: '16px',
                                 marginTop: '20px',
-                                color: 'var(--neon-cyan)'
+                                color: 'var(--neon-cyan)',
                             }}
                         >
                             [ QUEST COMPLETE ]
@@ -191,36 +191,42 @@ export const PowerUpShowcase = () => {
         const rect = e.currentTarget.getBoundingClientRect();
         setPosition({
             x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2
+            y: rect.top + rect.height / 2,
         });
         setShowEffect(true);
         setTimeout(() => setShowEffect(false), 1500);
     };
 
     return (
-        <div style={{ 
-            padding: '40px', 
-            background: 'var(--bg-secondary, #1a1a2e)',
-            minHeight: '400px',
-            position: 'relative'
-        }}>
-            <h3 style={{ 
-                fontFamily: "'Press Start 2P', cursive",
-                color: 'var(--neon-cyan)',
-                fontSize: '14px',
-                marginBottom: '30px',
-                textAlign: 'center'
-            }}>
+        <div
+            style={{
+                padding: '40px',
+                background: 'var(--bg-secondary, #1a1a2e)',
+                minHeight: '400px',
+                position: 'relative',
+            }}
+        >
+            <h3
+                style={{
+                    fontFamily: "'Press Start 2P', cursive",
+                    color: 'var(--neon-cyan)',
+                    fontSize: '14px',
+                    marginBottom: '30px',
+                    textAlign: 'center',
+                }}
+            >
                 POWER-UP EFFECTS
             </h3>
 
-            <div style={{ 
-                display: 'flex', 
-                gap: '20px', 
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-                marginBottom: '40px'
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '20px',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                    marginBottom: '40px',
+                }}
+            >
                 <button
                     onClick={triggerEffect}
                     style={{
@@ -231,7 +237,7 @@ export const PowerUpShowcase = () => {
                         fontFamily: "'Press Start 2P', cursive",
                         fontSize: '12px',
                         cursor: 'pointer',
-                        boxShadow: '0 0 20px rgba(0, 255, 0, 0.5)'
+                        boxShadow: '0 0 20px rgba(0, 255, 0, 0.5)',
                     }}
                 >
                     TRIGGER EFFECT
@@ -247,22 +253,22 @@ export const PowerUpShowcase = () => {
                         fontFamily: "'Press Start 2P', cursive",
                         fontSize: '12px',
                         cursor: 'pointer',
-                        boxShadow: '0 0 20px rgba(255, 255, 0, 0.5)'
+                        boxShadow: '0 0 20px rgba(255, 255, 0, 0.5)',
                     }}
                 >
                     LEVEL UP
                 </button>
             </div>
 
-            <PowerUpEffect 
-                active={showEffect} 
+            <PowerUpEffect
+                active={showEffect}
                 position={position}
-                particleSymbol="⭐"
+                particleSymbol='⭐'
                 particleCount={16}
             />
 
-            <LevelUpAnimation 
-                active={showLevelUp} 
+            <LevelUpAnimation
+                active={showLevelUp}
                 level={5}
                 onComplete={() => setShowLevelUp(false)}
             />

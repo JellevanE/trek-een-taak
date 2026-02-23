@@ -1,4 +1,9 @@
-import http, { IncomingMessage, RequestListener, Server as HttpServer, ServerResponse } from 'node:http';
+import http, {
+    IncomingMessage,
+    RequestListener,
+    Server as HttpServer,
+    ServerResponse,
+} from 'node:http';
 import type { Socket } from 'node:net';
 import { PassThrough } from 'node:stream';
 
@@ -80,7 +85,10 @@ function safelyParseJson(value: string): unknown {
     }
 }
 
-async function invoke(app: RequestListener, options: TestClientRequestOptions = {}): Promise<TestClientResponse> {
+async function invoke(
+    app: RequestListener,
+    options: TestClientRequestOptions = {},
+): Promise<TestClientResponse> {
     const { method = 'GET', path = '/', headers = {}, body } = options;
     const normalizedHeaders = normalizeHeaders(headers);
     const payload = prepareRequestBody(body, normalizedHeaders);
@@ -128,11 +136,26 @@ async function invoke(app: RequestListener, options: TestClientRequestOptions = 
 
 export interface TestClient {
     request: (options: TestClientRequestOptions) => Promise<TestClientResponse>;
-    get: (path: string, options?: Omit<TestClientRequestOptions, 'path' | 'method'>) => Promise<TestClientResponse>;
-    post: (path: string, options?: Omit<TestClientRequestOptions, 'path' | 'method'>) => Promise<TestClientResponse>;
-    patch: (path: string, options?: Omit<TestClientRequestOptions, 'path' | 'method'>) => Promise<TestClientResponse>;
-    put: (path: string, options?: Omit<TestClientRequestOptions, 'path' | 'method'>) => Promise<TestClientResponse>;
-    delete: (path: string, options?: Omit<TestClientRequestOptions, 'path' | 'method'>) => Promise<TestClientResponse>;
+    get: (
+        path: string,
+        options?: Omit<TestClientRequestOptions, 'path' | 'method'>,
+    ) => Promise<TestClientResponse>;
+    post: (
+        path: string,
+        options?: Omit<TestClientRequestOptions, 'path' | 'method'>,
+    ) => Promise<TestClientResponse>;
+    patch: (
+        path: string,
+        options?: Omit<TestClientRequestOptions, 'path' | 'method'>,
+    ) => Promise<TestClientResponse>;
+    put: (
+        path: string,
+        options?: Omit<TestClientRequestOptions, 'path' | 'method'>,
+    ) => Promise<TestClientResponse>;
+    delete: (
+        path: string,
+        options?: Omit<TestClientRequestOptions, 'path' | 'method'>,
+    ) => Promise<TestClientResponse>;
 }
 
 export function createTestClient(app: RequestListener): TestClient {
@@ -142,6 +165,6 @@ export function createTestClient(app: RequestListener): TestClient {
         post: (path, options = {}) => invoke(app, { ...options, method: 'POST', path }),
         patch: (path, options = {}) => invoke(app, { ...options, method: 'PATCH', path }),
         put: (path, options = {}) => invoke(app, { ...options, method: 'PUT', path }),
-        delete: (path, options = {}) => invoke(app, { ...options, method: 'DELETE', path })
+        delete: (path, options = {}) => invoke(app, { ...options, method: 'DELETE', path }),
     };
 }

@@ -38,7 +38,7 @@ function parseTimestamp(filename: string): Date | null {
         Number(day),
         Number(hours),
         Number(minutes),
-        Number(seconds)
+        Number(seconds),
     );
 }
 
@@ -73,7 +73,7 @@ async function createBackup(options: BackupOptions): Promise<void> {
     }
 
     console.log(
-        `\n✅ Backup complete: ${fileCount} file(s), ${(totalSize / 1024).toFixed(2)} KB total`
+        `\n✅ Backup complete: ${fileCount} file(s), ${(totalSize / 1024).toFixed(2)} KB total`,
     );
     console.log(`   Location: ${backupSubDir}`);
 
@@ -127,7 +127,7 @@ async function listBackups(): Promise<void> {
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: false,
         });
         console.log(`   ${entry.name.padEnd(20)} ${dateStr.padEnd(22)} ${sizeKB.padStart(8)} KB`);
     }
@@ -243,7 +243,7 @@ async function main(): Promise<void> {
     const args = parse(Deno.args, {
         boolean: ['list', 'help', 'h'],
         string: ['restore', 'keep'],
-        alias: { h: 'help' }
+        alias: { h: 'help' },
     });
 
     if (args.help) {
@@ -254,7 +254,7 @@ async function main(): Promise<void> {
     const options: BackupOptions = {
         list: args.list,
         restore: args.restore,
-        keep: args.keep ? parseInt(args.keep, 10) : undefined
+        keep: args.keep ? parseInt(args.keep, 10) : undefined,
     };
 
     // Validate keep option

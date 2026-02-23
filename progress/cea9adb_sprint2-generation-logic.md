@@ -6,16 +6,16 @@
 
 ## Changed files
 
-| File | Reason |
-|------|--------|
-| `server/src/services/storyline.service.ts` | Full rewrite of generation logic (see details below) |
-| `server/src/services/ai/langchain.service.ts` | Added retry, timeout, system prompt support |
-| `server/src/services/ai/narrative-extractor.service.ts` | Extraction failure now falls back to previous state instead of re-throwing |
-| `server/src/services/prompt.service.ts` | Added `loadSystemPrompt()`, fixed `DAILY_UPDATE_VARIANTS` constant |
-| `server/src/config/storyline.config.ts` | Updated models to `claude-haiku-4-5-20251001` |
-| `server/src/prompts/fantasy/reflection.txt` | New: motivational update for days with no task completions |
-| `server/src/prompts/fantasy/completion.txt` | New: triumphant narrative for when a campaign reaches 100% |
-| `README.md` | Fixed ports: 3001/3000 → 4001/4000 (start-dev.sh was always using 4001/4000) |
+| File                                                    | Reason                                                                       |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `server/src/services/storyline.service.ts`              | Full rewrite of generation logic (see details below)                         |
+| `server/src/services/ai/langchain.service.ts`           | Added retry, timeout, system prompt support                                  |
+| `server/src/services/ai/narrative-extractor.service.ts` | Extraction failure now falls back to previous state instead of re-throwing   |
+| `server/src/services/prompt.service.ts`                 | Added `loadSystemPrompt()`, fixed `DAILY_UPDATE_VARIANTS` constant           |
+| `server/src/config/storyline.config.ts`                 | Updated models to `claude-haiku-4-5-20251001`                                |
+| `server/src/prompts/fantasy/reflection.txt`             | New: motivational update for days with no task completions                   |
+| `server/src/prompts/fantasy/completion.txt`             | New: triumphant narrative for when a campaign reaches 100%                   |
+| `README.md`                                             | Fixed ports: 3001/3000 → 4001/4000 (start-dev.sh was always using 4001/4000) |
 
 ## storyline.service.ts — detailed changes
 

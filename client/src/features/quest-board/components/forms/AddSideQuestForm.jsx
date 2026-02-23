@@ -9,7 +9,7 @@ export const AddSideQuestForm = ({
     onAdd,
     onCancel,
     onFocus,
-    onBlur
+    onBlur,
 }) => {
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
@@ -22,11 +22,11 @@ export const AddSideQuestForm = ({
     };
 
     return (
-        <div className="add-side-quest">
+        <div className='add-side-quest'>
             <input
                 ref={inputRef}
-                type="text"
-                placeholder="Add a side-quest"
+                type='text'
+                placeholder='Add a side-quest'
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
                 onFocus={onFocus}
@@ -34,7 +34,7 @@ export const AddSideQuestForm = ({
                 onKeyDown={handleKeyDown}
                 data-quest-id={questId}
             />
-            <button type="button" className="btn-link" onClick={onAdd}>Add</button>
+            <button type='button' className='btn-link' onClick={onAdd}>Add</button>
         </div>
     );
 };
@@ -44,20 +44,20 @@ AddSideQuestForm.propTypes = {
     value: PropTypes.string,
     inputRef: PropTypes.oneOfType([
         PropTypes.func,
-        PropTypes.shape({ current: PropTypes.any })
+        PropTypes.shape({ current: PropTypes.any }),
     ]),
     onChange: PropTypes.func.isRequired,
     onAdd: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
     onFocus: PropTypes.func,
-    onBlur: PropTypes.func
+    onBlur: PropTypes.func,
 };
 
 AddSideQuestForm.defaultProps = {
     value: '',
     inputRef: null,
     onFocus: undefined,
-    onBlur: undefined
+    onBlur: undefined,
 };
 
 export default AddSideQuestForm;

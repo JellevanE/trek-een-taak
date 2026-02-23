@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
  * Sound Converter & Compressor
- * 
+ *
  * Converts sound files to web-optimized formats (.webm and .mp3)
  * and compresses them to meet the 50kb requirement.
- * 
+ *
  * Requirements:
  * - ffmpeg must be installed (brew install ffmpeg on macOS)
- * 
+ *
  * Usage:
  * node convert-sounds.js
  */
@@ -23,11 +23,11 @@ const MAX_SIZE_BYTES = MAX_SIZE_KB * 1024;
 
 // Sound event mappings - customize these to match your desired sounds
 const SOUND_MAPPINGS = {
-    quest_add: null,          // Will auto-select best match
+    quest_add: null, // Will auto-select best match
     quest_complete: null,
     side_quest_add: null,
     priority_cycle: null,
-    level_up: null
+    level_up: null,
 };
 
 // ANSI color codes for terminal output
@@ -38,7 +38,7 @@ const colors = {
     yellow: '\x1b[33m',
     red: '\x1b[31m',
     cyan: '\x1b[36m',
-    gray: '\x1b[90m'
+    gray: '\x1b[90m',
 };
 
 function log(message, color = 'reset') {
@@ -68,16 +68,16 @@ function formatBytes(bytes) {
 
 function getSoundFiles() {
     return fs.readdirSync(SOUNDS_DIR)
-        .filter(file => {
+        .filter((file) => {
             const ext = path.extname(file).toLowerCase();
             return ['.wav', '.mp3', '.flac', '.ogg', '.webm'].includes(ext);
         })
-        .filter(file => file !== 'convert-sounds.js')
-        .map(file => ({
+        .filter((file) => file !== 'convert-sounds.js')
+        .map((file) => ({
             name: file,
             path: path.join(SOUNDS_DIR, file),
             size: getFileSize(path.join(SOUNDS_DIR, file)),
-            basename: path.basename(file, path.extname(file))
+            basename: path.basename(file, path.extname(file)),
         }));
 }
 
@@ -85,12 +85,12 @@ function convertToFormat(inputPath, outputPath, format, bitrate) {
     const formatOptions = {
         mp3: {
             codec: 'libmp3lame',
-            extraArgs: '-ar 22050 -ac 1'  // 22kHz mono for smaller size
+            extraArgs: '-ar 22050 -ac 1', // 22kHz mono for smaller size
         },
         webm: {
             codec: 'libopus',
-            extraArgs: '-ar 24000 -ac 1'  // 24kHz mono
-        }
+            extraArgs: '-ar 24000 -ac 1', // 24kHz mono
+        },
     };
 
     const opts = formatOptions[format];
@@ -98,7 +98,8 @@ function convertToFormat(inputPath, outputPath, format, bitrate) {
         throw new Error(`Unsupported format: ${format}`);
     }
 
-    const cmd = `ffmpeg -i "${inputPath}" -c:a ${opts.codec} -b:a ${bitrate}k ${opts.extraArgs} -y "${outputPath}" 2>&1`;
+    const cmd =
+        `ffmpeg -i "${inputPath}" -c:a ${opts.codec} -b:a ${bitrate}k ${opts.extraArgs} -y "${outputPath}" 2>&1`;
 
     try {
         execSync(cmd, { stdio: 'pipe' });
@@ -141,7 +142,7 @@ function processSound(soundFile, outputBasename) {
     const results = {
         original: soundFile,
         mp3: null,
-        webm: null
+        webm: null,
     };
 
     // Convert to MP3
@@ -154,7 +155,12 @@ function processSound(soundFile, outputBasename) {
         results.mp3 = { path: mp3Path, size: mp3Result.size, bitrate: mp3Result.bitrate };
     } else if (mp3Result.size > 0) {
         log(`   ⚠ MP3: ${formatBytes(mp3Result.size)} (exceeds 50kb limit)`, 'yellow');
-        results.mp3 = { path: mp3Path, size: mp3Result.size, bitrate: mp3Result.bitrate, oversize: true };
+        results.mp3 = {
+            path: mp3Path,
+            size: mp3Result.size,
+            bitrate: mp3Result.bitrate,
+            oversize: true,
+        };
     } else {
         log(`   ✗ MP3 conversion failed`, 'red');
     }
@@ -169,7 +175,12 @@ function processSound(soundFile, outputBasename) {
         results.webm = { path: webmPath, size: webmResult.size, bitrate: webmResult.bitrate };
     } else if (webmResult.size > 0) {
         log(`   ⚠ WebM: ${formatBytes(webmResult.size)} (exceeds 50kb limit)`, 'yellow');
-        results.webm = { path: webmPath, size: webmResult.size, bitrate: webmResult.bitrate, oversize: true };
+        results.webm = {
+            path: webmPath,
+            size: webmResult.size,
+            bitrate: webmResult.bitrate,
+            oversize: true,
+        };
     } else {
         log(`   ✗ WebM conversion failed`, 'red');
     }
@@ -247,7 +258,10 @@ function main() {
         if (result.mp3) {
             const status = result.mp3.oversize ? '⚠' : '✓';
             const color = result.mp3.oversize ? 'yellow' : 'green';
-            log(`  ${status} MP3:  ${formatBytes(result.mp3.size)} @ ${result.mp3.bitrate}kbps`, color);
+            log(
+                `  ${status} MP3:  ${formatBytes(result.mp3.size)} @ ${result.mp3.bitrate}kbps`,
+                color,
+            );
             if (!result.mp3.oversize) fileSuccess = true;
         } else {
             log(`  ✗ MP3: conversion failed`, 'red');
@@ -256,7 +270,10 @@ function main() {
         if (result.webm) {
             const status = result.webm.oversize ? '⚠' : '✓';
             const color = result.webm.oversize ? 'yellow' : 'green';
-            log(`  ${status} WebM: ${formatBytes(result.webm.size)} @ ${result.webm.bitrate}kbps`, color);
+            log(
+                `  ${status} WebM: ${formatBytes(result.webm.size)} @ ${result.webm.bitrate}kbps`,
+                color,
+            );
             if (!result.webm.oversize) fileSuccess = true;
         } else {
             log(`  ✗ WebM: conversion failed`, 'red');
@@ -274,7 +291,10 @@ function main() {
     log('\n' + '='.repeat(70), 'bright');
     log(`\n✅ Successfully converted: ${successCount} files (under 50kb)`, 'green');
     if (oversizeCount > 0) {
-        log(`⚠️  Oversized: ${oversizeCount} files (over 50kb - you may want to use shorter clips)`, 'yellow');
+        log(
+            `⚠️  Oversized: ${oversizeCount} files (over 50kb - you may want to use shorter clips)`,
+            'yellow',
+        );
     }
     if (failCount > 0) {
         log(`❌ Failed: ${failCount} files`, 'red');
@@ -290,10 +310,10 @@ function main() {
 
     log('Example configuration for theme/index.js:', 'yellow');
     log('\n[SOUND_EVENT_KEYS.QUEST_ADD]: {', 'gray');
-    log('    label: \'Quest added\',', 'gray');
+    log("    label: 'Quest added',", 'gray');
     log('    sources: [', 'gray');
-    log('        { src: \'/theme/sounds/yourfile.webm\', type: \'audio/webm\' },', 'gray');
-    log('        { src: \'/theme/sounds/yourfile.mp3\', type: \'audio/mpeg\' }', 'gray');
+    log("        { src: '/theme/sounds/yourfile.webm', type: 'audio/webm' },", 'gray');
+    log("        { src: '/theme/sounds/yourfile.mp3', type: 'audio/mpeg' }", 'gray');
     log('    ]', 'gray');
     log('},\n', 'gray');
 
