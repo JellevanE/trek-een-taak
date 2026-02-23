@@ -15,7 +15,7 @@ npm install
 npm start
 ```
 
-The API will be available at http://localhost:3001
+The API will be available at http://localhost:4001
 
 2. Start the frontend (in another terminal):
 
@@ -25,7 +25,7 @@ npm install
 npm start
 ```
 
-Open http://localhost:3000 to view the app.
+Open http://localhost:4000 to view the app.
 
 Start both services with convenience script
 -----------------------------------------

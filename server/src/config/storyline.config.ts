@@ -1,7 +1,7 @@
 export const storylineConfig = {
     claude: {
-        model: 'claude-3-haiku-20240307', // Downgraded to Haiku as Sonnet 3.5 is not available for this key
-        extractorModel: 'claude-3-haiku-20240307',
+        model: 'claude-haiku-4-5-20251001',
+        extractorModel: 'claude-haiku-4-5-20251001',
         maxTokens: 1000,
         temperature: 0.8,
     },

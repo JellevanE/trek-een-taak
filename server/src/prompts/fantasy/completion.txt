@@ -1,0 +1,19 @@
+Campaign: {campaignName}
+Hero: {userName}, Level {userLevel} {userClass}
+
+Narrative Context:
+Summary: {narrativeSummary}
+Characters: {characters}
+Locations: {locations}
+
+All Quests Completed:
+{tasksCompleted}
+
+Create a triumphant campaign completion story (200-300 words) that:
+- Celebrates the hero's victory and the end of this chapter of their adventure
+- References the full journey and the hardships overcome
+- Names key characters and locations that shaped the story
+- Ends with a sense of closure and the promise of new adventures ahead
+
+Style: Classic fantasy RPG (grand finale)
+Tone: Triumphant and epic
