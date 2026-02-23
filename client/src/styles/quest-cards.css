@@ -80,6 +80,7 @@
     justify-content:space-between;
     align-items:center;
     gap:var(--quest-card-gap);
+    flex-wrap: wrap;
 }
 
 .quest-card-shell{
@@ -99,7 +100,7 @@
 .task-header .left,
 .quest-header .left{ display:flex; flex-direction:column; align-items:flex-start; gap:var(--arcade-space-xs); flex:1; min-width:0 }
 .task-header .right,
-.quest-header .right{ display:flex; align-items:center; justify-content:flex-end }
+.quest-header .right{ display:flex; align-items:center; justify-content:flex-end; flex-shrink: 0; }
 
 .quest-title-row{
     width:100%;

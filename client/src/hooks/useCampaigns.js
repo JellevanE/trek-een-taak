@@ -9,7 +9,7 @@ export const useCampaigns = ({
     reloadTasksRef
 }) => {
     const [campaigns, setCampaigns] = useState([]);
-    const [campaignSidebarCollapsed, setCampaignSidebarCollapsed] = useState(false);
+    const [campaignSidebarCollapsed, setCampaignSidebarCollapsed] = useState(true);
     const [activeCampaignFilter, setActiveCampaignFilter] = useState(null);
     const [taskCampaignSelection, setTaskCampaignSelection] = useState(null);
     const [campaignFormMode, setCampaignFormMode] = useState(null);
@@ -52,14 +52,14 @@ export const useCampaigns = ({
             setCampaigns([]);
             return null;
         }
-        
+
         try {
             const data = await apiFetch(
                 '/api/campaigns',
                 { headers: getAuthHeadersUtil(token) },
                 onUnauthorized
             );
-            
+
             if (data && Array.isArray(data.campaigns)) {
                 setCampaigns(data.campaigns);
             } else {
@@ -205,7 +205,7 @@ export const useCampaigns = ({
                     },
                     onUnauthorized
                 );
-                
+
                 closeCampaignForm();
                 pushToast('Campaign updated', 'success');
                 const reloadTasks = reloadTasksRef.current;
