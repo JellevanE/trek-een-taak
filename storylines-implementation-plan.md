@@ -1,37 +1,42 @@
 # Implementation Plan: Campaign Storylines
 
 ## Overview
+
 Add narrative storylines to campaigns with daily updates, quest log, and typewriter text effects. Start with classic fantasy theme, but architect for future flexibility.
 
 ## Quick Reference: Key Decisions
 
 **Architecture:**
+
 - Storyline is a **separate entity** linked to Campaign via `storylineId`
 - **One storyline per campaign** (expandable later)
 - **Automatic creation** - every campaign gets a storyline
 - **Cascade delete** - storyline deleted when campaign is deleted
 
 **Generation:**
+
 - **Daily updates** group all completed tasks into one narrative per campaign
 - **Two-call process**: Sonnet 4.5 for story text, Haiku 4.5 for extracting narrative state
 - **Includes subtasks** in story generation alongside main tasks
 - **Async generation** (no queue system for V1)
 
 **Security & Limits:**
+
 - **Rate limiting**: 10 generations/day per user, max 5 active storyline campaigns
 - **Input validation**: Length checks and sanitization to prevent prompt injection
 - **API key** in `.env` file
 
 **Frontend:**
+
 - **Separate zustand store** (`useStorylineStore`)
 - **Campaign page redesign** - collapsible panel → full page with tabs
 - **Typewriter effect** is core UX, not polish
 - **Desktop-first** - mobile not prioritized for V1
 
 **Development:**
+
 - **Local dev only** - no migration needed, can wipe storage
 - **Fantasy theme first** - architecture supports future themes
-
 
 ---
 
@@ -43,37 +48,37 @@ Add narrative storylines to campaigns with daily updates, quest log, and typewri
 
 ```typescript
 interface Storyline {
-  id: string;
-  campaignId: string;
-  theme: 'fantasy' | 'scifi' | 'mystery'; // extensible
-  
-  // Narrative State (for LLM context)
-  narrativeState: {
-    chapter: number;
-    currentObjective: string;
-    summary: string;
-    characters: string[];
-    locations: string[];
-    keyPlotPoints: string[];
-    progressPercentage: number; // based on campaign completion
-  };
-  
-  // Story History (for quest log display)
-  updates: StoryUpdate[];
-  
-  // Metadata
-  createdAt: string;
-  lastGeneratedAt: string;
-  lastVisitDate: string;
-  generationFailures: number; // track consecutive failures
+    id: string;
+    campaignId: string;
+    theme: 'fantasy' | 'scifi' | 'mystery'; // extensible
+
+    // Narrative State (for LLM context)
+    narrativeState: {
+        chapter: number;
+        currentObjective: string;
+        summary: string;
+        characters: string[];
+        locations: string[];
+        keyPlotPoints: string[];
+        progressPercentage: number; // based on campaign completion
+    };
+
+    // Story History (for quest log display)
+    updates: StoryUpdate[];
+
+    // Metadata
+    createdAt: string;
+    lastGeneratedAt: string;
+    lastVisitDate: string;
+    generationFailures: number; // track consecutive failures
 }
 
 interface StoryUpdate {
-  id: string;
-  type: 'intro' | 'daily' | 'completion' | 'reflection'; // extensible
-  text: string;
-  generatedAt: string;
-  tasksCompleted: string[]; // task IDs referenced in this update
+    id: string;
+    type: 'intro' | 'daily' | 'completion' | 'reflection'; // extensible
+    text: string;
+    generatedAt: string;
+    tasksCompleted: string[]; // task IDs referenced in this update
 }
 ```
 
@@ -83,8 +88,8 @@ interface StoryUpdate {
 
 ```typescript
 interface Campaign {
-  // ... existing fields
-  storylineId?: string; // optional - campaigns can exist without storylines
+    // ... existing fields
+    storylineId?: string; // optional - campaigns can exist without storylines
 }
 ```
 
@@ -103,6 +108,7 @@ Initialize as empty array, managed similar to tasks/campaigns.
 **File:** `server/src/services/storyline.service.ts`
 
 Key methods:
+
 - `createStoryline(campaignId, userId)` - **Automatically called** when campaign is created
 - `checkAndGenerateUpdate(storylineId, userId)` - Called on campaign load
 - `getStoryline(storylineId)` - Fetch for display
@@ -112,11 +118,13 @@ Key methods:
 ### 2.2 Campaign Lifecycle Integration
 
 **Campaign Creation:**
+
 - When a new campaign is created, automatically create an associated storyline
 - `POST /api/campaigns` should call `storylineService.createStoryline()` after campaign creation
 - Generate intro update immediately (or queue for async generation)
 
 **Campaign Deletion:**
+
 - When a campaign is deleted, cascade delete its storyline
 - `DELETE /api/campaigns/:id` should call `storylineService.deleteStoryline()`
 - Removes storyline and all associated updates from storage
@@ -151,6 +159,7 @@ GET    /api/storylines/:id/updates     - Get all updates (quest log)
 **File:** `server/src/services/ai/claude.service.ts`
 
 **Core functionality:**
+
 - Use Anthropic SDK (`@anthropic-ai/sdk`)
 - Configurable model (claude-sonnet-4-20250514)
 - Retry logic (3 attempts with exponential backoff)
@@ -158,16 +167,19 @@ GET    /api/storylines/:id/updates     - Get all updates (quest log)
 - Response validation (ensure text is generated)
 
 **Configuration:**
+
 - API key stored in `.env` file: `ANTHROPIC_API_KEY=sk-ant-...`
 - Model and temperature configurable via `storyline.config.ts`
 - Timeout: 30 seconds per generation
 
 **Security:**
+
 - Input sanitization for all user-provided content (campaign names, task descriptions)
 - Strip/escape any potential prompt injection attempts
 - Validate input lengths before sending to Claude
 
 **Rate Limiting:**
+
 - Track generation requests per user
 - Limit: Maximum 10 storyline generations per user per day (configurable)
 - Limit: Maximum 5 active campaigns with storylines per user
@@ -181,12 +193,14 @@ After generating story text, we need to extract/update structured narrative stat
 **File:** `server/src/services/ai/narrative-extractor.service.ts`
 
 **Process:**
+
 1. After story text is generated, make a second call to Claude
 2. Use a smaller/cheaper model (e.g., `claude-haiku-4-20250514`) for cost efficiency
 3. Provide the generated story text + previous narrative state
 4. Request structured JSON output with specific fields
 
 **Extraction Prompt Template:**
+
 ```
 Given this story update and previous narrative state, extract the following information as JSON:
 
@@ -210,6 +224,7 @@ Return ONLY valid JSON, no other text.
 ```
 
 **Cost Optimization:**
+
 - Consider batching multiple storyline extractions in one call (if processing multiple campaigns)
 - Cache extraction results to avoid re-processing
 - Use Haiku model for extraction (cheaper, sufficient for structured tasks)
@@ -243,13 +258,14 @@ Use simple template strings with variable injection:
 ```typescript
 // server/src/services/prompt.service.ts
 class PromptService {
-  loadTemplate(theme: string, type: string): string;
-  injectVariables(template: string, variables: Record<string, any>): string;
-  getRandomVariant(theme: string, type: 'daily-update'): string;
+    loadTemplate(theme: string, type: string): string;
+    injectVariables(template: string, variables: Record<string, any>): string;
+    getRandomVariant(theme: string, type: 'daily-update'): string;
 }
 ```
 
 Variables available:
+
 - `{{userName}}`
 - `{{userLevel}}`
 - `{{userClass}}`
@@ -293,22 +309,23 @@ Tone: Heroic and adventurous
 
 ```typescript
 interface StorylineState {
-  storylines: Record<string, Storyline>;
-  currentStoryline: Storyline | null;
-  isGenerating: boolean;
-  hasNewUpdate: boolean;
-  error: string | null;
-  
-  // Actions
-  fetchStoryline: (campaignId: string) => Promise<void>;
-  checkForUpdate: (campaignId: string) => Promise<void>;
-  markUpdateAsRead: () => void;
+    storylines: Record<string, Storyline>;
+    currentStoryline: Storyline | null;
+    isGenerating: boolean;
+    hasNewUpdate: boolean;
+    error: string | null;
+
+    // Actions
+    fetchStoryline: (campaignId: string) => Promise<void>;
+    checkForUpdate: (campaignId: string) => Promise<void>;
+    markUpdateAsRead: () => void;
 }
 ```
 
 ### 4.2 Integration with Campaign Store
 
 Campaign store should:
+
 - Trigger `checkForUpdate()` when campaign is loaded
 - Display notification badge if `hasNewUpdate === true`
 
@@ -319,26 +336,32 @@ Campaign store should:
 ### 5.1 Core Components
 
 **TypewriterText Component**
+
 ```
 client/src/components/story/TypewriterText.tsx
 ```
+
 - Character-by-character animation
 - Configurable speed (default: 30ms per char)
 - Skip button to show full text immediately
 - Pause on punctuation (.,!?) for natural rhythm
 
 **StoryUpdateModal**
+
 ```
 client/src/components/story/StoryUpdateModal.tsx
 ```
+
 - Shows new daily update with typewriter effect
 - "Continue" button to advance through paragraphs
 - Stores completion state in local storage
 
 **QuestLog**
+
 ```
 client/src/components/story/QuestLog.tsx
 ```
+
 - Timeline view of all story updates
 - Grouped by date
 - Click to expand full text
@@ -386,31 +409,31 @@ Campaign Page
 
 ```typescript
 function determineUpdateType(storyline: Storyline, user: User): UpdateType {
-  const today = new Date().toDateString();
-  const lastVisit = new Date(storyline.lastVisitDate).toDateString();
-  
-  // First visit ever
-  if (!storyline.updates.length) return 'intro';
-  
-  // Campaign completed
-  if (storyline.narrativeState.progressPercentage >= 100) {
-    return 'completion';
-  }
-  
-  // Same day, already generated
-  if (today === lastVisit) return null;
-  
-  // New day, check for completed tasks since last visit
-  const tasksCompletedSinceLastVisit = getCompletedTasksSince(
-    storyline.campaignId, 
-    storyline.lastVisitDate
-  );
-  
-  if (tasksCompletedSinceLastVisit.length > 0) {
-    return 'daily'; // with task progress
-  } else {
-    return 'reflection'; // no progress, motivational
-  }
+    const today = new Date().toDateString();
+    const lastVisit = new Date(storyline.lastVisitDate).toDateString();
+
+    // First visit ever
+    if (!storyline.updates.length) return 'intro';
+
+    // Campaign completed
+    if (storyline.narrativeState.progressPercentage >= 100) {
+        return 'completion';
+    }
+
+    // Same day, already generated
+    if (today === lastVisit) return null;
+
+    // New day, check for completed tasks since last visit
+    const tasksCompletedSinceLastVisit = getCompletedTasksSince(
+        storyline.campaignId,
+        storyline.lastVisitDate,
+    );
+
+    if (tasksCompletedSinceLastVisit.length > 0) {
+        return 'daily'; // with task progress
+    } else {
+        return 'reflection'; // no progress, motivational
+    }
 }
 ```
 
@@ -420,49 +443,49 @@ function determineUpdateType(storyline: Storyline, user: User): UpdateType {
 
 ```typescript
 function buildGenerationContext(
-  storyline: Storyline,
-  campaign: Campaign,
-  user: User,
-  recentTasks: Task[]
+    storyline: Storyline,
+    campaign: Campaign,
+    user: User,
+    recentTasks: Task[],
 ): GenerationContext {
-  // Helper to extract subtasks from tasks
-  const getAllSubtasks = (tasks: Task[]) => {
-    return tasks.flatMap(t => t.subtasks || []);
-  };
-  
-  return {
-    userName: user.name,
-    userLevel: user.stats.level,
-    userClass: user.stats.class,
-    campaignName: campaign.name,
-    campaignDescription: campaign.description,
-    
-    // Narrative continuity
-    narrativeSummary: storyline.narrativeState.summary,
-    currentObjective: storyline.narrativeState.currentObjective,
-    currentChapter: storyline.narrativeState.chapter,
-    characters: storyline.narrativeState.characters.join(', '),
-    locations: storyline.narrativeState.locations.join(', '),
-    
-    // Recent context (last 3 updates)
-    recentUpdates: storyline.updates.slice(-3).map(u => u.text).join('\n\n'),
-    
-    // Current progress (includes main tasks AND subtasks)
-    tasksCompleted: recentTasks
-      .filter(t => t.status === 'done')
-      .map(t => ({
-        task: t.description,
-        subtasks: getAllSubtasks([t]).filter(st => st.status === 'done')
-      })),
-    tasksInProgress: recentTasks
-      .filter(t => t.status === 'in_progress')
-      .map(t => t.description),
-    tasksUpcoming: recentTasks
-      .filter(t => t.status === 'todo')
-      .map(t => t.description),
-    
-    progressPercentage: storyline.narrativeState.progressPercentage
-  };
+    // Helper to extract subtasks from tasks
+    const getAllSubtasks = (tasks: Task[]) => {
+        return tasks.flatMap((t) => t.subtasks || []);
+    };
+
+    return {
+        userName: user.name,
+        userLevel: user.stats.level,
+        userClass: user.stats.class,
+        campaignName: campaign.name,
+        campaignDescription: campaign.description,
+
+        // Narrative continuity
+        narrativeSummary: storyline.narrativeState.summary,
+        currentObjective: storyline.narrativeState.currentObjective,
+        currentChapter: storyline.narrativeState.chapter,
+        characters: storyline.narrativeState.characters.join(', '),
+        locations: storyline.narrativeState.locations.join(', '),
+
+        // Recent context (last 3 updates)
+        recentUpdates: storyline.updates.slice(-3).map((u) => u.text).join('\n\n'),
+
+        // Current progress (includes main tasks AND subtasks)
+        tasksCompleted: recentTasks
+            .filter((t) => t.status === 'done')
+            .map((t) => ({
+                task: t.description,
+                subtasks: getAllSubtasks([t]).filter((st) => st.status === 'done'),
+            })),
+        tasksInProgress: recentTasks
+            .filter((t) => t.status === 'in_progress')
+            .map((t) => t.description),
+        tasksUpcoming: recentTasks
+            .filter((t) => t.status === 'todo')
+            .map((t) => t.description),
+
+        progressPercentage: storyline.narrativeState.progressPercentage,
+    };
 }
 ```
 
@@ -472,47 +495,47 @@ Before building context or sending to Claude, validate all user input:
 
 ```typescript
 function validateInputs(campaign: Campaign, tasks: Task[]): void {
-  const MAX_NAME_LENGTH = 200;
-  const MAX_DESCRIPTION_LENGTH = 1000;
-  
-  // Validate campaign
-  if (campaign.name.length > MAX_NAME_LENGTH) {
-    throw new ValidationError('Campaign name too long');
-  }
-  if (campaign.description?.length > MAX_DESCRIPTION_LENGTH) {
-    throw new ValidationError('Campaign description too long');
-  }
-  
-  // Validate tasks and subtasks
-  tasks.forEach(task => {
-    if (task.description.length > MAX_DESCRIPTION_LENGTH) {
-      throw new ValidationError('Task description too long');
+    const MAX_NAME_LENGTH = 200;
+    const MAX_DESCRIPTION_LENGTH = 1000;
+
+    // Validate campaign
+    if (campaign.name.length > MAX_NAME_LENGTH) {
+        throw new ValidationError('Campaign name too long');
     }
-    
-    task.subtasks?.forEach(subtask => {
-      if (subtask.description.length > MAX_DESCRIPTION_LENGTH) {
-        throw new ValidationError('Subtask description too long');
-      }
+    if (campaign.description?.length > MAX_DESCRIPTION_LENGTH) {
+        throw new ValidationError('Campaign description too long');
+    }
+
+    // Validate tasks and subtasks
+    tasks.forEach((task) => {
+        if (task.description.length > MAX_DESCRIPTION_LENGTH) {
+            throw new ValidationError('Task description too long');
+        }
+
+        task.subtasks?.forEach((subtask) => {
+            if (subtask.description.length > MAX_DESCRIPTION_LENGTH) {
+                throw new ValidationError('Subtask description too long');
+            }
+        });
     });
-  });
-  
-  // Sanitize for prompt injection
-  sanitizeForPrompt(campaign.name);
-  sanitizeForPrompt(campaign.description);
-  tasks.forEach(t => {
-    sanitizeForPrompt(t.description);
-    t.subtasks?.forEach(st => sanitizeForPrompt(st.description));
-  });
+
+    // Sanitize for prompt injection
+    sanitizeForPrompt(campaign.name);
+    sanitizeForPrompt(campaign.description);
+    tasks.forEach((t) => {
+        sanitizeForPrompt(t.description);
+        t.subtasks?.forEach((st) => sanitizeForPrompt(st.description));
+    });
 }
 
 function sanitizeForPrompt(text: string): string {
-  // Remove or escape potential injection patterns
-  return text
-    .replace(/\{\{/g, '') // Remove template markers
-    .replace(/\}\}/g, '')
-    .replace(/<prompt>/gi, '') // Remove XML-like tags
-    .replace(/<\/prompt>/gi, '')
-    .trim();
+    // Remove or escape potential injection patterns
+    return text
+        .replace(/\{\{/g, '') // Remove template markers
+        .replace(/\}\}/g, '')
+        .replace(/<prompt>/gi, '') // Remove XML-like tags
+        .replace(/<\/prompt>/gi, '')
+        .trim();
 }
 ```
 
@@ -547,39 +570,40 @@ After Claude returns story text:
 
 ```typescript
 export const storylineConfig = {
-  claude: {
-    model: 'claude-sonnet-4-20250514',
-    extractorModel: 'claude-haiku-4-20250514', // cheaper model for extraction
-    maxTokens: 1000,
-    temperature: 0.8,
-  },
-  generation: {
-    retryAttempts: 3,
-    timeoutMs: 30000,
-    maxHistoryUpdates: 3, // how many past updates to include in context
-  },
-  rateLimits: {
-    maxGenerationsPerDay: 10, // per user
-    maxActiveCampaignsWithStorylines: 5, // per user
-  },
-  validation: {
-    maxCampaignNameLength: 200,
-    maxDescriptionLength: 1000,
-    maxTaskDescriptionLength: 1000,
-  },
-  themes: {
-    fantasy: {
-      defaultTone: 'heroic',
-      systemPromptFile: 'fantasy/system.txt',
+    claude: {
+        model: 'claude-sonnet-4-20250514',
+        extractorModel: 'claude-haiku-4-20250514', // cheaper model for extraction
+        maxTokens: 1000,
+        temperature: 0.8,
     },
-    // future themes here
-  },
+    generation: {
+        retryAttempts: 3,
+        timeoutMs: 30000,
+        maxHistoryUpdates: 3, // how many past updates to include in context
+    },
+    rateLimits: {
+        maxGenerationsPerDay: 10, // per user
+        maxActiveCampaignsWithStorylines: 5, // per user
+    },
+    validation: {
+        maxCampaignNameLength: 200,
+        maxDescriptionLength: 1000,
+        maxTaskDescriptionLength: 1000,
+    },
+    themes: {
+        fantasy: {
+            defaultTone: 'heroic',
+            systemPromptFile: 'fantasy/system.txt',
+        },
+        // future themes here
+    },
 };
 ```
 
 ### 7.3 Extensibility Points
 
 **For future features:**
+
 - Add new `updateType` values (e.g., 'decision', 'event', 'unlock')
 - Add `InteractiveDecision` type with choices array
 - Add `unlockables: { images: [], glyphs: [] }` to narrative state
@@ -590,6 +614,7 @@ export const storylineConfig = {
 ## Implementation Order
 
 ### Sprint 1: Backend Foundation
+
 1. [x] Create `Storyline` data model
 2. [x] Add `storylineId` to Campaign model
 3. [x] Create storyline service with basic CRUD
@@ -600,6 +625,7 @@ export const storylineConfig = {
 8. [ ] **Implement rate limiting middleware** (generation limits per user/day)
 
 ### Sprint 2: Generation Logic
+
 1. **Implement input validation and sanitization** (length checks, prompt injection prevention)
 2. Implement `checkAndGenerateUpdate()` with update type determination
 3. Build context generation (including subtasks)
@@ -610,12 +636,18 @@ export const storylineConfig = {
 8. **Test narrative state extraction accuracy**
 
 ### Sprint 3: Frontend State & API
-1. Create `useStorylineStore`
-2. Add API client methods
-3. Integrate with campaign loading flow
-4. Add notification system
+
+**Decision:** Replace Zustand `useStorylineStore` with a `useStoryline` custom hook.
+The Zustand store read tokens directly from `localStorage`, used hardcoded `http://localhost:4001` URLs (bypassing the CRA proxy), and never passed `onUnauthorized` to `apiFetch` — so 401 responses silently failed instead of triggering logout. A hook following the same pattern as `useCampaigns` fixes all three issues and keeps auth handling consistent across the codebase.
+
+1. Create `useStoryline` hook (replaces Zustand store)
+2. Rewire `useQuestBoard` to use the new hook
+3. Delete old `storylineStore.js`
+4. Add notification dot on campaign sidebar
+5. Wire `onMarkAsRead` into StorylineCard
 
 ### Sprint 4: UI Components
+
 1. Build `TypewriterText` component
 2. Build `StoryUpdateModal`
 3. Build `QuestLog` component
@@ -623,6 +655,7 @@ export const storylineConfig = {
 5. Wire everything together
 
 ### Sprint 5: Polish & Testing
+
 1. Fine-tune prompts based on testing
 2. Optimize typewriter timing/UX
 3. Add loading states and transitions
@@ -633,12 +666,12 @@ export const storylineConfig = {
 
 ## Testing Strategy
 
-- **Unit tests:** 
+- **Unit tests:**
   - Prompt template injection and variable replacement
   - Update type determination logic
   - Input validation and sanitization functions
   - Rate limiting logic
-- **Integration tests:** 
+- **Integration tests:**
   - Full generation flow with mocked Claude
   - Narrative extraction service with sample outputs
   - Campaign creation → storyline creation hook
@@ -647,12 +680,12 @@ export const storylineConfig = {
   - Prompt injection attempts (malicious campaign/task names)
   - Length validation enforcement
   - Rate limit enforcement
-- **Manual testing:** 
+- **Manual testing:**
   - Multiple campaigns with different themes/progress levels
   - Complete 10+ tasks in one day, verify single grouped update
   - Test with and without subtasks
   - Verify narrative state extraction accuracy (characters, locations, objectives)
-- **Prompt testing:** 
+- **Prompt testing:**
   - Generate 20+ storylines, review for quality/consistency
   - Test reflection updates (no task completion)
   - Test completion updates (100% progress)
@@ -672,14 +705,15 @@ export const storylineConfig = {
 ## Risks & Mitigation
 
 ### Technical Risks:
+
 1. **Narrative state extraction failures**
    - Risk: Claude might not return valid JSON or miss key elements
    - Mitigation: Strict validation, retry logic, fallback to previous state if extraction fails
-   
+
 2. **File I/O bottlenecks**
    - Risk: `storylines.json` grows large with 100+ updates per campaign
    - Mitigation: Plan database migration for production; acceptable for local dev/prototype
-   
+
 3. **Generation cost explosion**
    - Risk: Users spam campaign creation or abuse system
    - Mitigation: Rate limiting (10/day), max 5 active campaigns, input validation
@@ -693,6 +727,7 @@ export const storylineConfig = {
    - Mitigation: Include narrative state in context, test extensively, tune prompts iteratively
 
 ### UX Risks:
+
 1. **Generation latency**
    - Risk: 5-10 second wait frustrates users
    - Mitigation: Show previous update while generating, add loading states, async processing
@@ -702,6 +737,7 @@ export const storylineConfig = {
    - Mitigation: Configurable speed (future), skip button, pause on punctuation for rhythm
 
 ### Future Architecture Risks:
+
 1. **File-based storage limits scalability**
    - Risk: Hard to transition to multi-user production
    - Mitigation: Already planning database migration; keep data structure compatible
@@ -715,6 +751,7 @@ export const storylineConfig = {
 ## Notes from Planning Session
 
 ### Key Decisions Made:
+
 1. **Storyline as separate entity** - Not nested in Campaign, allows future flexibility
 2. **One storyline per campaign initially** - Keep it simple, expand later if needed
 3. **Automatic storyline creation** - Every new campaign gets a storyline, no opt-in/opt-out for V1
@@ -735,6 +772,7 @@ export const storylineConfig = {
 18. **Notification UX details deferred** - Basic implementation for V1, detailed design later
 
 ### Implementation Notes:
+
 - **Environment:** API key in `.env` file (`ANTHROPIC_API_KEY`)
 - **Models:** Sonnet 4.5 for generation, Haiku 4.5 for extraction
 - **Rate Limits:** 10 generations/day per user, max 5 active storyline campaigns per user
@@ -743,6 +781,7 @@ export const storylineConfig = {
 - **Batching consideration:** May batch multiple extractions for cost efficiency (future optimization)
 
 ### Future Possibilities (Out of Scope for V1):
+
 - User settings/preferences (typewriter speed, update frequency)
 - Opt-in/opt-out for storylines
 - Pause/resume storylines
