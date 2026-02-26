@@ -16,7 +16,7 @@ const QuestListRow = (
             value={item}
             dragControls={controls}
             dragListener={false}
-            dragElastic={0.12}
+            dragElastic={0.08}
             dragMomentum={false}
             dragTransition={{
                 power: 0.1,
@@ -37,8 +37,8 @@ const QuestListRow = (
                 layout: {
                     type: 'spring',
                     stiffness: 300,
-                    damping: 30,
-                    mass: 1,
+                    damping: 40,
+                    mass: 0.8,
                 },
             }}
             whileDrag={{
@@ -54,7 +54,10 @@ const QuestListRow = (
             }}
         >
             <div style={{ width: '100%' }}>
-                {renderItem(item, dragMeta.isDragging, dragMeta)}
+                {renderItem(item, dragMeta.isDragging, {
+                    ...dragMeta,
+                    listIsDragging,
+                })}
             </div>
         </Reorder.Item>
     );
@@ -119,9 +122,15 @@ export const FramerQuestList = ({
         }
     }, [onReorder, onDragEnd]);
 
+    const reorderCooldownRef = React.useRef(false);
     const handleReorder = React.useCallback((next) => {
+        if (reorderCooldownRef.current) return;
+        reorderCooldownRef.current = true;
         setOrder(next);
         latestOrderRef.current = next;
+        setTimeout(() => {
+            reorderCooldownRef.current = false;
+        }, 150);
     }, []);
 
     if (!order || order.length === 0) {
@@ -131,7 +140,6 @@ export const FramerQuestList = ({
     return (
         <Reorder.Group
             ref={containerRef}
-            key={`quest-list-${refreshToken}`}
             axis='y'
             values={order}
             onReorder={handleReorder}

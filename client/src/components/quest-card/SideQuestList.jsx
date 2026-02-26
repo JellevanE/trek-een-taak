@@ -32,13 +32,6 @@ const SideQuestItem = ({
         idsMatch(editingSideQuest.questId, quest.id) &&
         idsMatch(editingSideQuest.sideQuestId, sideQuest.id));
 
-    // DEBUG: Trace side quest editing
-    if (sideEditing) {
-        console.log(
-            `[SideQuestItem:${sideQuest.id}] editing. Value: '${editingSideQuest?.description}'`,
-        );
-    }
-
     const sideKey = `${quest.id}:${sideQuest.id}`;
     const sideHandleProps = dragMeta?.handleProps || {};
     const sideHandleStyle = {

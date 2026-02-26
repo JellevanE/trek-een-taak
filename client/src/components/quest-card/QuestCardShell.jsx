@@ -55,8 +55,12 @@ export const QuestCardShell = ({
         <AnimatedQuestCard
             isNew={isNew}
             isCompleting={isCelebrating}
-            whileHover={!isDragging ? { scale: 1.015, transition: { duration: 0.2 } } : undefined}
-            whileTap={!isDragging ? { scale: 0.985 } : undefined}
+            whileHover={!isDragging && !dragMeta?.listIsDragging
+                ? { scale: 1.015, transition: { duration: 0.2 } }
+                : undefined}
+            whileTap={!isDragging && !dragMeta?.listIsDragging
+                ? { scale: 0.985 }
+                : undefined}
         >
             <div
                 role='button'

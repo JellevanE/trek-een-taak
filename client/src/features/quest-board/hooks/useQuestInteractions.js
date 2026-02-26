@@ -99,11 +99,6 @@ export const useQuestInteractions = ({
         scheduleLayoutRefresh,
         quests,
         collapsedMap,
-        selectedQuestId,
-        selectedSideQuest,
-        editingQuest,
-        editingSideQuest,
-        addingSideQuestTo,
     ]);
 
     const addTask = useCallback(async () => {

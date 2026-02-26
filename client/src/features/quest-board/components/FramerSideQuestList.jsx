@@ -17,7 +17,7 @@ const SideQuestRow = (
             value={item}
             dragControls={controls}
             dragListener={false}
-            dragElastic={0.1}
+            dragElastic={0.08}
             dragMomentum={false}
             dragTransition={{
                 power: 0.18,
@@ -38,8 +38,8 @@ const SideQuestRow = (
                 layout: {
                     type: 'spring',
                     stiffness: 300,
-                    damping: 30,
-                    mass: 1,
+                    damping: 40,
+                    mass: 0.8,
                 },
             }}
             whileDrag={{
@@ -52,7 +52,10 @@ const SideQuestRow = (
             style={{ listStyle: 'none' }}
         >
             <div style={{ width: '100%' }}>
-                {renderItem(item, dragMeta.isDragging, dragMeta)}
+                {renderItem(item, dragMeta.isDragging, {
+                    ...dragMeta,
+                    listIsDragging,
+                })}
             </div>
         </Reorder.Item>
     );
@@ -120,9 +123,15 @@ export const FramerSideQuestList = ({
         }
     }, [onReorder, onDragEnd]);
 
+    const reorderCooldownRef = React.useRef(false);
     const handleReorder = React.useCallback((next) => {
+        if (reorderCooldownRef.current) return;
+        reorderCooldownRef.current = true;
         setOrder(next);
         latestOrderRef.current = next;
+        setTimeout(() => {
+            reorderCooldownRef.current = false;
+        }, 150);
     }, []);
 
     React.useEffect(() => {
@@ -157,7 +166,6 @@ export const FramerSideQuestList = ({
         <div ref={containerRef} style={wrapperStyle}>
             <Reorder.Group
                 ref={reorderGroupRef}
-                key={`sidequest-list-${questId}-${refreshToken}`}
                 axis='y'
                 values={order}
                 onReorder={handleReorder}

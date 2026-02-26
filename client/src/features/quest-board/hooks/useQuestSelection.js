@@ -10,7 +10,6 @@ import { useQuestBoardStore } from '../../../store/questBoardStore.js';
  */
 export const useQuestSelection = ({
     quests,
-    refreshLayout = null,
 }) => {
     const {
         editingQuest,
@@ -61,17 +60,11 @@ export const useQuestSelection = ({
             next[questId] = false;
             return next;
         });
-        if (refreshLayout) {
-            setTimeout(() => refreshLayout(), 300);
-        }
-    }, [refreshLayout, setCollapsedMap]);
+    }, [setCollapsedMap]);
 
     const toggleCollapse = useCallback((questId) => {
         setCollapsedMap((prev) => ({ ...prev, [questId]: !prev[questId] }));
-        if (refreshLayout) {
-            setTimeout(() => refreshLayout(), 300);
-        }
-    }, [refreshLayout, setCollapsedMap]);
+    }, [setCollapsedMap]);
 
     const handleSelectQuest = useCallback((questId) => {
         if (questId === undefined || questId === null) return;

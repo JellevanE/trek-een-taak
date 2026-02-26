@@ -102,8 +102,6 @@ const KEYBOARD_SHORTCUTS = [
 const formatKeyLabel = (key) => KEY_LABEL_MAP[key] || key;
 
 function App() {
-    console.log('[App] Re-rendering');
-
     const { theme, themeLabel, themeProfile, toggleTheme, soundVolume, setSoundVolume } =
         useTheme();
     const prefersReducedMotion = useReducedMotionPreference();

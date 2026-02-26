@@ -1,48 +1,63 @@
 [
-    {
-        "id": "a39cde1d-98c2-426c-ad4d-2a470d071337",
-        "campaignId": 2,
-        "theme": "fantasy",
-        "narrativeState": {
-            "summary": "Friendo66, a young Level 3 warrior, awakens in a tavern in the kingdom of Aethermoor with a letter from the Grand Council describing disturbances across the realm—mysterious disappearances, strange lights, and an ancient evil stirring. The tavern keeper provides supplies as friendo66 prepares to embark on their first true adventure, facing a choice between three paths: the Whispering Woods, Cragspire Mountains, or Sunken Ruins.",
-            "currentObjective": "Choose a path and investigate the disturbances across Aethermoor to uncover the source of the ancient evil",
-            "chapter": 1,
-            "characters": [
-                "friendo66",
-                "Tavern Keeper",
-                "Grand Council of Aethermoor"
-            ],
-            "locations": [
-                "Aethermoor",
-                "Capital",
-                "Tavern",
-                "Whispering Woods",
-                "Cragspire Mountains",
-                "Sunken Ruins"
-            ],
-            "keyPlotPoints": [
-                "Friendo66 reaches Level 3 and completes training",
-                "Letter received from Grand Council describing realm disturbances",
-                "Mysterious disappearances in northern forests",
-                "Strange lights over eastern mountains",
-                "Ancient evil stirring beneath the world",
-                "Tavern keeper provides traveler's pack",
-                "Three paths presented for adventure"
-            ],
-            "progressPercentage": 0
-        },
-        "updates": [
-            {
-                "id": "793e14bd-5f1e-4dad-86b9-7ee92e514754",
-                "type": "intro",
-                "text": "# The Legend of Friendo66 Begins\n\nThe morning sun breaks across the sprawling kingdom of Aethermoor, casting long shadows across cobblestone streets worn by countless travelers. In a modest tavern on the outskirts of the capital, a young warrior named **friendo66** stirs awake, clutching a worn map and a letter sealed with the royal crest.\n\nYou've trained hard to reach Level 3, mastering basic sword techniques and the courage needed to face the unknown. But training in the village garrison has left you restless—your spirit yearns for something greater, something that only true adventure can provide.\n\nThe letter is from the Grand Council of Aethermoor. They speak of disturbances across the realm: mysterious disappearances in the northern forests, strange lights dancing over the eastern mountains, and whispers of an ancient evil stirring beneath the world. They need heroes. They need *you*.\n\nThe tavern keeper approaches with a knowing nod. \"So, you're finally heading out, are you?\" he says, sliding a worn traveler's pack across the bar. \"Many challenges await on the horizon, young warrior. Monsters, riddles, treasures beyond imagination—and dangers that would make seasoned adventurers tremble.\"\n\nYou look down at your sword, feeling its weight in your grip. Your heart races with equal parts excitement and trepidation. This is the moment you've dreamed of since childhood.\n\nThe map before you shows multiple paths: the Whispering Woods to the north, the Cragspire Mountains to the east, and the Sunken Ruins to the south. Each holds secrets. Each holds danger.\n\n**The adventure awaits, friendo66. The choice is yours—which path will you take first?**",
-                "generatedAt": "2026-02-23T19:00:53.041Z",
-                "tasksCompleted": []
-            }
-        ],
-        "createdAt": "2026-02-23T19:00:44.582Z",
-        "lastGeneratedAt": "2026-02-23T19:00:53.041Z",
-        "lastVisitDate": "2026-02-23T19:00:53.041Z",
-        "generationFailures": 0
-    }
+  {
+    "id": "a39cde1d-98c2-426c-ad4d-2a470d071337",
+    "campaignId": 2,
+    "theme": "fantasy",
+    "narrativeState": {
+      "summary": "Friendo66 embarks on a scout mission from the tavern and discovers strange violet-glowing symbols carved into stone on the northern ridge that match descriptions from ancient tomes. As they document the discovery, an unnatural pillar of swirling darkness erupts from the Cragspire Mountains, pulsing with the same violet light—a sign that the ancient evil is awakening and calling to them.",
+      "currentObjective": "Climb the Cragspire Mountains to investigate the source of the darkness and uncover the nature of the awakening ancient evil",
+      "chapter": 2,
+      "characters": [
+        "friendo66",
+        "Tavern Keeper",
+        "Grand Council of Aethermoor"
+      ],
+      "locations": [
+        "Aethermoor",
+        "Capital",
+        "Tavern",
+        "Northern Ridge",
+        "Cragspire Mountains",
+        "Whispering Woods",
+        "Sunken Ruins"
+      ],
+      "keyPlotPoints": [
+        "Friendo66 reaches Level 3 and completes training",
+        "Letter received from Grand Council describing realm disturbances",
+        "Mysterious disappearances in northern forests",
+        "Strange lights over eastern mountains",
+        "Ancient evil stirring beneath the world",
+        "Tavern keeper provides traveler's pack",
+        "Three paths presented for adventure",
+        "Scout mission to northern ridge undertaken",
+        "Violet-glowing symbols discovered matching ancient tome descriptions",
+        "Unnatural darkness pillar erupts from Cragspire Mountains",
+        "Ancient evil confirmed to be awakening",
+        "Cragspire Mountains chosen as next destination"
+      ],
+      "progressPercentage": 50
+    },
+    "updates": [
+      {
+        "id": "793e14bd-5f1e-4dad-86b9-7ee92e514754",
+        "type": "intro",
+        "text": "# The Legend of Friendo66 Begins\n\nThe morning sun breaks across the sprawling kingdom of Aethermoor, casting long shadows across cobblestone streets worn by countless travelers. In a modest tavern on the outskirts of the capital, a young warrior named **friendo66** stirs awake, clutching a worn map and a letter sealed with the royal crest.\n\nYou've trained hard to reach Level 3, mastering basic sword techniques and the courage needed to face the unknown. But training in the village garrison has left you restless—your spirit yearns for something greater, something that only true adventure can provide.\n\nThe letter is from the Grand Council of Aethermoor. They speak of disturbances across the realm: mysterious disappearances in the northern forests, strange lights dancing over the eastern mountains, and whispers of an ancient evil stirring beneath the world. They need heroes. They need *you*.\n\nThe tavern keeper approaches with a knowing nod. \"So, you're finally heading out, are you?\" he says, sliding a worn traveler's pack across the bar. \"Many challenges await on the horizon, young warrior. Monsters, riddles, treasures beyond imagination—and dangers that would make seasoned adventurers tremble.\"\n\nYou look down at your sword, feeling its weight in your grip. Your heart races with equal parts excitement and trepidation. This is the moment you've dreamed of since childhood.\n\nThe map before you shows multiple paths: the Whispering Woods to the north, the Cragspire Mountains to the east, and the Sunken Ruins to the south. Each holds secrets. Each holds danger.\n\n**The adventure awaits, friendo66. The choice is yours—which path will you take first?**",
+        "generatedAt": "2026-02-23T19:00:53.041Z",
+        "tasksCompleted": []
+      },
+      {
+        "id": "b8c4dccb-e5fb-4e61-953b-a9467033558a",
+        "type": "daily",
+        "text": "# Day's Chronicle: Friendo66's Northern Vigil\n\nThe morning sun cast long shadows across the northern ridge as friendo66 secured their pack and set forth from the tavern. The Grand Council's letter burned in their pocket—a reminder of the urgency weighing upon Aethermoor.\n\nThe scout mission proved treacherous. Winding through rocky outcrops and dense bracken, friendo66 searched for signs of the disturbances mentioned in the letter. Hours passed in vigilant silence until—there. Strange symbols carved into stone, glowing faintly with an otherworldly violet hue. The warrior's breath caught. These markings matched descriptions in the tavern's oldest tomes.\n\nAs friendo66 documented the discovery, a low rumble echoed across the ridge. The ground trembled. In the distance, toward the Cragspire Mountains, an unnatural pillar of swirling darkness twisted into the sky, pulsing with the same violet light. The ancient evil wasn't merely stirring—it was *awakening*.\n\nThe tavern keeper's warnings echoed in friendo66's mind: *\"The three paths diverge for reason. Choose wisely.\"*\n\nBut the choice had been made for them. The darkness called from the mountains, growing stronger by the hour. Whatever lay in those peaks—whether answers or danger—friendo66 knew their next destination.\n\n**Tomorrow, the climb begins.**",
+        "generatedAt": "2026-02-24T13:50:43.388Z",
+        "tasksCompleted": [
+          "187"
+        ]
+      }
+    ],
+    "createdAt": "2026-02-23T19:00:44.582Z",
+    "lastGeneratedAt": "2026-02-24T13:50:43.388Z",
+    "lastVisitDate": "2026-02-24T13:50:43.388Z",
+    "generationFailures": 0
+  }
 ]
