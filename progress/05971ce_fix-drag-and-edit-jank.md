@@ -48,3 +48,14 @@ Two related front-end problems with quest cards:
 
 ### `App.js` / `SideQuestList.jsx`
 - Removed `console.log('[App] Re-rendering')` and per-keystroke side-quest edit debug log.
+
+## 2026-02-26 DnD-kit rework (Option 2)
+
+- Replaced Framer Motion `Reorder` lists with `@dnd-kit` Sortable lists in:
+  - `client/src/features/quest-board/components/FramerQuestList.jsx`
+  - `client/src/features/quest-board/components/FramerSideQuestList.jsx`
+- Removed `useNeonDragHandle` from `listUtils.js` (Framer-specific).
+- Added `DragOverlay` + pointer sensor (distance activation) to reduce layout thrash on mixed heights.
+- Added dependencies to `client/package.json`: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`.
+
+**Note:** The agent could not run `npm install` due to `ENOTFOUND` (no registry access). Run locally to update `node_modules`/`package-lock.json`.
