@@ -10,11 +10,13 @@ import { useReducedMotionPreference } from './hooks/useReducedMotionPreference.j
 import { AnimatedToast } from './components/AnimatedComponents';
 import QuestCard from './components/QuestCard';
 import { AddSideQuestForm, QuestEditForm } from './features/quest-board/components/forms';
-import { StorylineCard } from './features/quest-board/components/StorylineCard.jsx';
 import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
 // Theme preview + showcase demos are lazy so they stay out of the main bundle
 const ThemePreviewPage = React.lazy(() => import('./theme/ThemePreviewPage.jsx'));
 const QuickDemo = React.lazy(() => import('./showcase/QuickDemo.jsx'));
+const CampaignDetailPage = React.lazy(
+    () => import('./features/campaign-detail/components/CampaignDetailPage.jsx'),
+);
 
 const KEY_LABEL_MAP = {
     ArrowDown: '↓',
@@ -134,6 +136,8 @@ function App() {
     const [showShortcuts, setShowShortcuts] = React.useState(false);
     // TEMPORARY: Showcase state (remove when done exploring)
     const [showShowcase, setShowShowcase] = React.useState(false);
+    const [campaignDetailId, setCampaignDetailId] = React.useState(null);
+    const [campaignDetailInitialTab, setCampaignDetailInitialTab] = React.useState('story');
     const shortcutsPanelRef = React.useRef(null);
     const {
         quests,
@@ -895,26 +899,28 @@ function App() {
                                     ∅
                                 </button>
                                 {campaigns.map((campaign) => (
-                                    <button
-                                        type='button'
-                                        key={campaign.id}
-                                        className={`campaign-pill ${
-                                            activeCampaignFilter === campaign.id ? 'active' : ''
-                                        }`}
-                                        onClick={() => setActiveCampaignFilter(campaign.id)}
-                                        title={campaign.name}
-                                        aria-pressed={activeCampaignFilter === campaign.id}
-                                    >
-                                        {campaign.image_url
-                                            ? <img src={campaign.image_url} alt='' />
-                                            : (
-                                                (campaign.name || '?').charAt(0).toUpperCase()
+                                    <div key={campaign.id} style={{ position: 'relative' }}>
+                                        <button
+                                            type='button'
+                                            className={`campaign-pill ${
+                                                activeCampaignFilter === campaign.id ? 'active' : ''
+                                            }`}
+                                            onClick={() =>
+                                                setActiveCampaignFilter(campaign.id)}
+                                            title={campaign.name}
+                                            aria-pressed={activeCampaignFilter === campaign.id}
+                                        >
+                                            {campaign.image_url
+                                                ? <img src={campaign.image_url} alt='' />
+                                                : (
+                                                    (campaign.name || '?').charAt(0).toUpperCase()
+                                                )}
+                                            {storylineHasUpdate &&
+                                                activeCampaignFilter === campaign.id && (
+                                                <span className='storyline-dot' />
                                             )}
-                                        {storylineHasUpdate &&
-                                            activeCampaignFilter === campaign.id && (
-                                            <span className='storyline-dot' />
-                                        )}
-                                    </button>
+                                        </button>
+                                    </div>
                                 ))}
                             </div>
                         )
@@ -931,7 +937,12 @@ function App() {
                                     <button
                                         type='button'
                                         className='btn-ghost btn-small'
-                                        onClick={openCampaignEditForm}
+                                        onClick={() => {
+                                            if (!selectedCampaign) return;
+                                            setCampaignDetailInitialTab('settings');
+                                            setCampaignDetailId(selectedCampaign.id);
+                                            setActiveCampaignFilter(selectedCampaign.id);
+                                        }}
                                         disabled={!selectedCampaign}
                                     >
                                         Edit Selected
@@ -1081,6 +1092,36 @@ function App() {
                                                         activeCampaignFilter === campaign.id && (
                                                         <span className='storyline-dot' />
                                                     )}
+                                                    <span
+                                                        className='campaign-detail-button'
+                                                        role='button'
+                                                        tabIndex={0}
+                                                        aria-label='Open details'
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setCampaignDetailInitialTab('story');
+                                                            setCampaignDetailId(campaign.id);
+                                                            setActiveCampaignFilter(campaign.id);
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key === 'Enter' ||
+                                                                e.key === ' '
+                                                            ) {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                setCampaignDetailInitialTab(
+                                                                    'story',
+                                                                );
+                                                                setCampaignDetailId(campaign.id);
+                                                                setActiveCampaignFilter(
+                                                                    campaign.id,
+                                                                );
+                                                            }
+                                                        }}
+                                                    >
+                                                        &#8250;
+                                                    </span>
                                                 </button>
                                             ))
                                         )
@@ -1095,17 +1136,6 @@ function App() {
                         )}
                 </aside>
                 <div className='board-main'>
-                    {/* Storyline Card */}
-                    {storyline && (
-                        <StorylineCard
-                            storyline={storyline}
-                            hasUpdate={storylineHasUpdate}
-                            onCheckUpdate={() => checkStorylineUpdate(storyline.campaignId)}
-                            isGenerating={storylineIsGenerating}
-                            onMarkAsRead={markStorylineAsRead}
-                        />
-                    )}
-
                     <div className='add-task-form'>
                         <input
                             type='text'
@@ -1183,6 +1213,33 @@ function App() {
                     </div>
                 </div>
             </div>
+            {/* Campaign Detail Page */}
+            <React.Suspense fallback={null}>
+                <AnimatePresence>
+                    {campaignDetailId !== null && (
+                        <CampaignDetailPage
+                            campaign={campaigns.find((c) => c.id === campaignDetailId)}
+                            storyline={storyline}
+                            storylineHasUpdate={storylineHasUpdate}
+                            storylineIsGenerating={storylineIsGenerating}
+                            onCheckStorylineUpdate={() => checkStorylineUpdate(campaignDetailId)}
+                            onMarkStorylineAsRead={markStorylineAsRead}
+                            initialTab={campaignDetailInitialTab}
+                            onOpenEditForm={openCampaignEditForm}
+                            campaignFormValues={campaignFormValues}
+                            campaignFormBusy={campaignFormBusy}
+                            campaignFormError={campaignFormError}
+                            onCampaignFieldChange={handleCampaignFieldChange}
+                            onCampaignFormSubmit={submitCampaignForm}
+                            onCampaignFormCancel={closeCampaignForm}
+                            onClose={() => {
+                                setCampaignDetailId(null);
+                                setCampaignDetailInitialTab('story');
+                            }}
+                        />
+                    )}
+                </AnimatePresence>
+            </React.Suspense>
             {/* Toasts & Undo */}
             <div className='toast-zone'>
                 {undoQueue.map((entry) => (

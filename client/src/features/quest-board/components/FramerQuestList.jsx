@@ -167,12 +167,8 @@ export const FramerQuestList = ({
     const handleDragOver = React.useCallback(({ active, over }) => {
         if (!over || active.id === over.id) return;
         setOrder((prev) => {
-            const oldIndex = prev.findIndex((item, index) =>
-                getItemKey(item, index) === active.id
-            );
-            const newIndex = prev.findIndex((item, index) =>
-                getItemKey(item, index) === over.id
-            );
+            const oldIndex = prev.findIndex((item, index) => getItemKey(item, index) === active.id);
+            const newIndex = prev.findIndex((item, index) => getItemKey(item, index) === over.id);
             if (oldIndex === -1 || newIndex === -1) return prev;
             const next = arrayMove(prev, oldIndex, newIndex);
             latestOrderRef.current = next;

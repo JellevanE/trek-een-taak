@@ -10,15 +10,15 @@ Sprint 2 completed the backend storyline generation. The frontend had a Zustand 
 
 ## Changed files
 
-| File | Reason |
-| --- | --- |
-| `client/src/hooks/useStoryline.js` | **New** — hook replacing Zustand store, follows `useCampaigns` pattern |
-| `client/src/hooks/useQuestBoard.js` | Rewired from Zustand import to `useStoryline` hook; exports `markStorylineAsRead` |
-| `client/src/store/storylineStore.js` | **Deleted** — no remaining imports |
-| `client/src/App.js` | Added `markStorylineAsRead` destructuring; notification dot in collapsed pills and expanded items; wired `onMarkAsRead` to StorylineCard |
-| `client/src/styles/campaigns.css` | Added `position: relative` to `.campaign-pill`; new `.storyline-dot` styles with pulse animation |
-| `client/src/features/quest-board/components/StorylineCard.jsx` | Added `onMarkAsRead` prop; called on "Show History" expand and "Check for Updates" click |
-| `storylines-implementation-plan.md` | Added Sprint 3 decision note explaining Zustand-to-hook rationale |
+| File                                                           | Reason                                                                                                                                   |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `client/src/hooks/useStoryline.js`                             | **New** — hook replacing Zustand store, follows `useCampaigns` pattern                                                                   |
+| `client/src/hooks/useQuestBoard.js`                            | Rewired from Zustand import to `useStoryline` hook; exports `markStorylineAsRead`                                                        |
+| `client/src/store/storylineStore.js`                           | **Deleted** — no remaining imports                                                                                                       |
+| `client/src/App.js`                                            | Added `markStorylineAsRead` destructuring; notification dot in collapsed pills and expanded items; wired `onMarkAsRead` to StorylineCard |
+| `client/src/styles/campaigns.css`                              | Added `position: relative` to `.campaign-pill`; new `.storyline-dot` styles with pulse animation                                         |
+| `client/src/features/quest-board/components/StorylineCard.jsx` | Added `onMarkAsRead` prop; called on "Show History" expand and "Check for Updates" click                                                 |
+| `storylines-implementation-plan.md`                            | Added Sprint 3 decision note explaining Zustand-to-hook rationale                                                                        |
 
 ## useStoryline.js — design decisions
 
