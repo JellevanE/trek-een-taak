@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 // Hues pulled from the app's accent palette
-const COLORS = ['#00f0ff', '#9b5cff', '#ff2ec4', '#c8b4ff', '#ffffff'];
+const COLORS = ['#30087a', '#3b3b3b', '#e8e4e7', '#ededed', '#979498'];
+
+// Canvas extends this many pixels beyond the viewport on every side.
+// Particles wrap at the canvas edges, which are off-screen, so the seam
+// clustering is never visible.
+const OVERSCAN = 200;
 
 const DEFAULTS = {
-    count: 800,
-    speed: 0.8,
-    fieldScale: 0.003,
-    fieldStrength: 1.0,
+    count: 1200,
+    speed: 0.5,
+    fieldScale: 0.0015,
+    fieldStrength: 0.7,
     pixelSize: 2,
-    opacity: 0.55,
-    trailFade: 0.12,
+    opacity: 0.6,
+    trailFade: 0.08,
 };
 
 function makeParticles(count, width, height) {
@@ -18,6 +23,9 @@ function makeParticles(count, width, height) {
         x: Math.random() * width,
         y: Math.random() * height,
         colorIndex: Math.floor(Math.random() * COLORS.length),
+        // Each particle samples the flow field at its own phase offset so they
+        // can't all converge to the same attractors in the sine/cosine field
+        phase: Math.random() * Math.PI * 2,
     }));
 }
 
@@ -53,8 +61,8 @@ export default function PixelBackground() {
         const ctx = canvas.getContext('2d');
 
         const resize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth + OVERSCAN * 2;
+            canvas.height = window.innerHeight + OVERSCAN * 2;
             particlesRef.current = makeParticles(
                 paramsRef.current.count,
                 canvas.width,
@@ -79,15 +87,17 @@ export default function PixelBackground() {
 
             ctx.globalAlpha = opacity;
             for (const p of particlesRef.current) {
-                // Flow field: combine two sine waves at different frequencies
-                // to produce an organic, non-repeating swirl direction
+                // Flow field: per-particle phase offset prevents all particles
+                // from converging to the same attractors in the sine/cosine field
                 const angle =
-                    (Math.sin(p.x * fieldScale + time) +
-                        Math.cos(p.y * fieldScale + time * 0.71)) *
+                    (Math.sin(p.x * fieldScale + time + p.phase) +
+                        Math.cos(p.y * fieldScale + time * 0.71 + p.phase * 0.5)) *
                     Math.PI;
 
-                p.x += Math.cos(angle) * speed * fieldStrength;
-                p.y += Math.sin(angle) * speed * fieldStrength;
+                // Small random jitter breaks particles out of local convergence zones
+                // and prevents edge-seam clustering when particles wrap
+                p.x += Math.cos(angle) * speed * fieldStrength + (Math.random() - 0.5) * 0.4;
+                p.y += Math.sin(angle) * speed * fieldStrength + (Math.random() - 0.5) * 0.4;
 
                 // Wrap around edges so particles never disappear
                 if (p.x < 0) p.x += width;
@@ -137,7 +147,7 @@ export default function PixelBackground() {
             label: 'Particle count',
             desc: 'Number of pixels in the field. More = denser, heavier on CPU.',
             min: 100,
-            max: 3000,
+            max: 5000,
             step: 100,
         },
         {
@@ -169,7 +179,7 @@ export default function PixelBackground() {
             label: 'Pixel size',
             desc: 'Width and height of each square pixel in screen pixels.',
             min: 1,
-            max: 8,
+            max: 12,
             step: 1,
         },
         {
@@ -191,8 +201,18 @@ export default function PixelBackground() {
     ];
 
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999 }}>
-            <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden' }}>
+            <canvas
+                ref={canvasRef}
+                style={{
+                    display: 'block',
+                    position: 'absolute',
+                    top: -OVERSCAN,
+                    left: -OVERSCAN,
+                    width: `calc(100% + ${OVERSCAN * 2}px)`,
+                    height: `calc(100% + ${OVERSCAN * 2}px)`,
+                }}
+            />
 
             {/* Debug panel — remove when integrating for real */}
             <div
