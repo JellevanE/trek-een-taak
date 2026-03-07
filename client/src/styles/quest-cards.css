@@ -14,7 +14,7 @@
 
 .task,
 .quest {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.08));
+    background: linear-gradient(180deg, rgb(18, 14, 36), rgb(8, 6, 18));
     border-radius: var(--quest-card-radius);
     padding: var(--quest-card-padding-block) var(--quest-card-padding-inline);
     margin: 0;
@@ -46,8 +46,8 @@
 
 .task.completed,
 .quest.completed {
-    opacity: 0.6;
-    filter: grayscale(20%);
+    opacity: 0.8;
+    filter: grayscale(40%);
     text-decoration: line-through;
 }
 

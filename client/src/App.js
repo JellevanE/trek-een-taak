@@ -135,6 +135,7 @@ function App() {
         [soundSliderId, soundVolume, setSoundVolume],
     );
     const [showShortcuts, setShowShortcuts] = React.useState(false);
+    const [showPixelBgSettings, setShowPixelBgSettings] = React.useState(false);
     // TEMPORARY: Showcase state (remove when done exploring)
     const [showShowcase, setShowShowcase] = React.useState(false);
     const [campaignDetailId, setCampaignDetailId] = React.useState(null);
@@ -467,7 +468,7 @@ function App() {
     if (!token) {
         return (
             <div className='App container'>
-                <PixelBackground />
+                <PixelBackground showControls={showPixelBgSettings} />
                 <header className='App-header'>
                     <div
                         style={{
@@ -659,6 +660,12 @@ function App() {
                             }}
                         >
                             🎮 Showcase
+                        </button>
+                        <button
+                            className='btn-ghost'
+                            onClick={() => setShowPixelBgSettings((prev) => !prev)}
+                        >
+                            Pixel BG
                         </button>
                         <button
                             className='btn-ghost'
