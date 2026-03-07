@@ -4,13 +4,12 @@ import { resetQuestBoardStore } from '../../../../store/questBoardStore';
 
 import { SOUND_EVENT_KEYS } from '../../../../theme';
 
-
 jest.useFakeTimers();
 
 describe('useQuestAnimations', () => {
     const mockQuests = [
         { id: 1, status: 'todo', side_quests: [] },
-        { id: 2, status: 'todo', side_quests: [] }
+        { id: 2, status: 'todo', side_quests: [] },
     ];
 
     beforeEach(async () => {
@@ -19,17 +18,19 @@ describe('useQuestAnimations', () => {
     });
 
     const setupHook = (props = {}) => {
-        return renderHook(() => useQuestAnimations({
-            quests: mockQuests,
-            setQuests: jest.fn(),
-            setCollapsedMap: jest.fn(),
-            refreshLayout: jest.fn(),
-            ensureQuestExpanded: jest.fn(),
-            mutateTaskStatus: jest.fn(),
-            mutateSideQuestStatus: jest.fn(),
-            playSound: jest.fn(),
-            ...props
-        }));
+        return renderHook(() =>
+            useQuestAnimations({
+                quests: mockQuests,
+                setQuests: jest.fn(),
+                setCollapsedMap: jest.fn(),
+                refreshLayout: jest.fn(),
+                ensureQuestExpanded: jest.fn(),
+                mutateTaskStatus: jest.fn(),
+                mutateSideQuestStatus: jest.fn(),
+                playSound: jest.fn(),
+                ...props,
+            })
+        );
     };
 
     it('triggerQuestSpawn sets and clears spawn flags', () => {
@@ -104,7 +105,7 @@ describe('useQuestAnimations', () => {
     it('setSideQuestStatusWithFx updates status and triggers effects', async () => {
         const mutateSideQuestStatus = jest.fn().mockResolvedValue({
             id: 1,
-            side_quests: [{ id: 101, status: 'done' }]
+            side_quests: [{ id: 101, status: 'done' }],
         });
         const ensureQuestExpanded = jest.fn();
         const setQuests = jest.fn();

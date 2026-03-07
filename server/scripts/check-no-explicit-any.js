@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const searchGlobs = [
     path.join(projectRoot, 'src'),
-    path.join(projectRoot, '__tests__')
+    path.join(projectRoot, '__tests__'),
 ];
 
 function collectTsFiles(targetPath) {
@@ -42,7 +42,7 @@ function checkFile(filePath) {
         if (node.kind === ts.SyntaxKind.AnyKeyword) {
             violations.push({
                 location: formatLocation(filePath, source, node),
-                snippet: sourceText.slice(node.getStart(source), node.getEnd())
+                snippet: sourceText.slice(node.getStart(source), node.getEnd()),
             });
         }
         ts.forEachChild(node, visit);
@@ -62,7 +62,9 @@ function main() {
     }
 
     if (violations.length > 0) {
-        console.error('Explicit "any" types are not allowed. Please replace them with specific types or refactor.');
+        console.error(
+            'Explicit "any" types are not allowed. Please replace them with specific types or refactor.',
+        );
         for (const violation of violations) {
             console.error(`  - ${violation.location} (${violation.snippet})`);
         }

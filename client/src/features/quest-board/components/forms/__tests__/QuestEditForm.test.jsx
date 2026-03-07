@@ -8,11 +8,11 @@ describe('QuestEditForm', () => {
         description: 'Test Quest',
         priority: 'high',
         task_level: 2,
-        campaign_id: 10
+        campaign_id: 10,
     };
     const mockCampaigns = [
         { id: 10, name: 'Campaign A' },
-        { id: 20, name: 'Campaign B' }
+        { id: 20, name: 'Campaign B' },
     ];
 
     const defaultProps = {
@@ -25,7 +25,7 @@ describe('QuestEditForm', () => {
         onSave: jest.fn(),
         onCyclePriority: jest.fn(),
         onCycleLevel: jest.fn(),
-        inputRef: React.createRef()
+        inputRef: React.createRef(),
     };
 
     beforeEach(() => {
@@ -36,7 +36,9 @@ describe('QuestEditForm', () => {
         const { container } = render(<QuestEditForm {...defaultProps} quest={null} />);
         expect(container).toBeEmptyDOMElement();
 
-        const { container: container2 } = render(<QuestEditForm {...defaultProps} editingQuest={null} />);
+        const { container: container2 } = render(
+            <QuestEditForm {...defaultProps} editingQuest={null} />,
+        );
         expect(container2).toBeEmptyDOMElement();
     });
 
@@ -105,7 +107,7 @@ describe('QuestEditForm', () => {
 
         expect(defaultProps.onSave).toHaveBeenCalledWith({
             ...mockEditingQuest,
-            description: mockEditingQuest.description
+            description: mockEditingQuest.description,
         });
     });
 

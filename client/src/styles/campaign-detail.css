@@ -1,0 +1,370 @@
+/* CAMPAIGN-DETAIL.CSS - Campaign detail page, quest log, story modals */
+
+/* ---- Overlay ---- */
+.campaign-detail-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    background: rgba(4, 8, 16, 0.82);
+    backdrop-filter: blur(8px);
+    overflow-y: auto;
+}
+
+/* ---- Page container ---- */
+.campaign-detail-page {
+    width: 100%;
+    max-width: 720px;
+    padding: 40px 28px 60px;
+    color: #ffffff;
+}
+
+/* ---- Header ---- */
+.campaign-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.campaign-detail-back {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.campaign-detail-back:hover {
+    border-color: rgba(0, 240, 255, 0.3);
+    color: #fff;
+}
+
+.campaign-detail-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+    color: #fff;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.campaign-detail-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.campaign-detail-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---- Tabs ---- */
+.campaign-detail-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 28px;
+}
+
+.campaign-detail-tab {
+    position: relative;
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.campaign-detail-tab:hover {
+    color: #fff;
+}
+
+.campaign-detail-tab.active {
+    color: #fff;
+    border-bottom-color: rgba(0, 240, 255, 0.7);
+}
+
+.campaign-detail-tab .storyline-dot {
+    position: absolute;
+    top: 8px;
+    right: 6px;
+}
+
+/* ---- Story tab ---- */
+.story-narrative-summary {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+}
+
+.story-narrative-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.story-narrative-objective {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #f0f5ff;
+}
+
+.story-narrative-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.story-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.story-empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* ---- Quest log timeline ---- */
+.quest-log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quest-log-date-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    padding: 12px 0 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.quest-log-date-header:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.quest-log-entry {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.quest-log-entry:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.quest-log-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 6px;
+    line-height: 1;
+    height: fit-content;
+    margin-top: 2px;
+}
+
+.quest-log-badge.intro {
+    background: rgba(0, 240, 255, 0.15);
+    color: #6ee7ff;
+}
+
+.quest-log-badge.daily {
+    background: rgba(76, 175, 80, 0.18);
+    color: #81c784;
+}
+
+.quest-log-badge.reflection {
+    background: rgba(156, 39, 176, 0.18);
+    color: #ce93d8;
+}
+
+.quest-log-badge.completion {
+    background: rgba(255, 193, 7, 0.18);
+    color: #ffd54f;
+}
+
+.quest-log-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.quest-log-text {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-secondary, #c4cfe0);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.quest-log-text.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+}
+
+.quest-log-time {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.quest-log-empty {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* ---- Story update modal ---- */
+.story-update-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(4, 8, 16, 0.8);
+    backdrop-filter: blur(6px);
+}
+
+.story-update-panel {
+    width: min(560px, 100%);
+    background: linear-gradient(180deg, rgba(18, 26, 40, 0.97), rgba(6, 12, 24, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 28px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(0, 240, 255, 0.08);
+    padding: 28px 30px;
+    color: #ffffff;
+}
+
+.story-update-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.story-update-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.story-update-date {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.story-update-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #dce7ff;
+    min-height: 80px;
+    margin-bottom: 24px;
+}
+
+.story-update-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ---- Typewriter cursor ---- */
+.typewriter-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: currentColor;
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    animation: typewriter-blink 0.8s step-end infinite;
+}
+
+@keyframes typewriter-blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+/* ---- Sidebar detail button ---- */
+.campaign-detail-button {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.campaign-item:hover .campaign-detail-button,
+.campaign-pill:hover .campaign-detail-button {
+    opacity: 1;
+}
+
+.campaign-detail-button:hover {
+    border-color: rgba(0, 240, 255, 0.3);
+    color: #fff;
+}

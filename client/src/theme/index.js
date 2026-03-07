@@ -2,57 +2,58 @@ const createMotionProfile = (overrides = {}) => ({
     durations: {
         drag: overrides.durations?.drag ?? 0.28,
         hover: overrides.durations?.hover ?? 0.18,
-        release: overrides.durations?.release ?? 0.32
+        release: overrides.durations?.release ?? 0.32,
     },
     easing: {
         drag: overrides.easing?.drag ?? [0.25, 0.1, 0.25, 1],
-        hover: overrides.easing?.hover ?? [0.4, 0, 0.2, 1]
+        hover: overrides.easing?.hover ?? [0.4, 0, 0.2, 1],
     },
     drag: {
         scale: overrides.drag?.scale ?? 1.02,
         shadow: overrides.drag?.shadow ?? '0 14px 24px rgba(57, 255, 20, 0.25)',
-        glow: overrides.drag?.glow ?? '0 0 18px rgba(57, 255, 20, 0.45)'
+        glow: overrides.drag?.glow ?? '0 0 18px rgba(57, 255, 20, 0.45)',
     },
     idle: {
-        shadow: overrides.idle?.shadow ?? '0 8px 14px rgba(0, 0, 0, 0.35)'
-    }
+        shadow: overrides.idle?.shadow ?? '0 8px 14px rgba(0, 0, 0, 0.35)',
+    },
 });
 
 const createColorTokens = (overrides = {}) => ({
     background: overrides.background ?? '#081020',
-    backgroundGradient: overrides.backgroundGradient ?? 'radial-gradient(ellipse at center, rgba(20,24,35,1) 0%, rgba(8,16,32,1) 60%)',
+    backgroundGradient: overrides.backgroundGradient ??
+        'radial-gradient(ellipse at center, rgba(20,24,35,1) 0%, rgba(8,16,32,1) 60%)',
     surface: overrides.surface ?? '#0f1724',
     accentCyan: overrides.accentCyan ?? '#00f0ff',
     accentPink: overrides.accentPink ?? '#ff2ec4',
     accentPurple: overrides.accentPurple ?? '#9b5cff',
     muted: overrides.muted ?? '#9aa3b2',
     progressTrack: overrides.progressTrack ?? 'rgba(255,255,255,0.03)',
-    progressFill: overrides.progressFill ?? 'linear-gradient(90deg, #9b5cff, #ff2ec4)'
+    progressFill: overrides.progressFill ?? 'linear-gradient(90deg, #9b5cff, #ff2ec4)',
 });
 
 const createAnimationTokens = (overrides = {}) => ({
     pulse: {
         scale: overrides.pulse?.scale ?? 1.02,
         shadowStrong: overrides.pulse?.shadowStrong ?? 'rgba(0,0,0,0.18)',
-        shadowRest: overrides.pulse?.shadowRest ?? 'rgba(0,0,0,0.08)'
+        shadowRest: overrides.pulse?.shadowRest ?? 'rgba(0,0,0,0.08)',
     },
     spawn: {
         startShadow: overrides.spawn?.startShadow ?? 'rgba(0,0,0,0)',
         midShadow: overrides.spawn?.midShadow ?? 'rgba(0,0,0,0.45)',
-        endShadow: overrides.spawn?.endShadow ?? 'rgba(0,0,0,0.6)'
+        endShadow: overrides.spawn?.endShadow ?? 'rgba(0,0,0,0.6)',
     },
     glow: {
         phaseOne: overrides.glow?.phaseOne ?? 'rgba(99,102,241,0.30)',
         phaseTwo: overrides.glow?.phaseTwo ?? 'rgba(155,92,255,0.28)',
-        phaseThree: overrides.glow?.phaseThree ?? 'rgba(99,102,241,0.18)'
+        phaseThree: overrides.glow?.phaseThree ?? 'rgba(99,102,241,0.18)',
     },
     burst: {
         ringStart: overrides.burst?.ringStart ?? 'rgba(0,240,255,0.12)',
         ringMid: overrides.burst?.ringMid ?? 'rgba(255,255,255,0.22)',
         ringEnd: overrides.burst?.ringEnd ?? 'rgba(255,255,255,0)',
         haloBorder: overrides.burst?.haloBorder ?? 'rgba(255,255,255,0.14)',
-        haloBackground: overrides.burst?.haloBackground ?? 'rgba(0,0,0,0.68)'
-    }
+        haloBackground: overrides.burst?.haloBackground ?? 'rgba(0,0,0,0.68)',
+    },
 });
 
 export const SOUND_EVENT_KEYS = Object.freeze({
@@ -66,7 +67,7 @@ export const SOUND_EVENT_KEYS = Object.freeze({
     INTERFACE_CLICK: 'interface_click',
     QUEST_DRAG: 'quest_drag',
     INVALID_INPUT: 'invalid_input',
-    ERROR: 'error'
+    ERROR: 'error',
 });
 
 export const DEFAULT_THEME_ID = 'neon_arcade';
@@ -82,10 +83,10 @@ export const THEME_PROFILES = Object.freeze({
         card: {
             depth: {
                 resting: '0 18px 38px rgba(7, 8, 25, 0.85), 0 0 18px rgba(155,92,255,0.08) inset',
-                active: '0 0 0 1px rgba(0,240,255,0.35), 0 24px 54px rgba(0,240,255,0.22)'
+                active: '0 0 0 1px rgba(0,240,255,0.35), 0 24px 54px rgba(0,240,255,0.22)',
             },
             transition: '0.24s cubic-bezier(0.4, 0, 0.2, 1)',
-            focusRing: 'rgba(0,240,255,0.4)'
+            focusRing: 'rgba(0,240,255,0.4)',
         },
         cta: {
             transition: 'transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s ease',
@@ -93,11 +94,11 @@ export const THEME_PROFILES = Object.freeze({
             hoverTranslate: '-2px',
             pressShadow: 'inset 0 3px 10px rgba(0,0,0,0.45)',
             pressTranslate: '1px',
-            focusRing: 'rgba(0,240,255,0.4)'
+            focusRing: 'rgba(0,240,255,0.4)',
         },
         glow: {
             intensity: 'neon',
-            handle: '0 0 18px rgba(0,240,255,0.45)'
+            handle: '0 0 18px rgba(0,240,255,0.45)',
         },
         soundFx: {
             enabled: true,
@@ -105,88 +106,94 @@ export const THEME_PROFILES = Object.freeze({
             requirements: {
                 formats: ['audio/webm', 'audio/mpeg'],
                 maxFileSizeKb: 50,
-                notes: 'Provide both .webm and .mp3 variants for each clip; keep files under 50kb.'
+                notes: 'Provide both .webm and .mp3 variants for each clip; keep files under 50kb.',
             },
             events: {
                 [SOUND_EVENT_KEYS.QUEST_ADD]: {
                     label: 'Quest added',
                     sources: [
                         { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
-                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.QUEST_COMPLETE]: {
                     label: 'Quest completed',
                     sources: [
                         { src: '/sounds/complete_quest.webm', type: 'audio/webm' },
-                        { src: '/sounds/complete_quest.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/complete_quest.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.QUEST_DELETE]: {
                     label: 'Quest deleted',
                     sources: [
                         { src: '/sounds/error_beep_short.webm', type: 'audio/webm' },
-                        { src: '/sounds/error_beep_short.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/error_beep_short.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.SIDE_QUEST_ADD]: {
                     label: 'Side quest added',
                     sources: [
                         { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
-                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.SIDE_QUEST_COMPLETE]: {
                     label: 'Side quest completed',
                     sources: [
                         { src: '/sounds/complete_sidequest.webm', type: 'audio/webm' },
-                        { src: '/sounds/complete_sidequest.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/complete_sidequest.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.PRIORITY_CYCLE]: {
                     label: 'Priority cycled',
                     sources: [
                         { src: '/sounds/priority_cycle.webm', type: 'audio/webm' },
-                        { src: '/sounds/priority_cycle.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/priority_cycle.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.LEVEL_UP]: {
                     label: 'Level up',
                     sources: [
                         { src: '/sounds/level_up.webm', type: 'audio/webm' },
-                        { src: '/sounds/level_up.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/level_up.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.INTERFACE_CLICK]: {
                     label: 'Interface click',
                     sources: [
-                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.webm', type: 'audio/webm' },
-                        { src: '/sounds/735804_biornade_clicking-for-multiple-purposes.mp3', type: 'audio/mpeg' }
-                    ]
+                        {
+                            src: '/sounds/735804_biornade_clicking-for-multiple-purposes.webm',
+                            type: 'audio/webm',
+                        },
+                        {
+                            src: '/sounds/735804_biornade_clicking-for-multiple-purposes.mp3',
+                            type: 'audio/mpeg',
+                        },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.QUEST_DRAG]: {
                     label: 'Quest drag',
                     sources: [
                         { src: '/sounds/drag_quest_card.webm', type: 'audio/webm' },
-                        { src: '/sounds/drag_quest_card.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/drag_quest_card.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.INVALID_INPUT]: {
                     label: 'Invalid input',
                     sources: [
                         { src: '/sounds/invalid_input.webm', type: 'audio/webm' },
-                        { src: '/sounds/invalid_input.mp3', type: 'audio/mpeg' }
-                    ]
+                        { src: '/sounds/invalid_input.mp3', type: 'audio/mpeg' },
+                    ],
                 },
                 [SOUND_EVENT_KEYS.ERROR]: {
                     label: 'Error',
                     sources: [
                         { src: '/sounds/error_beep_short.webm', type: 'audio/webm' },
-                        { src: '/sounds/error_beep_short.mp3', type: 'audio/mpeg' }
-                    ]
-                }
-            }
-        }
+                        { src: '/sounds/error_beep_short.mp3', type: 'audio/mpeg' },
+                    ],
+                },
+            },
+        },
     },
     classic: {
         id: 'classic',
@@ -194,65 +201,66 @@ export const THEME_PROFILES = Object.freeze({
         appearance: 'light',
         colors: createColorTokens({
             background: '#f6fafc',
-            backgroundGradient: 'radial-gradient(circle at top, rgba(246,250,252,1) 0%, rgba(226,230,238,1) 65%)',
+            backgroundGradient:
+                'radial-gradient(circle at top, rgba(246,250,252,1) 0%, rgba(226,230,238,1) 65%)',
             surface: '#ffffff',
             accentCyan: '#0ea5e9',
             accentPink: '#e879f9',
             accentPurple: '#7c3aed',
             muted: '#415161',
             progressTrack: 'rgba(15,23,42,0.08)',
-            progressFill: 'linear-gradient(90deg, #7c3aed, #f472b6)'
+            progressFill: 'linear-gradient(90deg, #7c3aed, #f472b6)',
         }),
         animations: createAnimationTokens({
             pulse: {
                 scale: 1.015,
                 shadowStrong: 'rgba(15, 23, 42, 0.22)',
-                shadowRest: 'rgba(15, 23, 42, 0.12)'
+                shadowRest: 'rgba(15, 23, 42, 0.12)',
             },
             spawn: {
                 startShadow: 'rgba(15,23,42,0.12)',
                 midShadow: 'rgba(15,23,42,0.3)',
-                endShadow: 'rgba(15,23,42,0.24)'
+                endShadow: 'rgba(15,23,42,0.24)',
             },
             glow: {
                 phaseOne: 'rgba(63,81,181,0.35)',
                 phaseTwo: 'rgba(124,58,237,0.28)',
-                phaseThree: 'rgba(63,81,181,0.15)'
+                phaseThree: 'rgba(63,81,181,0.15)',
             },
             burst: {
                 ringStart: 'rgba(14,165,233,0.25)',
                 ringMid: 'rgba(15,23,42,0.45)',
                 ringEnd: 'rgba(15,23,42,0)',
                 haloBorder: 'rgba(15,23,42,0.2)',
-                haloBackground: 'rgba(246,250,252,0.92)'
-            }
+                haloBackground: 'rgba(246,250,252,0.92)',
+            },
         }),
         motion: createMotionProfile({
             durations: {
                 drag: 0.24,
                 hover: 0.16,
-                release: 0.26
+                release: 0.26,
             },
             easing: {
                 drag: [0.4, 0, 0.2, 1],
-                hover: [0.25, 0.1, 0.25, 1]
+                hover: [0.25, 0.1, 0.25, 1],
             },
             drag: {
                 scale: 1.015,
                 shadow: '0 12px 22px rgba(111, 0, 255, 0.2)',
-                glow: '0 0 14px rgba(111, 0, 255, 0.35)'
+                glow: '0 0 14px rgba(111, 0, 255, 0.35)',
             },
             idle: {
-                shadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
-            }
+                shadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
+            },
         }),
         card: {
             depth: {
                 resting: '0 10px 26px rgba(15, 23, 42, 0.35), 0 0 14px rgba(148,0,211,0.08)',
-                active: '0 0 0 1px rgba(15,23,42,0.15), 0 18px 40px rgba(15, 23, 42, 0.28)'
+                active: '0 0 0 1px rgba(15,23,42,0.15), 0 18px 40px rgba(15, 23, 42, 0.28)',
             },
             transition: '0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-            focusRing: 'rgba(63, 63, 70, 0.45)'
+            focusRing: 'rgba(63, 63, 70, 0.45)',
         },
         cta: {
             transition: 'transform 0.16s ease, box-shadow 0.16s ease',
@@ -260,11 +268,11 @@ export const THEME_PROFILES = Object.freeze({
             hoverTranslate: '-1px',
             pressShadow: 'inset 0 2px 6px rgba(15, 23, 42, 0.25)',
             pressTranslate: '1px',
-            focusRing: 'rgba(63, 63, 70, 0.45)'
+            focusRing: 'rgba(63, 63, 70, 0.45)',
         },
         glow: {
             intensity: 'subtle',
-            handle: '0 0 12px rgba(15, 23, 42, 0.25)'
+            handle: '0 0 12px rgba(15, 23, 42, 0.25)',
         },
         soundFx: {
             enabled: false,
@@ -272,16 +280,17 @@ export const THEME_PROFILES = Object.freeze({
             requirements: {
                 formats: ['audio/webm', 'audio/mpeg'],
                 maxFileSizeKb: 50,
-                notes: 'Classic keeps sound design disabled by default; enable per user preference.'
+                notes:
+                    'Classic keeps sound design disabled by default; enable per user preference.',
             },
-            events: {}
-        }
-    }
+            events: {},
+        },
+    },
 });
 
 export const LEGACY_THEME_MAP = Object.freeze({
     dark: 'neon_arcade',
-    light: 'classic'
+    light: 'classic',
 });
 
 export const THEME_SEQUENCE = Object.freeze(Object.keys(THEME_PROFILES));

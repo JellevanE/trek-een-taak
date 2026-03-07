@@ -1,16 +1,26 @@
 {
-  "campaigns": [
-    {
-      "id": 1,
-      "name": "Challenge the mage",
-      "description": "Beat him at his own game",
-      "image_url": null,
-      "owner_id": 5,
-      "archived": false,
-      "created_at": "2025-12-08T16:58:39.168Z",
-      "updated_at": "2025-12-08T16:58:39.168Z",
-      "storyline_id": "71accba5-cf0d-47aa-b9a7-ae7cb40675f2"
-    }
-  ],
-  "nextId": 2
+    "campaigns": [
+        {
+            "id": 1,
+            "name": "Challenge the mage",
+            "description": "Beat him at his own game",
+            "image_url": null,
+            "owner_id": 5,
+            "archived": false,
+            "created_at": "2025-12-08T16:58:39.168Z",
+            "updated_at": "2025-12-08T16:58:39.168Z"
+        },
+        {
+            "id": 2,
+            "name": "Fly by guy",
+            "description": "catch the flyers",
+            "image_url": null,
+            "owner_id": 6,
+            "archived": false,
+            "created_at": "2026-02-23T19:00:44.582Z",
+            "updated_at": "2026-02-23T19:00:44.582Z",
+            "storyline_id": "a39cde1d-98c2-426c-ad4d-2a470d071337"
+        }
+    ],
+    "nextId": 3
 }

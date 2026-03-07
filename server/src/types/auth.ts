@@ -16,7 +16,7 @@ export type AuthenticatedRequest<
     P extends ParamsDictionary = ParamsDictionary,
     ResBody = unknown,
     ReqBody = unknown,
-    ReqQuery = ParsedQs
+    ReqQuery = ParsedQs,
 > = Request<P, ResBody, ReqBody, ReqQuery> & {
     user?: AuthenticatedUser;
 };

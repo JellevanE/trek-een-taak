@@ -1,28 +1,28 @@
 import { renderHook } from '@testing-library/react';
 import {
-    normalizeSideQuest,
-    normalizeQuest,
-    normalizeQuestList,
+    calculateGlobalProgress,
+    cloneQuestSnapshot,
+    findSideQuestById,
+    getNextLevel,
+    getNextPriority,
+    getProgressAura,
+    getQuestProgress,
+    getQuestSideQuests,
     getQuestStatus,
     getQuestStatusLabel,
-    getQuestSideQuests,
     getSideQuestStatus,
     getSideQuestStatusLabel,
     idsMatch,
-    cloneQuestSnapshot,
-    findSideQuestById,
     isInteractiveTarget,
-    priorityWeight,
-    sideQuestWeight,
-    getQuestProgress,
-    progressColor,
-    getProgressAura,
-    useGlobalProgress,
-    calculateGlobalProgress,
-    getNextPriority,
-    getNextLevel,
+    LEVEL_OPTIONS,
+    normalizeQuest,
+    normalizeQuestList,
+    normalizeSideQuest,
     PRIORITY_ORDER,
-    LEVEL_OPTIONS
+    priorityWeight,
+    progressColor,
+    sideQuestWeight,
+    useGlobalProgress,
 } from '../questHelpers.js';
 
 describe('questHelpers', () => {
@@ -63,7 +63,7 @@ describe('questHelpers', () => {
         it('should normalize sub_tasks to side_quests', () => {
             const quest = {
                 id: 1,
-                sub_tasks: [{ id: 1, completed: true }]
+                sub_tasks: [{ id: 1, completed: true }],
             };
             const result = normalizeQuest(quest);
             expect(result.side_quests).toHaveLength(1);
@@ -74,7 +74,7 @@ describe('questHelpers', () => {
             const quest = {
                 id: 1,
                 sub_tasks: [],
-                side_quests: [{ id: 1 }]
+                side_quests: [{ id: 1 }],
             };
             const result = normalizeQuest(quest);
             expect(result.side_quests).toHaveLength(1);
@@ -103,7 +103,7 @@ describe('questHelpers', () => {
         it('should normalize all quests in list', () => {
             const quests = [
                 { id: 1, completed: true },
-                { id: 2, task_level: 3 }
+                { id: 2, task_level: 3 },
             ];
             const result = normalizeQuestList(quests);
             expect(result).toHaveLength(2);
@@ -202,8 +202,8 @@ describe('questHelpers', () => {
             const quest = {
                 side_quests: [
                     { id: 1, title: 'First' },
-                    { id: 2, title: 'Second' }
-                ]
+                    { id: 2, title: 'Second' },
+                ],
             };
             expect(findSideQuestById(quest, 2)?.title).toBe('Second');
         });
@@ -289,8 +289,8 @@ describe('questHelpers', () => {
                 side_quests: [
                     { status: 'done' },
                     { status: 'done' },
-                    { status: 'todo' }
-                ]
+                    { status: 'todo' },
+                ],
             };
             const progress = getQuestProgress(quest);
             expect(progress).toBeGreaterThan(60);
@@ -301,8 +301,8 @@ describe('questHelpers', () => {
             const quest = {
                 side_quests: [
                     { status: 'done', weight: 2 },
-                    { status: 'todo', weight: 1 }
-                ]
+                    { status: 'todo', weight: 1 },
+                ],
             };
             const progress = getQuestProgress(quest);
             expect(progress).toBeGreaterThan(65);
@@ -326,7 +326,7 @@ describe('questHelpers', () => {
 
         it('should return 0 if weightSum is 0', () => {
             const quest = {
-                side_quests: []
+                side_quests: [],
             };
             expect(getQuestProgress(quest)).toBe(0);
         });
@@ -406,7 +406,7 @@ describe('questHelpers', () => {
         it('should calculate progress for today tasks', () => {
             const quests = [
                 { id: 1, due_date: '2024-01-15', status: 'done', priority: 'high' },
-                { id: 2, due_date: '2024-01-15', status: 'todo', priority: 'low' }
+                { id: 2, due_date: '2024-01-15', status: 'todo', priority: 'low' },
             ];
             const { result } = renderHook(() => useGlobalProgress(quests));
             expect(result.current.todayCount).toBe(2);
@@ -416,7 +416,7 @@ describe('questHelpers', () => {
         it('should apply reduced weight to backlog tasks', () => {
             const quests = [
                 { id: 1, due_date: '2024-01-15', status: 'done', priority: 'medium' },
-                { id: 2, due_date: '2024-01-16', status: 'todo', priority: 'medium' }
+                { id: 2, due_date: '2024-01-16', status: 'todo', priority: 'medium' },
             ];
             const { result } = renderHook(() => useGlobalProgress(quests));
             expect(result.current.todayCount).toBe(1);
@@ -426,7 +426,7 @@ describe('questHelpers', () => {
         it('should apply higher weight to overdue tasks', () => {
             const quests = [
                 { id: 1, due_date: '2024-01-15', status: 'done', priority: 'medium' },
-                { id: 2, due_date: '2024-01-14', status: 'todo', priority: 'medium' }
+                { id: 2, due_date: '2024-01-14', status: 'todo', priority: 'medium' },
             ];
             const { result } = renderHook(() => useGlobalProgress(quests));
             expect(result.current.todayCount).toBe(1);
@@ -442,9 +442,9 @@ describe('questHelpers', () => {
                     priority: 'high',
                     side_quests: [
                         { status: 'done', weight: 2 },
-                        { status: 'todo', weight: 1 }
-                    ]
-                }
+                        { status: 'todo', weight: 1 },
+                    ],
+                },
             ];
             const { result } = renderHook(() => useGlobalProgress(quests));
             expect(result.current.todayCount).toBe(1);
@@ -453,7 +453,7 @@ describe('questHelpers', () => {
 
         it('should handle quests without due_date', () => {
             const quests = [
-                { id: 1, status: 'done', priority: 'medium' }
+                { id: 1, status: 'done', priority: 'medium' },
             ];
             const { result } = renderHook(() => useGlobalProgress(quests));
             expect(result.current.backlogCount).toBe(1);
@@ -479,7 +479,7 @@ describe('questHelpers', () => {
         it('should calculate progress for today tasks', () => {
             const quests = [
                 { id: 1, due_date: '2024-01-15', status: 'done', priority: 'high' },
-                { id: 2, due_date: '2024-01-15', status: 'todo', priority: 'low' }
+                { id: 2, due_date: '2024-01-15', status: 'todo', priority: 'low' },
             ];
             const result = calculateGlobalProgress(quests);
             expect(result.todayCount).toBe(2);
@@ -489,7 +489,7 @@ describe('questHelpers', () => {
         it('should handle null quests in array', () => {
             const quests = [
                 null,
-                { id: 1, due_date: '2024-01-15', status: 'done' }
+                { id: 1, due_date: '2024-01-15', status: 'done' },
             ];
             const result = calculateGlobalProgress(quests);
             expect(result.todayCount).toBe(1);
@@ -497,7 +497,7 @@ describe('questHelpers', () => {
 
         it('should not weight backlog when no today tasks', () => {
             const quests = [
-                { id: 1, due_date: '2024-01-16', status: 'done', priority: 'medium' }
+                { id: 1, due_date: '2024-01-16', status: 'done', priority: 'medium' },
             ];
             const result = calculateGlobalProgress(quests);
             expect(result.weightingToday).toBe(false);

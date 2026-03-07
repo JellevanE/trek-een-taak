@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ensureAuth } from '../middleware/auth.js';
-import { getStoryline, checkUpdate } from '../controllers/storylineController.js';
+import { checkUpdate, getStoryline } from '../controllers/storylineController.js';
 
 const router = Router();
 

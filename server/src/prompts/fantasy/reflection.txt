@@ -1,0 +1,17 @@
+Campaign: {campaignName}
+Hero: {userName}, Level {userLevel} {userClass}
+
+Narrative Context:
+Summary: {narrativeSummary}
+Objective: {currentObjective}
+Locations: {locations}
+Characters: {characters}
+
+Create a reflective story update (150-250 words) for a day when no quests were completed:
+- Describe the hero pausing to gather strength or plan their next move
+- Reflect on the journey so far and what lies ahead
+- Acknowledge the weight of the current objective without feeling like failure
+- End with renewed resolve and a sense of anticipation for tomorrow
+
+Style: Classic fantasy RPG
+Tone: Contemplative yet hopeful

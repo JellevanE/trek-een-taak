@@ -1,26 +1,21 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { storylineConfig } from '../config/storyline.config.js';
 
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = path.resolve(MODULE_DIR, '../prompts');
 
+const DAILY_UPDATE_VARIANTS = 1; // increment as more variants are added
+
 export class PromptService {
     static loadTemplate(theme: string, type: string): string {
         try {
-            // Try specific theme first
             let templatePath = path.join(PROMPTS_DIR, theme, `${type}.txt`);
 
-            if (!fs.existsSync(templatePath)) {
-                // Check if it's one of the varied daily updates (e.g. daily-update-1)
-                // For now, simple fallback to generic if specific missing not implemented fully
-                // as per plan we have specific files.
-                // If type is just 'daily-update', pick random variant?
-                if (type === 'daily-update') {
-                    // Simple random logic for V1
-                    const variant = Math.floor(Math.random() * 1) + 1; // only 1 variant so far
-                    templatePath = path.join(PROMPTS_DIR, theme, `daily-update-${variant}.txt`);
-                }
+            if (!fs.existsSync(templatePath) && type === 'daily-update') {
+                const variant = Math.floor(Math.random() * DAILY_UPDATE_VARIANTS) + 1;
+                templatePath = path.join(PROMPTS_DIR, theme, `daily-update-${variant}.txt`);
             }
 
             if (fs.existsSync(templatePath)) {
@@ -28,10 +23,25 @@ export class PromptService {
             }
 
             console.error(`Prompt template not found: ${theme}/${type}`);
-            return `Write a story update about {currentObjective} for {userName}.`; // Fallback
+            return 'Write a story update about {currentObjective} for {userName}.';
         } catch (error) {
             console.error('Error loading prompt template:', error);
             throw error;
+        }
+    }
+
+    static loadSystemPrompt(theme: string): string | undefined {
+        const themeConfig = storylineConfig.themes[theme as keyof typeof storylineConfig.themes];
+        if (!themeConfig) return undefined;
+
+        const systemPromptPath = path.join(PROMPTS_DIR, themeConfig.systemPromptFile);
+        if (!fs.existsSync(systemPromptPath)) return undefined;
+
+        try {
+            return fs.readFileSync(systemPromptPath, 'utf8').trim();
+        } catch (error) {
+            console.error('Error loading system prompt:', error);
+            return undefined;
         }
     }
 }

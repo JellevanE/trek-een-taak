@@ -5,7 +5,7 @@ import type {
     RpgInventory,
     RpgMetrics,
     XpEventMetadata,
-    XpEventReason
+    XpEventReason,
 } from './rpg.js';
 
 export interface UserProfile {

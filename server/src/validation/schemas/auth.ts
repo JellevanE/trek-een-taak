@@ -18,7 +18,7 @@ export const profileUpdateSchema = z
             .trim()
             .max(200)
             .optional(),
-        prefs: z.record(z.unknown()).optional()
+        prefs: z.record(z.unknown()).optional(),
     })
     .strict()
     .partial();
@@ -33,14 +33,14 @@ export const registerUserSchema = z
             .email()
             .optional()
             .nullable(),
-        profile: profileUpdateSchema.optional()
+        profile: profileUpdateSchema.optional(),
     })
     .strict();
 
 export const loginUserSchema = z
     .object({
         username: z.string().trim().min(1),
-        password: z.string().min(1)
+        password: z.string().min(1),
     })
     .strict();
 
@@ -48,7 +48,7 @@ const emailFormatSchema = z.string().trim().email();
 
 export const emailValidationRequestSchema = z
     .object({
-        email: z.string().trim().min(1)
+        email: z.string().trim().min(1),
     })
     .strict();
 

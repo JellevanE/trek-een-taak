@@ -2,13 +2,13 @@ import { z } from 'zod';
 
 export const campaignIdParamsSchema = z
     .object({
-        id: z.coerce.number().int().positive()
+        id: z.coerce.number().int().positive(),
     })
     .strict();
 
 export const listCampaignsQuerySchema = z
     .object({
-        include_archived: z.union([z.string(), z.array(z.string())]).optional()
+        include_archived: z.union([z.string(), z.array(z.string())]).optional(),
     })
     .strict();
 
@@ -21,14 +21,14 @@ export const createCampaignSchema = z
             .trim()
             .max(2048)
             .nullable()
-            .optional()
+            .optional(),
     })
     .strict();
 
 export const updateCampaignSchema = createCampaignSchema
     .partial()
     .extend({
-        archived: z.boolean().optional()
+        archived: z.boolean().optional(),
     })
     .strict();
 

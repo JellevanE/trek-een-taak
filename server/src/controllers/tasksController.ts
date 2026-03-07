@@ -5,12 +5,7 @@ import type { ParsedQs } from 'qs';
 import { applyXp, ensureUserRpg } from '../rpg/experienceEngine.js';
 import { buildPublicRpgState, incrementCounter, toPublicXpEvent } from '../rpg/eventHooks.js';
 import { clampTaskLevel, computeSubtaskXp, computeTaskXp } from '../rpg/rewardTables.js';
-import {
-    readTasks,
-    serializeTask,
-    serializeTaskList,
-    writeTasks
-} from '../data/taskStore.js';
+import { readTasks, serializeTask, serializeTaskList, writeTasks } from '../data/taskStore.js';
 import { readCampaigns } from '../data/campaignStore.js';
 import { readUsers, writeUsers } from '../data/userStore.js';
 import { sendError } from '../utils/http.js';
@@ -23,24 +18,24 @@ import type { PublicXpEvent } from '../rpg/experienceTypes.js';
 import type { SubtaskCompletionMetadata, TaskCompletionMetadata } from '../types/rpg.js';
 import { validateRequest } from '../validation/index.js';
 import {
-    createSubtaskSchema,
-    createTaskSchema,
-    updateOrderSchema,
-    updateStatusSchema,
-    updateSubtaskSchema,
-    updateTaskSchema,
     type CreateSubtaskPayload,
+    createSubtaskSchema,
     type CreateTaskPayload,
+    createTaskSchema,
     type UpdateOrderPayload,
+    updateOrderSchema,
     type UpdateStatusPayload,
+    updateStatusSchema,
     type UpdateSubtaskPayload,
-    type UpdateTaskPayload
+    updateSubtaskSchema,
+    type UpdateTaskPayload,
+    updateTaskSchema,
 } from '../validation/schemas/tasks.js';
 
 type BaseAuthedRequest<
     P extends ParamsDictionary = ParamsDictionary,
     B = unknown,
-    Q extends ParsedQs = ParsedQs
+    Q extends ParsedQs = ParsedQs,
 > = AuthenticatedRequest<P, unknown, B, Q>;
 
 interface TaskListQuery extends ParsedQs {
@@ -74,7 +69,10 @@ function toTaskResponse(task: TaskRecord, extras: TaskResponseExtras = {}) {
     return { ...serialized, ...extras };
 }
 
-export function listTasks(req: BaseAuthedRequest<ParamsDictionary, unknown, TaskListQuery>, res: Response) {
+export function listTasks(
+    req: BaseAuthedRequest<ParamsDictionary, unknown, TaskListQuery>,
+    res: Response,
+) {
     if (!assertAuthenticated(req, res)) return;
     const tasksData = readTasks();
     const userId = req.user.id;
@@ -98,7 +96,10 @@ export function listTasks(req: BaseAuthedRequest<ParamsDictionary, unknown, Task
     return res.json({ tasks: serializeTaskList(filteredTasks), nextId: tasksData.nextId });
 }
 
-export function createTask(req: BaseAuthedRequest<ParamsDictionary, CreateTaskPayload>, res: Response) {
+export function createTask(
+    req: BaseAuthedRequest<ParamsDictionary, CreateTaskPayload>,
+    res: Response,
+) {
     if (!assertAuthenticated(req, res)) return;
     const validation = validateRequest(req, { body: createTaskSchema });
     if (!validation.success) {
@@ -117,17 +118,18 @@ export function createTask(req: BaseAuthedRequest<ParamsDictionary, CreateTaskPa
         const numericCampaignId = campaign_id;
         const campaignsData: CampaignStoreData = readCampaigns();
         const campaign = campaignsData.campaigns.find(
-            (record) => record.id === numericCampaignId && record.owner_id === req.user.id && !record.archived
+            (record) =>
+                record.id === numericCampaignId && record.owner_id === req.user.id &&
+                !record.archived,
         );
         if (!campaign) return sendError(res, 404, 'Campaign not found');
         campaignId = numericCampaignId;
     }
 
     const tasksData = readTasks();
-    const normalizedDueDate: string =
-        typeof due_date === 'string' && due_date.trim().length > 0
-            ? due_date
-            : new Date().toISOString().slice(0, 10);
+    const normalizedDueDate: string = typeof due_date === 'string' && due_date.trim().length > 0
+        ? due_date
+        : new Date().toISOString().slice(0, 10);
     const now = new Date().toISOString();
     const newTask: TaskRecord = {
         id: tasksData.nextId,
@@ -145,7 +147,7 @@ export function createTask(req: BaseAuthedRequest<ParamsDictionary, CreateTaskPa
         rpg: { xp_awarded: false, last_reward_at: null, history: [] },
         campaign_id: campaignId,
         owner_id: req.user.id,
-        completed: false
+        completed: false,
     };
 
     if (typeof req.user?.id !== 'number') {
@@ -168,7 +170,7 @@ export function createTask(req: BaseAuthedRequest<ParamsDictionary, CreateTaskPa
 
 export function createSubtask(
     req: BaseAuthedRequest<{ id: string }, CreateSubtaskPayload>,
-    res: Response
+    res: Response,
 ) {
     if (!assertAuthenticated(req, res)) return;
     const taskId = parseTaskId(req.params.id);
@@ -194,12 +196,14 @@ export function createSubtask(
         updated_at: now,
         status_history: [{ status: 'todo', at: now, note: null }],
         rpg: { xp_awarded: false, last_reward_at: null },
-        completed: false
+        completed: false,
     };
 
     task.sub_tasks.push(newSubTask);
     task.nextSubtaskId += 1;
-    task.side_quests = task.side_quests && task.side_quests.length > 0 ? task.side_quests : task.sub_tasks;
+    task.side_quests = task.side_quests && task.side_quests.length > 0
+        ? task.side_quests
+        : task.sub_tasks;
     task.updated_at = new Date().toISOString();
 
     try {
@@ -214,7 +218,7 @@ export function createSubtask(
 
 function applyTaskCompletionReward(
     task: TaskRecord,
-    user: UserRecord
+    user: UserRecord,
 ): { xpEvents: PublicXpEvent[]; playerSnapshot: PublicUserRpgState | null } {
     const reward = computeTaskXp(task);
     if (reward.amount <= 0) return { xpEvents: [], playerSnapshot: null };
@@ -222,7 +226,7 @@ function applyTaskCompletionReward(
     const metadata: TaskCompletionMetadata = {
         task_id: task.id,
         task_level: task.task_level,
-        priority: task.priority
+        priority: task.priority,
     };
     const xpEvent = applyXp(user, reward.amount, 'task_complete', metadata);
     if (!xpEvent) return { xpEvents: [], playerSnapshot: null };
@@ -233,7 +237,7 @@ function applyTaskCompletionReward(
     task.rpg.history.unshift({
         at: xpEvent.at,
         amount: xpEvent.amount,
-        reason: xpEvent.reason
+        reason: xpEvent.reason,
     });
     if (task.rpg.history.length > 10) task.rpg.history.length = 10;
 
@@ -245,7 +249,7 @@ function applyTaskCompletionReward(
 
 export function updateTaskStatus(
     req: BaseAuthedRequest<{ id: string }, UpdateStatusPayload>,
-    res: Response
+    res: Response,
 ) {
     if (!assertAuthenticated(req, res)) return;
     const validation = validateRequest(req, { body: updateStatusSchema });
@@ -261,7 +265,9 @@ export function updateTaskStatus(
     const task = tasksData.tasks.find((record) => record.id === taskId);
     if (!task || task.owner_id !== req.user.id) return res.status(404).send('Task not found');
 
-    if (!task.rpg || typeof task.rpg !== 'object') task.rpg = { xp_awarded: false, last_reward_at: null, history: [] };
+    if (!task.rpg || typeof task.rpg !== 'object') {
+        task.rpg = { xp_awarded: false, last_reward_at: null, history: [] };
+    }
     if (!Array.isArray(task.rpg.history)) task.rpg.history = [];
 
     const willComplete = status === 'done' && task.status !== 'done' && !task.rpg.xp_awarded;
@@ -306,10 +312,10 @@ export function updateTaskStatus(
             task,
             xpEvents.length > 0
                 ? {
-                      xp_events: xpEvents,
-                      player_rpg: playerSnapshot
-                  }
-                : {}
+                    xp_events: xpEvents,
+                    player_rpg: playerSnapshot,
+                }
+                : {},
         );
         if (!response) return sendError(res, 500, 'Failed to serialize task');
         return res.json(response);
@@ -321,7 +327,7 @@ export function updateTaskStatus(
 function applySubtaskCompletionReward(
     task: TaskRecord,
     subtask: SubTask,
-    user: UserRecord
+    user: UserRecord,
 ) {
     const reward = computeSubtaskXp(task, subtask);
     if (reward.amount <= 0) return null;
@@ -330,7 +336,7 @@ function applySubtaskCompletionReward(
         task_id: task.id,
         task_level: task.task_level,
         subtask_id: subtask.id,
-        priority: subtask.priority ?? task.priority
+        priority: subtask.priority ?? task.priority,
     };
     if (typeof subtask.weight === 'number' && Number.isFinite(subtask.weight)) {
         metadata.weight = subtask.weight;
@@ -347,7 +353,7 @@ function applySubtaskCompletionReward(
         at: xpEvent.at,
         amount: xpEvent.amount,
         reason: xpEvent.reason,
-        subtask_id: subtask.id
+        subtask_id: subtask.id,
     });
     if (task.rpg.history.length > 10) task.rpg.history.length = 10;
 
@@ -356,7 +362,7 @@ function applySubtaskCompletionReward(
 
 export function updateSubtaskStatus(
     req: BaseAuthedRequest<{ id: string; subtask_id: string }, UpdateStatusPayload>,
-    res: Response
+    res: Response,
 ) {
     if (!assertAuthenticated(req, res)) return;
     const validation = validateRequest(req, { body: updateStatusSchema });
@@ -376,7 +382,9 @@ export function updateSubtaskStatus(
     const subtask = (task.sub_tasks || []).find((item) => item.id === subtaskId);
     if (!subtask) return res.status(404).send('Subtask not found');
 
-    if (!task.rpg || typeof task.rpg !== 'object') task.rpg = { xp_awarded: false, last_reward_at: null, history: [] };
+    if (!task.rpg || typeof task.rpg !== 'object') {
+        task.rpg = { xp_awarded: false, last_reward_at: null, history: [] };
+    }
     if (!Array.isArray(task.rpg.history)) task.rpg.history = [];
     if (!subtask.rpg || typeof subtask.rpg !== 'object') {
         subtask.rpg = { xp_awarded: false, last_reward_at: null };
@@ -428,10 +436,10 @@ export function updateSubtaskStatus(
             task,
             xpEvents.length > 0
                 ? {
-                      xp_events: xpEvents,
-                      player_rpg: playerSnapshot
-                  }
-                : {}
+                    xp_events: xpEvents,
+                    player_rpg: playerSnapshot,
+                }
+                : {},
         );
         if (!response) return sendError(res, 500, 'Failed to serialize task');
         return res.json(response);
@@ -442,7 +450,7 @@ export function updateSubtaskStatus(
 
 export function updateTaskOrder(
     req: BaseAuthedRequest<ParamsDictionary, UpdateOrderPayload>,
-    res: Response
+    res: Response,
 ) {
     if (!assertAuthenticated(req, res)) return;
     const validation = validateRequest(req, { body: updateOrderSchema });
@@ -491,7 +499,9 @@ export function getTaskHistory(req: BaseAuthedRequest, res: Response) {
     if (taskId === null) return sendError(res, 400, 'Invalid task id');
 
     const tasksData = readTasks();
-    const task = tasksData.tasks.find((record) => record.id === taskId && record.owner_id === req.user.id);
+    const task = tasksData.tasks.find((record) =>
+        record.id === taskId && record.owner_id === req.user.id
+    );
     if (!task) return sendError(res, 404, 'Task not found');
 
     if (!task.status_history || !Array.isArray(task.status_history)) {
@@ -503,7 +513,7 @@ export function getTaskHistory(req: BaseAuthedRequest, res: Response) {
 
 export function updateTask(
     req: BaseAuthedRequest<{ id: string }, UpdateTaskPayload>,
-    res: Response
+    res: Response,
 ) {
     if (!assertAuthenticated(req, res)) return;
     const taskId = parseTaskId(req.params.id);
@@ -516,10 +526,15 @@ export function updateTask(
     const updates = validation.data.body ?? {};
 
     const tasksData = readTasks();
-    const task = tasksData.tasks.find((record) => record.id === taskId && record.owner_id === req.user.id);
+    const task = tasksData.tasks.find((record) =>
+        record.id === taskId && record.owner_id === req.user.id
+    );
     if (!task) return sendError(res, 404, 'Task not found');
 
-    if (Object.prototype.hasOwnProperty.call(updates, 'description') && updates.description !== undefined) {
+    if (
+        Object.prototype.hasOwnProperty.call(updates, 'description') &&
+        updates.description !== undefined
+    ) {
         task.description = updates.description.trim();
     }
 
@@ -545,7 +560,10 @@ export function updateTask(
         }
     }
 
-    if (Object.prototype.hasOwnProperty.call(updates, 'task_level') && updates.task_level !== undefined) {
+    if (
+        Object.prototype.hasOwnProperty.call(updates, 'task_level') &&
+        updates.task_level !== undefined
+    ) {
         task.task_level = clampTaskLevel(updates.task_level);
     }
 
@@ -557,7 +575,8 @@ export function updateTask(
             const numeric = campaignIdValue;
             const campaignsData = readCampaigns();
             const campaign = campaignsData.campaigns.find(
-                (record) => record.id === numeric && record.owner_id === req.user.id && !record.archived
+                (record) =>
+                    record.id === numeric && record.owner_id === req.user.id && !record.archived,
             );
             if (!campaign) return sendError(res, 404, 'Campaign not found');
             task.campaign_id = numeric;
@@ -584,7 +603,9 @@ export function deleteTask(req: BaseAuthedRequest, res: Response) {
     if (taskId === null) return sendError(res, 400, 'Invalid task id');
 
     const tasksData = readTasks();
-    const index = tasksData.tasks.findIndex((record) => record.id === taskId && record.owner_id === req.user.id);
+    const index = tasksData.tasks.findIndex((record) =>
+        record.id === taskId && record.owner_id === req.user.id
+    );
     if (index === -1) return sendError(res, 404, 'Task not found');
 
     tasksData.tasks.splice(index, 1);
@@ -599,7 +620,7 @@ export function deleteTask(req: BaseAuthedRequest, res: Response) {
 
 export function updateSubtask(
     req: BaseAuthedRequest<{ id: string; subtask_id: string }, UpdateSubtaskPayload>,
-    res: Response
+    res: Response,
 ) {
     if (!assertAuthenticated(req, res)) return;
     const taskId = parseTaskId(req.params.id);
@@ -613,20 +634,28 @@ export function updateSubtask(
     const updates = validation.data.body ?? {};
 
     const tasksData = readTasks();
-    const task = tasksData.tasks.find((record) => record.id === taskId && record.owner_id === req.user.id);
+    const task = tasksData.tasks.find((record) =>
+        record.id === taskId && record.owner_id === req.user.id
+    );
     if (!task) return sendError(res, 404, 'Task not found');
 
     const subtask = (task.sub_tasks || []).find((item) => item.id === subtaskId);
     if (!subtask) return sendError(res, 404, 'Subtask not found');
 
-    if (Object.prototype.hasOwnProperty.call(updates, 'description') && updates.description !== undefined) {
+    if (
+        Object.prototype.hasOwnProperty.call(updates, 'description') &&
+        updates.description !== undefined
+    ) {
         subtask.description = updates.description.trim();
     }
 
     if (Object.prototype.hasOwnProperty.call(updates, 'status')) {
         const value = updates.status;
         const allowedStatuses: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'done'];
-        if (value === undefined || typeof value !== 'string' || !allowedStatuses.includes(value as TaskStatus)) {
+        if (
+            value === undefined || typeof value !== 'string' ||
+            !allowedStatuses.includes(value as TaskStatus)
+        ) {
             return sendError(res, 400, 'Invalid status');
         }
         subtask.status = value as TaskStatus;
@@ -643,7 +672,10 @@ export function updateSubtask(
     if (Object.prototype.hasOwnProperty.call(updates, 'priority')) {
         const value = updates.priority;
         const allowedPriorities: TaskRecord['priority'][] = ['low', 'medium', 'high'];
-        if (value === undefined || typeof value !== 'string' || !allowedPriorities.includes(value as TaskRecord['priority'])) {
+        if (
+            value === undefined || typeof value !== 'string' ||
+            !allowedPriorities.includes(value as TaskRecord['priority'])
+        ) {
             return sendError(res, 400, 'Invalid priority');
         }
         subtask.priority = value as TaskRecord['priority'];
@@ -663,7 +695,7 @@ export function updateSubtask(
 
 export function deleteSubtask(
     req: BaseAuthedRequest,
-    res: Response
+    res: Response,
 ) {
     if (!assertAuthenticated(req, res)) return;
     const taskId = parseTaskId(req.params.id);
@@ -671,7 +703,9 @@ export function deleteSubtask(
     if (taskId === null || subtaskId === null) return sendError(res, 400, 'Invalid task id');
 
     const tasksData = readTasks();
-    const task = tasksData.tasks.find((record) => record.id === taskId && record.owner_id === req.user.id);
+    const task = tasksData.tasks.find((record) =>
+        record.id === taskId && record.owner_id === req.user.id
+    );
     if (!task) return sendError(res, 404, 'Task not found');
 
     const index = task.sub_tasks.findIndex((sub) => sub.id === subtaskId);
@@ -701,7 +735,7 @@ const controller = {
     updateTask,
     deleteTask,
     updateSubtask,
-    deleteSubtask
+    deleteSubtask,
 };
 
 export default controller;

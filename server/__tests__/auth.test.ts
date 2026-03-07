@@ -7,12 +7,12 @@ import { resetRegistrationRateLimiter } from '../src/security/registrationRateLi
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
-    JsonRecord,
     configureDataFiles,
+    JsonRecord,
     resetCampaignStore,
     resetDataFileOverrides,
     resetTaskStore,
-    resetUserStore
+    resetUserStore,
 } from '../src/testing/fixtures';
 
 let dataDir: string;
@@ -53,7 +53,7 @@ function expectError(response: { status: number; body: unknown }, status: number
 test('register rejects blank username', async () => {
     const res = await client.post('/api/users/register', {
         body: { username: '   ', password: 'secret123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expectError(res, 400);
 });
@@ -61,7 +61,7 @@ test('register rejects blank username', async () => {
 test('register rejects passwords shorter than 6 chars', async () => {
     const res = await client.post('/api/users/register', {
         body: { username: 'newhero', password: '123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expectError(res, 400);
 });
@@ -71,9 +71,9 @@ test('register rejects invalid profile class', async () => {
         body: {
             username: 'invalidclass',
             password: 'secret123',
-            profile: { class: 'paladin' }
+            profile: { class: 'paladin' },
         },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expect(res.status).toBe(400);
     const body = res.body as JsonRecord;
@@ -83,13 +83,13 @@ test('register rejects invalid profile class', async () => {
 test('register rejects duplicate usernames', async () => {
     const first = await client.post('/api/users/register', {
         body: { username: 'guildmaster', password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expect(first.status).toBe(201);
 
     const dup = await client.post('/api/users/register', {
         body: { username: 'GuildMaster', password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expectError(dup, 400);
 });
@@ -97,7 +97,7 @@ test('register rejects duplicate usernames', async () => {
 test('login requires both username and password', async () => {
     const res = await client.post('/api/users/login', {
         body: { username: 'someone' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expectError(res, 400);
 });
@@ -105,12 +105,12 @@ test('login requires both username and password', async () => {
 test('login rejects invalid credentials', async () => {
     await client.post('/api/users/register', {
         body: { username: 'scout', password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
 
     const res = await client.post('/api/users/login', {
         body: { username: 'scout', password: 'wrongpass' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expectError(res, 401);
 });
@@ -118,13 +118,13 @@ test('login rejects invalid credentials', async () => {
 test('login succeeds after registration', async () => {
     const register = await client.post('/api/users/register', {
         body: { username: 'enchanter', password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expect(register.status).toBe(201);
 
     const login = await client.post('/api/users/login', {
         body: { username: 'Enchanter', password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     expect(login.status).toBe(200);
     const body = login.body as JsonRecord;

@@ -72,7 +72,7 @@ const createSamplePlayer = (sources = [], gain) => {
 export const useSoundFx = ({
     soundFxProfile,
     volumePercent = 100,
-    prefersReducedMotion = false
+    prefersReducedMotion = false,
 } = {}) => {
     const audioCtxRef = useRef(null);
     const [players, setPlayers] = useState({});
@@ -124,7 +124,7 @@ export const useSoundFx = ({
         enabled: !muted && Object.keys(players).length > 0,
         play,
         volumePercent: clampedVolume,
-        requirements: soundFxProfile?.requirements ?? null
+        requirements: soundFxProfile?.requirements ?? null,
     };
 };
 

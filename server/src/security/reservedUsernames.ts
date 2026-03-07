@@ -16,16 +16,16 @@ const baseReserved = [
     'owner',
     'operator',
     'api',
-    'superuser'
+    'superuser',
 ] as const;
 
 function collectReserved(): string[] {
     const envList = process.env.RESERVED_USERNAMES;
     const extras = envList
         ? envList
-              .split(',')
-              .map((value) => value.trim().toLowerCase())
-              .filter(Boolean)
+            .split(',')
+            .map((value) => value.trim().toLowerCase())
+            .filter(Boolean)
         : [];
     const combined = [...baseReserved.map((value) => value.toLowerCase()), ...extras];
     return Array.from(new Set(combined));

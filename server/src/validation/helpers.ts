@@ -37,7 +37,7 @@ function mapIssues(error: ZodError, scope?: string): ValidationIssue[] {
     return error.issues.map((issue) => ({
         path: buildPath(scope, issue.path),
         message: issue.message,
-        code: issue.code
+        code: issue.code,
     }));
 }
 
@@ -46,7 +46,9 @@ export function formatZodError(error: ZodError, scope?: string): ValidationError
     let summary: string;
     if (issues.length === 1) {
         const [singleIssue] = issues;
-        const targetPath = singleIssue?.path && singleIssue.path.length > 0 ? singleIssue.path : scope ?? 'value';
+        const targetPath = singleIssue?.path && singleIssue.path.length > 0
+            ? singleIssue.path
+            : scope ?? 'value';
         const message = singleIssue?.message ?? 'Validation failed';
         summary = `Validation failed for ${targetPath}: ${message}`;
     } else {
@@ -58,7 +60,7 @@ export function formatZodError(error: ZodError, scope?: string): ValidationError
 export function parseWithSchema<T>(
     schema: ZodSchema<T>,
     payload: unknown,
-    scope?: string
+    scope?: string,
 ): ValidationResult<T> {
     const result = schema.safeParse(payload);
     if (result.success) return { success: true, data: result.data };

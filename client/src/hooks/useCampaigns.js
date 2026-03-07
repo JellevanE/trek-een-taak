@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch, getAuthHeaders as getAuthHeadersUtil } from '../utils/api.js';
 
 export const useCampaigns = ({
@@ -6,14 +6,18 @@ export const useCampaigns = ({
     getAuthHeaders,
     pushToast,
     onUnauthorized,
-    reloadTasksRef
+    reloadTasksRef,
 }) => {
     const [campaigns, setCampaigns] = useState([]);
     const [campaignSidebarCollapsed, setCampaignSidebarCollapsed] = useState(true);
     const [activeCampaignFilter, setActiveCampaignFilter] = useState(null);
     const [taskCampaignSelection, setTaskCampaignSelection] = useState(null);
     const [campaignFormMode, setCampaignFormMode] = useState(null);
-    const [campaignFormValues, setCampaignFormValues] = useState({ name: '', description: '', image_url: '' });
+    const [campaignFormValues, setCampaignFormValues] = useState({
+        name: '',
+        description: '',
+        image_url: '',
+    });
     const [campaignFormBusy, setCampaignFormBusy] = useState(false);
     const [campaignFormError, setCampaignFormError] = useState(null);
 
@@ -26,7 +30,9 @@ export const useCampaigns = ({
 
     useEffect(() => {
         if (typeof activeCampaignFilter === 'number') {
-            const exists = campaigns.some((campaign) => campaign && campaign.id === activeCampaignFilter);
+            const exists = campaigns.some((campaign) =>
+                campaign && campaign.id === activeCampaignFilter
+            );
             if (!exists) {
                 setActiveCampaignFilter(null);
             }
@@ -57,7 +63,7 @@ export const useCampaigns = ({
             const data = await apiFetch(
                 '/api/campaigns',
                 { headers: getAuthHeadersUtil(token) },
-                onUnauthorized
+                onUnauthorized,
             );
 
             if (data && Array.isArray(data.campaigns)) {
@@ -109,7 +115,7 @@ export const useCampaigns = ({
         setCampaignFormValues({
             name: selectedCampaign.name || '',
             description: selectedCampaign.description || '',
-            image_url: selectedCampaign.image_url || ''
+            image_url: selectedCampaign.image_url || '',
         });
         setCampaignFormError(null);
         setCampaignFormBusy(false);
@@ -131,7 +137,7 @@ export const useCampaigns = ({
                 setCampaignFormValues({
                     name: selectedCampaign.name || '',
                     description: selectedCampaign.description || '',
-                    image_url: selectedCampaign.image_url || ''
+                    image_url: selectedCampaign.image_url || '',
                 });
             } else {
                 setCampaignFormMode(null);
@@ -151,7 +157,7 @@ export const useCampaigns = ({
         const payload = {
             name,
             description: (campaignFormValues.description || '').trim(),
-            image_url: (campaignFormValues.image_url || '').trim()
+            image_url: (campaignFormValues.image_url || '').trim(),
         };
         if (!payload.description) delete payload.description;
         if (!payload.image_url) payload.image_url = null;
@@ -166,13 +172,15 @@ export const useCampaigns = ({
                     {
                         method: 'POST',
                         headers: getAuthHeaders(),
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
                     },
-                    onUnauthorized
+                    onUnauthorized,
                 );
                 if (created && created.id) {
                     setCampaigns((prev) => {
-                        const exists = prev.some((campaign) => campaign && campaign.id === created.id);
+                        const exists = prev.some((campaign) =>
+                            campaign && campaign.id === created.id
+                        );
                         if (exists) return prev;
                         return [...prev, created];
                     });
@@ -201,9 +209,9 @@ export const useCampaigns = ({
                     {
                         method: 'PATCH',
                         headers: getAuthHeaders(),
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
                     },
-                    onUnauthorized
+                    onUnauthorized,
                 );
 
                 closeCampaignForm();
@@ -229,7 +237,7 @@ export const useCampaigns = ({
         onUnauthorized,
         pushToast,
         reloadTasksRef,
-        selectedCampaign
+        selectedCampaign,
     ]);
 
     const hasCampaigns = campaigns.length > 0;
@@ -260,6 +268,6 @@ export const useCampaigns = ({
         submitCampaignForm,
         campaignLookup,
         selectedCampaign,
-        hasCampaigns
+        hasCampaigns,
     };
 };

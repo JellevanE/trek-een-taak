@@ -11,7 +11,7 @@ describe('AddSideQuestForm', () => {
         onCancel: jest.fn(),
         onFocus: jest.fn(),
         onBlur: jest.fn(),
-        inputRef: React.createRef()
+        inputRef: React.createRef(),
     };
 
     beforeEach(() => {
@@ -39,7 +39,7 @@ describe('AddSideQuestForm', () => {
     });
 
     it('calls onAdd when Add button is clicked', () => {
-        render(<AddSideQuestForm {...defaultProps} value="Test" />);
+        render(<AddSideQuestForm {...defaultProps} value='Test' />);
 
         const button = screen.getByText('Add');
         fireEvent.click(button);
@@ -48,7 +48,7 @@ describe('AddSideQuestForm', () => {
     });
 
     it('calls onAdd when Enter key is pressed', () => {
-        render(<AddSideQuestForm {...defaultProps} value="Test" />);
+        render(<AddSideQuestForm {...defaultProps} value='Test' />);
 
         const input = screen.getByPlaceholderText('Add a side-quest');
         fireEvent.keyDown(input, { key: 'Enter' });

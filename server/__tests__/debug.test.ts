@@ -7,12 +7,12 @@ import { resetRegistrationRateLimiter } from '../src/security/registrationRateLi
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
-    JsonRecord,
     configureDataFiles,
+    JsonRecord,
     resetCampaignStore,
     resetDataFileOverrides,
     resetTaskStore,
-    resetUserStore
+    resetUserStore,
 } from '../src/testing/fixtures';
 
 let dataDir: string;
@@ -39,7 +39,7 @@ beforeEach(async () => {
 
     const register = await client.post('/api/users/register', {
         body: { username: `debugger_${Date.now()}`, password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     authToken = (register.body as JsonRecord).token as string;
 });
@@ -63,11 +63,11 @@ test('debug endpoints require authentication', async () => {
 test('clear-tasks removes only the authenticated user tasks', async () => {
     await client.post('/api/tasks', {
         body: { description: 'clear me' },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
 
     const res = await client.post('/api/debug/clear-tasks', {
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(res.status).toBe(200);
     const body = res.body as JsonRecord;
@@ -81,12 +81,12 @@ test('seed-tasks creates demo tasks and removes previous ones for user', async (
     // seed with custom count
     await client.post('/api/tasks', {
         body: { description: 'existing to replace' },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
 
     const res = await client.post('/api/debug/seed-tasks', {
         body: { count: 3 },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(res.status).toBe(200);
     const body = res.body as JsonRecord;
@@ -104,7 +104,7 @@ test('seed-tasks creates demo tasks and removes previous ones for user', async (
 test('grant-xp adjusts player XP and returns event', async () => {
     const res = await client.post('/api/debug/grant-xp', {
         body: { amount: 75 },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(res.status).toBe(200);
     const body = res.body as JsonRecord;
@@ -118,11 +118,11 @@ test('grant-xp adjusts player XP and returns event', async () => {
 test('reset-rpg returns player to baseline stats', async () => {
     await client.post('/api/debug/grant-xp', {
         body: { amount: 100 },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
 
     const res = await client.post('/api/debug/reset-rpg', {
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(res.status).toBe(200);
     const body = res.body as JsonRecord;

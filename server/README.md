@@ -2,8 +2,7 @@
 
 This folder contains the backend API for the Task Tracker app.
 
-Run locally
------------
+## Run locally
 
 1. Install dependencies:
 
@@ -27,8 +26,7 @@ Run this in a separate terminal if you prefer incremental compiles to disk:
 npm run watch
 ```
 
-Notes
------
+## Notes
 
 - Generate the OpenAPI definition whenever you adjust request/response contracts:
   ```bash

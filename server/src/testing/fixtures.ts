@@ -26,7 +26,7 @@ function normalizeTask(task: TaskRecord): TaskRecord {
     clone.rpg = {
         xp_awarded: !!clone.rpg?.xp_awarded,
         last_reward_at: clone.rpg?.last_reward_at ?? null,
-        history: Array.isArray(clone.rpg?.history) ? clone.rpg!.history : []
+        history: Array.isArray(clone.rpg?.history) ? clone.rpg!.history : [],
     };
     return clone;
 }
@@ -37,7 +37,7 @@ export function buildDefaultUser(overrides: Partial<UserRecord> = {}): UserRecor
         display_name: 'Local User',
         avatar: null,
         class: 'adventurer',
-        bio: ''
+        bio: '',
     };
 
     const base: UserRecord = {
@@ -48,7 +48,7 @@ export function buildDefaultUser(overrides: Partial<UserRecord> = {}): UserRecor
         created_at: now,
         updated_at: now,
         profile: baseProfile,
-        rpg: createInitialRpgState()
+        rpg: createInitialRpgState(),
     };
 
     let mergedProfile: UserRecord['profile'] = { ...baseProfile };
@@ -65,19 +65,19 @@ export function buildDefaultUser(overrides: Partial<UserRecord> = {}): UserRecor
         ...base,
         ...overrides,
         profile: mergedProfile,
-        rpg: mergedRpg
+        rpg: mergedRpg,
     };
 }
 
 export function resetUserStore(
     filePath: string,
     users: UserRecord[] = [buildDefaultUser()],
-    nextId?: number
+    nextId?: number,
 ): UserStoreData {
     const highestId = users.reduce((max, user) => (user.id > max ? user.id : max), 0);
     const store: UserStoreData = {
         users: users.map((user) => ({ ...user, profile: { ...user.profile } })),
-        nextId: nextId ?? highestId + 1
+        nextId: nextId ?? highestId + 1,
     };
     writeJsonFile(filePath, store);
     return store;
@@ -95,7 +95,7 @@ export function emptyTaskStore(overrides: Partial<TaskStoreData> = {}): TaskStor
 
 export function resetTaskStore(
     filePath: string,
-    overrides: Partial<TaskStoreData> = {}
+    overrides: Partial<TaskStoreData> = {},
 ): TaskStoreData {
     const store = emptyTaskStore(overrides);
     writeJsonFile(filePath, store);
@@ -103,7 +103,7 @@ export function resetTaskStore(
 }
 
 export function emptyCampaignStore(
-    overrides: Partial<CampaignStoreData> = {}
+    overrides: Partial<CampaignStoreData> = {},
 ): CampaignStoreData {
     const base: CampaignStoreData = { campaigns: [], nextId: 1 };
     const merged = { ...base, ...overrides };
@@ -112,14 +112,15 @@ export function emptyCampaignStore(
         : [];
     if (typeof merged.nextId !== 'number' || merged.nextId < 1) {
         merged.nextId =
-            merged.campaigns.reduce((max, campaign) => (campaign.id > max ? campaign.id : max), 0) + 1;
+            merged.campaigns.reduce((max, campaign) => (campaign.id > max ? campaign.id : max), 0) +
+            1;
     }
     return merged;
 }
 
 export function resetCampaignStore(
     filePath: string,
-    overrides: Partial<CampaignStoreData> = {}
+    overrides: Partial<CampaignStoreData> = {},
 ): CampaignStoreData {
     const store = emptyCampaignStore(overrides);
     writeJsonFile(filePath, store);
@@ -136,7 +137,7 @@ export function buildCampaign(overrides: Partial<CampaignRecord> = {}): Campaign
         owner_id: 1,
         archived: false,
         created_at: now,
-        updated_at: now
+        updated_at: now,
     };
     return { ...base, ...overrides };
 }
@@ -160,7 +161,7 @@ export function buildTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
         task_level: 1,
         rpg: { xp_awarded: false, last_reward_at: null, history: [] },
         campaign_id: null,
-        completed: false
+        completed: false,
     };
     return normalizeTask({ ...base, ...overrides });
 }

@@ -25,13 +25,13 @@ const createSelectionStub = () => ({
     clearSelection: jest.fn(),
     findQuestById: jest.fn(() => null),
     moveQuestSelection: jest.fn(),
-    selectFirstSideQuest: jest.fn()
+    selectFirstSideQuest: jest.fn(),
 });
 
 const createAnimationsStub = () => ({
     triggerQuestSpawn: jest.fn(),
     setTaskStatus: jest.fn(),
-    setSideQuestStatus: jest.fn()
+    setSideQuestStatus: jest.fn(),
 });
 
 describe('useQuestInteractions', () => {
@@ -51,7 +51,7 @@ describe('useQuestInteractions', () => {
         deleteSideQuestRequest: jest.fn(),
         createQuestSnapshot: jest.fn(() => null),
         setPriority: jest.fn(),
-        setTaskLevel: jest.fn()
+        setTaskLevel: jest.fn(),
     });
 
     beforeEach(async () => {
@@ -61,7 +61,7 @@ describe('useQuestInteractions', () => {
             cb();
             return 1;
         });
-        jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => { });
+        jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -96,7 +96,7 @@ describe('useQuestInteractions', () => {
         props.createSideQuest.mockResolvedValue({
             id: 7,
             description: 'Quest',
-            side_quests: [{ id: 1, description: 'Chase the bug', status: 'todo' }]
+            side_quests: [{ id: 1, description: 'Chase the bug', status: 'todo' }],
         });
 
         const { result } = renderHook(() => useQuestInteractions(props));
@@ -127,7 +127,7 @@ describe('useQuestInteractions', () => {
         props.createSideQuest.mockResolvedValue({
             id: 7,
             description: 'Quest',
-            side_quests: [{ id: 42, description: 'Collect runes', status: 'todo' }]
+            side_quests: [{ id: 42, description: 'Collect runes', status: 'todo' }],
         });
 
         const { result } = renderHook(() => useQuestInteractions(props));
@@ -138,17 +138,21 @@ describe('useQuestInteractions', () => {
 
         expect(props.setQuests).toHaveBeenCalledTimes(2);
         const optimisticUpdater = props.setQuests.mock.calls[0][0];
-        const optimisticState = optimisticUpdater([{ id: 7, description: 'Quest', side_quests: [] }]);
+        const optimisticState = optimisticUpdater([{
+            id: 7,
+            description: 'Quest',
+            side_quests: [],
+        }]);
         expect(optimisticState[0].side_quests).toHaveLength(1);
         expect(optimisticState[0].side_quests[0]).toMatchObject({
             description: 'Collect runes',
-            optimistic: true
+            optimistic: true,
         });
 
         const finalUpdater = props.setQuests.mock.calls[props.setQuests.mock.calls.length - 1][0];
         const finalState = finalUpdater(optimisticState);
         expect(finalState[0].side_quests).toEqual([
-            expect.objectContaining({ id: 42, description: 'Collect runes', status: 'todo' })
+            expect.objectContaining({ id: 42, description: 'Collect runes', status: 'todo' }),
         ]);
         expect(props.selection.setSideQuestDescriptionMap).toHaveBeenCalled();
         expect(props.playSound).toHaveBeenCalled();
@@ -195,7 +199,7 @@ describe('useQuestInteractions', () => {
 
         // Should have called setLoadingSideQuestAdds to add quest 7
         expect(props.selection.setLoadingSideQuestAdds).toHaveBeenCalled();
-        const addCall = props.selection.setLoadingSideQuestAdds.mock.calls.find(call => {
+        const addCall = props.selection.setLoadingSideQuestAdds.mock.calls.find((call) => {
             const updater = call[0];
             const testSet = new Set();
             const result = updater(testSet);
@@ -207,7 +211,7 @@ describe('useQuestInteractions', () => {
         resolveCreate({
             id: 7,
             description: 'Quest',
-            side_quests: [{ id: 1, description: 'New side quest', status: 'todo' }]
+            side_quests: [{ id: 1, description: 'New side quest', status: 'todo' }],
         });
 
         await act(async () => {
@@ -215,7 +219,7 @@ describe('useQuestInteractions', () => {
         });
 
         // Should have called setLoadingSideQuestAdds to remove quest 7
-        const removeCall = props.selection.setLoadingSideQuestAdds.mock.calls.find(call => {
+        const removeCall = props.selection.setLoadingSideQuestAdds.mock.calls.find((call) => {
             const updater = call[0];
             const testSet = new Set([7]);
             const result = updater(testSet);
@@ -246,8 +250,8 @@ describe('useQuestInteractions', () => {
             description: 'Quest with subs',
             side_quests: [
                 { id: 1, status: 'todo' },
-                { id: 2, status: 'todo' }
-            ]
+                { id: 2, status: 'todo' },
+            ],
         }];
 
         const { result } = renderHook(() => useQuestInteractions(props));
@@ -264,7 +268,11 @@ describe('useQuestInteractions', () => {
     describe('Quest CRUD operations', () => {
         it('creates a new quest via addTask', async () => {
             const props = baseProps();
-            props.createQuest.mockResolvedValue({ id: 999, description: 'New quest', status: 'todo' });
+            props.createQuest.mockResolvedValue({
+                id: 999,
+                description: 'New quest',
+                status: 'todo',
+            });
 
             const { result } = renderHook(() => useQuestInteractions(props));
 
@@ -302,7 +310,11 @@ describe('useQuestInteractions', () => {
             const { result } = renderHook(() => useQuestInteractions(props));
 
             await act(async () => {
-                await result.current.updateTask(400, { description: 'New', priority: 'medium', task_level: 1 });
+                await result.current.updateTask(400, {
+                    description: 'New',
+                    priority: 'medium',
+                    task_level: 1,
+                });
             });
 
             expect(props.updateQuest).toHaveBeenCalledWith(400, {
@@ -310,7 +322,7 @@ describe('useQuestInteractions', () => {
                 priority: 'medium',
                 task_level: 1,
                 due_date: null,
-                campaign_id: null
+                campaign_id: null,
             });
             expect(props.selection.setEditingQuest).toHaveBeenCalledWith(null);
         });
@@ -322,7 +334,11 @@ describe('useQuestInteractions', () => {
             const { result } = renderHook(() => useQuestInteractions(props));
 
             await act(async () => {
-                await result.current.updateTask(500, { task_level: '3', description: 'Test', priority: 'low' });
+                await result.current.updateTask(500, {
+                    task_level: '3',
+                    description: 'Test',
+                    priority: 'low',
+                });
             });
 
             expect(props.updateQuest).toHaveBeenCalledWith(500, {
@@ -330,7 +346,7 @@ describe('useQuestInteractions', () => {
                 priority: 'low',
                 task_level: 3,
                 due_date: null,
-                campaign_id: null
+                campaign_id: null,
             });
         });
     });
@@ -338,8 +354,15 @@ describe('useQuestInteractions', () => {
     describe('Side quest editing workflow', () => {
         it('saves side quest edit with valid description', async () => {
             const props = baseProps();
-            props.selection.editingSideQuest = { questId: 10, sideQuestId: 20, description: 'Updated' };
-            props.updateSideQuestRequest.mockResolvedValue({ id: 10, side_quests: [{ id: 20, description: 'Updated' }] });
+            props.selection.editingSideQuest = {
+                questId: 10,
+                sideQuestId: 20,
+                description: 'Updated',
+            };
+            props.updateSideQuestRequest.mockResolvedValue({
+                id: 10,
+                side_quests: [{ id: 20, description: 'Updated' }],
+            });
 
             const { result } = renderHook(() => useQuestInteractions(props));
 
@@ -371,7 +394,11 @@ describe('useQuestInteractions', () => {
 
         it('shows error toast when side quest update fails', async () => {
             const props = baseProps();
-            props.selection.editingSideQuest = { questId: 12, sideQuestId: 22, description: 'Fail' };
+            props.selection.editingSideQuest = {
+                questId: 12,
+                sideQuestId: 22,
+                description: 'Fail',
+            };
             props.updateSideQuestRequest.mockRejectedValue(new Error('Network error'));
 
             const { result } = renderHook(() => useQuestInteractions(props));
@@ -721,7 +748,6 @@ describe('useQuestInteractions', () => {
             props.selection.selectedQuestId = 1;
             props.selection.findQuestById.mockReturnValue(quest);
 
-
             renderHook(() => useQuestInteractions(props));
 
             act(() => {
@@ -751,6 +777,4 @@ describe('useQuestInteractions', () => {
             expect(props.deleteQuest).toHaveBeenCalledWith(1);
         });
     });
-
 });
-

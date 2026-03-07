@@ -19,9 +19,9 @@ function createDefaultUser(): UserRecord {
             display_name: 'Local User',
             avatar: null,
             class: 'adventurer',
-            bio: ''
+            bio: '',
         },
-        rpg: createInitialRpgState()
+        rpg: createInitialRpgState(),
     } as UserRecord;
 }
 
@@ -30,7 +30,7 @@ export function ensureDefaultUserFile(): void {
     if (fs.existsSync(usersFile)) return;
     const initial: UserStoreData = {
         users: [createDefaultUser()],
-        nextId: 2
+        nextId: 2,
     };
     fs.writeFileSync(usersFile, JSON.stringify(initial, null, 2));
 }
@@ -45,9 +45,8 @@ export function readUsers(): UserStoreData {
         if (!Array.isArray(parsed.users)) parsed.users = [];
         if (typeof parsed.nextId !== 'number') {
             const maxId = parsed.users.reduce(
-                (max, user) =>
-                    user && typeof user.id === 'number' && user.id > max ? user.id : max,
-                0
+                (max, user) => user && typeof user.id === 'number' && user.id > max ? user.id : max,
+                0,
             );
             parsed.nextId = maxId + 1;
         }
@@ -58,7 +57,7 @@ export function readUsers(): UserStoreData {
 
         return {
             users: parsed.users as UserRecord[],
-            nextId: parsed.nextId ?? 1
+            nextId: parsed.nextId ?? 1,
         };
     } catch (error) {
         console.error('Error reading users file:', error);
@@ -89,6 +88,6 @@ export function sanitizeUser(user: UserRecord | null | undefined): PublicUser | 
     const { password_hash, ...rest } = user;
     return {
         ...rest,
-        rpg: buildPublicRpgState(user.rpg)
+        rpg: buildPublicRpgState(user.rpg),
     };
 }

@@ -30,13 +30,13 @@ const createSelectionStub = () => ({
     clearSelection: jest.fn(),
     findQuestById: jest.fn(() => null),
     moveQuestSelection: jest.fn(),
-    selectFirstSideQuest: jest.fn()
+    selectFirstSideQuest: jest.fn(),
 });
 
 const createAnimationsStub = () => ({
     triggerQuestSpawn: jest.fn(),
     setTaskStatus: jest.fn(),
-    setSideQuestStatus: jest.fn()
+    setSideQuestStatus: jest.fn(),
 });
 
 describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
@@ -55,7 +55,7 @@ describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
         updateSideQuestRequest: jest.fn().mockResolvedValue(null),
         deleteSideQuestRequest: jest.fn().mockResolvedValue(null),
         setPriority: jest.fn(),
-        setTaskLevel: jest.fn()
+        setTaskLevel: jest.fn(),
     });
 
     beforeEach(async () => {
@@ -65,7 +65,7 @@ describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
             cb();
             return 1;
         });
-        jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => { });
+        jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -89,7 +89,7 @@ describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
         props.createSideQuest.mockResolvedValueOnce({
             id: 7,
             description: 'Quest',
-            side_quests: [{ id: 1, description: 'First side quest', status: 'todo' }]
+            side_quests: [{ id: 1, description: 'First side quest', status: 'todo' }],
         });
 
         // Second side quest fails
@@ -129,8 +129,8 @@ describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
             description: 'Parent Quest',
             side_quests: [
                 { id: 1, description: 'Side Quest 1', status: 'todo' },
-                { id: 2, description: 'Side Quest 2', status: 'todo' }
-            ]
+                { id: 2, description: 'Side Quest 2', status: 'todo' },
+            ],
         }];
 
         const { result } = renderHook(() => useQuestInteractions(props));
@@ -184,7 +184,7 @@ describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
         props.quests = [{
             id: 20,
             description: 'Quest',
-            side_quests: [{ id: 1, description: 'Existing', status: 'todo' }]
+            side_quests: [{ id: 1, description: 'Existing', status: 'todo' }],
         }];
 
         // Add operation succeeds
@@ -193,15 +193,15 @@ describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
             description: 'Quest',
             side_quests: [
                 { id: 1, description: 'Existing', status: 'todo' },
-                { id: 2, description: 'New', status: 'todo' }
-            ]
+                { id: 2, description: 'New', status: 'todo' },
+            ],
         });
 
         // Delete operation succeeds
         props.deleteSideQuestRequest.mockResolvedValueOnce({
             id: 20,
             description: 'Quest',
-            side_quests: [{ id: 2, description: 'New', status: 'todo' }]
+            side_quests: [{ id: 2, description: 'New', status: 'todo' }],
         });
 
         props.selection.sideQuestDescriptionMap = { 20: 'New' };
@@ -237,20 +237,24 @@ describe('useQuestInteractions - Failure Scenarios (Story 2)', () => {
             await Promise.all([
                 result.current.addSideQuest(30),
                 result.current.addSideQuest(30),
-                result.current.addSideQuest(30)
+                result.current.addSideQuest(30),
             ]);
         });
 
         // Should have shown error toast for each failure
         const errorToasts = props.pushToast.mock.calls.filter(
-            call => call[0] === 'Failed to add side quest' && call[1] === 'error'
+            (call) => call[0] === 'Failed to add side quest' && call[1] === 'error',
         );
         expect(errorToasts.length).toBe(3);
     });
 
     it('handles side quest update failure with proper error message', async () => {
         const props = baseProps();
-        props.selection.editingSideQuest = { questId: 40, sideQuestId: 5, description: 'Updated description' };
+        props.selection.editingSideQuest = {
+            questId: 40,
+            sideQuestId: 5,
+            description: 'Updated description',
+        };
         props.updateSideQuestRequest.mockRejectedValueOnce(new Error('Update failed'));
 
         const { result } = renderHook(() => useQuestInteractions(props));

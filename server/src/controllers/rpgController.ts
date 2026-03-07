@@ -11,7 +11,7 @@ import type { AuthenticatedRequest } from '../types/auth.js';
 import type { UserStoreData } from '../types/user.js';
 import type { DailyFocusMetadata, DebugAdjustmentMetadata } from '../types/rpg.js';
 import { validateRequest } from '../validation/index.js';
-import { grantXpSchema, type GrantXpPayload } from '../validation/schemas/rpg.js';
+import { type GrantXpPayload, grantXpSchema } from '../validation/schemas/rpg.js';
 
 type BaseAuthedRequest<B = unknown> = AuthenticatedRequest<ParamsDictionary, unknown, B>;
 
@@ -50,7 +50,7 @@ export function claimDailyReward(req: BaseAuthedRequest, res: Response) {
         writeUsers(usersData);
         return res.json({
             xp_event: toPublicXpEvent(xpEvent),
-            player_rpg: buildPublicRpgState(rpgState)
+            player_rpg: buildPublicRpgState(rpgState),
         });
     } catch (error) {
         return sendError(res, 500, 'Failed to persist daily reward');
@@ -82,7 +82,7 @@ export function grantXp(req: BaseAuthedRequest<GrantXpPayload>, res: Response) {
         writeUsers(usersData);
         return res.json({
             xp_event: toPublicXpEvent(event),
-            player_rpg: buildPublicRpgState(rpgState)
+            player_rpg: buildPublicRpgState(rpgState),
         });
     } catch (error) {
         return sendError(res, 500, 'Failed to grant XP');
@@ -102,7 +102,7 @@ export function resetRpg(req: BaseAuthedRequest, res: Response) {
         usersData.users[index] = user;
         writeUsers(usersData);
         return res.json({
-            player_rpg: buildPublicRpgState(user.rpg)
+            player_rpg: buildPublicRpgState(user.rpg),
         });
     } catch (error) {
         return sendError(res, 500, 'Failed to reset RPG stats');
@@ -112,7 +112,7 @@ export function resetRpg(req: BaseAuthedRequest, res: Response) {
 const controller = {
     claimDailyReward,
     grantXp,
-    resetRpg
+    resetRpg,
 };
 
 export default controller;

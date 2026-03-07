@@ -16,7 +16,7 @@ describe('QuestBoardContext', () => {
 
     it('throws when context is consumed without a provider', () => {
         expect(() => renderHook(() => useQuestBoardContext())).toThrow(
-            'useQuestBoardContext must be used within a QuestBoardProvider'
+            'useQuestBoardContext must be used within a QuestBoardProvider',
         );
     });
 });

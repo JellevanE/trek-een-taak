@@ -17,14 +17,13 @@ function sanitizeCampaign(campaign: unknown, fallbackOwnerId: number): CampaignR
         id: campaign.id,
         name: typeof campaign.name === 'string' ? campaign.name.trim() : `Campaign ${campaign.id}`,
         description: typeof campaign.description === 'string' ? campaign.description.trim() : '',
-        image_url:
-            typeof campaign.image_url === 'string' && campaign.image_url.trim().length > 0
-                ? campaign.image_url.trim()
-                : null,
+        image_url: typeof campaign.image_url === 'string' && campaign.image_url.trim().length > 0
+            ? campaign.image_url.trim()
+            : null,
         owner_id: typeof campaign.owner_id === 'number' ? campaign.owner_id : fallbackOwnerId,
         archived: typeof campaign.archived === 'boolean' ? campaign.archived : false,
         created_at: typeof campaign.created_at === 'string' ? campaign.created_at : now,
-        updated_at: typeof campaign.updated_at === 'string' ? campaign.updated_at : now
+        updated_at: typeof campaign.updated_at === 'string' ? campaign.updated_at : now,
     };
 
     return sanitized;
@@ -46,9 +45,13 @@ export function readCampaigns(): CampaignStoreData {
             .map((campaign) => sanitizeCampaign(campaign, fallbackOwnerId))
             .filter((campaign): campaign is CampaignRecord => campaign !== null);
 
-        const maxId = campaigns.reduce((max, campaign) => (campaign.id > max ? campaign.id : max), 0);
-        const nextId =
-            typeof parsed.nextId === 'number' && parsed.nextId > maxId ? parsed.nextId : maxId + 1;
+        const maxId = campaigns.reduce(
+            (max, campaign) => (campaign.id > max ? campaign.id : max),
+            0,
+        );
+        const nextId = typeof parsed.nextId === 'number' && parsed.nextId > maxId
+            ? parsed.nextId
+            : maxId + 1;
 
         return { campaigns, nextId };
     } catch (error) {
@@ -75,7 +78,10 @@ export function writeCampaigns(data: CampaignStoreData): boolean {
     }
 }
 
-export function serializeCampaign(campaign: CampaignRecord | null, extra: Partial<CampaignExtras> = {}) {
+export function serializeCampaign(
+    campaign: CampaignRecord | null,
+    extra: Partial<CampaignExtras> = {},
+) {
     if (!campaign) return campaign;
     const base = {
         id: campaign.id,
@@ -85,12 +91,15 @@ export function serializeCampaign(campaign: CampaignRecord | null, extra: Partia
         owner_id: campaign.owner_id,
         archived: !!campaign.archived,
         created_at: campaign.created_at,
-        updated_at: campaign.updated_at
+        updated_at: campaign.updated_at,
     };
     return { ...base, ...extra };
 }
 
-export function serializeCampaignList(list: CampaignRecord[] | null, statsById: Map<number, CampaignExtras> = new Map()) {
+export function serializeCampaignList(
+    list: CampaignRecord[] | null,
+    statsById: Map<number, CampaignExtras> = new Map(),
+) {
     if (!Array.isArray(list)) return [];
     return list.map((campaign) => {
         const extras = statsById.get(campaign.id) || {};

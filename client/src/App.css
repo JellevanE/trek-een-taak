@@ -3,6 +3,7 @@
 /* Import feature-specific styles in dependency order */
 @import './styles/layout.css';
 @import './styles/campaigns.css';
+@import './styles/campaign-detail.css';
 @import './styles/buttons.css';
 @import './styles/forms.css';
 @import './styles/quest-cards.css';

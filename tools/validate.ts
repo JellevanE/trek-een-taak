@@ -13,37 +13,39 @@ const commands: Record<string, CommandSpec> = {
     'server:lint': {
         cmd: ['npm', 'run', 'lint'],
         cwd: 'server',
-        description: 'Enforce TypeScript hygiene checks (no explicit any)'
+        description: 'Enforce TypeScript hygiene checks (no explicit any)',
     },
     'server:build': {
         cmd: ['npm', 'run', 'build'],
         cwd: 'server',
-        description: 'Compile backend TypeScript before running tests'
+        description: 'Compile backend TypeScript before running tests',
     },
     'server:test': {
         cmd: ['npm', 'test', '--', '--runInBand'],
         cwd: 'server',
-        description: 'Run backend test suite (Jest + Supertest)'
+        description: 'Run backend test suite (Jest + Supertest)',
     },
     'client:test': {
         cmd: ['npm', 'test', '--', '--watchAll=false'],
         cwd: 'client',
-        description: 'Run frontend tests once (React Testing Library)'
+        description: 'Run frontend tests once (React Testing Library)',
     },
     'client:build': {
         cmd: ['npm', 'run', 'build'],
         cwd: 'client',
-        description: 'Build production bundle to verify compilation'
-    }
+        description: 'Build production bundle to verify compilation',
+    },
 };
 
 const pipelines: Record<string, string[]> = {
     default: ['server:lint', 'server:build', 'server:test', 'client:test'],
-    ci: ['server:lint', 'server:build', 'server:test', 'client:test', 'client:build']
+    ci: ['server:lint', 'server:build', 'server:test', 'client:test', 'client:build'],
 };
 
 function printUsage(): void {
-    console.log('Usage: deno run --allow-env --allow-read --allow-run tools/validate.ts [target ...]');
+    console.log(
+        'Usage: deno run --allow-env --allow-read --allow-run tools/validate.ts [target ...]',
+    );
     console.log('\nTargets:');
     const commandKeys = Object.keys(commands).sort();
     for (const key of commandKeys) {
@@ -100,7 +102,7 @@ async function runCommand(token: string): Promise<void> {
         env: spec.env ? { ...Deno.env.toObject(), ...spec.env } : undefined,
         stdin: 'inherit',
         stdout: 'inherit',
-        stderr: 'inherit'
+        stderr: 'inherit',
     });
 
     console.log(`\n▶ ${token}${spec.description ? ` — ${spec.description}` : ''}`);
@@ -117,7 +119,7 @@ async function main(): Promise<void> {
         return;
     }
 
-    const tokens = resolveTargets(Deno.args.filter(arg => arg !== '--'));
+    const tokens = resolveTargets(Deno.args.filter((arg) => arg !== '--'));
     const steps = expandTargets(tokens);
 
     const start = performance.now();

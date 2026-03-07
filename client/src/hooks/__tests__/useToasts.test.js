@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useToasts } from '../useToasts.js';
 
 describe('useToasts', () => {
@@ -18,7 +18,7 @@ describe('useToasts', () => {
 
     it('should add a toast with default type and timeout', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Test message');
         });
@@ -31,7 +31,7 @@ describe('useToasts', () => {
 
     it('should add a toast with custom type', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Success message', 'success');
         });
@@ -42,7 +42,7 @@ describe('useToasts', () => {
 
     it('should add a toast with custom timeout', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Error message', 'error', 5000);
         });
@@ -53,7 +53,7 @@ describe('useToasts', () => {
 
     it('should auto-dismiss toast after timeout', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Auto dismiss', 'info', 1000);
         });
@@ -69,7 +69,7 @@ describe('useToasts', () => {
 
     it('should handle multiple toasts', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('First toast');
             result.current.pushToast('Second toast');
@@ -84,7 +84,7 @@ describe('useToasts', () => {
 
     it('should dismiss a specific toast by id', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('First toast');
             result.current.pushToast('Second toast');
@@ -104,7 +104,7 @@ describe('useToasts', () => {
 
     it('should clear timeout when dismissing a toast manually', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Toast with timeout', 'info', 5000);
         });
@@ -127,7 +127,7 @@ describe('useToasts', () => {
 
     it('should handle dismissing non-existent toast gracefully', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Only toast');
         });
@@ -141,7 +141,7 @@ describe('useToasts', () => {
 
     it('should clean up all timers on unmount', () => {
         const { result, unmount } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Toast 1', 'info', 5000);
             result.current.pushToast('Toast 2', 'info', 5000);
@@ -160,7 +160,7 @@ describe('useToasts', () => {
 
     it('should auto-dismiss multiple toasts at different times', () => {
         const { result } = renderHook(() => useToasts());
-        
+
         act(() => {
             result.current.pushToast('Fast toast', 'info', 1000);
             result.current.pushToast('Medium toast', 'info', 2000);

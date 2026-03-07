@@ -1,6 +1,9 @@
 import React from 'react';
 import { useQuestBoardContext } from '../features/quest-board/context/QuestBoardContext.jsx';
-import { getSideQuestMaxHeight, QUEST_LAYOUT_TOKENS } from '../features/quest-board/tokens/spacing.js';
+import {
+    getSideQuestMaxHeight,
+    QUEST_LAYOUT_TOKENS,
+} from '../features/quest-board/tokens/spacing.js';
 import { QuestCardShell } from './quest-card/QuestCardShell.jsx';
 import { QuestHeader } from './quest-card/QuestHeader.jsx';
 import { QuestProgress } from './quest-card/QuestProgress.jsx';
@@ -20,7 +23,7 @@ const QuestCard = React.memo(({
     quest,
     isDragging,
     dragMeta = {},
-    visualRefresh = false
+    visualRefresh = false,
 }) => {
     const {
         themeName = 'dark',
@@ -73,7 +76,7 @@ const QuestCard = React.memo(({
         cycleEditingPriority,
         cycleEditingLevel,
         sideQuestItemHeight,
-        soundFxEnabled
+        soundFxEnabled,
     } = useQuestBoardContext();
 
     const SIDE_QUEST_ITEM_HEIGHT = sideQuestItemHeight ?? QUEST_LAYOUT_TOKENS.sideQuestItemHeight;
@@ -89,7 +92,7 @@ const QuestCard = React.memo(({
     const sideQuestGap = QUEST_LAYOUT_TOKENS.sideQuestGap;
     const sideQuestMaxHeight = getSideQuestMaxHeight(questSideQuests.length, {
         itemHeight: SIDE_QUEST_ITEM_HEIGHT,
-        gap: sideQuestGap
+        gap: sideQuestGap,
     });
     const cardTokens = themeProfile?.card || null;
     const ctaTokens = themeProfile?.cta || null;
@@ -107,51 +110,53 @@ const QuestCard = React.memo(({
     const isLoading = loadingSideQuestAdds.has(quest.id);
 
     const sideQuestFooter = React.useMemo(() => (
-        <div className="side-quest-footer">
-            {isAddingToThisQuest ? (
-                <AddSideQuestForm
-                    key={`add-sidequest-${quest.id}`}
-                    questId={quest.id}
-                    value={currentValue}
-                    inputRef={(el) => {
-                        if (!addInputRefs.current) addInputRefs.current = {};
-                        if (el) {
-                            addInputRefs.current[quest.id] = el;
-                        } else {
-                            delete addInputRefs.current[quest.id];
-                        }
-                    }}
-                    onChange={(value) => {
-                        setSideQuestDescriptionMap((prev) => ({ ...prev, [quest.id]: value }));
-                    }}
-                    onAdd={() => {
-                        addSideQuest(quest.id);
-                    }}
-                    onCancel={() => {
-                        setSideQuestDescriptionMap((prev) => ({ ...prev, [quest.id]: '' }));
-                        setAddingSideQuestTo(null);
-                    }}
-                    onFocus={() => setAddingSideQuestTo(quest.id)}
-                    onBlur={() => {
-                        setTimeout(() => {
-                            setAddingSideQuestTo((prev) => (prev === quest.id ? null : prev));
-                        }, 100);
-                    }}
-                />
-            ) : (
-                <ActionButton
-                    variant="primary"
-                    size="large"
-                    className="add-side-quest-button"
-                    loading={isLoading}
-                    onClick={() => {
-                        handleSelectQuest(quest.id);
-                        setAddingSideQuestTo(quest.id);
-                    }}
-                >
-                    + Add Side Quest
-                </ActionButton>
-            )}
+        <div className='side-quest-footer'>
+            {isAddingToThisQuest
+                ? (
+                    <AddSideQuestForm
+                        key={`add-sidequest-${quest.id}`}
+                        questId={quest.id}
+                        value={currentValue}
+                        inputRef={(el) => {
+                            if (!addInputRefs.current) addInputRefs.current = {};
+                            if (el) {
+                                addInputRefs.current[quest.id] = el;
+                            } else {
+                                delete addInputRefs.current[quest.id];
+                            }
+                        }}
+                        onChange={(value) => {
+                            setSideQuestDescriptionMap((prev) => ({ ...prev, [quest.id]: value }));
+                        }}
+                        onAdd={() => {
+                            addSideQuest(quest.id);
+                        }}
+                        onCancel={() => {
+                            setSideQuestDescriptionMap((prev) => ({ ...prev, [quest.id]: '' }));
+                            setAddingSideQuestTo(null);
+                        }}
+                        onFocus={() => setAddingSideQuestTo(quest.id)}
+                        onBlur={() => {
+                            setTimeout(() => {
+                                setAddingSideQuestTo((prev) => (prev === quest.id ? null : prev));
+                            }, 100);
+                        }}
+                    />
+                )
+                : (
+                    <ActionButton
+                        variant='primary'
+                        size='large'
+                        className='add-side-quest-button'
+                        loading={isLoading}
+                        onClick={() => {
+                            handleSelectQuest(quest.id);
+                            setAddingSideQuestTo(quest.id);
+                        }}
+                    >
+                        + Add Side Quest
+                    </ActionButton>
+                )}
         </div>
         // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [
@@ -163,7 +168,7 @@ const QuestCard = React.memo(({
         setSideQuestDescriptionMap,
         addSideQuest,
         setAddingSideQuestTo,
-        handleSelectQuest
+        handleSelectQuest,
     ]);
 
     const questClassName = [
@@ -178,7 +183,7 @@ const QuestCard = React.memo(({
         spawnQuests[quest.id] ? 'spawn' : '',
         questSelected ? 'selected' : '',
         isDragging ? 'dragging' : '',
-        visualRefresh ? 'quest-card-refresh' : ''
+        visualRefresh ? 'quest-card-refresh' : '',
     ].filter(Boolean).join(' ');
     const isNewQuest = !!spawnQuests[quest.id];
     const isCelebrating = !!celebratingQuests[quest.id];
@@ -196,80 +201,82 @@ const QuestCard = React.memo(({
             isInteractiveTarget={isInteractiveTarget}
             cardTokens={cardTokens}
         >
-            {isEditingThisQuest ? (
-                <QuestEditForm
-                    key={`edit-quest-${quest.id}`}
-                    quest={quest}
-                    editingQuest={editingQuest}
-                    inputRef={editingQuestInputRef}
-                    campaigns={campaigns}
-                    hasCampaigns={hasCampaigns}
-                    onChange={handleEditChange}
-                    onCancel={() => setEditingQuest(null)}
-                    onSave={(finalData) => updateTask(quest.id, finalData)}
-                    onCyclePriority={cycleEditingPriority}
-                    onCycleLevel={cycleEditingLevel}
-                />
-            ) : (
-                <>
-                    <QuestHeader
-                        description={quest.description}
-                        priority={quest.priority}
-                        level={quest.task_level}
-                        campaign={campaign}
-                        questHasCampaign={questHasCampaign}
+            {isEditingThisQuest
+                ? (
+                    <QuestEditForm
+                        key={`edit-quest-${quest.id}`}
+                        quest={quest}
+                        editingQuest={editingQuest}
+                        inputRef={editingQuestInputRef}
+                        campaigns={campaigns}
                         hasCampaigns={hasCampaigns}
-                        isCollapsed={collapsedMap[quest.id]}
-                        onToggleCollapse={() => toggleCollapse(quest.id)}
+                        onChange={handleEditChange}
+                        onCancel={() => setEditingQuest(null)}
+                        onSave={(finalData) => updateTask(quest.id, finalData)}
+                        onCyclePriority={cycleEditingPriority}
+                        onCycleLevel={cycleEditingLevel}
                     />
-                    {!collapsedMap[quest.id] && (
-                        <>
-                            <QuestProgress
-                                progress={questProgress}
-                                progressColor={progressColor}
-                                statusLabel={questStatusLabel}
-                                dueDate={quest.due_date}
-                            />
-                            <QuestActions
-                                questSelected={questSelected}
-                                questStatus={questStatus}
-                                onEdit={() => setEditingQuest({ ...quest })}
-                                onDelete={() => deleteTask(quest.id)}
-                                onStart={() => setTaskStatus(quest.id, 'in_progress')}
-                                onComplete={() => setTaskStatus(quest.id, 'done')}
-                                onUndo={() => setTaskStatus(quest.id, 'todo')}
-                                ctaTokens={ctaTokens}
-                                soundFx={soundFxTokens}
-                            />
-                            <SideQuestList
-                                quest={quest}
-                                sideQuests={questSideQuests}
-                                smoothDrag={smoothDrag}
-                                themeName={themeName}
-                                sideQuestItemHeight={SIDE_QUEST_ITEM_HEIGHT}
-                                sideQuestGap={sideQuestGap}
-                                sideQuestMaxHeight={sideQuestMaxHeight}
-                                sideQuestFooter={sideQuestFooter}
-                                selectedSideQuest={selectedSideQuest}
-                                editingSideQuest={editingSideQuest}
-                                idsMatch={idsMatch}
-                                handleSelectSideQuest={handleSelectSideQuest}
-                                isInteractiveTarget={isInteractiveTarget}
-                                getSideQuestStatus={getSideQuestStatus}
-                                getSideQuestStatusLabel={getSideQuestStatusLabel}
-                                setSideQuestStatus={setSideQuestStatus}
-                                deleteSideQuest={deleteSideQuest}
-                                startEditingSideQuest={startEditingSideQuest}
-                                handleSideQuestEditChange={handleSideQuestEditChange}
-                                cancelSideQuestEdit={cancelSideQuestEdit}
-                                saveSideQuestEdit={saveSideQuestEdit}
-                                addInputRefs={addInputRefs}
-                                pulsingSideQuests={pulsingSideQuests}
-                            />
-                        </>
-                    )}
-                </>
-            )}
+                )
+                : (
+                    <>
+                        <QuestHeader
+                            description={quest.description}
+                            priority={quest.priority}
+                            level={quest.task_level}
+                            campaign={campaign}
+                            questHasCampaign={questHasCampaign}
+                            hasCampaigns={hasCampaigns}
+                            isCollapsed={collapsedMap[quest.id]}
+                            onToggleCollapse={() => toggleCollapse(quest.id)}
+                        />
+                        {!collapsedMap[quest.id] && (
+                            <>
+                                <QuestProgress
+                                    progress={questProgress}
+                                    progressColor={progressColor}
+                                    statusLabel={questStatusLabel}
+                                    dueDate={quest.due_date}
+                                />
+                                <QuestActions
+                                    questSelected={questSelected}
+                                    questStatus={questStatus}
+                                    onEdit={() => setEditingQuest({ ...quest })}
+                                    onDelete={() => deleteTask(quest.id)}
+                                    onStart={() => setTaskStatus(quest.id, 'in_progress')}
+                                    onComplete={() => setTaskStatus(quest.id, 'done')}
+                                    onUndo={() => setTaskStatus(quest.id, 'todo')}
+                                    ctaTokens={ctaTokens}
+                                    soundFx={soundFxTokens}
+                                />
+                                <SideQuestList
+                                    quest={quest}
+                                    sideQuests={questSideQuests}
+                                    smoothDrag={smoothDrag}
+                                    themeName={themeName}
+                                    sideQuestItemHeight={SIDE_QUEST_ITEM_HEIGHT}
+                                    sideQuestGap={sideQuestGap}
+                                    sideQuestMaxHeight={sideQuestMaxHeight}
+                                    sideQuestFooter={sideQuestFooter}
+                                    selectedSideQuest={selectedSideQuest}
+                                    editingSideQuest={editingSideQuest}
+                                    idsMatch={idsMatch}
+                                    handleSelectSideQuest={handleSelectSideQuest}
+                                    isInteractiveTarget={isInteractiveTarget}
+                                    getSideQuestStatus={getSideQuestStatus}
+                                    getSideQuestStatusLabel={getSideQuestStatusLabel}
+                                    setSideQuestStatus={setSideQuestStatus}
+                                    deleteSideQuest={deleteSideQuest}
+                                    startEditingSideQuest={startEditingSideQuest}
+                                    handleSideQuestEditChange={handleSideQuestEditChange}
+                                    cancelSideQuestEdit={cancelSideQuestEdit}
+                                    saveSideQuestEdit={saveSideQuestEdit}
+                                    addInputRefs={addInputRefs}
+                                    pulsingSideQuests={pulsingSideQuests}
+                                />
+                            </>
+                        )}
+                    </>
+                )}
         </QuestCardShell>
     );
 });

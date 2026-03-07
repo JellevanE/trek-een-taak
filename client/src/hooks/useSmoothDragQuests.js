@@ -4,17 +4,17 @@ import { DEFAULT_THEME_ID } from '../theme';
 
 /**
  * useSmoothDragQuests - Integration layer for smooth drag & drop
- * 
+ *
  * This hook provides the smooth drag components configured for your quest system.
  * It bridges the gap between the smooth drag library and your existing quest state.
- * 
+ *
  * Usage in your useQuests hook:
- * 
+ *
  * import { useSmoothDragQuests } from './useSmoothDragQuests';
- * 
+ *
  * // In your useQuests hook:
  * const smoothDrag = useSmoothDragQuests({ quests, setQuests });
- * 
+ *
  * // Return it along with other quest functions:
  * return {
  *   ...otherQuestStuff,
@@ -39,9 +39,7 @@ export const useSmoothDragQuests = ({ quests, setQuests, playSound }) => {
     const handleSideQuestReorder = useCallback((questId, reorderedSideQuests) => {
         setQuests((prevQuests) =>
             prevQuests.map((quest) =>
-                quest.id === questId
-                    ? { ...quest, side_quests: reorderedSideQuests }
-                    : quest
+                quest.id === questId ? { ...quest, side_quests: reorderedSideQuests } : quest
             )
         );
     }, [setQuests]);
@@ -62,7 +60,7 @@ export const useSmoothDragQuests = ({ quests, setQuests, playSound }) => {
         renderItem,
         itemHeight = 100,
         itemGap = 0,
-        themeName = DEFAULT_THEME_ID
+        themeName = DEFAULT_THEME_ID,
     }) => {
         const currentQuests = questsRef.current;
         return (
@@ -86,7 +84,7 @@ export const useSmoothDragQuests = ({ quests, setQuests, playSound }) => {
         itemHeight = 60,
         itemGap = 0,
         maxContainerHeight = null,
-        themeName = DEFAULT_THEME_ID
+        themeName = DEFAULT_THEME_ID,
     }) => (
         <FramerSideQuestList
             questId={questId}

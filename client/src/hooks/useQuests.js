@@ -1,20 +1,20 @@
-import { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuestData } from '../features/quest-board/hooks/useQuestData.js';
 import { useQuestSelection } from '../features/quest-board/hooks/useQuestSelection.js';
 import { useQuestAnimations } from '../features/quest-board/hooks/useQuestAnimations.js';
 import { useQuestInteractions } from '../features/quest-board/hooks/useQuestInteractions.js';
 import {
+    calculateGlobalProgress,
+    getProgressAura,
+    getQuestProgress,
+    getQuestSideQuests,
     getQuestStatus,
     getQuestStatusLabel,
-    getQuestSideQuests,
     getSideQuestStatus,
     getSideQuestStatusLabel,
     idsMatch,
     isInteractiveTarget,
-    getQuestProgress,
     progressColor,
-    getProgressAura,
-    calculateGlobalProgress
 } from './questHelpers.js';
 import { useSmoothDragQuests } from './useSmoothDragQuests.js';
 
@@ -26,7 +26,7 @@ export const useQuests = ({
     campaignApi,
     playerStatsApi,
     reloadTasksRef,
-    soundFx = null
+    soundFx = null,
 }) => {
     const questData = useQuestData({
         token,
@@ -35,7 +35,7 @@ export const useQuests = ({
         pushToast,
         campaignApi,
         playerStatsApi,
-        reloadTasksRef
+        reloadTasksRef,
     });
 
     const {
@@ -64,7 +64,7 @@ export const useQuests = ({
         seedDemoQuests,
         grantXp,
         resetRpgStats,
-        createQuestSnapshot
+        createQuestSnapshot,
     } = questData;
 
     const soundFxRef = useRef(soundFx);
@@ -92,7 +92,7 @@ export const useQuests = ({
         ensureQuestExpanded: selection.ensureQuestExpanded,
         mutateTaskStatus,
         mutateSideQuestStatus,
-        playSound
+        playSound,
     });
     const interactions = useQuestInteractions({
         quests,
@@ -110,7 +110,7 @@ export const useQuests = ({
         deleteSideQuestRequest,
         createQuestSnapshot,
         setPriority,
-        setTaskLevel
+        setTaskLevel,
     });
 
     const {
@@ -141,7 +141,7 @@ export const useQuests = ({
         startEditingSideQuest,
         handleSideQuestEditChange,
         cancelSideQuestEdit,
-        handleEditChange
+        handleEditChange,
     } = selection;
 
     const {
@@ -156,7 +156,7 @@ export const useQuests = ({
         spawnQuests,
         setSpawnQuests,
         completedCollapseTimersRef,
-        scheduleCollapseAndMove
+        scheduleCollapseAndMove,
     } = animations;
 
     const {
@@ -179,13 +179,17 @@ export const useQuests = ({
         cyclePriority,
         cycleTaskLevel,
         cycleEditingPriority,
-        cycleEditingLevel
+        cycleEditingLevel,
     } = interactions;
 
     const globalProgress = useMemo(() => calculateGlobalProgress(quests), [quests]);
-    const globalAura = useMemo(() => getProgressAura(globalProgress.percent), [globalProgress.percent]);
+    const globalAura = useMemo(() => getProgressAura(globalProgress.percent), [
+        globalProgress.percent,
+    ]);
     const globalLabel = globalProgress.weightingToday
-        ? `Today (${globalProgress.todayCount} quest${globalProgress.todayCount === 1 ? '' : 's'}${globalProgress.backlogCount ? ` + ${globalProgress.backlogCount} backlog` : ''})`
+        ? `Today (${globalProgress.todayCount} quest${globalProgress.todayCount === 1 ? '' : 's'}${
+            globalProgress.backlogCount ? ` + ${globalProgress.backlogCount} backlog` : ''
+        })`
         : `All quests (${globalProgress.totalCount})`;
 
     return {
@@ -279,6 +283,6 @@ export const useQuests = ({
         seedDemoQuests,
         grantXp,
         resetRpgStats,
-        progressColor
+        progressColor,
     };
 };

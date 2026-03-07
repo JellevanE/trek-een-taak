@@ -5,9 +5,11 @@ This document lists the **5 new components** added to the showcase, complementin
 ## ✅ New Components Added
 
 ### 1. RetroInput (RetroInput.jsx)
+
 **Purpose**: Retro-styled text input and textarea with pixel borders and glow effects
 
 **Features**:
+
 - Text input with focus glow animation
 - Animated blinking cursor when focused
 - Password input variant
@@ -18,28 +20,32 @@ This document lists the **5 new components** added to the showcase, complementin
 - Inspired by `.task-input` from inspiration.html
 
 **Use Cases**:
+
 - Quest name input fields
 - Description text areas
 - Search boxes
 - Form inputs
 
 **Example**:
+
 ```jsx
 <RetroInput
-  value={questName}
-  onChange={(e) => setQuestName(e.target.value)}
-  placeholder="Enter quest name..."
-  glowColor="var(--neon-cyan)"
-  onEnter={handleSubmit}
-/>
+    value={questName}
+    onChange={(e) => setQuestName(e.target.value)}
+    placeholder='Enter quest name...'
+    glowColor='var(--neon-cyan)'
+    onEnter={handleSubmit}
+/>;
 ```
 
 ---
 
 ### 2. RetroSelect (RetroSelect.jsx)
+
 **Purpose**: Arcade-style dropdown/select component matching the retro aesthetic
 
 **Features**:
+
 - Custom styled dropdown with pixel borders
 - Focus glow animation
 - Custom arrow icon (SVG-based)
@@ -49,30 +55,34 @@ This document lists the **5 new components** added to the showcase, complementin
 - Inspired by `.priority-select` from inspiration.html
 
 **Use Cases**:
+
 - Priority selection
 - Category dropdowns
 - Difficulty selectors
 - Any form select inputs
 
 **Example**:
+
 ```jsx
 <RetroSelect
-  value={priority}
-  onChange={(e) => setPriority(e.target.value)}
-  options={[
-    { value: 'low', label: '⬇️ LOW' },
-    { value: 'high', label: '⬆️ HIGH' }
-  ]}
-  glowColor="var(--neon-cyan)"
-/>
+    value={priority}
+    onChange={(e) => setPriority(e.target.value)}
+    options={[
+        { value: 'low', label: '⬇️ LOW' },
+        { value: 'high', label: '⬆️ HIGH' },
+    ]}
+    glowColor='var(--neon-cyan)'
+/>;
 ```
 
 ---
 
 ### 3. CounterBadge (CounterBadge.jsx)
+
 **Purpose**: Animated counter badges for displaying quest counts and player stats
 
 **Features**:
+
 - Pulse animation on value change
 - Configurable max display value (e.g., "99+")
 - Multiple size options
@@ -83,6 +93,7 @@ This document lists the **5 new components** added to the showcase, complementin
 - Inspired by `.task-count` from inspiration.html
 
 **Use Cases**:
+
 - Active quest counts
 - Completed quest badges
 - XP counters
@@ -91,6 +102,7 @@ This document lists the **5 new components** added to the showcase, complementin
 - Notification badges
 
 **Example**:
+
 ```jsx
 <CounterBadge 
   count={activeQuests} 
@@ -109,9 +121,11 @@ This document lists the **5 new components** added to the showcase, complementin
 ---
 
 ### 4. EmptyState (EmptyState.jsx)
+
 **Purpose**: Retro-styled empty states with multiple variants for different scenarios
 
 **Features**:
+
 - **EmptyState**: Main empty state with optional glitch effect
 - **LoadingState**: Animated loading indicator with bouncing dots
 - **ErrorState**: Error display with error code and retry button
@@ -121,6 +135,7 @@ This document lists the **5 new components** added to the showcase, complementin
 - Inspired by `.empty-state` from inspiration.html
 
 **Use Cases**:
+
 - No quests available message
 - Loading quest lists
 - Error handling (404, 500, etc.)
@@ -128,6 +143,7 @@ This document lists the **5 new components** added to the showcase, complementin
 - Locked content displays
 
 **Example**:
+
 ```jsx
 <EmptyState
   message="NO QUESTS AVAILABLE"
@@ -148,9 +164,11 @@ This document lists the **5 new components** added to the showcase, complementin
 ---
 
 ### 5. ToastNotification (ToastNotification.jsx)
+
 **Purpose**: Complete toast notification system with slide-in animations and auto-dismiss
 
 **Features**:
+
 - 4 notification types: success, error, warning, info
 - Slide-in/out animations from right side
 - Auto-dismiss with countdown progress bar
@@ -162,6 +180,7 @@ This document lists the **5 new components** added to the showcase, complementin
 - Stack multiple toasts automatically
 
 **Use Cases**:
+
 - Quest completion notifications
 - Error messages
 - Success confirmations
@@ -169,6 +188,7 @@ This document lists the **5 new components** added to the showcase, complementin
 - General user feedback
 
 **Example**:
+
 ```jsx
 const toast = useToast();
 
@@ -179,11 +199,11 @@ toast.warning('Quest expires in 5 minutes');
 toast.info('New quest available');
 
 // Render container:
-<ToastContainer 
-  toasts={toast.toasts}
-  onClose={toast.removeToast}
-  position="top-right"
-/>
+<ToastContainer
+    toasts={toast.toasts}
+    onClose={toast.removeToast}
+    position='top-right'
+/>;
 ```
 
 ---
@@ -191,6 +211,7 @@ toast.info('New quest available');
 ## 🎨 Design Consistency
 
 All new components:
+
 - ✅ Use existing CSS variables (`--neon-cyan`, `--bg-dark`, etc.)
 - ✅ Match the retro arcade aesthetic
 - ✅ Include Framer Motion animations
@@ -205,6 +226,7 @@ All new components:
 ## 📚 Documentation Updates
 
 Updated files:
+
 - ✅ `index.js` - Added exports for all 5 new components
 - ✅ `ShowcasePage.jsx` - Added 5 new sections to navigation
 - ✅ `README.md` - Updated component list with new additions
@@ -215,6 +237,7 @@ Updated files:
 ## 🚀 Integration Ready
 
 All components are:
+
 - Standalone and don't affect the main app
 - Ready to copy into the quest board application
 - Fully functional with interactive showcases
@@ -226,43 +249,51 @@ All components are:
 ## 💡 Usage Tips
 
 ### Form Components
+
 Use `RetroInput` and `RetroSelect` together for consistent form styling:
+
 ```jsx
 <RetroInput placeholder="Quest name..." glowColor="var(--neon-cyan)" />
 <RetroSelect options={priorities} glowColor="var(--neon-cyan)" />
 ```
 
 ### Quest Counters
+
 Combine `CounterBadge` with section headers:
+
 ```jsx
 <h2>
-  ACTIVE QUESTS <CounterBadge count={activeQuests} color="var(--neon-cyan)" />
-</h2>
+    ACTIVE QUESTS <CounterBadge count={activeQuests} color='var(--neon-cyan)' />
+</h2>;
 ```
 
 ### User Feedback
+
 Use `ToastNotification` for all success/error messages:
+
 ```jsx
 const handleComplete = async () => {
-  try {
-    await completeQuest();
-    toast.success('Quest completed! +50 XP');
-  } catch (error) {
-    toast.error('Failed to complete quest');
-  }
+    try {
+        await completeQuest();
+        toast.success('Quest completed! +50 XP');
+    } catch (error) {
+        toast.error('Failed to complete quest');
+    }
 };
 ```
 
 ### Loading & Empty States
+
 Replace generic messages with styled components:
+
 ```jsx
-{isLoading ? (
-  <LoadingState message="LOADING QUESTS..." />
-) : quests.length === 0 ? (
-  <EmptyState message="NO QUESTS" icon="📭" />
-) : (
-  <QuestList quests={quests} />
-)}
+{
+    isLoading
+        ? <LoadingState message='LOADING QUESTS...' />
+        : quests.length === 0
+        ? <EmptyState message='NO QUESTS' icon='📭' />
+        : <QuestList quests={quests} />;
+}
 ```
 
 ---

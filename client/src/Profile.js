@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const RegistrationWizard = React.lazy(() => import('./RegistrationWizard'));
 
@@ -24,7 +24,9 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         const loadProfile = async () => {
             setLoading(true);
             try {
-                const res = await fetch('/api/users/me', { headers: { Authorization: `Bearer ${token}` } });
+                const res = await fetch('/api/users/me', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 let payload = null;
                 try {
                     payload = await res.json();
@@ -36,7 +38,9 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
                     if (res.status === 401 && typeof onLogout === 'function') {
                         onLogout();
                     }
-                    const message = payload && payload.error ? payload.error : `Failed to load profile (${res.status})`;
+                    const message = payload && payload.error
+                        ? payload.error
+                        : `Failed to load profile (${res.status})`;
                     throw new Error(message);
                 }
 
@@ -62,7 +66,9 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         };
 
         loadProfile();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [token, onLogout]);
 
     const handleSave = () => {
@@ -71,10 +77,10 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         fetch('/api/users/me', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify(profile)
+            body: JSON.stringify(profile),
         })
-            .then(r => r.json())
-            .then(data => {
+            .then((r) => r.json())
+            .then((data) => {
                 setProfile(data.user.profile || {});
                 setRpg(data.user.rpg || rpg);
                 setEditing(false);
@@ -89,11 +95,12 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         if (!username || !password) return;
         setLoading(true);
         fetch('/api/users/login', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
         })
-            .then(r => r.json())
-            .then(data => {
+            .then((r) => r.json())
+            .then((data) => {
                 if (data.token) {
                     if (data.user && data.user.rpg) setRpg(data.user.rpg);
                     onLogin(data.token, data.user);
@@ -107,14 +114,17 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         // Show registration wizard
         if (showRegistrationWizard) {
             return (
-                <React.Suspense fallback={<div className="profile-box">Loading registration…</div>}>
+                <React.Suspense fallback={<div className='profile-box'>Loading registration…</div>}>
                     <RegistrationWizard
                         onSuccess={(token, user) => {
-                            if (user && user.rpg) setRpg(user.rpg);
+                            if (user && user.rpg) {
+                                setRpg(user.rpg);
+                            }
                             onLogin(token, user);
                             setShowRegistrationWizard(false);
                         }}
-                        onCancel={() => setShowRegistrationWizard(false)}
+                        onCancel={() =>
+                            setShowRegistrationWizard(false)}
                     />
                 </React.Suspense>
             );
@@ -122,32 +132,32 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
 
         // Show simple login form
         return (
-            <div className="profile-box">
+            <div className='profile-box'>
                 <h3>Sign In</h3>
-                <div className="login-form">
-                    <input 
-                        placeholder="username" 
-                        value={username} 
-                        onChange={e => setUsername(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                <div className='login-form'>
+                    <input
+                        placeholder='username'
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     />
-                    <input 
-                        placeholder="password" 
-                        type="password" 
-                        value={password} 
-                        onChange={e => setPassword(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                    <input
+                        placeholder='password'
+                        type='password'
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     />
-                    <button onClick={handleLogin} disabled={loading} className="btn-primary">
+                    <button onClick={handleLogin} disabled={loading} className='btn-primary'>
                         {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </div>
-                <div className="auth-divider">
+                <div className='auth-divider'>
                     <span>Don't have an account?</span>
                 </div>
-                <button 
-                    onClick={() => setShowRegistrationWizard(true)} 
-                    className="btn-ghost btn-full-width"
+                <button
+                    onClick={() => setShowRegistrationWizard(true)}
+                    className='btn-ghost btn-full-width'
                     disabled={loading}
                 >
                     Create Account
@@ -157,59 +167,142 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
     }
 
     return (
-        <div className="profile-box">
-            <button onClick={onClose} className="close-button">X</button>
-            {saved && <div className="saved-message">Saved!</div>}
+        <div className='profile-box'>
+            <button onClick={onClose} className='close-button'>X</button>
+            {saved && <div className='saved-message'>Saved!</div>}
             <h3>Profile</h3>
-            {loading ? <div className="spinner"></div> : (
+            {loading ? <div className='spinner'></div> : (
                 <div>
-                    {!editing ? (
-                        <div>
-                            <div className="profile-header">
-                                <div className="avatar-placeholder">{profile.display_name ? profile.display_name.charAt(0).toUpperCase() : 'U'}</div>
-                                <div><strong>Name:</strong> {profile.display_name || ''}</div>
-                            </div>
-                            <div><strong>Class:</strong> {profile.class || ''}</div>
-                            <div><strong>Bio:</strong> {profile.bio || ''}</div>
-                            {rpg && (
-                                <div className="profile-rpg-stats" style={{marginTop:12}}>
-                                    <div style={{marginBottom:4}}><strong>Level:</strong> {rpg.level}</div>
-                                    <div style={{fontSize:12, color:'var(--text-muted)'}}>
-                                        {rpg.xp_into_level} / {rpg.xp_for_level} XP toward next level
+                    {!editing
+                        ? (
+                            <div>
+                                <div className='profile-header'>
+                                    <div className='avatar-placeholder'>
+                                        {profile.display_name
+                                            ? profile.display_name.charAt(0).toUpperCase()
+                                            : 'U'}
                                     </div>
-                                    <div style={{marginTop:6, height:6, borderRadius:4, background:'var(--border-soft, rgba(255,255,255,0.12))', overflow:'hidden'}}>
-                                        <div style={{width: `${Math.max(0, Math.min(100, Math.round((rpg.xp_progress || 0) * 100)))}%`, height:'100%', background:'linear-gradient(90deg, #6dd5fa, #2980b9)'}} />
-                                    </div>
-                                    <div style={{marginTop:6, fontSize:11, color:'var(--text-muted)'}}>
-                                        Last daily bonus: {rpg.last_daily_reward_at ? rpg.last_daily_reward_at : '—'}
+                                    <div>
+                                        <strong>Name:</strong> {profile.display_name || ''}
                                     </div>
                                 </div>
-                            )}
-                            <div style={{ marginTop: 8 }}>
-                                <button onClick={() => setEditing(true)} className="btn-ghost">Edit</button>
-                                <button onClick={() => { setRpg(null); onLogout(); }} className="btn-ghost">Logout</button>
+                                <div>
+                                    <strong>Class:</strong> {profile.class || ''}
+                                </div>
+                                <div>
+                                    <strong>Bio:</strong> {profile.bio || ''}
+                                </div>
+                                {rpg && (
+                                    <div className='profile-rpg-stats' style={{ marginTop: 12 }}>
+                                        <div style={{ marginBottom: 4 }}>
+                                            <strong>Level:</strong> {rpg.level}
+                                        </div>
+                                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                            {rpg.xp_into_level} / {rpg.xp_for_level}{' '}
+                                            XP toward next level
+                                        </div>
+                                        <div
+                                            style={{
+                                                marginTop: 6,
+                                                height: 6,
+                                                borderRadius: 4,
+                                                background:
+                                                    'var(--border-soft, rgba(255,255,255,0.12))',
+                                                overflow: 'hidden',
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    width: `${
+                                                        Math.max(
+                                                            0,
+                                                            Math.min(
+                                                                100,
+                                                                Math.round(
+                                                                    (rpg.xp_progress || 0) * 100,
+                                                                ),
+                                                            ),
+                                                        )
+                                                    }%`,
+                                                    height: '100%',
+                                                    background:
+                                                        'linear-gradient(90deg, #6dd5fa, #2980b9)',
+                                                }}
+                                            />
+                                        </div>
+                                        <div
+                                            style={{
+                                                marginTop: 6,
+                                                fontSize: 11,
+                                                color: 'var(--text-muted)',
+                                            }}
+                                        >
+                                            Last daily bonus:{' '}
+                                            {rpg.last_daily_reward_at
+                                                ? rpg.last_daily_reward_at
+                                                : '—'}
+                                        </div>
+                                    </div>
+                                )}
+                                <div style={{ marginTop: 8 }}>
+                                    <button onClick={() => setEditing(true)} className='btn-ghost'>
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setRpg(null);
+                                            onLogout();
+                                        }}
+                                        className='btn-ghost'
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="profile-edit-form">
-                            <div className="form-group">
-                                <label>Name</label>
-                                <input value={profile.display_name || ''} onChange={e => setProfile(p => ({ ...p, display_name: e.target.value }))} />
+                        )
+                        : (
+                            <div className='profile-edit-form'>
+                                <div className='form-group'>
+                                    <label>Name</label>
+                                    <input
+                                        value={profile.display_name || ''}
+                                        onChange={(e) =>
+                                            setProfile((p) => ({
+                                                ...p,
+                                                display_name: e.target.value,
+                                            }))}
+                                    />
+                                </div>
+                                <div className='form-group'>
+                                    <label>Class</label>
+                                    <input
+                                        value={profile.class || ''}
+                                        onChange={(e) =>
+                                            setProfile((p) => ({ ...p, class: e.target.value }))}
+                                    />
+                                </div>
+                                <div className='form-group'>
+                                    <label>Bio</label>
+                                    <textarea
+                                        value={profile.bio || ''}
+                                        onChange={(e) =>
+                                            setProfile((p) => ({ ...p, bio: e.target.value }))}
+                                    />
+                                </div>
+                                <div className='form-actions'>
+                                    <button onClick={() => setEditing(false)} className='btn-ghost'>
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={loading}
+                                        className='btn-primary'
+                                    >
+                                        Save
+                                    </button>
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label>Class</label>
-                                <input value={profile.class || ''} onChange={e => setProfile(p => ({ ...p, class: e.target.value }))} />
-                            </div>
-                            <div className="form-group">
-                                <label>Bio</label>
-                                <textarea value={profile.bio || ''} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} />
-                            </div>
-                            <div className="form-actions">
-                                <button onClick={() => setEditing(false)} className="btn-ghost">Cancel</button>
-                                <button onClick={handleSave} disabled={loading} className="btn-primary">Save</button>
-                            </div>
-                        </div>
-                    )}
+                        )}
                 </div>
             )}
         </div>

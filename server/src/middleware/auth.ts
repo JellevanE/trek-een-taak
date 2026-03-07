@@ -1,7 +1,7 @@
 import type { NextFunction, Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 
-import { primaryJwtSecret, jwtSecrets } from '../config.js';
+import { jwtSecrets, primaryJwtSecret } from '../config.js';
 import type { AuthenticatedRequest, AuthenticatedUser } from '../types/auth.js';
 import { sendError } from '../utils/http.js';
 
@@ -29,7 +29,7 @@ export function signToken(user: AuthenticatedUser): string {
     assertValidUser(user);
     const payload: TokenPayload = {
         id: user.id,
-        username: user.username
+        username: user.username,
     };
     return jwt.sign(payload, primaryJwtSecret, { expiresIn: '7d' });
 }
@@ -56,7 +56,7 @@ export function verifyToken(token: string): TokenPayload {
 export function authenticate(
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Response | void {
     const authHeader = req.headers?.authorization;
     if (!authHeader) return next();
@@ -78,7 +78,7 @@ export function authenticate(
 export function ensureAuth(
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ): Response | void {
     if (!req.user || typeof req.user.id !== 'number') {
         return sendError(res, 401, 'Authentication required');

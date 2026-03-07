@@ -7,11 +7,11 @@ import { resetRegistrationRateLimiter } from '../src/security/registrationRateLi
 import { createTestClient, type TestClient } from '../src/utils/testClient';
 import {
     buildDefaultUser,
-    JsonRecord,
     configureDataFiles,
+    JsonRecord,
     resetDataFileOverrides,
     resetTaskStore,
-    resetUserStore
+    resetUserStore,
 } from '../src/testing/fixtures';
 
 let dataDir: string;
@@ -39,7 +39,7 @@ beforeEach(() => {
 beforeEach(async () => {
     const res = await client.post('/api/users/register', {
         body: { username: `testuser_${Date.now()}`, password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     const body = res.body as JsonRecord | null;
     authToken = typeof body?.token === 'string' ? body.token : null;
@@ -55,14 +55,14 @@ afterAll(() => {
 test('create subtask returns 201 and task with subtask id', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'Parent task', priority: 'medium' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskBody = taskRes.body as { id: number };
     const taskId = taskBody.id;
 
     const resAuth = await client.post(`/api/tasks/${taskId}/subtasks`, {
         body: { description: 'sub 1' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
 
     expect(resAuth.status).toBe(201);
@@ -78,14 +78,14 @@ test('create subtask returns 201 and task with subtask id', async () => {
 test('create subtask with missing description returns 400', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'Parent task', priority: 'medium' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskBody = taskRes.body as { id: number };
     const taskId = taskBody.id;
 
     const res = await client.post(`/api/tasks/${taskId}/subtasks`, {
         body: { description: '' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
 
     expect(res.status).toBe(400);
@@ -94,14 +94,14 @@ test('create subtask with missing description returns 400', async () => {
 test('patch status updates task and appends history', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'Test task', priority: 'medium' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskBody = taskRes.body as { id: number };
     const taskId = taskBody.id;
 
     const res = await client.patch(`/api/tasks/${taskId}/status`, {
         body: { status: 'in_progress', note: 'working' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
 
     expect(res.status).toBe(200);
@@ -117,14 +117,14 @@ test('patch status updates task and appends history', async () => {
 test('completing a task awards XP and returns player snapshot', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'XP quest', priority: 'medium', task_level: 2 },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskBody = taskRes.body as { id: number };
     const taskId = taskBody.id;
 
     const completeRes = await client.patch(`/api/tasks/${taskId}/status`, {
         body: { status: 'done' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
 
     expect(completeRes.status).toBe(200);
@@ -142,7 +142,7 @@ test('completing a task awards XP and returns player snapshot', async () => {
     expect((player.xp as number) > 0).toBe(true);
 
     const profileRes = await client.get('/api/users/me', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(profileRes.status).toBe(200);
     const profileBody = profileRes.body as JsonRecord;
@@ -155,21 +155,21 @@ test('completing a task awards XP and returns player snapshot', async () => {
 test('completing a subtask grants XP once', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'Parent XP quest', priority: 'high', task_level: 3 },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskBody = taskRes.body as { id: number };
     const taskId = taskBody.id;
 
     const subRes = await client.post(`/api/tasks/${taskId}/subtasks`, {
         body: { description: 'earn xp side quest' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     const subBody = subRes.body as JsonRecord & { sub_tasks: Array<JsonRecord> };
     const subId = (subBody.sub_tasks[0] as JsonRecord).id as number;
 
     const subComplete = await client.patch(`/api/tasks/${taskId}/subtasks/${subId}/status`, {
         body: { status: 'done' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
 
     expect(subComplete.status).toBe(200);
@@ -189,13 +189,13 @@ test('completing a subtask grants XP once', async () => {
 test('re-completing a task does not grant additional XP', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'One-shot quest', priority: 'medium', task_level: 2 },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskId = (taskRes.body as { id: number }).id;
 
     const firstComplete = await client.patch(`/api/tasks/${taskId}/status`, {
         body: { status: 'done' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(firstComplete.status).toBe(200);
     const firstBody = firstComplete.body as JsonRecord;
@@ -205,14 +205,14 @@ test('re-completing a task does not grant additional XP', async () => {
 
     const secondComplete = await client.patch(`/api/tasks/${taskId}/status`, {
         body: { status: 'done' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(secondComplete.status).toBe(200);
     const secondBody = secondComplete.body as JsonRecord;
     expect(secondBody).not.toHaveProperty('xp_events');
 
     const profileRes = await client.get('/api/users/me', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const profileBody = profileRes.body as JsonRecord;
     const user = profileBody.user as JsonRecord;
@@ -223,13 +223,13 @@ test('re-completing a task does not grant additional XP', async () => {
 test('re-completing a subtask does not grant additional XP', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'Split quest', priority: 'high', task_level: 3 },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const taskId = (taskRes.body as { id: number }).id;
 
     const subRes = await client.post(`/api/tasks/${taskId}/subtasks`, {
         body: { description: 'Initial effort' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     const subTasks = (subRes.body as JsonRecord & { sub_tasks: Array<JsonRecord> }).sub_tasks || [];
     expect(subTasks.length).toBeGreaterThan(0);
@@ -237,7 +237,7 @@ test('re-completing a subtask does not grant additional XP', async () => {
 
     const firstComplete = await client.patch(`/api/tasks/${taskId}/subtasks/${subId}/status`, {
         body: { status: 'done' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(firstComplete.status).toBe(200);
     const firstBody = firstComplete.body as JsonRecord;
@@ -247,14 +247,14 @@ test('re-completing a subtask does not grant additional XP', async () => {
 
     const secondComplete = await client.patch(`/api/tasks/${taskId}/subtasks/${subId}/status`, {
         body: { status: 'done' },
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(secondComplete.status).toBe(200);
     const secondBody = secondComplete.body as JsonRecord;
     expect(secondBody).not.toHaveProperty('xp_events');
 
     const profileRes = await client.get('/api/users/me', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     const profileBody = profileRes.body as JsonRecord;
     const user = profileBody.user as JsonRecord;
@@ -264,7 +264,7 @@ test('re-completing a subtask does not grant additional XP', async () => {
 
 test('daily reward grants XP once per day', async () => {
     const dailyReward = await client.post('/api/rpg/daily-reward', {
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(dailyReward.status).toBe(200);
     const rewardBody = dailyReward.body as JsonRecord;
@@ -276,7 +276,7 @@ test('daily reward grants XP once per day', async () => {
     expect((player.xp as number) > 0).toBe(true);
 
     const secondClaim = await client.post('/api/rpg/daily-reward', {
-        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' }
+        headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
     expect(secondClaim.status).toBe(400);
     const secondBody = secondClaim.body as JsonRecord;
@@ -286,12 +286,12 @@ test('daily reward grants XP once per day', async () => {
 test('debug clear tasks removes all user quests', async () => {
     const taskRes = await client.post('/api/tasks', {
         body: { description: 'To clear', priority: 'medium' },
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(taskRes.status).toBe(201);
 
     const clearRes = await client.post('/api/debug/clear-tasks', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(clearRes.status).toBe(200);
     const clearBody = clearRes.body as JsonRecord;
@@ -299,7 +299,7 @@ test('debug clear tasks removes all user quests', async () => {
     expect((clearBody.removed as number) > 0).toBe(true);
 
     const listRes = await client.get('/api/tasks', {
-        headers: { authorization: `Bearer ${authToken}` }
+        headers: { authorization: `Bearer ${authToken}` },
     });
     expect(listRes.status).toBe(200);
     const listBody = listRes.body as JsonRecord;

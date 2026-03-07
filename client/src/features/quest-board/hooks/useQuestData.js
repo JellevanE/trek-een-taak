@@ -1,10 +1,10 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { apiFetch } from '../../../utils/api.js';
 import {
+    cloneQuestSnapshot,
     normalizeQuest,
     normalizeQuestList,
-    cloneQuestSnapshot
 } from '../../../hooks/questHelpers.js';
 import { useQuestBoardStore } from '../../../store/questBoardStore.js';
 
@@ -23,13 +23,13 @@ export const useQuestData = ({
     campaignApi,
     playerStatsApi,
     reloadTasksRef,
-    skipInitialFetch = false
+    skipInitialFetch = false,
 }) => {
     const {
         activeCampaignFilter,
         taskCampaignSelection,
         refreshCampaigns,
-        getTasksEndpoint
+        getTasksEndpoint,
     } = campaignApi;
     const { setPlayerStats, handleXpPayload } = playerStatsApi;
 
@@ -45,7 +45,7 @@ export const useQuestData = ({
         debugBusy,
         setDebugBusy,
         showDebugTools,
-        setShowDebugTools
+        setShowDebugTools,
     } = useQuestBoardStore(useShallow((state) => ({
         quests: state.quests,
         setQuests: state.setQuests,
@@ -58,7 +58,7 @@ export const useQuestData = ({
         debugBusy: state.debugBusy,
         setDebugBusy: state.setDebugBusy,
         showDebugTools: state.showDebugTools,
-        setShowDebugTools: state.setShowDebugTools
+        setShowDebugTools: state.setShowDebugTools,
     })));
 
     const reloadTasks = useCallback(async (filterOverride = activeCampaignFilter) => {
@@ -69,7 +69,7 @@ export const useQuestData = ({
             const data = await apiFetch(
                 url,
                 { headers: { Authorization: `Bearer ${token}` } },
-                onUnauthorized
+                onUnauthorized,
             );
 
             if (data) {
@@ -82,7 +82,15 @@ export const useQuestData = ({
             pushToast('Failed to refresh quests', 'error');
             setQuests([]);
         }
-    }, [activeCampaignFilter, getTasksEndpoint, onUnauthorized, pushToast, refreshCampaigns, setQuests, token]);
+    }, [
+        activeCampaignFilter,
+        getTasksEndpoint,
+        onUnauthorized,
+        pushToast,
+        refreshCampaigns,
+        setQuests,
+        token,
+    ]);
 
     reloadTasksRef.current = reloadTasks;
 
@@ -100,7 +108,7 @@ export const useQuestData = ({
                 const data = await apiFetch(
                     url,
                     { headers: { Authorization: `Bearer ${token}` } },
-                    onUnauthorized
+                    onUnauthorized,
                 );
 
                 if (data) {
@@ -129,17 +137,17 @@ export const useQuestData = ({
                 {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
 
             if (!newQuest) return null;
             const normalized = normalizeQuest(newQuest);
-            const matchesFilter =
-                activeCampaignFilter === null
-                || (activeCampaignFilter === 'uncategorized' && !normalized.campaign_id)
-                || (typeof activeCampaignFilter === 'number' && normalized.campaign_id === activeCampaignFilter);
+            const matchesFilter = activeCampaignFilter === null ||
+                (activeCampaignFilter === 'uncategorized' && !normalized.campaign_id) ||
+                (typeof activeCampaignFilter === 'number' &&
+                    normalized.campaign_id === activeCampaignFilter);
             if (matchesFilter) {
                 setQuests((prev) => [normalized, ...prev]);
             } else {
@@ -167,7 +175,7 @@ export const useQuestData = ({
         setQuests,
         taskCampaignSelection,
         taskLevel,
-        setTaskLevel
+        setTaskLevel,
     ]);
 
     const patchQuest = useCallback(async (questId, updates) => {
@@ -177,13 +185,15 @@ export const useQuestData = ({
                 {
                     method: 'PUT',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify(updates)
+                    body: JSON.stringify(updates),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             if (updatedTask) {
                 const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
+                setQuests((prev) =>
+                    prev.map((quest) => (quest.id === questId ? normalized : quest))
+                );
                 refreshCampaigns();
                 return normalized;
             }
@@ -199,9 +209,9 @@ export const useQuestData = ({
                 `/api/tasks/${questId}`,
                 {
                     method: 'DELETE',
-                    headers: getAuthHeaders()
+                    headers: getAuthHeaders(),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             setQuests((prev) => prev.filter((quest) => quest.id !== questId));
             refreshCampaigns();
@@ -220,13 +230,15 @@ export const useQuestData = ({
                 {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ description: descriptionText })
+                    body: JSON.stringify({ description: descriptionText }),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             if (updatedTask) {
                 const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
+                setQuests((prev) =>
+                    prev.map((quest) => (quest.id === questId ? normalized : quest))
+                );
                 refreshCampaigns();
                 return normalized;
             }
@@ -243,14 +255,16 @@ export const useQuestData = ({
                 {
                     method: 'PATCH',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ status, note })
+                    body: JSON.stringify({ status, note }),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             if (updatedQuest) {
                 handleXpPayload(updatedQuest);
                 const normalized = normalizeQuest(updatedQuest);
-                setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
+                setQuests((prev) =>
+                    prev.map((quest) => (quest.id === questId ? normalized : quest))
+                );
                 refreshCampaigns();
                 return normalized;
             }
@@ -268,13 +282,15 @@ export const useQuestData = ({
                 {
                     method: 'PATCH',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ status, note })
+                    body: JSON.stringify({ status, note }),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             if (updatedTask) {
                 const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
+                setQuests((prev) =>
+                    prev.map((quest) => (quest.id === questId ? normalized : quest))
+                );
                 refreshCampaigns();
                 return normalized;
             }
@@ -286,21 +302,28 @@ export const useQuestData = ({
 
     const updateSideQuest = useCallback(async (questId, sideQuestId, payload) => {
         const url = `/api/tasks/${questId}/subtasks/${sideQuestId}`;
-        console.log('[useQuestData:updateSideQuest] called with:', { questId, sideQuestId, type: typeof sideQuestId, url });
+        console.log('[useQuestData:updateSideQuest] called with:', {
+            questId,
+            sideQuestId,
+            type: typeof sideQuestId,
+            url,
+        });
         try {
             const updatedTask = await apiFetch(
                 url,
                 {
                     method: 'PUT',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             if (updatedTask) {
                 console.log('[updateSideQuest] API response:', updatedTask);
                 const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
+                setQuests((prev) =>
+                    prev.map((quest) => (quest.id === questId ? normalized : quest))
+                );
                 refreshCampaigns();
                 return normalized;
             }
@@ -316,13 +339,15 @@ export const useQuestData = ({
                 `/api/tasks/${questId}/subtasks/${sideQuestId}`,
                 {
                     method: 'DELETE',
-                    headers: getAuthHeaders()
+                    headers: getAuthHeaders(),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             if (updatedTask) {
                 const normalized = normalizeQuest(updatedTask);
-                setQuests((prev) => prev.map((quest) => (quest.id === questId ? normalized : quest)));
+                setQuests((prev) =>
+                    prev.map((quest) => (quest.id === questId ? normalized : quest))
+                );
                 refreshCampaigns();
                 return normalized;
             }
@@ -340,9 +365,9 @@ export const useQuestData = ({
                 '/api/debug/clear-tasks',
                 {
                     method: 'POST',
-                    headers: getAuthHeaders()
+                    headers: getAuthHeaders(),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             setQuests([]);
             refreshCampaigns();
@@ -353,7 +378,15 @@ export const useQuestData = ({
         } finally {
             setDebugBusy(false);
         }
-    }, [debugBusy, getAuthHeaders, onUnauthorized, pushToast, refreshCampaigns, setDebugBusy, setQuests]);
+    }, [
+        debugBusy,
+        getAuthHeaders,
+        onUnauthorized,
+        pushToast,
+        refreshCampaigns,
+        setDebugBusy,
+        setQuests,
+    ]);
 
     const seedDemoQuests = useCallback(async (count) => {
         if (debugBusy) return;
@@ -365,9 +398,9 @@ export const useQuestData = ({
                 {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
             if (Array.isArray(data?.tasks)) {
                 setQuests(normalizeQuestList(data.tasks));
@@ -391,9 +424,9 @@ export const useQuestData = ({
                 {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ amount })
+                    body: JSON.stringify({ amount }),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
 
             handleXpPayload(data);
@@ -418,9 +451,9 @@ export const useQuestData = ({
                 '/api/debug/reset-rpg',
                 {
                     method: 'POST',
-                    headers: getAuthHeaders()
+                    headers: getAuthHeaders(),
                 },
-                onUnauthorized
+                onUnauthorized,
             );
 
             handleXpPayload(data);
@@ -464,6 +497,6 @@ export const useQuestData = ({
         seedDemoQuests,
         grantXp,
         resetRpgStats,
-        createQuestSnapshot
+        createQuestSnapshot,
     };
 };

@@ -4,19 +4,21 @@ import React from 'react';
 const CampaignChip = ({ campaign, questHasCampaign, hasCampaigns }) => {
     if (questHasCampaign && campaign) {
         return (
-            <div className="campaign-chip" title={`Campaign: ${campaign.name}`}>
-                <div className="chip-avatar">
-                    {campaign.image_url ? (
-                        <img src={campaign.image_url} alt="" />
-                    ) : (
+            <div className='campaign-chip' title={`Campaign: ${campaign.name}`}>
+                <div className='chip-avatar'>
+                    {campaign.image_url ? <img src={campaign.image_url} alt='' /> : (
                         (campaign.name || '?').charAt(0).toUpperCase()
                     )}
                 </div>
-                <div className="chip-content">
-                    <span className="chip-name">{campaign.name}</span>
-                    {(campaign.progress_summary || (campaign.stats && typeof campaign.stats.quests_total === 'number')) && (
-                        <span className="chip-progress">
-                            {campaign.progress_summary || `${campaign.stats?.quests_completed || 0}/${campaign.stats?.quests_total || 0}`}
+                <div className='chip-content'>
+                    <span className='chip-name'>{campaign.name}</span>
+                    {(campaign.progress_summary ||
+                        (campaign.stats && typeof campaign.stats.quests_total === 'number')) && (
+                        <span className='chip-progress'>
+                            {campaign.progress_summary ||
+                                `${campaign.stats?.quests_completed || 0}/${
+                                    campaign.stats?.quests_total || 0
+                                }`}
                         </span>
                     )}
                 </div>
@@ -26,7 +28,7 @@ const CampaignChip = ({ campaign, questHasCampaign, hasCampaigns }) => {
 
     if (questHasCampaign && !campaign) {
         return (
-            <div className="campaign-chip archived" title="Campaign archived">
+            <div className='campaign-chip archived' title='Campaign archived'>
                 Archived
             </div>
         );
@@ -34,7 +36,7 @@ const CampaignChip = ({ campaign, questHasCampaign, hasCampaigns }) => {
 
     if (!questHasCampaign && hasCampaigns) {
         return (
-            <div className="campaign-chip unassigned" title="No campaign">
+            <div className='campaign-chip unassigned' title='No campaign'>
                 Unassigned
             </div>
         );
@@ -50,16 +52,16 @@ CampaignChip.propTypes = {
         progress_summary: PropTypes.string,
         stats: PropTypes.shape({
             quests_completed: PropTypes.number,
-            quests_total: PropTypes.number
-        })
+            quests_total: PropTypes.number,
+        }),
     }),
     questHasCampaign: PropTypes.bool.isRequired,
-    hasCampaigns: PropTypes.bool
+    hasCampaigns: PropTypes.bool,
 };
 
 CampaignChip.defaultProps = {
     campaign: null,
-    hasCampaigns: false
+    hasCampaigns: false,
 };
 
 const getDisplayDescription = (description) => {
@@ -76,20 +78,20 @@ export const QuestHeader = ({
     questHasCampaign,
     hasCampaigns,
     isCollapsed,
-    onToggleCollapse
+    onToggleCollapse,
 }) => {
     const headingLabel = getDisplayDescription(description);
 
     return (
-        <div className="quest-header">
-            <div className="left">
-                <div className="quest-title-row">
-                    <h3 title={headingLabel} data-testid="quest-heading">
+        <div className='quest-header'>
+            <div className='left'>
+                <div className='quest-title-row'>
+                    <h3 title={headingLabel} data-testid='quest-heading'>
                         {headingLabel}
                     </h3>
-                    <div className="quest-meta-tags">
+                    <div className='quest-meta-tags'>
                         <span className={`priority-pill ${priority}`}>{priority}</span>
-                        <span className="level-pill">Lv. {level || 1}</span>
+                        <span className='level-pill'>Lv. {level || 1}</span>
                         <CampaignChip
                             campaign={campaign}
                             questHasCampaign={questHasCampaign}
@@ -98,15 +100,15 @@ export const QuestHeader = ({
                     </div>
                 </div>
             </div>
-            <div className="right">
-                <div className="quest-controls">
+            <div className='right'>
+                <div className='quest-controls'>
                     <button
-                        className="btn-ghost"
+                        className='btn-ghost'
                         onClick={(event) => {
                             event.stopPropagation();
                             onToggleCollapse();
                         }}
-                        aria-label="toggle quest details"
+                        aria-label='toggle quest details'
                     >
                         {isCollapsed ? 'Expand' : 'Minimize'}
                     </button>
@@ -124,7 +126,7 @@ QuestHeader.propTypes = {
     questHasCampaign: PropTypes.bool,
     hasCampaigns: PropTypes.bool,
     isCollapsed: PropTypes.bool,
-    onToggleCollapse: PropTypes.func.isRequired
+    onToggleCollapse: PropTypes.func.isRequired,
 };
 
 QuestHeader.defaultProps = {
@@ -132,7 +134,7 @@ QuestHeader.defaultProps = {
     campaign: null,
     questHasCampaign: false,
     hasCampaigns: false,
-    isCollapsed: false
+    isCollapsed: false,
 };
 
 export default QuestHeader;

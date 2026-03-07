@@ -1,6 +1,7 @@
 # Quest Board Frontend Overhaul Plan
 
 Shared goals from the JAD session:
+
 - Prioritize the quest board as the primary interaction surface.
 - Fix the janky drag behavior, including side-quest reordering and spacing.
 - Adopt Framer Motion so animations feel arcade-neon, yet remain themable and modular.
@@ -10,6 +11,7 @@ Shared goals from the JAD session:
 - All work should happen on a dedicated feature branch, with each story landing as its own commit and backed by sufficient test coverage before merge.
 
 ## Story 1 · Framer Motion Drag Infrastructure
+
 - [x] Benchmark the current physics implementation in `client/src/components/SmoothDraggable.js` to list the behaviors we must retain (activation thresholds, resize observers, side-quest caps).
 - [x] Introduce Framer Motion (via `framer-motion` + `Reorder`) and scaffold `client/src/components/quest-board/FramerQuestList.jsx` plus `FramerSideQuestList.jsx` that mirror the existing API but support column-aware layouts.
 - [x] Update `client/src/hooks/useSmoothDragQuests.js` (or replace with `useQuestReorder.js`) to expose the new Framer Motion lists, ensuring quest and side-quest reorders hydrate `quests` state without extra renders.
@@ -19,6 +21,7 @@ Shared goals from the JAD session:
 _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs previous baseline reported by react-scripts)._
 
 ## Story 2 · Quest Hook Decomposition & UI Extraction
+
 - [x] Carve data fetching/mutations from `client/src/hooks/useQuests.js` into `useQuestData.js`, leaving orchestration hooks (`useQuestSelection.js`, `useQuestInteractions.js`, `useQuestAnimations.js`) to manage selection, keyboard shortcuts, undo stacks, and glow/pulse states.
 - [x] Move JSX helper functions such as `renderEditForm` and `renderAddSideQuestForm` into dedicated components under `client/src/components/quest-board/forms/` so hooks no longer emit UI.
 - [x] Introduce a lightweight context (e.g., `QuestBoardContext.jsx`) that exposes quest state + dispatchers to the card and list components, reducing prop threading. _Implemented via `QuestBoardProvider`/`useQuestBoardContext`, wrapping the Framer quest list so cards/list items consume shared state without prop churn._
@@ -29,6 +32,7 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
 - _Note: Original drag jank was caused by `renderQuestCard` and related props being regenerated on nearly every state change inside `useQuests.js`. Decomposition stabilized dependencies so Framer Motion receives steady layout data before drag start events. **Verify if drag jank is fully resolved after Story 1 migration**—if yes, remove this note; if persists, identify remaining unstable dependencies causing re-renders._
 
 ## Story 3 · Quest & Side-Quest Layout Refresh
+
 - [x] Split `client/src/components/QuestCard.js` (544 lines) into composable pieces (`QuestCardShell`, `QuestHeader`, `QuestProgress`, `SideQuestList`, `QuestActions`) so spacing and overflow are isolated per section. _New components now live under `client/src/components/quest-card/` with `QuestCard` acting as the orchestrator._
 - [x] Ensure the new `SideQuestList` keeps items inside the quest card by using intrinsic height calculations plus CSS grid/flex tweaks in `client/src/App.css` (or a new `quest-board.css`). _Added `.quest-card-shell`, `.side-quest-panel`, and scroll clamping styles so Framer lists respect card bounds._
 - [x] Rebuild side-quest rows (`SideQuestItem.jsx`) with tighter vertical rhythm, draggable handles that don't overlap buttons, and responsive states for nested buttons/menus. _Implemented via the `SideQuestList` + `SideQuestItem` pair, which centralizes button spacing and drag-handle focus management._
@@ -42,10 +46,11 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
   - Side-quest action buttons reposition for touch (min 44px tap targets)
   - Drag handles enlarge for touch interaction
   - Consider horizontal scrolling for quest list on narrow screens
-  _New 1024px/768px/600px media queries in `client/src/App.css` collapse quest card shells, enlarge drag handles via CSS vars, widen tap targets, and enable overflow scrolling when space is constrained._
+    _New 1024px/768px/600px media queries in `client/src/App.css` collapse quest card shells, enlarge drag handles via CSS vars, widen tap targets, and enable overflow scrolling when space is constrained._
 - [x] **Clarify test fixtures approach:** Either add explicit Storybook setup with installation steps, or document that "Storybook-style" means lightweight test fixtures (`.json` mock data files) for component testing. _Documented via `client/src/features/quest-board/test-data/questFixtures.js`, which supplies deterministic fixtures to the new Jest suites._
 
 ## Story 4 · Theme & Interaction Tokens
+
 - [x] Extend `client/src/hooks/useTheme.js` (or create `client/src/theme/index.js`) to expose interaction tokens: `motion.curves`, `motion.durations`, `glow.intensity`, `card.depth`, `soundFx` toggles. _New `client/src/theme/index.js` owns the Neon/Classic profiles and `useTheme` now returns `themeProfile`, auto-syncs CSS vars, and broadcasts card/CTA tokens + sound flags through context._
 - [x] Provide a default "Neon Arcade" theme profile plus a placeholder "Classic" profile so we can prove animations/styles swap together. _`DEFAULT_THEME_ID` points to `neon_arcade` with a light-mode `classic` fallback + legacy dark/light aliases so existing localStorage entries migrate automatically._
 - [x] Update quest board components (`QuestCard`, new Framer list wrappers, CTA buttons) to consume the theme tokens instead of hard-coded CSS transitions. _QuestCardShell + QuestActions now drive box-shadows/focus rings/CTA motion through theme-fed CSS vars, and Framer lists consume the shared motion presets._
@@ -55,22 +60,23 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
   - Map existing CSS custom properties (--accent-cyan, --accent-pink, --accent-purple, --muted) to theme profiles
   - Migrate `@keyframes` animations (pulse-anim, glow-anim, burst-fade, burst-ring, quest-spawn-anim) to support theme-specific parameters
   - Document which animations/styles are themable vs. structural (unchangeable)
-  _Body/background hues, progress bars, and the glow/burst/pulse keyframes now read from the theme tokens exposed via `getThemeCssVariables`, and `client/src/theme/THEME_NOTES.md` calls out which animations remain structural._
+    _Body/background hues, progress bars, and the glow/burst/pulse keyframes now read from the theme tokens exposed via `getThemeCssVariables`, and `client/src/theme/THEME_NOTES.md` calls out which animations remain structural._
 - [x] **Sound effect implementation:** Expand beyond toggle to include:
   - Define audio file requirements (format: WebM/MP3 fallback, max size: 50kb per file)
   - Add volume controls (0-100%) in theme settings
   - Implement preload strategy to avoid first-play latency
   - Map sound events: quest-add, quest-complete, side-quest-add, priority-cycle, level-up
   - Ensure sounds respect reduced-motion preferences (mute if enabled)
-  _`useSoundFx` preloads tone/sample players, honors reduced-motion, and new FX sliders wire into `useTheme` so quest add/complete/etc. fire theme-aware cues._
+    _`useSoundFx` preloads tone/sample players, honors reduced-motion, and new FX sliders wire into `useTheme` so quest add/complete/etc. fire theme-aware cues._
 - [x] **Theme validation tooling:** Create mechanisms to verify themes work across all states:
   - Consider a `/themes` preview route showing all quest states (active, completed, editing, dragging, glowing, pulsing)
   - Add visual regression testing setup (lightweight Percy/Chromatic snapshots or manual screenshot comparison)
   - Test theme switching doesn't cause FOUC (flash of unstyled content)
-  _Visited via `/themes`, the preview grid renders every quest state per theme and is snapshotted by `ThemePreviewPage.test.jsx`; the root now sets `data-theme-ready` to prevent FOUC before CSS vars apply._
+    _Visited via `/themes`, the preview grid renders every quest state per theme and is snapshotted by `ThemePreviewPage.test.jsx`; the root now sets `data-theme-ready` to prevent FOUC before CSS vars apply._
 - [x] **Extend useQuestMotionTokens:** The existing hook in `client/src/features/quest-board/hooks/useQuestMotionTokens.js` already handles motion profiles and reduced-motion—integrate it with the broader theme system rather than duplicating logic. _Hook now resolves presets from the shared theme module so Story 4 tokens stay in sync._
 
 ## Story 5 · Quest State Store (Zustand)
+
 - [x] Introduce a `client/src/store/questBoardStore.js` (or similar) using Zustand to own quests, selection, editing, and layout metadata. _`questBoardStore.js` now centralizes quests + UI metadata with devtools + partial persistence (collapsed map)._
 - [x] Refactor `useQuests` descendants to read/write through the store (selectors/actions) while keeping server synchronization logic in hooks. _`useQuestData/Selection/Animations/Interactions` subscribe via `useShallow` and dispatch store setters._
 - [x] Expose derived selectors for quest lists, side-quest subsets, animation states, and undo queues so components subscribe narrowly. _Exported `questBoardSelectors` (quests, questById, sideQuestsFor, animationFlags, undoQueue)._
@@ -87,7 +93,7 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
   - Option A: Keep context as thin wrapper over Zustand store (context provides store instance)
   - Option B: Deprecate context entirely, have components import store hooks directly
   - Ensure no "two sources of truth" bugs during transition period
-  _Current state: QuestBoardProvider continues to wrap components but simply forwards the store-driven values coming from `useQuests`; direct store selectors can phase out context later._
+    _Current state: QuestBoardProvider continues to wrap components but simply forwards the store-driven values coming from `useQuests`; direct store selectors can phase out context later._
 - [x] **Bundle impact assessment:** Zustand adds ~3kb gzipped—validate against the 119.33kb baseline from Story 1 to confirm we stay under the 5% regression threshold (125.3kb max). _`cd client && npm run build -- --stats` on 2025-11-11 produced a 135.08kb gzip main bundle (+15.75kb vs. 119.33kb baseline, ~13.2% over). After lazy-loading the showcase modal + theme preview route and pruning unused framer-motion helpers, the latest build (main.7e22b707.js) sits at 131.59kb (+12.26kb vs. baseline, ~10.3% over). Heaviest modules remain: framer-motion projection core (~63kb), drag controls (~20kb), theme index (~17kb), quest hooks (~11kb), and Zustand middleware (~16kb). Optimization work should prioritize further code-splitting around quest-board-only hooks/components, trimming theme data, and verifying framer-motion tree shaking. _Follow-up decision:_ defer deeper bundle trims until after the upcoming quest/side-quest card overhaul lands so we optimize the final architecture rather than interim code._
 - [x] **DevTools integration:** Set up Zustand DevTools for debugging:
   - Install `zustand/middleware` devtools
@@ -102,6 +108,7 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
 - _Only `collapsedMap` is persisted (JSON storage wrapper w/ safe fallback) to preserve user fold state without leaking transient selections._
 
 ## Story 6 · Bundle & UX Validation
+
 - [ ] Track bundle size before/after the migration using `client npm run build -- --stats` and flag any regressions >5%.
 - [ ] Define UX heuristics for the quest board (latency targets for drag start, drop, and side-quest open/close) and verify them manually or via React Profiler traces.
 - [ ] Run `deno task validate` plus focused `client npm test` after each major story to ensure both suites stay green throughout the overhaul.
@@ -126,14 +133,13 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
   - After Story 5 (Zustand): Expected +3kb (library)
   - Total target: <125.3kb (5% threshold) - if exceeded, identify optimization opportunities
 
-
 ## Story 7 · Accessibility & Keyboard UX (Optional Enhancement)
 
 - [ ] **Screen reader support:** Ensure state changes are announced:
   - Quest completion: "Quest completed: [description]"
   - Priority/level changes: "Priority changed to urgent" / "Level increased to 3"
   - Side quest operations: "Side quest added" / "Side quest completed"
-- [ ] **Focus management:** 
+- [ ] **Focus management:**
   - Focus traps in edit forms (Tab/Shift+Tab cycles within modal)
   - Focus restoration after deleting a quest (move to next/previous quest)
   - Visible focus indicators for all interactive elements (2px outline, high contrast)

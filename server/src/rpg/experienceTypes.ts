@@ -2,7 +2,7 @@ import type {
     PublicUserRpgState,
     UserRpgCounters,
     UserRpgEvent,
-    UserRpgState
+    UserRpgState,
 } from '../types/user.js';
 import type { XpEventMetadata, XpEventReason } from '../types/rpg.js';
 
@@ -32,9 +32,4 @@ export interface PublicXpEvent {
     leveled_up: boolean;
 }
 
-export type {
-    PublicUserRpgState,
-    UserRpgCounters,
-    UserRpgEvent,
-    UserRpgState
-};
+export type { PublicUserRpgState, UserRpgCounters, UserRpgEvent, UserRpgState };

@@ -7,7 +7,7 @@ import {
     loginUser,
     registerUser,
     updateCurrentUser,
-    validateEmail
+    validateEmail,
 } from '../controllers/usersController.js';
 
 const router = Router();

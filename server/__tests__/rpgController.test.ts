@@ -10,13 +10,13 @@ import * as userStoreModule from '../src/data/userStore.js';
 import { resetRegistrationRateLimiter } from '../src/security/registrationRateLimiter.js';
 import { createTestClient, type TestClient } from '../src/utils/testClient.js';
 import {
-    JsonRecord,
     buildDefaultUser,
     configureDataFiles,
+    JsonRecord,
+    resetCampaignStore,
     resetDataFileOverrides,
     resetTaskStore,
-    resetCampaignStore,
-    resetUserStore
+    resetUserStore,
 } from '../src/testing/fixtures.js';
 import { XP_CONFIG } from '../src/rpg/rewardTables.js';
 
@@ -44,7 +44,7 @@ beforeEach(async () => {
 
     const register = await client.post('/api/users/register', {
         body: { username: `player_${Date.now()}`, password: 'password123' },
-        headers: { accept: 'application/json' }
+        headers: { accept: 'application/json' },
     });
     authToken = (register.body as JsonRecord).token as string;
 });
@@ -60,14 +60,14 @@ function authHeaders() {
 
 test('claim daily reward grants XP once per day', async () => {
     const first = await client.post('/api/rpg/daily-reward', {
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(first.status).toBe(200);
     const firstBody = first.body as JsonRecord;
     expect((firstBody.xp_event as JsonRecord).amount).toBeGreaterThan(0);
 
     const second = await client.post('/api/rpg/daily-reward', {
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(second.status).toBe(400);
     expect((second.body as JsonRecord).error).toMatch(/already claimed/i);
@@ -76,7 +76,7 @@ test('claim daily reward grants XP once per day', async () => {
 test('claim daily reward errors when user missing', async () => {
     resetUserStore(usersFile, []);
     const res = await client.post('/api/rpg/daily-reward', {
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(res.status).toBe(404);
 });
@@ -85,7 +85,7 @@ test('claim daily reward handles applyXp failure', async () => {
     const originalDailyXp = XP_CONFIG.dailyBaseXp;
     XP_CONFIG.dailyBaseXp = 0;
     const res = await client.post('/api/rpg/daily-reward', {
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(res.status).toBe(500);
     XP_CONFIG.dailyBaseXp = originalDailyXp;
@@ -94,13 +94,13 @@ test('claim daily reward handles applyXp failure', async () => {
 test('grant XP validates amount and handles missing user', async () => {
     const invalid = await client.post('/api/rpg/grant-xp', {
         body: { amount: 'oops' },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(invalid.status).toBe(400);
 
     const zero = await client.post('/api/rpg/grant-xp', {
         body: { amount: 0 },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(zero.status).toBe(400);
 
@@ -110,7 +110,7 @@ test('grant XP validates amount and handles missing user', async () => {
 
     const missing = await client.post('/api/rpg/grant-xp', {
         body: { amount: 10 },
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(missing.status).toBe(404);
 });
@@ -124,7 +124,7 @@ test('grant XP handles write errors', async () => {
     try {
         const res = await client.post('/api/rpg/grant-xp', {
             body: { amount: 5 },
-            headers: authHeaders()
+            headers: authHeaders(),
         });
         expect(res.status).toBe(500);
     } finally {
@@ -136,7 +136,7 @@ test('grant XP handles write errors', async () => {
 
 test('reset RPG restores baseline and handles failures', async () => {
     const res = await client.post('/api/rpg/reset', {
-        headers: authHeaders()
+        headers: authHeaders(),
     });
     expect(res.status).toBe(200);
     const body = res.body as JsonRecord;

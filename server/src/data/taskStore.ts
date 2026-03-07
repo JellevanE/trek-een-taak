@@ -8,15 +8,19 @@ import type {
     TaskRecord,
     TaskRewardHistoryEntry,
     TaskRpgData,
+    TaskStatus,
     TaskStoreData,
-    TaskStatus
 } from '../types/task.js';
 import { isJsonObject } from '../types/json.js';
 
 import { getTasksFile } from './filePaths.js';
 import { readUsers } from './userStore.js';
 
-function ensureStatusHistory(history: unknown, status: TaskStatus, timestamp: string): StatusHistoryEntry[] {
+function ensureStatusHistory(
+    history: unknown,
+    status: TaskStatus,
+    timestamp: string,
+): StatusHistoryEntry[] {
     if (!Array.isArray(history) || history.length === 0) {
         return [{ status, at: timestamp, note: null }];
     }
@@ -28,12 +32,12 @@ function ensureStatusHistory(history: unknown, status: TaskStatus, timestamp: st
         const atValue = entry.at;
         const noteValue = 'note' in entry ? entry.note : null;
         return {
-            status:
-                typeof statusValue === 'string' && ['todo', 'in_progress', 'blocked', 'done'].includes(statusValue)
-                    ? (statusValue as TaskStatus)
-                    : status,
+            status: typeof statusValue === 'string' &&
+                    ['todo', 'in_progress', 'blocked', 'done'].includes(statusValue)
+                ? (statusValue as TaskStatus)
+                : status,
             at: typeof atValue === 'string' ? atValue : timestamp,
-            note: typeof noteValue === 'string' || noteValue === null ? noteValue : null
+            note: typeof noteValue === 'string' || noteValue === null ? noteValue : null,
         };
     });
 }
@@ -49,7 +53,8 @@ function normalizeSubTask(raw: unknown, now: string): SubTask {
     const completedValue = typeof source.completed === 'boolean' ? source.completed : undefined;
     const rawStatus = typeof source.status === 'string' ? source.status : undefined;
     const statusValue: TaskStatus =
-        rawStatus === 'todo' || rawStatus === 'in_progress' || rawStatus === 'blocked' || rawStatus === 'done'
+        rawStatus === 'todo' || rawStatus === 'in_progress' || rawStatus === 'blocked' ||
+            rawStatus === 'done'
             ? rawStatus
             : completedValue
             ? 'done'
@@ -60,15 +65,20 @@ function normalizeSubTask(raw: unknown, now: string): SubTask {
     const statusHistory = ensureStatusHistory(source.status_history, statusValue, updatedAt);
 
     const rpgSource = isJsonObject(source.rpg) ? source.rpg : {};
-    const xpAwarded = typeof rpgSource.xp_awarded === 'boolean' ? rpgSource.xp_awarded : !!completedValue;
-    const lastRewardAt = typeof rpgSource.last_reward_at === 'string' ? rpgSource.last_reward_at : null;
+    const xpAwarded = typeof rpgSource.xp_awarded === 'boolean'
+        ? rpgSource.xp_awarded
+        : !!completedValue;
+    const lastRewardAt = typeof rpgSource.last_reward_at === 'string'
+        ? rpgSource.last_reward_at
+        : null;
 
     const priorityValue =
         source.priority === 'low' || source.priority === 'medium' || source.priority === 'high'
             ? source.priority
             : undefined;
-    const weightValue =
-        typeof source.weight === 'number' && Number.isFinite(source.weight) ? source.weight : undefined;
+    const weightValue = typeof source.weight === 'number' && Number.isFinite(source.weight)
+        ? source.weight
+        : undefined;
 
     const subtask: SubTask = {
         id: idValue,
@@ -80,8 +90,8 @@ function normalizeSubTask(raw: unknown, now: string): SubTask {
         completed: completedValue ?? statusValue === 'done',
         rpg: {
             xp_awarded: xpAwarded,
-            last_reward_at: lastRewardAt
-        }
+            last_reward_at: lastRewardAt,
+        },
     };
 
     if (priorityValue !== undefined) {
@@ -106,7 +116,7 @@ function normalizeTaskRpg(raw: unknown, timestamp: string): TaskRpgData {
     const fallback: TaskRpgData = {
         xp_awarded: false,
         last_reward_at: null,
-        history: []
+        history: [],
     };
 
     if (!isJsonObject(raw)) return fallback;
@@ -121,8 +131,10 @@ function normalizeTaskRpg(raw: unknown, timestamp: string): TaskRpgData {
         const subtaskIdValue = entry.subtask_id;
         const record: TaskRewardHistoryEntry = {
             at: typeof atValue === 'string' ? atValue : timestamp,
-            amount: typeof amountValue === 'number' && Number.isFinite(amountValue) ? amountValue : 0,
-            reason: typeof reasonValue === 'string' ? reasonValue : 'unknown'
+            amount: typeof amountValue === 'number' && Number.isFinite(amountValue)
+                ? amountValue
+                : 0,
+            reason: typeof reasonValue === 'string' ? reasonValue : 'unknown',
         };
         if (typeof subtaskIdValue === 'number' && Number.isFinite(subtaskIdValue)) {
             record.subtask_id = subtaskIdValue;
@@ -133,7 +145,7 @@ function normalizeTaskRpg(raw: unknown, timestamp: string): TaskRpgData {
     return {
         xp_awarded: typeof raw.xp_awarded === 'boolean' ? raw.xp_awarded : false,
         last_reward_at: typeof raw.last_reward_at === 'string' ? raw.last_reward_at : null,
-        history
+        history,
     };
 }
 
@@ -164,7 +176,8 @@ function normalizeTask(raw: unknown, index: number, usersData: UserStoreData): T
     const completedValue = typeof source.completed === 'boolean' ? source.completed : undefined;
     const rawStatus = typeof source.status === 'string' ? source.status : undefined;
     const statusValue: TaskStatus =
-        rawStatus === 'todo' || rawStatus === 'in_progress' || rawStatus === 'blocked' || rawStatus === 'done'
+        rawStatus === 'todo' || rawStatus === 'in_progress' || rawStatus === 'blocked' ||
+            rawStatus === 'done'
             ? rawStatus
             : completedValue
             ? 'done'
@@ -174,18 +187,21 @@ function normalizeTask(raw: unknown, index: number, usersData: UserStoreData): T
     const updatedAt = typeof source.updated_at === 'string' ? source.updated_at : createdAt;
     const statusHistory = ensureStatusHistory(source.status_history, statusValue, updatedAt);
 
-    const orderValue = typeof source.order === 'number' && Number.isFinite(source.order) ? source.order : index;
+    const orderValue = typeof source.order === 'number' && Number.isFinite(source.order)
+        ? source.order
+        : index;
     const dueDateValue: string =
         typeof source.due_date === 'string' && source.due_date.trim().length > 0
             ? source.due_date
             : now.slice(0, 10);
 
-    const ownerIdValue =
-        typeof source.owner_id === 'number' && Number.isFinite(source.owner_id)
-            ? source.owner_id
-            : resolveOwnerId(usersData);
+    const ownerIdValue = typeof source.owner_id === 'number' && Number.isFinite(source.owner_id)
+        ? source.owner_id
+        : resolveOwnerId(usersData);
 
-    const rawLevel = typeof source.task_level === 'number' && Number.isFinite(source.task_level) ? source.task_level : 1;
+    const rawLevel = typeof source.task_level === 'number' && Number.isFinite(source.task_level)
+        ? source.task_level
+        : 1;
     const taskLevel = clampTaskLevel(rawLevel);
 
     const rpg = normalizeTaskRpg(source.rpg, now);
@@ -206,16 +222,16 @@ function normalizeTask(raw: unknown, index: number, usersData: UserStoreData): T
 
     return {
         id: typeof source.id === 'number' && Number.isFinite(source.id) ? source.id : index + 1,
-        description:
-            typeof source.description === 'string' && source.description.trim().length > 0
-                ? source.description.trim()
-                : `Task ${index + 1}`,
+        description: typeof source.description === 'string' && source.description.trim().length > 0
+            ? source.description.trim()
+            : `Task ${index + 1}`,
         priority: priorityValue,
         sub_tasks: normalizedSubs,
         side_quests: normalizedSideQuests,
-        nextSubtaskId: typeof source.nextSubtaskId === 'number' && Number.isFinite(source.nextSubtaskId)
-            ? source.nextSubtaskId
-            : maxSubId + 1,
+        nextSubtaskId:
+            typeof source.nextSubtaskId === 'number' && Number.isFinite(source.nextSubtaskId)
+                ? source.nextSubtaskId
+                : maxSubId + 1,
         due_date: dueDateValue,
         status: statusValue,
         completed: statusValue === 'done',
@@ -226,7 +242,7 @@ function normalizeTask(raw: unknown, index: number, usersData: UserStoreData): T
         owner_id: ownerIdValue,
         task_level: taskLevel,
         rpg,
-        campaign_id: campaignId
+        campaign_id: campaignId,
     };
 }
 
@@ -251,16 +267,17 @@ export function readTasks(): TaskStoreData {
         const tasksArray = Array.isArray(parsed.tasks) ? parsed.tasks : [];
         const normalizedTasks = tasksArray.map((task, idx) => normalizeTask(task, idx, usersData));
 
-        const maxTaskId =
-            normalizedTasks.length > 0
-                ? normalizedTasks.reduce((max, task) => (task.id > max ? task.id : max), 0)
-                : 0;
+        const maxTaskId = normalizedTasks.length > 0
+            ? normalizedTasks.reduce((max, task) => (task.id > max ? task.id : max), 0)
+            : 0;
 
-        const nextIdValue = typeof parsed.nextId === 'number' && parsed.nextId > maxTaskId ? parsed.nextId : maxTaskId + 1;
+        const nextIdValue = typeof parsed.nextId === 'number' && parsed.nextId > maxTaskId
+            ? parsed.nextId
+            : maxTaskId + 1;
 
         return {
             tasks: normalizedTasks,
-            nextId: nextIdValue
+            nextId: nextIdValue,
         };
     } catch (error) {
         console.error('Error reading tasks file:', error);
@@ -298,8 +315,8 @@ function serializeSubtask(subtask: SubTask | null | undefined): SubTask | null {
         completed: !!subtask.completed,
         rpg: {
             xp_awarded: !!(subtask.rpg && subtask.rpg.xp_awarded),
-            last_reward_at: subtask.rpg?.last_reward_at ?? null
-        }
+            last_reward_at: subtask.rpg?.last_reward_at ?? null,
+        },
     };
     if (subtask.priority !== undefined) {
         base.priority = subtask.priority;
@@ -314,13 +331,13 @@ export function serializeTask(task: TaskRecord | null | undefined): TaskRecord |
     if (!task) return null;
     const subTasks = Array.isArray(task.sub_tasks)
         ? task.sub_tasks
-              .map(serializeSubtask)
-              .filter((sub): sub is SubTask => sub !== null)
+            .map(serializeSubtask)
+            .filter((sub): sub is SubTask => sub !== null)
         : [];
     const serializedSideQuests = Array.isArray(task.side_quests)
         ? task.side_quests
-              .map(serializeSubtask)
-              .filter((sub): sub is SubTask => sub !== null)
+            .map(serializeSubtask)
+            .filter((sub): sub is SubTask => sub !== null)
         : [];
 
     const sideQuests = serializedSideQuests.length > 0 ? serializedSideQuests : subTasks;
@@ -328,7 +345,7 @@ export function serializeTask(task: TaskRecord | null | undefined): TaskRecord |
     const rpgData: TaskRpgData = {
         xp_awarded: !!task.rpg?.xp_awarded,
         last_reward_at: task.rpg?.last_reward_at ?? null,
-        history: Array.isArray(task.rpg?.history) ? task.rpg!.history : []
+        history: Array.isArray(task.rpg?.history) ? task.rpg!.history : [],
     };
 
     return {
@@ -336,8 +353,9 @@ export function serializeTask(task: TaskRecord | null | undefined): TaskRecord |
         sub_tasks: subTasks,
         side_quests: sideQuests,
         rpg: rpgData,
-        campaign_id:
-            typeof task.campaign_id === 'number' && task.campaign_id > 0 ? task.campaign_id : null
+        campaign_id: typeof task.campaign_id === 'number' && task.campaign_id > 0
+            ? task.campaign_id
+            : null,
     };
 }
 
@@ -376,7 +394,7 @@ export function buildDemoTasks(options: DemoTaskOptions): TaskStoreData {
         'Calibrate the chrono-compass',
         'Train with sparring golems',
         'Draft trading manifests',
-        'Decode ancient glyphs'
+        'Decode ancient glyphs',
     ];
 
     const sideQuestPool = [
@@ -386,7 +404,7 @@ export function buildDemoTasks(options: DemoTaskOptions): TaskStoreData {
         'Sharpen gear',
         'Meditate before battle',
         'Update quest board',
-        'Visit quartermaster'
+        'Visit quartermaster',
     ];
 
     const priorities: TaskRecord['priority'][] = ['low', 'medium', 'high'];
@@ -421,7 +439,7 @@ export function buildDemoTasks(options: DemoTaskOptions): TaskStoreData {
                 updated_at: subNow,
                 status_history: [{ status: subStatus, at: subNow, note: null }],
                 completed: subStatus === 'done',
-                rpg: { xp_awarded: subStatus === 'done', last_reward_at: null }
+                rpg: { xp_awarded: subStatus === 'done', last_reward_at: null },
             });
         }
 
@@ -442,7 +460,7 @@ export function buildDemoTasks(options: DemoTaskOptions): TaskStoreData {
             owner_id: ownerId,
             task_level: level,
             rpg: { xp_awarded: status === 'done', last_reward_at: null, history: [] },
-            campaign_id: null
+            campaign_id: null,
         };
         tasks.push(task);
     }

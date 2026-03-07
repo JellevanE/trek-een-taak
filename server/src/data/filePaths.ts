@@ -10,14 +10,14 @@ const defaults: Record<DataFileKey, string> = {
     tasks: path.join(ROOT_DIR, 'tasks.json'),
     users: path.join(ROOT_DIR, 'users.json'),
     campaigns: path.join(ROOT_DIR, 'campaigns.json'),
-    storylines: path.join(ROOT_DIR, 'storylines.json')
+    storylines: path.join(ROOT_DIR, 'storylines.json'),
 };
 
 const envVars: Record<DataFileKey, string> = {
     tasks: 'TASKS_FILE',
     users: 'USERS_FILE',
     campaigns: 'CAMPAIGNS_FILE',
-    storylines: 'STORYLINES_FILE'
+    storylines: 'STORYLINES_FILE',
 };
 
 const overrides: Partial<Record<DataFileKey, string>> = {};

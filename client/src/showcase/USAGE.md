@@ -14,27 +14,31 @@ import ShowcasePage from './showcase/ShowcasePage';
 const [showShowcase, setShowShowcase] = React.useState(false);
 
 // Add this somewhere in your JSX (maybe near the theme toggle):
-{showShowcase && <ShowcasePage />}
-{!showShowcase && (
-  <button 
-    onClick={() => setShowShowcase(true)}
-    style={{ 
-      position: 'fixed', 
-      bottom: '20px', 
-      right: '20px',
-      padding: '10px 20px',
-      background: 'var(--neon-purple)',
-      color: 'white',
-      border: '2px solid var(--neon-purple)',
-      cursor: 'pointer',
-      fontFamily: "'Press Start 2P', cursive",
-      fontSize: '10px',
-      zIndex: 1000
-    }}
-  >
-    VIEW SHOWCASE
-  </button>
-)}
+{
+    showShowcase && <ShowcasePage />;
+}
+{
+    !showShowcase && (
+        <button
+            onClick={() => setShowShowcase(true)}
+            style={{
+                position: 'fixed',
+                bottom: '20px',
+                right: '20px',
+                padding: '10px 20px',
+                background: 'var(--neon-purple)',
+                color: 'white',
+                border: '2px solid var(--neon-purple)',
+                cursor: 'pointer',
+                fontFamily: "'Press Start 2P', cursive",
+                fontSize: '10px',
+                zIndex: 1000,
+            }}
+        >
+            VIEW SHOWCASE
+        </button>
+    );
+}
 ```
 
 ## Option 2: Direct Import in Development
@@ -46,13 +50,14 @@ import React from 'react';
 import { ShowcasePage } from './showcase';
 
 function ShowcaseTest() {
-  return <ShowcasePage />;
+    return <ShowcasePage />;
 }
 
 export default ShowcaseTest;
 ```
 
 Then in `index.js`, temporarily replace:
+
 ```javascript
 // import App from './App';
 import App from './ShowcaseTest';
@@ -86,22 +91,26 @@ import { PixelButton, GlitchText, PowerUpEffect } from './showcase';
 ## Available Components
 
 ### 🎮 Interactive Elements
+
 - **PixelButton** - Retro button with press effects
 - **ArcadeModal** - Modal with arcade cabinet styling
 
 ### ✨ Visual Effects
+
 - **PowerUpEffect** - Particle burst animation
 - **LevelUpAnimation** - Full-screen celebration
 - **CRTOverlay** - Scanline/CRT screen effect
 - **GlitchText** - Glitching text effect
 
 ### 📊 UI Components
+
 - **HealthBar** - Multiple progress bar styles
 - **RetroLoadingSpinner** - 8-bit loading animations
 
 ## Cleanup
 
 When you're done exploring:
+
 1. Remove any showcase imports from App.js or index.js
 2. Delete test files you created
 3. The showcase folder stays for future reference
@@ -117,6 +126,7 @@ When you're done exploring:
 ## Sound Effects Note
 
 Components have sound effect hooks but don't implement audio. When ready:
+
 1. Use Web Audio API
 2. Preload short sound files (<50kb each)
 3. Play on button clicks, quest completions, etc.

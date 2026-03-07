@@ -1,5 +1,5 @@
 import { ChatAnthropic } from '@langchain/anthropic';
-import { PromptTemplate } from '@langchain/core/prompts';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { storylineConfig } from '../../config/storyline.config.js';
 
@@ -20,26 +20,62 @@ export class LangChainService {
         });
     }
 
-    async generateText(promptTemplate: string, variables: Record<string, any>): Promise<string> {
-        try {
-            const prompt = PromptTemplate.fromTemplate(promptTemplate);
-            const chain = prompt.pipe(this.model).pipe(new StringOutputParser());
-            const result = await chain.invoke(variables);
-            return result;
-        } catch (error) {
-            console.error('LangChain generation error:', error);
-            throw new Error('Failed to generate text from AI service.');
+    async generateText(
+        promptTemplate: string,
+        variables: Record<string, unknown>,
+        systemPrompt?: string,
+    ): Promise<string> {
+        const { retryAttempts, timeoutMs } = storylineConfig.generation;
+        let lastError: Error = new Error('Generation failed');
+
+        for (let attempt = 1; attempt <= retryAttempts; attempt++) {
+            try {
+                const messages: [string, string][] = [];
+                if (systemPrompt) {
+                    messages.push(['system', systemPrompt]);
+                }
+                messages.push(['human', promptTemplate]);
+
+                const prompt = ChatPromptTemplate.fromMessages(messages);
+                const chain = prompt.pipe(this.model).pipe(new StringOutputParser());
+
+                const timeoutPromise = new Promise<never>((_, reject) =>
+                    setTimeout(
+                        () => reject(new Error(`Generation timed out after ${timeoutMs}ms`)),
+                        timeoutMs,
+                    )
+                );
+
+                const result = await Promise.race([chain.invoke(variables), timeoutPromise]);
+
+                if (!result || result.trim().length === 0) {
+                    throw new Error('AI returned an empty response');
+                }
+
+                return result;
+            } catch (error) {
+                lastError = error instanceof Error ? error : new Error(String(error));
+                console.error(
+                    `Generation attempt ${attempt}/${retryAttempts} failed:`,
+                    lastError.message,
+                );
+
+                if (attempt < retryAttempts) {
+                    const backoffMs = Math.pow(2, attempt) * 500;
+                    await new Promise((resolve) => setTimeout(resolve, backoffMs));
+                }
+            }
         }
+
+        throw lastError;
     }
 
-    // For structured output (extraction), we can use withStructuredOutput once we have schemas
-    // Or just use a specific model for extraction as planned (Haiku)
-    getExtractionModel() {
+    getExtractionModel(): ChatAnthropic {
         const apiKey = process.env.ANTHROPIC_API_KEY;
         return new ChatAnthropic({
             apiKey: apiKey || '',
             modelName: storylineConfig.claude.extractorModel,
-            temperature: 0.2, // lower temp for extraction
+            temperature: 0.2,
             maxTokens: 1000,
         });
     }

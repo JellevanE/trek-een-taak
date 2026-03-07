@@ -1,9 +1,9 @@
 import {
-    type MutableUser,
     type LevelProgress,
+    type MutableUser,
     type UserRpgCounters,
     type UserRpgEvent,
-    type UserRpgState
+    type UserRpgState,
 } from './experienceTypes.js';
 import { XP_CONFIG } from './rewardTables.js';
 import type {
@@ -11,7 +11,7 @@ import type {
     RpgInventory,
     RpgMetrics,
     XpEventMetadata,
-    XpEventReason
+    XpEventReason,
 } from '../types/rpg.js';
 
 export function xpRequiredForLevel(level: number): number {
@@ -46,15 +46,14 @@ export function getLevelProgress(levelInput: number, xpInput: number): LevelProg
         xp_into_level: xpIntoLevel,
         xp_for_level: xpForLevel,
         xp_to_next: xpToNext,
-        progress
+        progress,
     };
 }
 
 function ensureCounters(counters: unknown): UserRpgCounters {
-    const safe: UserRpgCounters =
-        counters && typeof counters === 'object'
-            ? (counters as UserRpgCounters)
-            : { tasks_completed: 0, subtasks_completed: 0, daily_rewards_claimed: 0 };
+    const safe: UserRpgCounters = counters && typeof counters === 'object'
+        ? (counters as UserRpgCounters)
+        : { tasks_completed: 0, subtasks_completed: 0, daily_rewards_claimed: 0 };
 
     if (typeof safe.tasks_completed !== 'number' || !Number.isFinite(safe.tasks_completed)) {
         safe.tasks_completed = 0;
@@ -62,7 +61,10 @@ function ensureCounters(counters: unknown): UserRpgCounters {
     if (typeof safe.subtasks_completed !== 'number' || !Number.isFinite(safe.subtasks_completed)) {
         safe.subtasks_completed = 0;
     }
-    if (typeof safe.daily_rewards_claimed !== 'number' || !Number.isFinite(safe.daily_rewards_claimed)) {
+    if (
+        typeof safe.daily_rewards_claimed !== 'number' ||
+        !Number.isFinite(safe.daily_rewards_claimed)
+    ) {
         safe.daily_rewards_claimed = 0;
     }
     return safe;
@@ -127,7 +129,7 @@ export function createInitialRpgState(overrides: Partial<UserRpgState> = {}): Us
         last_xp_award_at: null,
         counters: { tasks_completed: 0, subtasks_completed: 0, daily_rewards_claimed: 0 },
         flags: {},
-        metrics: {}
+        metrics: {},
     };
     const user: MutableUser = { rpg: { ...base, ...overrides } };
     return ensureUserRpg(user) ?? base;
@@ -150,7 +152,7 @@ export function applyXp(
     user: MutableUser | null | undefined,
     amount: number,
     reason: XpEventReason = 'xp_gain',
-    metadata: XpEventMetadata = {}
+    metadata: XpEventMetadata = {},
 ): UserRpgEvent | null {
     if (!user || !Number.isFinite(amount) || amount === 0) return null;
     const rpg = ensureUserRpg(user);
@@ -184,7 +186,7 @@ export function applyXp(
         xp_into_level: progress.xp_into_level,
         xp_for_level: progress.xp_for_level,
         xp_to_next: progress.xp_to_next,
-        leveled_up: leveledUp
+        leveled_up: leveledUp,
     };
 
     rpg.xp_log.unshift(event);

@@ -15,7 +15,7 @@ export const RetroInput = ({
     glowColor = 'var(--neon-cyan, #00ffff)',
     maxLength,
     onEnter,
-    autoFocus = false
+    autoFocus = false,
 }) => {
     const [isFocused, setIsFocused] = React.useState(false);
 
@@ -28,14 +28,14 @@ export const RetroInput = ({
     return (
         <motion.div
             animate={{
-                boxShadow: isFocused 
+                boxShadow: isFocused
                     ? `0 0 10px ${glowColor}, 0 0 20px ${glowColor}40`
-                    : '0 0 0px transparent'
+                    : '0 0 0px transparent',
             }}
             transition={{ duration: 0.2 }}
             style={{
                 position: 'relative',
-                width: '100%'
+                width: '100%',
             }}
         >
             <input
@@ -61,7 +61,7 @@ export const RetroInput = ({
                     transition: 'border-color 0.2s',
                     letterSpacing: '1px',
                     opacity: disabled ? 0.5 : 1,
-                    cursor: disabled ? 'not-allowed' : 'text'
+                    cursor: disabled ? 'not-allowed' : 'text',
                 }}
             />
             {isFocused && (
@@ -77,7 +77,7 @@ export const RetroInput = ({
                         color: glowColor,
                         fontFamily: "'Press Start 2P', cursive",
                         fontSize: '10px',
-                        animation: 'blink 1s infinite'
+                        animation: 'blink 1s infinite',
                     }}
                 >
                     _
@@ -95,21 +95,21 @@ export const RetroTextArea = ({
     disabled = false,
     glowColor = 'var(--neon-cyan, #00ffff)',
     rows = 4,
-    maxLength
+    maxLength,
 }) => {
     const [isFocused, setIsFocused] = React.useState(false);
 
     return (
         <motion.div
             animate={{
-                boxShadow: isFocused 
+                boxShadow: isFocused
                     ? `0 0 10px ${glowColor}, 0 0 20px ${glowColor}40`
-                    : '0 0 0px transparent'
+                    : '0 0 0px transparent',
             }}
             transition={{ duration: 0.2 }}
             style={{
                 position: 'relative',
-                width: '100%'
+                width: '100%',
             }}
         >
             <textarea
@@ -135,7 +135,7 @@ export const RetroTextArea = ({
                     resize: 'vertical',
                     minHeight: '100px',
                     opacity: disabled ? 0.5 : 1,
-                    cursor: disabled ? 'not-allowed' : 'text'
+                    cursor: disabled ? 'not-allowed' : 'text',
                 }}
             />
         </motion.div>
@@ -150,135 +150,153 @@ export const RetroInputShowcase = () => {
 
     return (
         <div style={{ padding: '40px' }}>
-            <h3 style={{ 
-                fontFamily: "'Press Start 2P', cursive",
-                color: 'var(--neon-cyan)',
-                fontSize: '14px',
-                marginBottom: '30px',
-                textAlign: 'center'
-            }}>
+            <h3
+                style={{
+                    fontFamily: "'Press Start 2P', cursive",
+                    color: 'var(--neon-cyan)',
+                    fontSize: '14px',
+                    marginBottom: '30px',
+                    textAlign: 'center',
+                }}
+            >
                 RETRO INPUT FIELDS
             </h3>
 
-            <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '30px',
-                maxWidth: '600px',
-                margin: '0 auto'
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '30px',
+                    maxWidth: '600px',
+                    margin: '0 auto',
+                }}
+            >
                 {/* Standard Input */}
                 <div>
-                    <label style={{
-                        display: 'block',
-                        marginBottom: '10px',
-                        fontFamily: "'Press Start 2P', cursive",
-                        fontSize: '10px',
-                        color: 'var(--neon-cyan)'
-                    }}>
+                    <label
+                        style={{
+                            display: 'block',
+                            marginBottom: '10px',
+                            fontFamily: "'Press Start 2P', cursive",
+                            fontSize: '10px',
+                            color: 'var(--neon-cyan)',
+                        }}
+                    >
                         STANDARD INPUT
                     </label>
                     <RetroInput
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Enter quest name..."
-                        glowColor="var(--neon-cyan)"
+                        placeholder='Enter quest name...'
+                        glowColor='var(--neon-cyan)'
                     />
-                    <p style={{
-                        marginTop: '8px',
-                        fontSize: '14px',
-                        color: 'var(--muted, #888)'
-                    }}>
+                    <p
+                        style={{
+                            marginTop: '8px',
+                            fontSize: '14px',
+                            color: 'var(--muted, #888)',
+                        }}
+                    >
                         Value: {inputValue || '(empty)'}
                     </p>
                 </div>
 
                 {/* Password Input */}
                 <div>
-                    <label style={{
-                        display: 'block',
-                        marginBottom: '10px',
-                        fontFamily: "'Press Start 2P', cursive",
-                        fontSize: '10px',
-                        color: 'var(--neon-pink)'
-                    }}>
+                    <label
+                        style={{
+                            display: 'block',
+                            marginBottom: '10px',
+                            fontFamily: "'Press Start 2P', cursive",
+                            fontSize: '10px',
+                            color: 'var(--neon-pink)',
+                        }}
+                    >
                         PASSWORD INPUT
                     </label>
                     <RetroInput
-                        type="password"
+                        type='password'
                         value={passwordValue}
                         onChange={(e) => setPasswordValue(e.target.value)}
-                        placeholder="Enter password..."
-                        glowColor="var(--neon-pink)"
+                        placeholder='Enter password...'
+                        glowColor='var(--neon-pink)'
                     />
                 </div>
 
                 {/* TextArea */}
                 <div>
-                    <label style={{
-                        display: 'block',
-                        marginBottom: '10px',
-                        fontFamily: "'Press Start 2P', cursive",
-                        fontSize: '10px',
-                        color: 'var(--neon-green)'
-                    }}>
+                    <label
+                        style={{
+                            display: 'block',
+                            marginBottom: '10px',
+                            fontFamily: "'Press Start 2P', cursive",
+                            fontSize: '10px',
+                            color: 'var(--neon-green)',
+                        }}
+                    >
                         TEXTAREA
                     </label>
                     <RetroTextArea
                         value={textAreaValue}
                         onChange={(e) => setTextAreaValue(e.target.value)}
-                        placeholder="Enter quest description..."
-                        glowColor="var(--neon-green)"
+                        placeholder='Enter quest description...'
+                        glowColor='var(--neon-green)'
                         rows={4}
                     />
-                    <p style={{
-                        marginTop: '8px',
-                        fontSize: '14px',
-                        color: 'var(--muted, #888)'
-                    }}>
+                    <p
+                        style={{
+                            marginTop: '8px',
+                            fontSize: '14px',
+                            color: 'var(--muted, #888)',
+                        }}
+                    >
                         Characters: {textAreaValue.length}
                     </p>
                 </div>
 
                 {/* Disabled State */}
                 <div>
-                    <label style={{
-                        display: 'block',
-                        marginBottom: '10px',
-                        fontFamily: "'Press Start 2P', cursive",
-                        fontSize: '10px',
-                        color: 'var(--muted)'
-                    }}>
+                    <label
+                        style={{
+                            display: 'block',
+                            marginBottom: '10px',
+                            fontFamily: "'Press Start 2P', cursive",
+                            fontSize: '10px',
+                            color: 'var(--muted)',
+                        }}
+                    >
                         DISABLED STATE
                     </label>
                     <RetroInput
-                        value="Cannot edit this"
+                        value='Cannot edit this'
                         disabled
-                        glowColor="var(--muted)"
+                        glowColor='var(--muted)'
                     />
                 </div>
 
                 {/* Different Colors */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '15px'
-                }}>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '15px',
+                    }}
+                >
                     <RetroInput
-                        placeholder="Cyan glow"
-                        glowColor="var(--neon-cyan)"
+                        placeholder='Cyan glow'
+                        glowColor='var(--neon-cyan)'
                     />
                     <RetroInput
-                        placeholder="Pink glow"
-                        glowColor="var(--neon-pink)"
+                        placeholder='Pink glow'
+                        glowColor='var(--neon-pink)'
                     />
                     <RetroInput
-                        placeholder="Green glow"
-                        glowColor="var(--neon-green)"
+                        placeholder='Green glow'
+                        glowColor='var(--neon-green)'
                     />
                     <RetroInput
-                        placeholder="Yellow glow"
-                        glowColor="var(--neon-yellow)"
+                        placeholder='Yellow glow'
+                        glowColor='var(--neon-yellow)'
                     />
                 </div>
             </div>

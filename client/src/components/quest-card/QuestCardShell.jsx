@@ -12,7 +12,7 @@ export const QuestCardShell = ({
     handleSelectQuest,
     isInteractiveTarget,
     children,
-    cardTokens
+    cardTokens,
 }) => {
     const questHandleProps = dragMeta?.handleProps || {};
 
@@ -55,11 +55,13 @@ export const QuestCardShell = ({
         <AnimatedQuestCard
             isNew={isNew}
             isCompleting={isCelebrating}
-            whileHover={!isDragging ? { scale: 1.015, transition: { duration: 0.2 } } : undefined}
-            whileTap={!isDragging ? { scale: 0.985 } : undefined}
+            whileHover={!isDragging && !dragMeta?.listIsDragging
+                ? { scale: 1.015, transition: { duration: 0.2 } }
+                : undefined}
+            whileTap={!isDragging && !dragMeta?.listIsDragging ? { scale: 0.985 } : undefined}
         >
             <div
-                role="button"
+                role='button'
                 tabIndex={0}
                 className={questClassName}
                 data-dragging={isDragging ? 'true' : undefined}
@@ -73,20 +75,22 @@ export const QuestCardShell = ({
                         handleSelectQuest(quest.id);
                     }
                 }}
-                // Spread drag handle props (contains onPointerDown)
-                {...questHandleProps}
+                {
+                    // Spread drag handle props (contains onPointerDown)
+                    ...questHandleProps
+                }
             >
-                <div className="quest-card-shell">
-                    <div className="quest-card-body">
+                <div className='quest-card-shell'>
+                    <div className='quest-card-body'>
                         {children}
                     </div>
                 </div>
                 {isCelebrating && (
-                    <div className="level-up-burst" aria-hidden="true">
-                        <div className="burst-ring" />
-                        <div className="burst-copy">
-                            <span className="burst-emoji">✦</span>
-                            <span className="burst-text">Level Up!</span>
+                    <div className='level-up-burst' aria-hidden='true'>
+                        <div className='burst-ring' />
+                        <div className='burst-copy'>
+                            <span className='burst-emoji'>✦</span>
+                            <span className='burst-text'>Level Up!</span>
                         </div>
                     </div>
                 )}
@@ -97,7 +101,7 @@ export const QuestCardShell = ({
 
 QuestCardShell.propTypes = {
     quest: PropTypes.shape({
-        id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired
+        id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     }).isRequired,
     questClassName: PropTypes.string.isRequired,
     isDragging: PropTypes.bool,
@@ -110,11 +114,11 @@ QuestCardShell.propTypes = {
     cardTokens: PropTypes.shape({
         depth: PropTypes.shape({
             resting: PropTypes.string,
-            active: PropTypes.string
+            active: PropTypes.string,
         }),
         transition: PropTypes.string,
-        focusRing: PropTypes.string
-    })
+        focusRing: PropTypes.string,
+    }),
 };
 
 QuestCardShell.defaultProps = {
@@ -122,7 +126,7 @@ QuestCardShell.defaultProps = {
     dragMeta: {},
     isNew: false,
     isCelebrating: false,
-    cardTokens: null
+    cardTokens: null,
 };
 
 export default QuestCardShell;

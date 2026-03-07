@@ -1,12 +1,17 @@
 import type { JsonSchema } from './zodToJsonSchema.js';
-import { SchemaRegistry, convert } from './zodToJsonSchema.js';
+import { convert, SchemaRegistry } from './zodToJsonSchema.js';
 
-import { emailValidationRequestSchema, loginUserSchema, profileUpdateSchema, registerUserSchema } from '../validation/schemas/auth.js';
+import {
+    emailValidationRequestSchema,
+    loginUserSchema,
+    profileUpdateSchema,
+    registerUserSchema,
+} from '../validation/schemas/auth.js';
 import {
     campaignIdParamsSchema,
     createCampaignSchema,
     listCampaignsQuerySchema,
-    updateCampaignSchema
+    updateCampaignSchema,
 } from '../validation/schemas/campaigns.js';
 import { seedTasksSchema } from '../validation/schemas/debug.js';
 import { grantXpSchema } from '../validation/schemas/rpg.js';
@@ -16,7 +21,7 @@ import {
     updateOrderSchema,
     updateStatusSchema,
     updateSubtaskSchema,
-    updateTaskSchema
+    updateTaskSchema,
 } from '../validation/schemas/tasks.js';
 import {
     authSuccessResponseSchema,
@@ -37,7 +42,7 @@ import {
     taskResponseSchema,
     taskWithProgressSchema,
     usernameAvailabilitySchema,
-    xpGrantResponseSchema
+    xpGrantResponseSchema,
 } from './schemas.js';
 
 function applyNullable(target: JsonSchema, nullable: boolean): JsonSchema {
@@ -62,9 +67,18 @@ export function buildOpenApiDocument() {
     const publicUserRef = registry.register('PublicUser', publicUserSchema);
     const publicUserRpgRef = registry.register('PublicUserRpgState', publicUserRpgStateSchema);
     const authResponseRef = registry.register('AuthSuccessResponse', authSuccessResponseSchema);
-    const currentUserResponseRef = registry.register('CurrentUserResponse', currentUserResponseSchema);
-    const usernameAvailabilityRef = registry.register('UsernameAvailabilityResponse', usernameAvailabilitySchema);
-    const emailValidationResponseRef = registry.register('EmailValidationResponse', emailValidationResponseSchema);
+    const currentUserResponseRef = registry.register(
+        'CurrentUserResponse',
+        currentUserResponseSchema,
+    );
+    const usernameAvailabilityRef = registry.register(
+        'UsernameAvailabilityResponse',
+        usernameAvailabilitySchema,
+    );
+    const emailValidationResponseRef = registry.register(
+        'EmailValidationResponse',
+        emailValidationResponseSchema,
+    );
     const taskRef = registry.register('Task', taskResponseSchema);
     const taskWithProgressRef = registry.register('TaskWithProgress', taskWithProgressSchema);
     const taskListRef = registry.register('TaskListResponse', taskListResponseSchema);
@@ -72,24 +86,39 @@ export function buildOpenApiDocument() {
     const taskHistoryRef = registry.register('TaskHistoryResponse', taskHistoryResponseSchema);
     const campaignRef = registry.register('Campaign', campaignSchema);
     const campaignListRef = registry.register('CampaignListResponse', campaignListResponseSchema);
-    const campaignDetailsRef = registry.register('CampaignDetailsResponse', campaignDetailsResponseSchema);
+    const campaignDetailsRef = registry.register(
+        'CampaignDetailsResponse',
+        campaignDetailsResponseSchema,
+    );
     const seedTasksResponseRef = registry.register('SeedTasksResponse', seedTasksResponseSchema);
     const clearTasksResponseRef = registry.register('ClearTasksResponse', clearTasksResponseSchema);
     const xpGrantResponseRef = registry.register('XpGrantResponse', xpGrantResponseSchema);
-    const playerSnapshotRef = registry.register('PlayerSnapshotResponse', playerSnapshotResponseSchema);
+    const playerSnapshotRef = registry.register(
+        'PlayerSnapshotResponse',
+        playerSnapshotResponseSchema,
+    );
 
     const registerUserRequestRef = registry.register('RegisterUserRequest', registerUserSchema);
     const loginRequestRef = registry.register('LoginRequest', loginUserSchema);
     const profileUpdateRequestRef = registry.register('ProfileUpdateRequest', profileUpdateSchema);
-    const emailValidationRequestRef = registry.register('EmailValidationRequest', emailValidationRequestSchema);
+    const emailValidationRequestRef = registry.register(
+        'EmailValidationRequest',
+        emailValidationRequestSchema,
+    );
     const createTaskRequestRef = registry.register('CreateTaskRequest', createTaskSchema);
     const createSubtaskRequestRef = registry.register('CreateSubtaskRequest', createSubtaskSchema);
     const updateStatusRequestRef = registry.register('UpdateStatusRequest', updateStatusSchema);
     const updateTaskRequestRef = registry.register('UpdateTaskRequest', updateTaskSchema);
     const updateSubtaskRequestRef = registry.register('UpdateSubtaskRequest', updateSubtaskSchema);
     const updateOrderRequestRef = registry.register('UpdateOrderRequest', updateOrderSchema);
-    const createCampaignRequestRef = registry.register('CreateCampaignRequest', createCampaignSchema);
-    const updateCampaignRequestRef = registry.register('UpdateCampaignRequest', updateCampaignSchema);
+    const createCampaignRequestRef = registry.register(
+        'CreateCampaignRequest',
+        createCampaignSchema,
+    );
+    const updateCampaignRequestRef = registry.register(
+        'UpdateCampaignRequest',
+        updateCampaignSchema,
+    );
     const grantXpRequestRef = registry.register('GrantXpRequest', grantXpSchema);
     const seedTasksRequestRef = registry.register('SeedTasksRequest', seedTasksSchema);
 
@@ -113,24 +142,24 @@ export function buildOpenApiDocument() {
     const rateLimitHeaders = {
         'X-RateLimit-Limit': {
             schema: buildIntegerParamSchema({ minimum: 0 }),
-            description: 'Maximum number of allowed requests within the window.'
+            description: 'Maximum number of allowed requests within the window.',
         },
         'X-RateLimit-Remaining': {
             schema: buildIntegerParamSchema({ minimum: 0 }),
-            description: 'Remaining attempts available in the current window.'
+            description: 'Remaining attempts available in the current window.',
         },
         'Retry-After': {
             schema: buildIntegerParamSchema({ minimum: 1 }),
-            description: 'Seconds until the limit resets (only sent when rate limited).'
-        }
+            description: 'Seconds until the limit resets (only sent when rate limited).',
+        },
     };
 
     const authSecurity = [{ bearerAuth: [] }];
 
     const jsonContent = (schema: JsonSchema) => ({
         'application/json': {
-            schema
-        }
+            schema,
+        },
     });
 
     const doc = {
@@ -139,30 +168,30 @@ export function buildOpenApiDocument() {
             title: 'Task Tracker API',
             version: '1.0.0',
             description:
-                'OpenAPI definition for the Task Tracker backend. Schemas are derived from the runtime Zod validators to stay in sync with request and response types.'
+                'OpenAPI definition for the Task Tracker backend. Schemas are derived from the runtime Zod validators to stay in sync with request and response types.',
         },
         servers: [
             {
                 url: 'http://localhost:3001',
-                description: 'Local development'
-            }
+                description: 'Local development',
+            },
         ],
         tags: [
             { name: 'Users' },
             { name: 'Tasks' },
             { name: 'Campaigns' },
             { name: 'RPG' },
-            { name: 'Debug' }
+            { name: 'Debug' },
         ],
         components: {
             securitySchemes: {
                 bearerAuth: {
                     type: 'http',
                     scheme: 'bearer',
-                    bearerFormat: 'JWT'
-                }
+                    bearerFormat: 'JWT',
+                },
             },
-            schemas: registry.components
+            schemas: registry.components,
         },
         paths: {
             '/api/users/register': {
@@ -171,25 +200,25 @@ export function buildOpenApiDocument() {
                     summary: 'Register a new user',
                     requestBody: {
                         required: true,
-                        content: jsonContent(registerUserRequestRef)
+                        content: jsonContent(registerUserRequestRef),
                     },
                     responses: {
                         '201': {
                             description: 'User registered successfully.',
                             headers: rateLimitHeaders,
-                            content: jsonContent(authResponseRef)
+                            content: jsonContent(authResponseRef),
                         },
                         '400': {
                             description: 'Invalid registration payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '429': {
                             description: 'Rate limit exceeded.',
                             headers: rateLimitHeaders,
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/users/login': {
                 post: {
@@ -197,23 +226,23 @@ export function buildOpenApiDocument() {
                     summary: 'Authenticate a user session',
                     requestBody: {
                         required: true,
-                        content: jsonContent(loginRequestRef)
+                        content: jsonContent(loginRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Authentication succeeded.',
-                            content: jsonContent(authResponseRef)
+                            content: jsonContent(authResponseRef),
                         },
                         '400': {
                             description: 'Invalid credentials payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication failed.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/users/validate-email': {
                 post: {
@@ -221,19 +250,19 @@ export function buildOpenApiDocument() {
                     summary: 'Validate email address formatting',
                     requestBody: {
                         required: true,
-                        content: jsonContent(emailValidationRequestRef)
+                        content: jsonContent(emailValidationRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Validation result.',
-                            content: jsonContent(emailValidationResponseRef)
+                            content: jsonContent(emailValidationResponseRef),
                         },
                         '400': {
                             description: 'Malformed request body.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/users/check-username/{username}': {
                 get: {
@@ -244,20 +273,20 @@ export function buildOpenApiDocument() {
                             name: 'username',
                             in: 'path',
                             required: true,
-                            schema: { type: 'string', minLength: 1 }
-                        }
+                            schema: { type: 'string', minLength: 1 },
+                        },
                     ],
                     responses: {
                         '200': {
                             description: 'Availability result.',
-                            content: jsonContent(usernameAvailabilityRef)
+                            content: jsonContent(usernameAvailabilityRef),
                         },
                         '400': {
                             description: 'Missing or invalid username.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/users/me': {
                 get: {
@@ -267,17 +296,17 @@ export function buildOpenApiDocument() {
                     responses: {
                         '200': {
                             description: 'Current user details.',
-                            content: jsonContent(currentUserResponseRef)
+                            content: jsonContent(currentUserResponseRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'User not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
+                            content: jsonContent(errorRef),
+                        },
+                    },
                 },
                 put: {
                     tags: ['Users'],
@@ -285,27 +314,27 @@ export function buildOpenApiDocument() {
                     security: authSecurity,
                     requestBody: {
                         required: true,
-                        content: jsonContent(profileUpdateRequestRef)
+                        content: jsonContent(profileUpdateRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Updated profile.',
-                            content: jsonContent(currentUserResponseRef)
+                            content: jsonContent(currentUserResponseRef),
                         },
                         '400': {
                             description: 'Validation failed.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'User not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks': {
                 get: {
@@ -320,26 +349,27 @@ export function buildOpenApiDocument() {
                             schema: {
                                 oneOf: [
                                     buildIntegerParamSchema({ minimum: 1 }),
-                                    { type: 'string', enum: ['none', 'null'] }
-                                ]
+                                    { type: 'string', enum: ['none', 'null'] },
+                                ],
                             },
-                            description: 'Filter tasks by campaign id or "null"/"none" for unassigned tasks.'
-                        }
+                            description:
+                                'Filter tasks by campaign id or "null"/"none" for unassigned tasks.',
+                        },
                     ],
                     responses: {
                         '200': {
                             description: 'Task list response.',
-                            content: jsonContent(taskListRef)
+                            content: jsonContent(taskListRef),
                         },
                         '400': {
                             description: 'Invalid query parameter.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
+                            content: jsonContent(errorRef),
+                        },
+                    },
                 },
                 post: {
                     tags: ['Tasks'],
@@ -347,27 +377,27 @@ export function buildOpenApiDocument() {
                     security: authSecurity,
                     requestBody: {
                         required: true,
-                        content: jsonContent(createTaskRequestRef)
+                        content: jsonContent(createTaskRequestRef),
                     },
                     responses: {
                         '201': {
                             description: 'Task created.',
-                            content: jsonContent(taskRef)
+                            content: jsonContent(taskRef),
                         },
                         '400': {
                             description: 'Invalid task payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Referenced campaign not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks/{id}': {
                 put: {
@@ -379,31 +409,31 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     requestBody: {
                         required: true,
-                        content: jsonContent(updateTaskRequestRef)
+                        content: jsonContent(updateTaskRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Updated task.',
-                            content: jsonContent(taskRef)
+                            content: jsonContent(taskRef),
                         },
                         '400': {
                             description: 'Validation failed.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
+                            content: jsonContent(errorRef),
+                        },
+                    },
                 },
                 delete: {
                     tags: ['Tasks'],
@@ -414,27 +444,27 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     responses: {
                         '204': {
-                            description: 'Task deleted.'
+                            description: 'Task deleted.',
                         },
                         '400': {
                             description: 'Invalid task id.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks/{id}/subtasks': {
                 post: {
@@ -446,32 +476,32 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     requestBody: {
                         required: true,
-                        content: jsonContent(createSubtaskRequestRef)
+                        content: jsonContent(createSubtaskRequestRef),
                     },
                     responses: {
                         '201': {
                             description: 'Subtask created.',
-                            content: jsonContent(taskRef)
+                            content: jsonContent(taskRef),
                         },
                         '400': {
                             description: 'Invalid subtask payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks/{id}/status': {
                 patch: {
@@ -483,32 +513,32 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     requestBody: {
                         required: true,
-                        content: jsonContent(updateStatusRequestRef)
+                        content: jsonContent(updateStatusRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Task updated.',
-                            content: jsonContent(taskWithProgressRef)
+                            content: jsonContent(taskWithProgressRef),
                         },
                         '400': {
                             description: 'Invalid status payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks/{id}/history': {
                 get: {
@@ -520,28 +550,28 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     responses: {
                         '200': {
                             description: 'Status history.',
-                            content: jsonContent(taskHistoryRef)
+                            content: jsonContent(taskHistoryRef),
                         },
                         '400': {
                             description: 'Invalid task id.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks/{id}/subtasks/{subtask_id}': {
                 put: {
@@ -553,37 +583,37 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
+                            schema: idParamSchema,
                         },
                         {
                             name: 'subtask_id',
                             in: 'path',
                             required: true,
-                            schema: subtaskIdSchema
-                        }
+                            schema: subtaskIdSchema,
+                        },
                     ],
                     requestBody: {
                         required: true,
-                        content: jsonContent(updateSubtaskRequestRef)
+                        content: jsonContent(updateSubtaskRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Updated task response.',
-                            content: jsonContent(taskRef)
+                            content: jsonContent(taskRef),
                         },
                         '400': {
                             description: 'Validation failed.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task or subtask not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
+                            content: jsonContent(errorRef),
+                        },
+                    },
                 },
                 delete: {
                     tags: ['Tasks'],
@@ -594,33 +624,33 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
+                            schema: idParamSchema,
                         },
                         {
                             name: 'subtask_id',
                             in: 'path',
                             required: true,
-                            schema: subtaskIdSchema
-                        }
+                            schema: subtaskIdSchema,
+                        },
                     ],
                     responses: {
                         '204': {
-                            description: 'Subtask deleted.'
+                            description: 'Subtask deleted.',
                         },
                         '400': {
                             description: 'Invalid identifier.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task or subtask not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks/{id}/subtasks/{subtask_id}/status': {
                 patch: {
@@ -632,38 +662,38 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
+                            schema: idParamSchema,
                         },
                         {
                             name: 'subtask_id',
                             in: 'path',
                             required: true,
-                            schema: subtaskIdSchema
-                        }
+                            schema: subtaskIdSchema,
+                        },
                     ],
                     requestBody: {
                         required: true,
-                        content: jsonContent(updateStatusRequestRef)
+                        content: jsonContent(updateStatusRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Updated task including recent XP changes.',
-                            content: jsonContent(taskWithProgressRef)
+                            content: jsonContent(taskWithProgressRef),
                         },
                         '400': {
                             description: 'Invalid payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Task or subtask not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/tasks/order': {
                 put: {
@@ -672,23 +702,23 @@ export function buildOpenApiDocument() {
                     security: authSecurity,
                     requestBody: {
                         required: true,
-                        content: jsonContent(updateOrderRequestRef)
+                        content: jsonContent(updateOrderRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Sorted task list.',
-                            content: jsonContent(taskOrderRef)
+                            content: jsonContent(taskOrderRef),
                         },
                         '400': {
                             description: 'Invalid request payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/campaigns': {
                 get: {
@@ -701,23 +731,24 @@ export function buildOpenApiDocument() {
                             in: 'query',
                             required: false,
                             schema: includeArchivedSchema,
-                            description: 'Include archived campaigns when set to "true". Accepts either a single string or repeated query parameters.'
-                        }
+                            description:
+                                'Include archived campaigns when set to "true". Accepts either a single string or repeated query parameters.',
+                        },
                     ],
                     responses: {
                         '200': {
                             description: 'Campaign list.',
-                            content: jsonContent(campaignListRef)
+                            content: jsonContent(campaignListRef),
                         },
                         '400': {
                             description: 'Invalid query parameter.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
+                            content: jsonContent(errorRef),
+                        },
+                    },
                 },
                 post: {
                     tags: ['Campaigns'],
@@ -725,23 +756,23 @@ export function buildOpenApiDocument() {
                     security: authSecurity,
                     requestBody: {
                         required: true,
-                        content: jsonContent(createCampaignRequestRef)
+                        content: jsonContent(createCampaignRequestRef),
                     },
                     responses: {
                         '201': {
                             description: 'Campaign created.',
-                            content: jsonContent(campaignRef)
+                            content: jsonContent(campaignRef),
                         },
                         '400': {
                             description: 'Invalid payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/campaigns/{id}': {
                 get: {
@@ -753,27 +784,27 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     responses: {
                         '200': {
                             description: 'Campaign details.',
-                            content: jsonContent(campaignDetailsRef)
+                            content: jsonContent(campaignDetailsRef),
                         },
                         '400': {
                             description: 'Invalid campaign id.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Campaign not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
+                            content: jsonContent(errorRef),
+                        },
+                    },
                 },
                 patch: {
                     tags: ['Campaigns'],
@@ -784,31 +815,31 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     requestBody: {
                         required: true,
-                        content: jsonContent(updateCampaignRequestRef)
+                        content: jsonContent(updateCampaignRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'Updated campaign.',
-                            content: jsonContent(campaignRef)
+                            content: jsonContent(campaignRef),
                         },
                         '400': {
                             description: 'Invalid payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Campaign not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
+                            content: jsonContent(errorRef),
+                        },
+                    },
                 },
                 delete: {
                     tags: ['Campaigns'],
@@ -819,27 +850,27 @@ export function buildOpenApiDocument() {
                             name: 'id',
                             in: 'path',
                             required: true,
-                            schema: idParamSchema
-                        }
+                            schema: idParamSchema,
+                        },
                     ],
                     responses: {
                         '204': {
-                            description: 'Campaign removed.'
+                            description: 'Campaign removed.',
                         },
                         '400': {
                             description: 'Invalid campaign id.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'Campaign not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/rpg/daily-reward': {
                 post: {
@@ -849,22 +880,22 @@ export function buildOpenApiDocument() {
                     responses: {
                         '200': {
                             description: 'Reward granted.',
-                            content: jsonContent(xpGrantResponseRef)
+                            content: jsonContent(xpGrantResponseRef),
                         },
                         '400': {
                             description: 'Reward already claimed or unavailable.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'User not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/rpg/grant-xp': {
                 post: {
@@ -873,27 +904,27 @@ export function buildOpenApiDocument() {
                     security: authSecurity,
                     requestBody: {
                         required: true,
-                        content: jsonContent(grantXpRequestRef)
+                        content: jsonContent(grantXpRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'XP adjusted.',
-                            content: jsonContent(xpGrantResponseRef)
+                            content: jsonContent(xpGrantResponseRef),
                         },
                         '400': {
                             description: 'Invalid adjustment payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'User not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/rpg/reset': {
                 post: {
@@ -903,18 +934,18 @@ export function buildOpenApiDocument() {
                     responses: {
                         '200': {
                             description: 'RPG state reset.',
-                            content: jsonContent(playerSnapshotRef)
+                            content: jsonContent(playerSnapshotRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'User not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/debug/clear-tasks': {
                 post: {
@@ -924,14 +955,14 @@ export function buildOpenApiDocument() {
                     responses: {
                         '200': {
                             description: 'Tasks removed.',
-                            content: jsonContent(clearTasksResponseRef)
+                            content: jsonContent(clearTasksResponseRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/debug/seed-tasks': {
                 post: {
@@ -940,23 +971,23 @@ export function buildOpenApiDocument() {
                     security: authSecurity,
                     requestBody: {
                         required: false,
-                        content: jsonContent(applyNullable({ ...seedTasksRequestRef }, false))
+                        content: jsonContent(applyNullable({ ...seedTasksRequestRef }, false)),
                     },
                     responses: {
                         '200': {
                             description: 'Demo tasks created.',
-                            content: jsonContent(seedTasksResponseRef)
+                            content: jsonContent(seedTasksResponseRef),
                         },
                         '400': {
                             description: 'Invalid seed payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/debug/grant-xp': {
                 post: {
@@ -965,27 +996,27 @@ export function buildOpenApiDocument() {
                     security: authSecurity,
                     requestBody: {
                         required: true,
-                        content: jsonContent(grantXpRequestRef)
+                        content: jsonContent(grantXpRequestRef),
                     },
                     responses: {
                         '200': {
                             description: 'XP granted.',
-                            content: jsonContent(xpGrantResponseRef)
+                            content: jsonContent(xpGrantResponseRef),
                         },
                         '400': {
                             description: 'Invalid payload.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'User not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
             },
             '/api/debug/reset-rpg': {
                 post: {
@@ -995,20 +1026,20 @@ export function buildOpenApiDocument() {
                     responses: {
                         '200': {
                             description: 'RPG state reset.',
-                            content: jsonContent(playerSnapshotRef)
+                            content: jsonContent(playerSnapshotRef),
                         },
                         '401': {
                             description: 'Authentication required.',
-                            content: jsonContent(errorRef)
+                            content: jsonContent(errorRef),
                         },
                         '404': {
                             description: 'User not found.',
-                            content: jsonContent(errorRef)
-                        }
-                    }
-                }
-            }
-        }
+                            content: jsonContent(errorRef),
+                        },
+                    },
+                },
+            },
+        },
     };
 
     return doc;

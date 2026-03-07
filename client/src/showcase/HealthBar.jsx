@@ -14,7 +14,7 @@ export const HealthBar = ({
     style = 'neon', // neon, pixel, gradient, classic
     height = 32,
     animated = true,
-    color = 'auto' // auto (dynamic based on percentage), green, red, cyan, yellow, purple
+    color = 'auto', // auto (dynamic based on percentage), green, red, cyan, yellow, purple
 }) => {
     const percentage = Math.round((current / max) * 100);
 
@@ -31,28 +31,28 @@ export const HealthBar = ({
         green: {
             primary: 'var(--neon-green, #00ff00)',
             shadow: 'rgba(0, 255, 0, 0.3)',
-            glow: 'rgba(0, 255, 0, 0.15)'
+            glow: 'rgba(0, 255, 0, 0.15)',
         },
         red: {
             primary: 'var(--neon-red, #ff0040)',
             shadow: 'rgba(255, 0, 64, 0.3)',
-            glow: 'rgba(255, 0, 64, 0.15)'
+            glow: 'rgba(255, 0, 64, 0.15)',
         },
         cyan: {
             primary: 'var(--neon-cyan, #00ffff)',
             shadow: 'rgba(0, 255, 255, 0.3)',
-            glow: 'rgba(0, 255, 255, 0.15)'
+            glow: 'rgba(0, 255, 255, 0.15)',
         },
         yellow: {
             primary: 'var(--neon-yellow, #ffff00)',
             shadow: 'rgba(255, 255, 0, 0.3)',
-            glow: 'rgba(255, 255, 0, 0.15)'
+            glow: 'rgba(255, 255, 0, 0.15)',
         },
         purple: {
             primary: 'var(--neon-purple, #9400d3)',
             shadow: 'rgba(148, 0, 211, 0.3)',
-            glow: 'rgba(148, 0, 211, 0.15)'
-        }
+            glow: 'rgba(148, 0, 211, 0.15)',
+        },
     };
 
     const colors = colorMap[actualColor];
@@ -69,7 +69,7 @@ export const HealthBar = ({
                         transparent 10px
                     )`,
                     border: `2px solid ${colors.primary}`,
-                    boxShadow: `0 0 5px ${colors.shadow}`
+                    boxShadow: `0 0 5px ${colors.shadow}`,
                 };
             case 'gradient':
                 return {
@@ -78,13 +78,13 @@ export const HealthBar = ({
                         var(--neon-cyan, #00ffff)
                     )`,
                     border: `1px solid ${colors.primary}`,
-                    boxShadow: `0 0 8px ${colors.shadow}, inset 0 0 5px ${colors.glow}`
+                    boxShadow: `0 0 8px ${colors.shadow}, inset 0 0 5px ${colors.glow}`,
                 };
             case 'classic':
                 return {
                     background: colors.primary,
                     border: 'none',
-                    boxShadow: 'none'
+                    boxShadow: 'none',
                 };
             case 'neon':
             default:
@@ -95,7 +95,7 @@ export const HealthBar = ({
                         0 0 8px ${colors.shadow},
                         0 0 12px ${colors.glow},
                         inset 0 0 10px rgba(255, 255, 255, 0.2)
-                    `
+                    `,
                 };
         }
     };
@@ -103,22 +103,24 @@ export const HealthBar = ({
     const barStyle = getBarStyle();
 
     return (
-        <div className="health-bar-container" style={{ width: '100%' }}>
-            <div style={{
-                position: 'relative',
-                width: '100%',
-                height: `${height}px`,
-                background: 'var(--bg-dark, #0a0a0f)',
-                border: '2px solid var(--dark-gray, #444)',
-                boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.5)',
-                overflow: 'hidden'
-            }}>
+        <div className='health-bar-container' style={{ width: '100%' }}>
+            <div
+                style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: `${height}px`,
+                    background: 'var(--bg-dark, #0a0a0f)',
+                    border: '2px solid var(--dark-gray, #444)',
+                    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.5)',
+                    overflow: 'hidden',
+                }}
+            >
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${percentage}%` }}
                     transition={{
                         duration: animated ? 0.8 : 0,
-                        ease: 'easeOut'
+                        ease: 'easeOut',
                     }}
                     style={{
                         height: '100%',
@@ -127,19 +129,19 @@ export const HealthBar = ({
                         justifyContent: 'space-between',
                         padding: '0 12px',
                         position: 'relative',
-                        ...barStyle
+                        ...barStyle,
                     }}
                 >
                     {/* Animated flowing pattern */}
                     {animated && style === 'neon' && (
                         <motion.div
                             animate={{
-                                backgroundPosition: ['0% 0%', '200% 0%']
+                                backgroundPosition: ['0% 0%', '200% 0%'],
                             }}
                             transition={{
                                 duration: 2,
                                 repeat: Infinity,
-                                ease: 'linear'
+                                ease: 'linear',
                             }}
                             style={{
                                 position: 'absolute',
@@ -154,7 +156,7 @@ export const HealthBar = ({
                                     rgba(255, 255, 255, 0.1) 10px,
                                     rgba(255, 255, 255, 0.1) 20px
                                 )`,
-                                backgroundSize: '200% 100%'
+                                backgroundSize: '200% 100%',
                             }}
                         />
                     )}
@@ -169,7 +171,7 @@ export const HealthBar = ({
                                 textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)',
                                 position: 'relative',
                                 zIndex: 1,
-                                fontWeight: 'bold'
+                                fontWeight: 'bold',
                             }}
                         >
                             {percentage}%
@@ -186,37 +188,51 @@ export const HealthBarShowcase = () => {
     const [progress, setProgress] = React.useState(65);
 
     return (
-        <div style={{ 
-            padding: '40px', 
-            background: 'var(--bg-secondary, #1a1a2e)',
-            minHeight: '500px'
-        }}>
-            <h3 style={{ 
-                fontFamily: "'Press Start 2P', cursive",
-                color: 'var(--neon-cyan)',
-                fontSize: '14px',
-                marginBottom: '30px',
-                textAlign: 'center'
-            }}>
+        <div
+            style={{
+                padding: '40px',
+                background: 'var(--bg-secondary, #1a1a2e)',
+                minHeight: '500px',
+            }}
+        >
+            <h3
+                style={{
+                    fontFamily: "'Press Start 2P', cursive",
+                    color: 'var(--neon-cyan)',
+                    fontSize: '14px',
+                    marginBottom: '30px',
+                    textAlign: 'center',
+                }}
+            >
                 HEALTH / PROGRESS BARS
             </h3>
 
-            <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            <div
+                style={{
+                    maxWidth: '600px',
+                    margin: '0 auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '30px',
+                }}
+            >
                 {/* Control slider */}
                 <div style={{ textAlign: 'center' }}>
-                    <label style={{ 
-                        color: 'white',
-                        fontFamily: 'VT323, monospace',
-                        fontSize: '18px',
-                        display: 'block',
-                        marginBottom: '10px'
-                    }}>
+                    <label
+                        style={{
+                            color: 'white',
+                            fontFamily: 'VT323, monospace',
+                            fontSize: '18px',
+                            display: 'block',
+                            marginBottom: '10px',
+                        }}
+                    >
                         Adjust Progress: {progress}%
                     </label>
-                    <input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
+                    <input
+                        type='range'
+                        min='0'
+                        max='100'
                         value={progress}
                         onChange={(e) => setProgress(parseInt(e.target.value))}
                         style={{ width: '100%' }}
@@ -224,55 +240,55 @@ export const HealthBarShowcase = () => {
                 </div>
 
                 {/* Different styles */}
-                <HealthBar 
-                    current={progress} 
-                    max={100} 
-                    label="NEON STYLE"
-                    style="neon"
-                    color="green"
+                <HealthBar
+                    current={progress}
+                    max={100}
+                    label='NEON STYLE'
+                    style='neon'
+                    color='green'
                 />
 
-                <HealthBar 
-                    current={progress} 
-                    max={100} 
-                    label="PIXEL STYLE"
-                    style="pixel"
-                    color="cyan"
+                <HealthBar
+                    current={progress}
+                    max={100}
+                    label='PIXEL STYLE'
+                    style='pixel'
+                    color='cyan'
                 />
 
-                <HealthBar 
-                    current={progress} 
-                    max={100} 
-                    label="GRADIENT STYLE"
-                    style="gradient"
-                    color="purple"
+                <HealthBar
+                    current={progress}
+                    max={100}
+                    label='GRADIENT STYLE'
+                    style='gradient'
+                    color='purple'
                 />
 
-                <HealthBar 
-                    current={progress} 
-                    max={100} 
-                    label="CLASSIC STYLE"
-                    style="classic"
-                    color="yellow"
+                <HealthBar
+                    current={progress}
+                    max={100}
+                    label='CLASSIC STYLE'
+                    style='classic'
+                    color='yellow'
                     showPercentage={false}
                 />
 
                 {/* Different sizes */}
-                <HealthBar 
-                    current={progress} 
-                    max={100} 
-                    label="SMALL (24px)"
+                <HealthBar
+                    current={progress}
+                    max={100}
+                    label='SMALL (24px)'
                     height={24}
-                    color="red"
+                    color='red'
                 />
 
-                <HealthBar 
-                    current={progress} 
-                    max={100} 
-                    label="LARGE (48px)"
+                <HealthBar
+                    current={progress}
+                    max={100}
+                    label='LARGE (48px)'
                     height={48}
-                    color="cyan"
-                    emoji="⚡"
+                    color='cyan'
+                    emoji='⚡'
                 />
             </div>
         </div>

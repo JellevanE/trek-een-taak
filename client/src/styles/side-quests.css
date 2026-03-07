@@ -1,7 +1,7 @@
 /* SIDE-QUESTS.CSS - Side quest (subtask) specific styles */
 
 .quest ul {
-    padding-left: var(--side-quest-gap)
+    padding-left: var(--side-quest-gap);
 }
 
 .quest li,
@@ -50,7 +50,7 @@
     margin-left: auto;
 }
 
-.task-row-actions>* {
+.task-row-actions > * {
     flex: 0 0 auto;
     white-space: nowrap;
     flex-shrink: 0;
@@ -59,11 +59,11 @@
 .subtask-desc {
     font-family: 'Courier New', monospace;
     color: #e6f7ff;
-    font-size: 14px
+    font-size: 14px;
 }
 
 .subtask-desc.small {
-    font-size: 12px
+    font-size: 12px;
 }
 
 .side-quest-desc {
@@ -74,18 +74,18 @@
 }
 
 .side-quest-desc.small {
-    font-size: 12px
+    font-size: 12px;
 }
 
 .task .subtask-desc.started,
 .quest .side-quest-desc.started {
     font-weight: 700;
-    color: #fff
+    color: #fff;
 }
 
 .task .subtask-desc.in-progress,
 .quest .side-quest-desc.in-progress {
-    color: #bfe6ff
+    color: #bfe6ff;
 }
 
 .side-quest-scroll .completed .task-row {
@@ -130,7 +130,7 @@
     overflow: hidden;
 }
 
-.side-quest-scroll[data-scrollable="true"] {
+.side-quest-scroll[data-scrollable='true'] {
     overflow-y: auto;
     padding-right: 4px;
 }

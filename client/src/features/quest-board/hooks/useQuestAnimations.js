@@ -1,10 +1,10 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import {
     findSideQuestById,
     getQuestStatus,
     getSideQuestStatus,
-    idsMatch
+    idsMatch,
 } from '../../../hooks/questHelpers.js';
 import { SOUND_EVENT_KEYS } from '../../../theme';
 import { useQuestBoardStore } from '../../../store/questBoardStore.js';
@@ -21,7 +21,7 @@ export const useQuestAnimations = ({
     ensureQuestExpanded,
     mutateTaskStatus,
     mutateSideQuestStatus,
-    playSound
+    playSound,
 }) => {
     const {
         pulsingQuests,
@@ -33,7 +33,7 @@ export const useQuestAnimations = ({
         celebratingQuests,
         setCelebratingQuests,
         spawnQuests,
-        setSpawnQuests
+        setSpawnQuests,
     } = useQuestBoardStore(useShallow((state) => ({
         pulsingQuests: state.pulsingQuests,
         setPulsingQuests: state.setPulsingQuests,
@@ -44,7 +44,7 @@ export const useQuestAnimations = ({
         celebratingQuests: state.celebratingQuests,
         setCelebratingQuests: state.setCelebratingQuests,
         spawnQuests: state.spawnQuests,
-        setSpawnQuests: state.setSpawnQuests
+        setSpawnQuests: state.setSpawnQuests,
     })));
     const completedCollapseTimersRef = useRef({});
 
@@ -85,7 +85,10 @@ export const useQuestAnimations = ({
             }
         };
         if (typeof window !== 'undefined') {
-            if (completedCollapseTimersRef.current && typeof completedCollapseTimersRef.current[questId] === 'number') {
+            if (
+                completedCollapseTimersRef.current &&
+                typeof completedCollapseTimersRef.current[questId] === 'number'
+            ) {
                 clearTimeout(completedCollapseTimersRef.current[questId]);
                 delete completedCollapseTimersRef.current[questId];
             }
@@ -104,29 +107,34 @@ export const useQuestAnimations = ({
     const setTaskStatusWithFx = useCallback(async (id, status, note) => {
         const updatedQuest = await mutateTaskStatus(id, status, note);
         if (!updatedQuest) return;
-        setQuests((prev) => prev.map((quest) => (
-            idsMatch(quest.id, updatedQuest.id) ? updatedQuest : quest
-        )));
+        setQuests((prev) =>
+            prev.map((quest) => (
+                idsMatch(quest.id, updatedQuest.id) ? updatedQuest : quest
+            ))
+        );
         setPulsingQuests((prev) => ({ ...prev, [id]: 'full' }));
-        setTimeout(() => setPulsingQuests((prev) => {
-            const copy = { ...prev };
-            delete copy[id];
-            return copy;
-        }), 700);
+        setTimeout(() =>
+            setPulsingQuests((prev) => {
+                const copy = { ...prev };
+                delete copy[id];
+                return copy;
+            }), 700);
         if (status === 'done') {
             playSound(SOUND_EVENT_KEYS.QUEST_COMPLETE);
             setGlowQuests((prev) => ({ ...prev, [id]: true }));
-            setTimeout(() => setGlowQuests((prev) => {
-                const copy = { ...prev };
-                delete copy[id];
-                return copy;
-            }), 1400);
+            setTimeout(() =>
+                setGlowQuests((prev) => {
+                    const copy = { ...prev };
+                    delete copy[id];
+                    return copy;
+                }), 1400);
             setCelebratingQuests((prev) => ({ ...prev, [id]: true }));
-            setTimeout(() => setCelebratingQuests((prev) => {
-                const copy = { ...prev };
-                delete copy[id];
-                return copy;
-            }), 1400);
+            setTimeout(() =>
+                setCelebratingQuests((prev) => {
+                    const copy = { ...prev };
+                    delete copy[id];
+                    return copy;
+                }), 1400);
             scheduleCollapseAndMove(id);
         }
     }, [
@@ -136,25 +144,28 @@ export const useQuestAnimations = ({
         setCelebratingQuests,
         setGlowQuests,
         setPulsingQuests,
-        setQuests
+        setQuests,
     ]);
 
     const setSideQuestStatusWithFx = useCallback(async (taskId, subTaskId, status, note) => {
         const normalized = await mutateSideQuestStatus(taskId, subTaskId, status, note);
         if (!normalized) return;
-        setQuests((prev) => prev.map((quest) => (
-            idsMatch(quest.id, normalized.id) ? normalized : quest
-        )));
+        setQuests((prev) =>
+            prev.map((quest) => (
+                idsMatch(quest.id, normalized.id) ? normalized : quest
+            ))
+        );
         const subStatus = getSideQuestStatus(findSideQuestById(normalized, subTaskId), normalized);
         setPulsingSideQuests((prev) => ({
             ...prev,
-            [`${taskId}:${subTaskId}`]: subStatus === 'done' ? 'full' : 'subtle'
+            [`${taskId}:${subTaskId}`]: subStatus === 'done' ? 'full' : 'subtle',
         }));
-        setTimeout(() => setPulsingSideQuests((prev) => {
-            const copy = { ...prev };
-            delete copy[`${taskId}:${subTaskId}`];
-            return copy;
-        }), 700);
+        setTimeout(() =>
+            setPulsingSideQuests((prev) => {
+                const copy = { ...prev };
+                delete copy[`${taskId}:${subTaskId}`];
+                return copy;
+            }), 700);
         if (subStatus === 'done') {
             playSound(SOUND_EVENT_KEYS.SIDE_QUEST_COMPLETE);
             ensureQuestExpanded(taskId);
@@ -162,7 +173,14 @@ export const useQuestAnimations = ({
         if (refreshLayout) {
             setTimeout(() => refreshLayout(), 50);
         }
-    }, [ensureQuestExpanded, mutateSideQuestStatus, playSound, refreshLayout, setPulsingSideQuests, setQuests]);
+    }, [
+        ensureQuestExpanded,
+        mutateSideQuestStatus,
+        playSound,
+        refreshLayout,
+        setPulsingSideQuests,
+        setQuests,
+    ]);
 
     return {
         pulsingQuests,
@@ -179,6 +197,6 @@ export const useQuestAnimations = ({
         triggerQuestSpawn,
         scheduleCollapseAndMove,
         setTaskStatus: setTaskStatusWithFx,
-        setSideQuestStatus: setSideQuestStatusWithFx
+        setSideQuestStatus: setSideQuestStatusWithFx,
     };
 };

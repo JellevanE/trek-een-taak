@@ -10,7 +10,7 @@ const baseProps = {
     questHasCampaign: false,
     hasCampaigns: false,
     isCollapsed: false,
-    onToggleCollapse: jest.fn()
+    onToggleCollapse: jest.fn(),
 };
 
 describe('QuestHeader', () => {
@@ -20,7 +20,7 @@ describe('QuestHeader', () => {
             <QuestHeader
                 {...baseProps}
                 description={longDescription}
-            />
+            />,
         );
 
         const heading = screen.getByTestId('quest-heading');
@@ -32,8 +32,8 @@ describe('QuestHeader', () => {
         render(
             <QuestHeader
                 {...baseProps}
-                description="   "
-            />
+                description='   '
+            />,
         );
 
         expect(screen.getByTestId('quest-heading')).toHaveTextContent('Untitled quest');
@@ -48,7 +48,7 @@ describe('QuestHeader', () => {
                 campaign={createCampaignFixture({ name: 'Emoji Ops' })}
                 questHasCampaign
                 hasCampaigns
-            />
+            />,
         );
 
         expect(screen.getByText(emojiDescription)).toBeInTheDocument();

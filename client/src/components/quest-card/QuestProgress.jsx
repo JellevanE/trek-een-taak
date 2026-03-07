@@ -6,11 +6,11 @@ export const QuestProgress = ({
     progress,
     progressColor,
     statusLabel,
-    dueDate
+    dueDate,
 }) => (
     <>
-        <div className="quest-progress-wrap">
-            <div className="quest-progress">
+        <div className='quest-progress-wrap'>
+            <div className='quest-progress'>
                 <AnimatedProgressBar
                     percent={progress}
                     color={progressColor(progress)}
@@ -19,22 +19,22 @@ export const QuestProgress = ({
                         'aria-valuemin': 0,
                         'aria-valuemax': 100,
                         'aria-valuenow': progress,
-                        title: `${progress}%`
+                        title: `${progress}%`,
                     }}
                 >
-                    <div className="tooltip">{progress}%</div>
+                    <div className='tooltip'>{progress}%</div>
                 </AnimatedProgressBar>
-                <div className="quest-progress-meta">{progress}%</div>
+                <div className='quest-progress-meta'>{progress}%</div>
             </div>
         </div>
-        <div className="quest-details">
+        <div className='quest-details'>
             <div>
-                <div className="muted small">Due:</div>
-                <div className="muted">{dueDate || '—'}</div>
+                <div className='muted small'>Due:</div>
+                <div className='muted'>{dueDate || '—'}</div>
             </div>
             <div>
-                <div className="muted small">Status:</div>
-                <div className="muted">{statusLabel}</div>
+                <div className='muted small'>Status:</div>
+                <div className='muted'>{statusLabel}</div>
             </div>
         </div>
     </>
@@ -44,11 +44,11 @@ QuestProgress.propTypes = {
     progress: PropTypes.number.isRequired,
     progressColor: PropTypes.func.isRequired,
     statusLabel: PropTypes.string.isRequired,
-    dueDate: PropTypes.string
+    dueDate: PropTypes.string,
 };
 
 QuestProgress.defaultProps = {
-    dueDate: null
+    dueDate: null,
 };
 
 export default QuestProgress;
