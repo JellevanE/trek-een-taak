@@ -8,6 +8,7 @@ import { useQuestBoard } from './hooks/useQuestBoard';
 import { useSoundFx } from './hooks/useSoundFx.js';
 import { useReducedMotionPreference } from './hooks/useReducedMotionPreference.js';
 import { AnimatedToast } from './components/AnimatedComponents';
+import PixelBackground from './components/PixelBackground';
 import QuestCard from './components/QuestCard';
 import { AddSideQuestForm, QuestEditForm } from './features/quest-board/components/forms';
 import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
@@ -466,6 +467,7 @@ function App() {
     if (!token) {
         return (
             <div className='App container'>
+                <PixelBackground />
                 <header className='App-header'>
                     <div
                         style={{
@@ -529,6 +531,7 @@ function App() {
 
     return (
         <div className='App container'>
+            <PixelBackground />
             {showShortcuts && (
                 <div
                     className='shortcuts-overlay'
