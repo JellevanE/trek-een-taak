@@ -22,7 +22,7 @@ const DEFAULTS = {
     fieldScale: 0.002,
     fieldStrength: 1.5,
     pixelSize: 9,
-    opacity: 0.2,
+    opacity: 0.1,
     trailFade: 0.5,
 };
 
@@ -144,8 +144,8 @@ export default function PixelBackground({ showControls = false }) {
         const ctx = canvas.getContext('2d');
 
         const resize = () => {
-            canvas.width = globalThis.innerWidth + OVERSCAN * 2;
-            canvas.height = globalThis.innerHeight + OVERSCAN * 2;
+            canvas.width = window.innerWidth + OVERSCAN * 2;
+            canvas.height = window.innerHeight + OVERSCAN * 2;
             particlesRef.current = makeParticles(
                 paramsRef.current.count,
                 canvas.width,
@@ -153,7 +153,7 @@ export default function PixelBackground({ showControls = false }) {
             );
         };
         resize();
-        addEventListener('resize', resize);
+        window.addEventListener('resize', resize);
 
         let time = 0;
 
@@ -213,7 +213,7 @@ export default function PixelBackground({ showControls = false }) {
 
         return () => {
             cancelAnimationFrame(animRef.current);
-            removeEventListener('resize', resize);
+            window.removeEventListener('resize', resize);
             document.removeEventListener('visibilitychange', onVisibility);
         };
     }, []);
@@ -230,7 +230,7 @@ export default function PixelBackground({ showControls = false }) {
 
     return (
         // pointerEvents none so the canvas never blocks clicks on app content
-        <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none', opacity: 0.35 }}>
             <canvas
                 ref={canvasRef}
                 style={{

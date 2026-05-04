@@ -469,7 +469,7 @@ function App() {
         return (
             <div className='App container'>
                 <PixelBackground showControls={showPixelBgSettings} />
-                <header className='App-header'>
+                <header className='App-header' style={{ position: 'relative', zIndex: 1 }}>
                     <div
                         style={{
                             display: 'flex',
@@ -532,7 +532,7 @@ function App() {
 
     return (
         <div className='App container'>
-            <PixelBackground />
+            <PixelBackground showControls={showPixelBgSettings} />
             {showShortcuts && (
                 <div
                     className='shortcuts-overlay'
@@ -662,28 +662,42 @@ function App() {
                             🎮 Showcase
                         </button>
                         <button
-                            className='btn-ghost'
+                            className='btn-ghost btn-icon'
                             onClick={() => setShowPixelBgSettings((prev) => !prev)}
+                            aria-label='Pixel background settings'
+                            aria-pressed={showPixelBgSettings}
+                            title='Pixel BG'
                         >
-                            Pixel BG
+                            ▦
                         </button>
                         <button
-                            className='btn-ghost'
+                            className='btn-ghost btn-icon'
                             onClick={() => setShowShortcuts((prev) => !prev)}
                             aria-haspopup='dialog'
                             aria-expanded={showShortcuts}
+                            aria-label='Keyboard shortcuts'
+                            title='Keyboard shortcuts'
                         >
-                            Keyboard Shortcuts
+                            ⌨
                         </button>
                         <button
-                            className='btn-ghost'
+                            className='btn-ghost btn-icon'
                             data-skip-shortcuts='true'
                             onClick={() => setShowDebugTools((s) => !s)}
+                            aria-label={showDebugTools ? 'Hide debug tools' : 'Show debug tools'}
+                            aria-pressed={showDebugTools}
+                            title={showDebugTools ? 'Hide debug tools' : 'Debug tools'}
                         >
-                            {showDebugTools ? 'Hide Debug' : 'Debug Tools'}
+                            ⚙
                         </button>
-                        <button className='btn-ghost' onClick={() => setShowProfile((s) => !s)}>
-                            Profile
+                        <button
+                            className='btn-ghost btn-icon'
+                            onClick={() => setShowProfile((s) => !s)}
+                            aria-label='Profile'
+                            aria-pressed={showProfile}
+                            title='Profile'
+                        >
+                            ◉
                         </button>
                     </div>
                 </div>

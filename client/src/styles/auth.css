@@ -8,6 +8,8 @@
     border-left: 3px solid var(--accent-pink);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(155, 92, 255, 0.08) inset;
+    position: relative;
+    z-index: 1;
 }
 
 .auth-required-screen h2 {
