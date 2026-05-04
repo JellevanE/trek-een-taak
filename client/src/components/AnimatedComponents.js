@@ -41,8 +41,9 @@ export const AnimatedProgressBar = ({
             style={{
                 height: '100%',
                 borderRadius: '999px',
+                background: color,
             }}
-            animate={{ width: `${percent}%`, backgroundColor: color }}
+            animate={{ width: `${percent}%` }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
         />
         {children}
