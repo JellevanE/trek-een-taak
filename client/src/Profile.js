@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiUrl } from './utils/api.js';
 
 const RegistrationWizard = React.lazy(() => import('./RegistrationWizard'));
 
@@ -24,7 +25,7 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         const loadProfile = async () => {
             setLoading(true);
             try {
-                const res = await fetch('/api/users/me', {
+                const res = await fetch(apiUrl('/api/users/me'), {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 let payload = null;
@@ -74,7 +75,7 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
     const handleSave = () => {
         if (!token) return;
         setLoading(true);
-        fetch('/api/users/me', {
+        fetch(apiUrl('/api/users/me'), {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
             body: JSON.stringify(profile),
@@ -94,7 +95,7 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
     const handleLogin = () => {
         if (!username || !password) return;
         setLoading(true);
-        fetch('/api/users/login', {
+        fetch(apiUrl('/api/users/login'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
