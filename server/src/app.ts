@@ -1,8 +1,11 @@
 import cors from 'cors';
 import express from 'express';
+import helmet from 'helmet';
 
 import { authenticate } from './middleware/auth.js';
 import { applyTestingListenPatch } from './utils/testingListenPatch.js';
+import { corsOptions } from './security/corsOptions.js';
+import { resolveTrustProxy } from './security/trustProxy.js';
 
 import campaignsRouter from './routes/campaigns.js';
 import debugRouter from './routes/debug.js';
@@ -16,8 +19,13 @@ const app = express();
 
 applyTestingListenPatch(app);
 
-app.use(cors());
-app.use(express.json());
+// Behind a host's reverse proxy, trust the proxy so req.ip (used for rate
+// limiting) reflects the real client. Configured via TRUST_PROXY; off by default.
+app.set('trust proxy', resolveTrustProxy());
+
+app.use(helmet());
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '64kb' }));
 app.use(authenticate);
 
 app.use('/api/docs', docsRouter);

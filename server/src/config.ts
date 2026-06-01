@@ -6,7 +6,9 @@ function readSecretFile(filePath?: string | null): string | null {
         const content = fs.readFileSync(filePath, 'utf8');
         return content.trim() || null;
     } catch (err) {
-        throw new Error(`Failed to read JWT secret file at ${filePath}: ${(err as Error).message}`);
+        throw new Error(
+            `Failed to read JWT secret file at ${filePath}: ${(err as Error).message}`,
+        );
     }
 }
 
@@ -18,7 +20,8 @@ function collectRawSecrets(): string[] {
         if (fromFile) collected.push(fromFile);
     }
 
-    const secretList = process.env.JWT_SECRETS || process.env.JWT_SECRET_LIST || '';
+    const secretList = process.env.JWT_SECRETS || process.env.JWT_SECRET_LIST ||
+        '';
     secretList
         .split(',')
         .map((value) => value.trim())
@@ -40,15 +43,12 @@ function resolveJwtSecrets(): string[] {
         if (process.env.NODE_ENV === 'test') {
             return ['test-secret'];
         }
-        if (process.env.NODE_ENV !== 'production') {
-            const fallback = 'dev-local-secret';
-            console.warn(
-                'JWT secret not configured. Using insecure development fallback. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE to override.',
-            );
-            return [fallback];
-        }
+        // No predictable fallback: an unconfigured secret must fail hard in every
+        // non-test environment so a deploy can never silently accept forgeable tokens.
+        // For local development set JWT_SECRET in server/.env.
         throw new Error(
-            'JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.',
+            'JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE ' +
+                '(for local dev, add JWT_SECRET to server/.env).',
         );
     }
 
@@ -58,6 +58,8 @@ function resolveJwtSecrets(): string[] {
 export const jwtSecrets = resolveJwtSecrets();
 const [primarySecret] = jwtSecrets;
 if (!primarySecret) {
-    throw new Error('JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.');
+    throw new Error(
+        'JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.',
+    );
 }
 export const primaryJwtSecret = primarySecret;
