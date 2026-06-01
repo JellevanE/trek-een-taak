@@ -644,23 +644,6 @@ function App() {
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button className='btn-ghost' onClick={toggleTheme}>
-                            Theme: {themeLabel}
-                        </button>
-                        {renderSoundSlider('main')}
-                        {/* TEMPORARY: Showcase button (remove when done exploring) */}
-                        <button
-                            className='btn-ghost'
-                            onClick={() => setShowShowcase(true)}
-                            style={{
-                                background: 'var(--neon-purple, #9400d3)',
-                                color: 'white',
-                                border: '2px solid var(--neon-purple, #9400d3)',
-                                boxShadow: '0 0 10px rgba(148, 0, 211, 0.5)',
-                            }}
-                        >
-                            🎮 Showcase
-                        </button>
                         <button
                             className='btn-ghost btn-icon'
                             onClick={() => setShowPixelBgSettings((prev) => !prev)}
