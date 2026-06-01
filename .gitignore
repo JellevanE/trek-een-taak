@@ -56,7 +56,17 @@ client.__worktree_backup/
 # Data backups
 backups/
 
+# Runtime JSON data stores (contain user data / password hashes — must not be versioned).
+# Local files stay on disk; stores recreate empty defaults on first run.
+server/users.json
+server/tasks.json
+server/campaigns.json
+server/storylines.json
+
 # secrets
 .jwt-secret
 .secrets.json
 .env
+
+docs/
+node_modules/

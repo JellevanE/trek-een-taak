@@ -13,6 +13,7 @@ import { isJsonObject } from '../types/json.js';
 import { validateRequest } from '../validation/index.js';
 import { getClientIp } from '../utils/ip.js';
 import { registrationRateLimiter } from '../security/registrationRateLimiter.js';
+import { loginRateLimiter } from '../security/loginRateLimiter.js';
 import { isUsernameReserved } from '../security/reservedUsernames.js';
 import {
     type EmailValidationPayload,
@@ -26,12 +27,14 @@ import {
     registerUserSchema,
 } from '../validation/schemas/auth.js';
 
-type BaseAuthedRequest<P extends ParamsDictionary = ParamsDictionary, B = unknown> =
-    AuthenticatedRequest<
-        P,
-        unknown,
-        B
-    >;
+type BaseAuthedRequest<
+    P extends ParamsDictionary = ParamsDictionary,
+    B = unknown,
+> = AuthenticatedRequest<
+    P,
+    unknown,
+    B
+>;
 
 export function getCurrentUser(req: BaseAuthedRequest, res: Response) {
     if (!assertAuthenticated(req, res)) return;
@@ -115,7 +118,8 @@ export function checkUsernameAvailability(
         return res.json({ available: false, reserved: true, suggestions });
     }
     const isTaken = usersData.users.some((user) =>
-        typeof user.username === 'string' && user.username.toLowerCase() === normalized
+        typeof user.username === 'string' &&
+        user.username.toLowerCase() === normalized
     );
     if (isTaken) {
         const suggestions = [
@@ -132,7 +136,9 @@ export function validateEmail(
     req: BaseAuthedRequest<Record<string, string>, EmailValidationPayload>,
     res: Response,
 ) {
-    const validation = validateRequest(req, { body: emailValidationRequestSchema });
+    const validation = validateRequest(req, {
+        body: emailValidationRequestSchema,
+    });
     if (!validation.success) {
         return sendError(res, 400, validation.error.summary);
     }
@@ -157,11 +163,21 @@ export function registerUser(
     const clientIp = getClientIp(req);
     const rateStatus = registrationRateLimiter.attempt(clientIp);
     res.setHeader('X-RateLimit-Limit', String(rateStatus.limit));
-    res.setHeader('X-RateLimit-Remaining', String(Math.max(rateStatus.remaining, 0)));
+    res.setHeader(
+        'X-RateLimit-Remaining',
+        String(Math.max(rateStatus.remaining, 0)),
+    );
     if (!rateStatus.allowed) {
-        const retryAfterSeconds = Math.max(Math.ceil(rateStatus.resetInMs / 1000), 1);
+        const retryAfterSeconds = Math.max(
+            Math.ceil(rateStatus.resetInMs / 1000),
+            1,
+        );
         res.setHeader('Retry-After', String(retryAfterSeconds));
-        return sendError(res, 429, 'Too many registration attempts. Please try again later.');
+        return sendError(
+            res,
+            429,
+            'Too many registration attempts. Please try again later.',
+        );
     }
 
     const validation = validateRequest(req, { body: registerUserSchema });
@@ -181,7 +197,8 @@ export function registerUser(
 
     if (
         usersData.users.some((user) =>
-            typeof user.username === 'string' && user.username.toLowerCase() === normalizedUsername
+            typeof user.username === 'string' &&
+            user.username.toLowerCase() === normalizedUsername
         )
     ) {
         return sendError(res, 400, 'Username taken');
@@ -248,6 +265,26 @@ export function loginUser(
     req: BaseAuthedRequest<Record<string, string>, LoginUserPayload>,
     res: Response,
 ) {
+    const clientIp = getClientIp(req);
+    const rateStatus = loginRateLimiter.attempt(clientIp);
+    res.setHeader('X-RateLimit-Limit', String(rateStatus.limit));
+    res.setHeader(
+        'X-RateLimit-Remaining',
+        String(Math.max(rateStatus.remaining, 0)),
+    );
+    if (!rateStatus.allowed) {
+        const retryAfterSeconds = Math.max(
+            Math.ceil(rateStatus.resetInMs / 1000),
+            1,
+        );
+        res.setHeader('Retry-After', String(retryAfterSeconds));
+        return sendError(
+            res,
+            429,
+            'Too many login attempts. Please try again later.',
+        );
+    }
+
     const validation = validateRequest(req, { body: loginUserSchema });
     if (!validation.success) {
         return sendError(res, 400, validation.error.summary);

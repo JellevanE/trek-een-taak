@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Storyline, StoryUpdate } from '../types/storyline.js';
 import { readStorylines, writeStorylines } from '../data/storylineStore.js';
 import { storylineConfig } from '../config/storyline.config.js';
+import { aiGenerationRateLimiter } from '../security/aiGenerationRateLimiter.js';
 
 // ─── Validation ──────────────────────────────────────────────────────────────
 
@@ -13,9 +14,14 @@ function sanitize(text: string): string {
         .trim();
 }
 
-function validateAndSanitize(fields: Record<string, string | undefined>): Record<string, string> {
-    const { maxCampaignNameLength, maxDescriptionLength, maxTaskDescriptionLength } =
-        storylineConfig.validation;
+function validateAndSanitize(
+    fields: Record<string, string | undefined>,
+): Record<string, string> {
+    const {
+        maxCampaignNameLength,
+        maxDescriptionLength,
+        maxTaskDescriptionLength,
+    } = storylineConfig.validation;
 
     const limits: Record<string, number> = {
         campaignName: maxCampaignNameLength,
@@ -32,7 +38,9 @@ function validateAndSanitize(fields: Record<string, string | undefined>): Record
         }
         const limit = limits[key] ?? maxDescriptionLength;
         if (value.length > limit) {
-            throw new Error(`Input "${key}" exceeds maximum length of ${limit} characters`);
+            throw new Error(
+                `Input "${key}" exceeds maximum length of ${limit} characters`,
+            );
         }
         result[key] = sanitize(value);
     }
@@ -123,7 +131,10 @@ export class StorylineService {
             const { readTasks } = await import('../data/taskStore.js');
             const tasksData = readTasks();
 
-            const progressPercentage = computeProgress(tasksData.tasks, storyline.campaignId);
+            const progressPercentage = computeProgress(
+                tasksData.tasks,
+                storyline.campaignId,
+            );
             if (progressPercentage >= 100) {
                 updateType = 'completion';
             } else {
@@ -138,6 +149,18 @@ export class StorylineService {
         }
 
         if (!updateType) {
+            return { status: 'current', updates: storyline.updates };
+        }
+
+        // Enforce the per-user daily generation budget before spending an API call.
+        // When exhausted, degrade gracefully by returning the existing narrative
+        // rather than erroring — the user just doesn't get a new update today.
+        const quota = aiGenerationRateLimiter.attempt(String(userId));
+        if (!quota.allowed) {
+            console.warn(
+                `AI generation quota reached for user ${userId} ` +
+                    `(${quota.limit}/day). Skipping generation.`,
+            );
             return { status: 'current', updates: storyline.updates };
         }
 
@@ -170,7 +193,9 @@ export class StorylineService {
         const { readUsers } = await import('../data/userStore.js');
         const { PromptService } = await import('./prompt.service.js');
         const { langChainService } = await import('./ai/langchain.service.js');
-        const { NarrativeExtractorService } = await import('./ai/narrative-extractor.service.js');
+        const { NarrativeExtractorService } = await import(
+            './ai/narrative-extractor.service.js'
+        );
 
         const campaignsData = readCampaigns();
         const campaign = campaignsData.campaigns.find((c) => c.id === storyline.campaignId);
@@ -215,7 +240,10 @@ export class StorylineService {
         });
 
         // Current progress percentage
-        const progressPercentage = computeProgress(tasksData.tasks, storyline.campaignId);
+        const progressPercentage = computeProgress(
+            tasksData.tasks,
+            storyline.campaignId,
+        );
 
         // Build the summary text for the appropriate update type
         const tasksSummary = type === 'intro'
@@ -233,7 +261,8 @@ export class StorylineService {
             userClass,
             currentObjective: storyline.narrativeState.currentObjective,
             narrativeSummary: storyline.narrativeState.summary,
-            locations: storyline.narrativeState.locations.join(', ') || 'unknown lands',
+            locations: storyline.narrativeState.locations.join(', ') ||
+                'unknown lands',
             characters: storyline.narrativeState.characters.join(', ') || 'none yet',
             tasksSummary,
             tasksCompleted: tasksSummary,
@@ -243,7 +272,11 @@ export class StorylineService {
         const template = PromptService.loadTemplate(storyline.theme, templateType);
         const systemPrompt = PromptService.loadSystemPrompt(storyline.theme);
 
-        const text = await langChainService.generateText(template, context, systemPrompt);
+        const text = await langChainService.generateText(
+            template,
+            context,
+            systemPrompt,
+        );
 
         // Extract updated narrative state; falls back to previous on failure
         const newNarrativeState = await NarrativeExtractorService.extractState(

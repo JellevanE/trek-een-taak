@@ -3,6 +3,19 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { storylineConfig } from '../../config/storyline.config.js';
 
+// Decide whether a failed generation is worth retrying. Retrying a permanent
+// failure (bad API key, malformed request) just multiplies cost for nothing, so
+// only transient conditions — timeouts, rate limits (429), and server errors
+// (5xx, incl. Anthropic's 529 overloaded) — are considered retryable.
+function isRetryableError(error: Error): boolean {
+    const status = (error as { status?: number }).status;
+    if (typeof status === 'number') {
+        return status === 429 || status >= 500;
+    }
+    // No HTTP status (network blip, timeout, empty response) — treat as transient.
+    return true;
+}
+
 export class LangChainService {
     private model: ChatAnthropic;
 
@@ -46,7 +59,10 @@ export class LangChainService {
                     )
                 );
 
-                const result = await Promise.race([chain.invoke(variables), timeoutPromise]);
+                const result = await Promise.race([
+                    chain.invoke(variables),
+                    timeoutPromise,
+                ]);
 
                 if (!result || result.trim().length === 0) {
                     throw new Error('AI returned an empty response');
@@ -59,6 +75,11 @@ export class LangChainService {
                     `Generation attempt ${attempt}/${retryAttempts} failed:`,
                     lastError.message,
                 );
+
+                // Don't burn more API calls retrying a permanent failure.
+                if (!isRetryableError(lastError)) {
+                    break;
+                }
 
                 if (attempt < retryAttempts) {
                     const backoffMs = Math.pow(2, attempt) * 500;

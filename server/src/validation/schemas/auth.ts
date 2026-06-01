@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-export const allowedProfileClasses = ['adventurer', 'warrior', 'mage', 'rogue'] as const;
+export const allowedProfileClasses = [
+    'adventurer',
+    'warrior',
+    'mage',
+    'rogue',
+] as const;
 
 export const profileUpdateSchema = z
     .object({
@@ -26,7 +31,7 @@ export const profileUpdateSchema = z
 export const registerUserSchema = z
     .object({
         username: z.string().trim().min(1),
-        password: z.string().min(6),
+        password: z.string().min(8).max(128),
         email: z
             .string()
             .trim()
@@ -59,4 +64,6 @@ export function isEmailFormatValid(email: string): boolean {
 export type ProfileUpdatePayload = z.infer<typeof profileUpdateSchema>;
 export type RegisterUserPayload = z.infer<typeof registerUserSchema>;
 export type LoginUserPayload = z.infer<typeof loginUserSchema>;
-export type EmailValidationPayload = z.infer<typeof emailValidationRequestSchema>;
+export type EmailValidationPayload = z.infer<
+    typeof emailValidationRequestSchema
+>;
