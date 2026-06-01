@@ -112,15 +112,15 @@ export const THEME_PROFILES = Object.freeze({
                 [SOUND_EVENT_KEYS.QUEST_ADD]: {
                     label: 'Quest added',
                     sources: [
-                        { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
-                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' },
+                        { src: '/sounds/complete_quest.webm', type: 'audio/webm' },
+                        { src: '/sounds/complete_quest.mp3', type: 'audio/mpeg' },
                     ],
                 },
                 [SOUND_EVENT_KEYS.QUEST_COMPLETE]: {
                     label: 'Quest completed',
                     sources: [
-                        { src: '/sounds/complete_quest.webm', type: 'audio/webm' },
-                        { src: '/sounds/complete_quest.mp3', type: 'audio/mpeg' },
+                        { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
+                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' },
                     ],
                 },
                 [SOUND_EVENT_KEYS.QUEST_DELETE]: {
@@ -133,15 +133,15 @@ export const THEME_PROFILES = Object.freeze({
                 [SOUND_EVENT_KEYS.SIDE_QUEST_ADD]: {
                     label: 'Side quest added',
                     sources: [
-                        { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
-                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' },
+                        { src: '/sounds/complete_sidequest.webm', type: 'audio/webm' },
+                        { src: '/sounds/complete_sidequest.mp3', type: 'audio/mpeg' },
                     ],
                 },
                 [SOUND_EVENT_KEYS.SIDE_QUEST_COMPLETE]: {
                     label: 'Side quest completed',
                     sources: [
-                        { src: '/sounds/complete_sidequest.webm', type: 'audio/webm' },
-                        { src: '/sounds/complete_sidequest.mp3', type: 'audio/mpeg' },
+                        { src: '/sounds/receive_loot_short.webm', type: 'audio/webm' },
+                        { src: '/sounds/receive_loot_short.mp3', type: 'audio/mpeg' },
                     ],
                 },
                 [SOUND_EVENT_KEYS.PRIORITY_CYCLE]: {

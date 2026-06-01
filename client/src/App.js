@@ -14,7 +14,6 @@ import { AddSideQuestForm, QuestEditForm } from './features/quest-board/componen
 import { QuestBoardProvider } from './features/quest-board/context/QuestBoardContext.jsx';
 // Theme preview + showcase demos are lazy so they stay out of the main bundle
 const ThemePreviewPage = React.lazy(() => import('./theme/ThemePreviewPage.jsx'));
-const QuickDemo = React.lazy(() => import('./showcase/QuickDemo.jsx'));
 const CampaignDetailPage = React.lazy(
     () => import('./features/campaign-detail/components/CampaignDetailPage.jsx'),
 );
@@ -117,27 +116,8 @@ function App() {
     const surfaceTint = isDarkAppearance ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
     const progressTrackColor = isDarkAppearance ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
     const { token, setToken, showProfile, setShowProfile } = useAuth();
-    const soundSliderId = React.useId();
-    const renderSoundSlider = React.useCallback(
-        (suffix) => (
-            <label className='theme-audio-control' htmlFor={`${soundSliderId}-${suffix}`}>
-                <span>FX {soundVolume}%</span>
-                <input
-                    id={`${soundSliderId}-${suffix}`}
-                    type='range'
-                    min='0'
-                    max='100'
-                    value={soundVolume}
-                    onChange={(event) => setSoundVolume(Number(event.target.value))}
-                />
-            </label>
-        ),
-        [soundSliderId, soundVolume, setSoundVolume],
-    );
     const [showShortcuts, setShowShortcuts] = React.useState(false);
     const [showPixelBgSettings, setShowPixelBgSettings] = React.useState(false);
-    // TEMPORARY: Showcase state (remove when done exploring)
-    const [showShowcase, setShowShowcase] = React.useState(false);
     const [campaignDetailId, setCampaignDetailId] = React.useState(null);
     const [campaignDetailInitialTab, setCampaignDetailInitialTab] = React.useState('story');
     const shortcutsPanelRef = React.useRef(null);
@@ -484,25 +464,6 @@ function App() {
                                 Quest management made easy, but also way harder.
                             </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <button className='btn-ghost' onClick={toggleTheme}>
-                                Theme: {themeLabel}
-                            </button>
-                            {renderSoundSlider('auth')}
-                            {/* TEMPORARY: Showcase button (remove when done exploring) */}
-                            <button
-                                className='btn-ghost'
-                                onClick={() => setShowShowcase(true)}
-                                style={{
-                                    background: 'var(--neon-purple, #9400d3)',
-                                    color: 'white',
-                                    border: '2px solid var(--neon-purple, #9400d3)',
-                                    boxShadow: '0 0 10px rgba(148, 0, 211, 0.5)',
-                                }}
-                            >
-                                🎮 Showcase
-                            </button>
-                        </div>
                     </div>
                 </header>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
@@ -644,23 +605,6 @@ function App() {
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button className='btn-ghost' onClick={toggleTheme}>
-                            Theme: {themeLabel}
-                        </button>
-                        {renderSoundSlider('main')}
-                        {/* TEMPORARY: Showcase button (remove when done exploring) */}
-                        <button
-                            className='btn-ghost'
-                            onClick={() => setShowShowcase(true)}
-                            style={{
-                                background: 'var(--neon-purple, #9400d3)',
-                                color: 'white',
-                                border: '2px solid var(--neon-purple, #9400d3)',
-                                boxShadow: '0 0 10px rgba(148, 0, 211, 0.5)',
-                            }}
-                        >
-                            🎮 Showcase
-                        </button>
                         <button
                             className='btn-ghost btn-icon'
                             onClick={() => setShowPixelBgSettings((prev) => !prev)}
@@ -1296,11 +1240,6 @@ function App() {
                     ))}
                 </AnimatePresence>
             </div>
-
-            {/* TEMPORARY: Showcase demo (remove when done exploring) */}
-            <React.Suspense fallback={null}>
-                {showShowcase && <QuickDemo onClose={() => setShowShowcase(false)} />}
-            </React.Suspense>
         </div>
     );
 }

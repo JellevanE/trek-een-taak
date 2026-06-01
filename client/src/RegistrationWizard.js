@@ -22,6 +22,7 @@ function ProgressIndicator({ currentStep, totalSteps }) {
 function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
+    const [checking, setChecking] = useState(false);
 
     const validateField = (name, value) => {
         const newErrors = { ...errors };
@@ -45,8 +46,8 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
             case 'password':
                 if (!value) {
                     newErrors.password = 'Password is required';
-                } else if (value.length < 6) {
-                    newErrors.password = 'Password must be at least 6 characters';
+                } else if (value.length < 8) {
+                    newErrors.password = 'Password must be at least 8 characters';
                 } else {
                     delete newErrors.password;
                     // Also validate confirm password if it exists
@@ -93,10 +94,10 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
         setTimeout(() => validateField(name, value), 300);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate all fields
+        // Validate all fields locally
         const fields = ['username', 'password', 'confirmPassword'];
         if (formData.email) fields.push('email');
 
@@ -107,8 +108,60 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
             }
         });
 
-        if (isValid) {
+        if (!isValid) {
+            return;
+        }
+
+        // Verify against the server BEFORE advancing, so the wizard only
+        // progresses when this step actually succeeded. Otherwise a taken or
+        // reserved username (or an invalid email) wouldn't surface until after
+        // the user completed the next step.
+        setChecking(true);
+        try {
+            const username = formData.username.trim();
+            const res = await fetch(
+                apiUrl(`/api/users/check-username/${encodeURIComponent(username)}`),
+            );
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok || !data.available) {
+                const suggestion = Array.isArray(data.suggestions) && data.suggestions.length
+                    ? ` Try ${data.suggestions.join(' or ')}.`
+                    : '';
+                setErrors((prev) => ({
+                    ...prev,
+                    username: data.reserved
+                        ? `That username isn't allowed.${suggestion}`
+                        : `That username is already taken.${suggestion}`,
+                }));
+                return;
+            }
+
+            if (formData.email) {
+                const emailRes = await fetch(apiUrl('/api/users/validate-email'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: formData.email.trim() }),
+                });
+                const emailData = await emailRes.json().catch(() => ({}));
+                if (!emailRes.ok || !emailData.valid) {
+                    setErrors((prev) => ({
+                        ...prev,
+                        email: 'Please enter a valid email address',
+                    }));
+                    return;
+                }
+            }
+
             onNext();
+        } catch (err) {
+            setErrors((prev) => ({
+                ...prev,
+                username:
+                    'Could not verify your details. Please check your connection and try again.',
+            }));
+        } finally {
+            setChecking(false);
         }
     };
 
@@ -181,9 +234,9 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                         <div className='password-strength'>
                             <div
                                 className={`strength-meter ${
-                                    formData.password.length >= 8
+                                    formData.password.length >= 12
                                         ? 'strong'
-                                        : formData.password.length >= 6
+                                        : formData.password.length >= 8
                                         ? 'medium'
                                         : 'weak'
                                 }`}
@@ -191,9 +244,9 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                                 <div className='strength-fill' />
                             </div>
                             <div className='strength-text'>
-                                {formData.password.length >= 8
+                                {formData.password.length >= 12
                                     ? 'Strong'
-                                    : formData.password.length >= 6
+                                    : formData.password.length >= 8
                                     ? 'Good'
                                     : 'Weak'}
                             </div>
@@ -223,9 +276,9 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                     <button
                         type='submit'
                         className='btn-primary'
-                        disabled={loading || Object.keys(errors).length > 0}
+                        disabled={loading || checking || Object.keys(errors).length > 0}
                     >
-                        {loading ? 'Creating Account...' : 'Create Account'}
+                        {checking ? 'Checking…' : 'Continue'}
                     </button>
                 </div>
             </form>
@@ -236,10 +289,26 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
 // Profile setup step component
 function ProfileSetupStep({ formData, setFormData, onNext, onBack, loading }) {
     const classes = [
-        { id: 'adventurer', name: 'Adventurer', description: 'Balanced approach to tasks' },
-        { id: 'warrior', name: 'Warrior', description: 'Focus on completing difficult tasks' },
-        { id: 'mage', name: 'Mage', description: 'Strategic planning and organization' },
-        { id: 'rogue', name: 'Rogue', description: 'Quick completion and efficiency' },
+        {
+            id: 'adventurer',
+            name: 'Adventurer',
+            description: 'Balanced approach to tasks',
+        },
+        {
+            id: 'warrior',
+            name: 'Warrior',
+            description: 'Focus on completing difficult tasks',
+        },
+        {
+            id: 'mage',
+            name: 'Mage',
+            description: 'Strategic planning and organization',
+        },
+        {
+            id: 'rogue',
+            name: 'Rogue',
+            description: 'Quick completion and efficiency',
+        },
     ];
 
     const handleSubmit = (e) => {
@@ -326,6 +395,36 @@ function ProfileSetupStep({ formData, setFormData, onNext, onBack, loading }) {
     );
 }
 
+// Failures whose root cause is step-1 data (username / email / password).
+// These should send the user back to step 1 so the wizard's progress reflects
+// what actually failed — including the race where a username is claimed
+// between the availability check and the final submit. Transient failures
+// (rate limit, server error) are not step-specific and stay put.
+function isAccountDetailsError(err) {
+    const status = err && err.status;
+    if (status === 429 || status === 500) {
+        return false;
+    }
+    const message = ((err && err.message) || '').toLowerCase();
+    return (
+        message.includes('username') ||
+        message.includes('email') ||
+        message.includes('password')
+    );
+}
+
+// Maps a failed registration into a message that's safe and useful to show.
+function friendlyRegistrationError(err) {
+    const status = err && err.status;
+    if (status === 429) {
+        return 'Too many registration attempts. Please wait a moment and try again.';
+    }
+    if (status === 500) {
+        return 'Something went wrong creating your account. Please try again.';
+    }
+    return (err && err.message) || 'Registration failed. Please try again.';
+}
+
 // Main registration wizard component
 export default function RegistrationWizard({ onSuccess, onCancel }) {
     const [currentStep, setCurrentStep] = useState(1);
@@ -383,17 +482,24 @@ export default function RegistrationWizard({ onSuccess, onCancel }) {
                 body: JSON.stringify(registrationData),
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-                throw new Error(data.error || 'Registration failed');
+                const err = new Error(data.error || 'Registration failed');
+                err.status = response.status;
+                throw err;
             }
 
             // Success! Call the success callback with the token
             onSuccess(data.token, data.user);
         } catch (err) {
             console.error('Registration error:', err);
-            setError(err.message || 'Registration failed. Please try again.');
+            // Send the user back to the step that owns the problem so the
+            // progress indicator never overstates how far they actually got.
+            if (isAccountDetailsError(err)) {
+                setCurrentStep(1);
+            }
+            setError(friendlyRegistrationError(err));
         } finally {
             setLoading(false);
         }
