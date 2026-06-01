@@ -3,6 +3,27 @@
  */
 
 /**
+ * Base URL for the API. Empty by default, so requests stay relative
+ * (`/api/...`) and work same-origin in dev and single-service deploys.
+ * Set REACT_APP_API_URL at build time to point the client at a separate
+ * API origin (e.g. when client and server are split into two services).
+ */
+const API_BASE = (process.env.REACT_APP_API_URL || '').replace(/\/+$/, '');
+
+/**
+ * Resolves a request path against API_BASE. Absolute URLs and already-relative
+ * paths (when API_BASE is unset) pass through unchanged.
+ * @param {string} path - Request path, e.g. '/api/tasks'
+ * @returns {string} The resolved URL
+ */
+export function apiUrl(path) {
+    if (typeof path !== 'string' || !API_BASE || /^https?:\/\//i.test(path)) {
+        return path;
+    }
+    return `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
+/**
  * Standard API error handler that processes response errors
  * @param {Response} res - Fetch response object
  * @param {Function} onUnauthorized - Callback for 401 errors
@@ -39,7 +60,7 @@ export async function handleApiResponse(res, onUnauthorized = null) {
  * @returns {Promise} Response data
  */
 export async function apiFetch(url, options = {}, onUnauthorized = null) {
-    const res = await fetch(url, options);
+    const res = await fetch(apiUrl(url), options);
     return handleApiResponse(res, onUnauthorized);
 }
 
