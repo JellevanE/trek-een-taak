@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "candle-photo-to-sprite",
+  "prompt": "i took this photo of a candle: /Users/jelle.vanelburg/fantasy-sprites/eval-workspace/test-inputs/my_candle_photo.jpg - can you turn it into a sprite for the tavern scenes in my game? its a small prop that sits on tables so it shouldnt be big",
+  "assertions": [
+    "A sprite PNG file is delivered in the outputs directory",
+    "The photo background was removed: all four corner pixels are fully transparent",
+    "The sprite is small-prop-sized: longest side is between 8 and 32 pixels",
+    "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+    "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+    "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)"
+  ]
+}

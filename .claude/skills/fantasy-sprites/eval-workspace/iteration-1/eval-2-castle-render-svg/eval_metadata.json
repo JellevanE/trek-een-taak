@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "castle-render-svg",
+  "prompt": "Here's a render of a castle for my game: /Users/jelle.vanelburg/fantasy-sprites/eval-workspace/test-inputs/castle_render.png. Turn it into a building sprite, and I also need an SVG version because my engine scales background assets.",
+  "assertions": [
+    "A sprite PNG file is delivered in the outputs directory",
+    "An SVG file is delivered and is well-formed XML with an <svg> root element",
+    "The SVG preserves crisp pixel edges (shape-rendering crispEdges or equivalent integer-aligned rects)",
+    "The PNG sprite is building-sized: longest side is between 48 and 128 pixels",
+    "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+    "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+    "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)"
+  ]
+}

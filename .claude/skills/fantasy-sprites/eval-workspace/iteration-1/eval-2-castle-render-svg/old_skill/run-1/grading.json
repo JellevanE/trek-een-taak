@@ -1,0 +1,45 @@
+{
+  "expectations": [
+    {
+      "text": "A sprite PNG file is delivered in the outputs directory",
+      "passed": true,
+      "evidence": "found castle_sprite.png"
+    },
+    {
+      "text": "An SVG file is delivered and is well-formed XML with an <svg> root element",
+      "passed": true,
+      "evidence": "castle_sprite.svg parses, root <svg>"
+    },
+    {
+      "text": "The SVG preserves crisp pixel edges (shape-rendering crispEdges or equivalent integer-aligned rects)",
+      "passed": true,
+      "evidence": "shape-rendering crispEdges present"
+    },
+    {
+      "text": "The PNG sprite is building-sized: longest side is between 48 and 128 pixels",
+      "passed": true,
+      "evidence": "sprite is 62x70, longest side 70, expected 48-128"
+    },
+    {
+      "text": "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+      "passed": false,
+      "evidence": "1652 unique opaque colors"
+    },
+    {
+      "text": "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+      "passed": false,
+      "evidence": "1647 off-palette colors, e.g. #8985a2, #8377b4, #5e528c, #594683, #716199"
+    },
+    {
+      "text": "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)",
+      "passed": true,
+      "evidence": "alpha values: {0, 255}"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 2,
+    "total": 7,
+    "pass_rate": 0.7143
+  }
+}

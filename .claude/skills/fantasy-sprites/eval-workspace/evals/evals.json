@@ -1,0 +1,56 @@
+{
+  "skill_name": "fantasy-sprites",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "treasure-chest-no-image",
+      "prompt": "I'm building a dungeon level for my fantasy game and I need a sprite for a treasure chest. I don't have any art or reference for it yet, can you make me one? It should fit with the rest of my purple-blue sprite set.",
+      "expected_output": "A small (16-24px) treasure chest sprite PNG with transparent background, colors from the house palette, sourced via openly-licensed reference images rather than hand-drawn pixels.",
+      "files": [],
+      "assertions": [
+        "A sprite PNG file is delivered in the outputs directory",
+        "The sprite has a transparent background (all four corner pixels are fully transparent)",
+        "The sprite is item-sized: longest side is between 8 and 32 pixels",
+        "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+        "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+        "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)",
+        "If web images were used as reference, attribution/license information is preserved in the outputs"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "candle-photo-to-sprite",
+      "prompt": "i took this photo of a candle: /Users/jelle.vanelburg/fantasy-sprites/eval-workspace/test-inputs/my_candle_photo.jpg - can you turn it into a sprite for the tavern scenes in my game? its a small prop that sits on tables so it shouldnt be big",
+      "expected_output": "A small item sprite (around 16-24px) converted from the photo, background removed, hard alpha, house palette colors.",
+      "files": [
+        "/Users/jelle.vanelburg/fantasy-sprites/eval-workspace/test-inputs/my_candle_photo.jpg"
+      ],
+      "assertions": [
+        "A sprite PNG file is delivered in the outputs directory",
+        "The photo background was removed: all four corner pixels are fully transparent",
+        "The sprite is small-prop-sized: longest side is between 8 and 32 pixels",
+        "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+        "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+        "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "castle-render-svg",
+      "prompt": "Here's a render of a castle for my game: /Users/jelle.vanelburg/fantasy-sprites/eval-workspace/test-inputs/castle_render.png. Turn it into a building sprite, and I also need an SVG version because my engine scales background assets.",
+      "expected_output": "A building-sized sprite (around 64px) PNG plus a valid SVG version with crisp pixel edges, both using the house palette.",
+      "files": [
+        "/Users/jelle.vanelburg/fantasy-sprites/eval-workspace/test-inputs/castle_render.png"
+      ],
+      "assertions": [
+        "A sprite PNG file is delivered in the outputs directory",
+        "An SVG file is delivered and is well-formed XML with an <svg> root element",
+        "The SVG preserves crisp pixel edges (shape-rendering crispEdges or equivalent integer-aligned rects)",
+        "The PNG sprite is building-sized: longest side is between 48 and 128 pixels",
+        "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+        "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+        "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)"
+      ]
+    }
+  ]
+}

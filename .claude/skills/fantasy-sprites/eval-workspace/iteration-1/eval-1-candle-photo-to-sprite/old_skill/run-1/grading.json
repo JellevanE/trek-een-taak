@@ -1,0 +1,40 @@
+{
+  "expectations": [
+    {
+      "text": "A sprite PNG file is delivered in the outputs directory",
+      "passed": true,
+      "evidence": "found candle_sprite.png"
+    },
+    {
+      "text": "The photo background was removed: all four corner pixels are fully transparent",
+      "passed": true,
+      "evidence": "corner alphas: [0, 0, 0, 0]"
+    },
+    {
+      "text": "The sprite is small-prop-sized: longest side is between 8 and 32 pixels",
+      "passed": true,
+      "evidence": "sprite is 16x16, longest side 16, expected 8-32"
+    },
+    {
+      "text": "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+      "passed": true,
+      "evidence": "11 unique opaque colors"
+    },
+    {
+      "text": "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+      "passed": false,
+      "evidence": "6 off-palette colors, e.g. #c7c19e, #f0eecd, #fdf0c0, #9d94a8, #f2b13d"
+    },
+    {
+      "text": "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)",
+      "passed": false,
+      "evidence": "12 intermediate alpha values present"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 2,
+    "total": 6,
+    "pass_rate": 0.6667
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "expectations": [
+    {
+      "text": "A sprite PNG file is delivered in the outputs directory",
+      "passed": true,
+      "evidence": "found treasure_chest.png"
+    },
+    {
+      "text": "The sprite has a transparent background (all four corner pixels are fully transparent)",
+      "passed": true,
+      "evidence": "corner alphas: [0, 0, 0, 0]"
+    },
+    {
+      "text": "The sprite is item-sized: longest side is between 8 and 32 pixels",
+      "passed": true,
+      "evidence": "sprite is 32x32, longest side 32, expected 8-32"
+    },
+    {
+      "text": "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+      "passed": false,
+      "evidence": "62 unique opaque colors"
+    },
+    {
+      "text": "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+      "passed": false,
+      "evidence": "56 off-palette colors, e.g. #3e336c, #463d72, #40366e, #b8b0aa, #352a62"
+    },
+    {
+      "text": "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)",
+      "passed": false,
+      "evidence": "2 intermediate alpha values present"
+    },
+    {
+      "text": "If web images were used as reference, attribution/license information is preserved in the outputs",
+      "passed": true,
+      "evidence": "no downloaded web images in outputs (vacuous)"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 3,
+    "total": 7,
+    "pass_rate": 0.5714
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 0,
+  "eval_name": "treasure-chest-no-image",
+  "prompt": "I'm building a dungeon level for my fantasy game and I need a sprite for a treasure chest. I don't have any art or reference for it yet, can you make me one? It should fit with the rest of my purple-blue sprite set.",
+  "assertions": [
+    "A sprite PNG file is delivered in the outputs directory",
+    "The sprite has a transparent background (all four corner pixels are fully transparent)",
+    "The sprite is item-sized: longest side is between 8 and 32 pixels",
+    "The sprite uses at most 16 unique opaque colors (pixel-art palette discipline)",
+    "Every opaque color in the sprite is an exact color from the house palette (assets/palette.txt)",
+    "Alpha is hard: every pixel is fully opaque or fully transparent (no semi-transparent fringe)",
+    "If web images were used as reference, attribution/license information is preserved in the outputs"
+  ]
+}

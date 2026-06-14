@@ -1,65 +1,87 @@
-import fs from 'node:fs';
+import fs from "node:fs";
 
 function readSecretFile(filePath?: string | null): string | null {
-    if (!filePath) return null;
-    try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        return content.trim() || null;
-    } catch (err) {
-        throw new Error(
-            `Failed to read JWT secret file at ${filePath}: ${(err as Error).message}`,
-        );
-    }
+  if (!filePath) return null;
+  try {
+    const content = fs.readFileSync(filePath, "utf8");
+    return content.trim() || null;
+  } catch (err) {
+    throw new Error(
+      `Failed to read JWT secret file at ${filePath}: ${
+        (err as Error).message
+      }`,
+    );
+  }
 }
 
 function collectRawSecrets(): string[] {
-    const collected: string[] = [];
+  const collected: string[] = [];
 
-    if (process.env.JWT_SECRET_FILE) {
-        const fromFile = readSecretFile(process.env.JWT_SECRET_FILE);
-        if (fromFile) collected.push(fromFile);
-    }
+  if (process.env.JWT_SECRET_FILE) {
+    const fromFile = readSecretFile(process.env.JWT_SECRET_FILE);
+    if (fromFile) collected.push(fromFile);
+  }
 
-    const secretList = process.env.JWT_SECRETS || process.env.JWT_SECRET_LIST ||
-        '';
-    secretList
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean)
-        .forEach((secret) => collected.push(secret));
+  const secretList = process.env.JWT_SECRETS || process.env.JWT_SECRET_LIST ||
+    "";
+  secretList
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .forEach((secret) => collected.push(secret));
 
-    const singleSecret = process.env.JWT_SECRET?.trim();
-    if (singleSecret) {
-        collected.push(singleSecret);
-    }
+  const singleSecret = process.env.JWT_SECRET?.trim();
+  if (singleSecret) {
+    collected.push(singleSecret);
+  }
 
-    return collected;
+  return collected;
 }
 
 function resolveJwtSecrets(): string[] {
-    const uniqueSecrets = Array.from(new Set(collectRawSecrets()));
+  const uniqueSecrets = Array.from(new Set(collectRawSecrets()));
 
-    if (uniqueSecrets.length === 0) {
-        if (process.env.NODE_ENV === 'test') {
-            return ['test-secret'];
-        }
-        // No predictable fallback: an unconfigured secret must fail hard in every
-        // non-test environment so a deploy can never silently accept forgeable tokens.
-        // For local development set JWT_SECRET in server/.env.
-        throw new Error(
-            'JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE ' +
-                '(for local dev, add JWT_SECRET to server/.env).',
-        );
+  if (uniqueSecrets.length === 0) {
+    if (process.env.NODE_ENV === "test") {
+      return ["test-secret"];
     }
+    // No predictable fallback: an unconfigured secret must fail hard in every
+    // non-test environment so a deploy can never silently accept forgeable tokens.
+    // For local development set JWT_SECRET in server/.env.
+    throw new Error(
+      "JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE " +
+        "(for local dev, add JWT_SECRET to server/.env).",
+    );
+  }
 
-    return uniqueSecrets;
+  return uniqueSecrets;
 }
 
 export const jwtSecrets = resolveJwtSecrets();
 const [primarySecret] = jwtSecrets;
 if (!primarySecret) {
-    throw new Error(
-        'JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.',
-    );
+  throw new Error(
+    "JWT secret not configured. Set JWT_SECRET, JWT_SECRETS, or JWT_SECRET_FILE.",
+  );
 }
 export const primaryJwtSecret = primarySecret;
+
+// Admin access is granted by username via ADMIN_USERNAMES (comma-separated,
+// case-insensitive). Unset/empty means no admins, so admin-only routes 403.
+// Resolved on each call (not cached at module load) so the env can change
+// without a rebuild and tests can configure it per-case.
+export function getAdminUsernames(): string[] {
+  return Array.from(
+    new Set(
+      (process.env.ADMIN_USERNAMES || "")
+        .split(",")
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  );
+}
+
+export function isAdminUsername(username: string | null | undefined): boolean {
+  if (!username) return false;
+  return getAdminUsernames().includes(username.toLowerCase());
+}

@@ -1,0 +1,18 @@
+# House palette: purple-blue spectrum with cream highlight (Shovel Knight adjacent).
+# One hex color per line; lines starting with # are ignored.
+# Edit this file to retheme every future sprite — pixelate.py reads it by default.
+#0b0328
+#170a47
+#0c0336
+#281c59
+#2f2264
+#3d3467
+#534a81
+#695791
+#675690
+#807eb3
+#85839f
+#7e779e
+#aaa8c8
+#c8c6da
+#e2e0b8
