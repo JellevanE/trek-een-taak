@@ -5,6 +5,8 @@ GEMINI.md
 CLAUDE.md
 client.log
 inspiration.html
+.playwright-test/
+.playwright-mcp
 
 # Node
 node_modules/

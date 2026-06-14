@@ -1,0 +1,91 @@
+# render.yaml — REFERENCE ONLY (not active infrastructure).
+#
+# The live Render service for task_track is configured manually in the
+# dashboard UI. Render only reads this file for services created/managed as a
+# Blueprint, so committing it next to a hand-created service does NOT change
+# anything — the dashboard config wins and this file is ignored.
+#
+# Keep this as documentation of the intended prod config (single web service +
+# persistent disk, the documented hosting decision) and as a seed if the
+# service is ever re-provisioned cleanly via New -> Blueprint. NOTE: adopting
+# it as a Blueprint creates a NEW service with a NEW empty disk — it will not
+# adopt the existing service or its data. To change the LIVE service today,
+# edit Build/Start commands and env vars in the dashboard instead.
+#
+# ┌─ IMPORTANT ─────────────────────────────────────────────────────────────┐
+# │ As of today the server (server/src/app.ts) is API-ONLY — it mounts       │
+# │ /api/* routes and does NOT serve the client bundle. The build below      │
+# │ compiles client/build, but nothing serves it yet, so visiting the root   │
+# │ URL would 404 and the React app would not load.                          │
+# │                                                                          │
+# │ For this single-service blueprint to actually serve the app, the server  │
+# │ needs to (a) express.static() the client/build directory and (b) add a   │
+# │ SPA fallback that returns index.html for non-/api GET routes. That's a   │
+# │ small, known addition — ask and I'll wire it in.                         │
+# │                                                                          │
+# │ Until then this deploys a working API; the SPA won't render at the root. │
+# └──────────────────────────────────────────────────────────────────────────┘
+#
+# Render runs `make` in its native Node environment, so you *could* point the
+# commands at the Makefile (e.g. `make build`). They're kept explicit on
+# purpose: what runs in prod stays readable here and doesn't depend on Make.
+
+services:
+  - type: web
+    name: task-track
+    runtime: node
+    # Disks require a paid instance type; the free tier has no persistent disk.
+    plan: starter
+    region: frankfurt
+    branch: main
+    # Lockfiles exist in both subdirs, so `npm ci` gives reproducible installs.
+    # CI=false: Create React App treats lint warnings as errors when CI=true
+    # (Render sets CI=true), which would fail the build on any warning.
+    # INLINE_RUNTIME_CHUNK=false: keep all JS external so it loads under the
+    # server's default helmet CSP (script-src 'self') — no inline <script>.
+    buildCommand: |
+      npm --prefix server ci
+      npm --prefix client ci
+      CI=false INLINE_RUNTIME_CHUNK=false npm --prefix client run build
+      npm --prefix server run build
+    # npm runs the lifecycle script with cwd = server/, so the compiled
+    # dist/prompts resolve correctly. (Data paths are overridden to the disk
+    # below, so the default server-root data location is not used in prod.)
+    startCommand: npm --prefix server start
+    # Adjust if /api/docs requires auth or isn't a 200 GET. The server has no
+    # root route, so do NOT point the health check at "/".
+    healthCheckPath: /api/docs
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Pin a Node LTS rather than inheriting Render's default.
+      - key: NODE_VERSION
+        value: "22"
+      # Behind Render's proxy — trust 1 hop so req.ip is correct for rate limits.
+      - key: TRUST_PROXY
+        value: "1"
+      # ── Secrets / per-deploy values: set these in the Render dashboard ──
+      - key: JWT_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Comma-separated allowlist of front-end origins (your prod domain).
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Comma-separated usernames granted admin access (debug/admin routes).
+      - key: ADMIN_USERNAMES
+        sync: false
+      # ── JSON stores live on the persistent disk so they survive deploys ──
+      - key: TASKS_FILE
+        value: /data/tasks.json
+      - key: USERS_FILE
+        value: /data/users.json
+      - key: CAMPAIGNS_FILE
+        value: /data/campaigns.json
+      - key: STORYLINES_FILE
+        value: /data/storylines.json
+      # NOTE: do NOT set PORT — Render injects it and the server must read it.
