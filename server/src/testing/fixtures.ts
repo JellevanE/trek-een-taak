@@ -3,6 +3,7 @@ import { writeFileSync } from 'node:fs';
 import type { CampaignRecord, CampaignStoreData } from '../types/campaign.js';
 import type { SubTask, TaskRecord, TaskStoreData } from '../types/task.js';
 import type { UserRecord, UserStoreData } from '../types/user.js';
+import type { Storyline } from '../types/storyline.js';
 import { configureDataFiles, resetDataFileOverrides } from '../data/filePaths.js';
 import { createInitialRpgState } from '../rpg/experienceEngine.js';
 import type { JsonObject } from '../types/json.js';
@@ -164,6 +165,35 @@ export function buildTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
         completed: false,
     };
     return normalizeTask({ ...base, ...overrides });
+}
+
+export function buildStoryline(overrides: Partial<Storyline> = {}): Storyline {
+    const now = new Date().toISOString();
+    const base: Storyline = {
+        id: 'storyline-1',
+        campaignId: 1,
+        theme: 'fantasy',
+        narrativeState: {
+            chapter: 1,
+            currentObjective: 'Begin your adventure',
+            summary: 'The journey begins...',
+            characters: [],
+            locations: [],
+            keyPlotPoints: [],
+            progressPercentage: 0,
+        },
+        updates: [],
+        createdAt: now,
+        lastGeneratedAt: now,
+        lastVisitDate: now,
+        generationFailures: 0,
+    };
+    return { ...base, ...overrides };
+}
+
+export function resetStorylineStore(filePath: string, storylines: Storyline[] = []): void {
+    // storylineStore persists a bare array, not a wrapped object.
+    writeJsonFile(filePath, storylines);
 }
 
 export { configureDataFiles, resetDataFileOverrides };
