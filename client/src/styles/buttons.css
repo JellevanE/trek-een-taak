@@ -36,14 +36,17 @@ button:disabled {
 /* utility classes available: .btn-primary, .btn-ghost, .btn-danger, .btn-small */
 
 .btn-primary {
-    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
+    background: var(--accent-cyan);
     color: #001018;
     padding: 10px 14px;
     border-radius: 8px;
     border: 0;
     cursor: pointer;
-    box-shadow: 0 6px 20px rgba(0, 240, 255, 0.08), 0 0 14px rgba(255, 46, 196, 0.06);
     font-weight: 700;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.08);
 }
 
 .btn-ghost {

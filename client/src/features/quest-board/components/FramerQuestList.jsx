@@ -19,6 +19,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { DEFAULT_THEME_ID } from '../../../theme';
 import { useQuestMotionTokens } from '../hooks/useQuestMotionTokens.js';
 import { getItemKey, reconcileOrder } from './listUtils.js';
+import { sortQuestsForDisplay } from '../../../hooks/questHelpers.js';
 
 const isDragInteractiveTarget = (target) =>
     target && typeof target.closest === 'function' &&
@@ -133,7 +134,10 @@ export const FramerQuestList = ({
     React.useEffect(() => {
         if (isDragging) return;
         setOrder((prev) => {
-            const next = reconcileOrder(items, prev);
+            // Preserve manual drag order for items that still exist, then re-apply the
+            // open-first / completed-last grouping so finishing a quest drops it into
+            // the completed group (newest first) without disturbing open-quest order.
+            const next = sortQuestsForDisplay(reconcileOrder(items, prev));
             latestOrderRef.current = next;
             return next;
         });

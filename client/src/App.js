@@ -10,6 +10,7 @@ import { useReducedMotionPreference } from "./hooks/useReducedMotionPreference.j
 import { AnimatedToast } from "./components/AnimatedComponents";
 import PixelBackground from "./components/PixelBackground";
 import QuestCard from "./components/QuestCard";
+import Icon from "./components/Icon";
 import {
   AddSideQuestForm,
   QuestEditForm,
@@ -125,9 +126,6 @@ function App() {
     prefersReducedMotion,
   });
   const isDarkAppearance = themeProfile?.appearance !== "light";
-  const surfaceTint = isDarkAppearance
-    ? "rgba(255, 255, 255, 0.05)"
-    : "rgba(0, 0, 0, 0.05)";
   const progressTrackColor = isDarkAppearance
     ? "rgba(255,255,255,0.12)"
     : "rgba(0,0,0,0.08)";
@@ -644,7 +642,7 @@ function App() {
               aria-pressed={showPixelBgSettings}
               title="Pixel BG"
             >
-              ▦
+              <Icon name="pencil" size={18} />
             </button>
             <button
               className="btn-ghost btn-icon"
@@ -654,7 +652,7 @@ function App() {
               aria-label="Keyboard shortcuts"
               title="Keyboard shortcuts"
             >
-              ⌨
+              <Icon name="info-circle" size={18} />
             </button>
             {isDebugEnabled && isAdmin && (
               <button
@@ -667,7 +665,7 @@ function App() {
                 aria-pressed={showDebugTools}
                 title={showDebugTools ? "Hide debug tools" : "Debug tools"}
               >
-                ⚙
+                <Icon name="cog" size={18} />
               </button>
             )}
             <button
@@ -677,7 +675,7 @@ function App() {
               aria-pressed={showProfile}
               title="Profile"
             >
-              ◉
+              <Icon name="user" size={18} />
             </button>
           </div>
         </div>
@@ -688,7 +686,12 @@ function App() {
           style={{
             margin: "16px 0",
             padding: "12px 16px",
-            background: surfaceTint,
+            // Flat, fully solid panel (uniform overlay over the theme surface so it
+            // stays opaque and theme-aware without a gradient sheen).
+            background:
+              "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), var(--panel-dark)",
+            border: "1px solid rgba(255, 255, 255, 0.14)",
+            boxShadow: "0 10px 28px rgba(0, 0, 0, 0.5)",
             borderRadius: 12,
             display: "flex",
             alignItems: "center",
@@ -906,7 +909,10 @@ function App() {
                 ? "Expand campaigns panel"
                 : "Collapse campaigns panel"}
             >
-              {campaignSidebarCollapsed ? "»" : "«"}
+              <Icon
+                name={campaignSidebarCollapsed ? "angle-right" : "angle-left"}
+                size={16}
+              />
             </button>
             {!campaignSidebarCollapsed && (
               <span className="campaign-sidebar-title">Campaigns</span>
@@ -921,7 +927,7 @@ function App() {
                   onClick={openCampaignCreateForm}
                   aria-label="Create campaign"
                 >
-                  +
+                  <Icon name="plus" size={16} />
                 </button>
                 <button
                   type="button"
@@ -932,7 +938,7 @@ function App() {
                   aria-label="Show all quests"
                   aria-pressed={activeCampaignFilter === null}
                 >
-                  ◎
+                  <Icon name="book" size={18} />
                 </button>
                 <button
                   type="button"
@@ -943,7 +949,7 @@ function App() {
                   aria-label="Show unassigned quests"
                   aria-pressed={activeCampaignFilter === "uncategorized"}
                 >
-                  ∅
+                  <Icon name="times-circle" size={18} />
                 </button>
                 {campaigns.map((campaign) => (
                   <div key={campaign.id} style={{ position: "relative" }}>
@@ -1164,7 +1170,7 @@ function App() {
                               }
                             }}
                           >
-                            &#8250;
+                            <Icon name="angle-right" size={14} />
                           </span>
                         </button>
                       ))

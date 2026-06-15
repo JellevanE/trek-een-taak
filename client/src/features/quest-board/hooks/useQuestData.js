@@ -5,6 +5,7 @@ import {
     cloneQuestSnapshot,
     normalizeQuest,
     normalizeQuestList,
+    sortQuestsForDisplay,
 } from '../../../hooks/questHelpers.js';
 import { useQuestBoardStore } from '../../../store/questBoardStore.js';
 
@@ -74,7 +75,7 @@ export const useQuestData = ({
 
             if (data) {
                 const payload = data.tasks || data.quests || [];
-                setQuests(normalizeQuestList(payload));
+                setQuests(sortQuestsForDisplay(normalizeQuestList(payload)));
                 refreshCampaigns();
             }
         } catch (error) {
@@ -113,7 +114,7 @@ export const useQuestData = ({
 
                 if (data) {
                     const payload = data.tasks || data.quests || [];
-                    setQuests(normalizeQuestList(payload));
+                    setQuests(sortQuestsForDisplay(normalizeQuestList(payload)));
                 }
             } catch (error) {
                 console.error('Error fetching quests:', error);
@@ -149,7 +150,7 @@ export const useQuestData = ({
                 (typeof activeCampaignFilter === 'number' &&
                     normalized.campaign_id === activeCampaignFilter);
             if (matchesFilter) {
-                setQuests((prev) => [normalized, ...prev]);
+                setQuests((prev) => sortQuestsForDisplay([normalized, ...prev]));
             } else {
                 await reloadTasks();
             }
@@ -263,7 +264,9 @@ export const useQuestData = ({
                 handleXpPayload(updatedQuest);
                 const normalized = normalizeQuest(updatedQuest);
                 setQuests((prev) =>
-                    prev.map((quest) => (quest.id === questId ? normalized : quest))
+                    sortQuestsForDisplay(
+                        prev.map((quest) => (quest.id === questId ? normalized : quest)),
+                    )
                 );
                 refreshCampaigns();
                 return normalized;
@@ -403,7 +406,7 @@ export const useQuestData = ({
                 onUnauthorized,
             );
             if (Array.isArray(data?.tasks)) {
-                setQuests(normalizeQuestList(data.tasks));
+                setQuests(sortQuestsForDisplay(normalizeQuestList(data.tasks)));
                 pushToast('Seeded demo quests', 'success');
             }
         } catch (error) {
