@@ -157,6 +157,7 @@ function App() {
     taskLevel,
     playerStats,
     setPlayerStats,
+    isAdmin,
     dailyLoading,
     debugBusy,
     showDebugTools,
@@ -654,7 +655,7 @@ function App() {
             >
               ⌨
             </button>
-            {isDebugEnabled && (
+            {isDebugEnabled && isAdmin && (
               <button
                 className="btn-ghost btn-icon"
                 data-skip-shortcuts="true"
@@ -803,7 +804,7 @@ function App() {
           />
         </div>
       )}
-      {isDebugEnabled && showDebugTools && (
+      {isDebugEnabled && isAdmin && showDebugTools && (
         <div className="debug-panel" data-skip-shortcuts="true">
           <div className="debug-title">Debug Utilities</div>
           <div className="debug-actions">

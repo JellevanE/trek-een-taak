@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { createInitialRpgState, ensureUserRpg } from '../rpg/experienceEngine.js';
 import { buildPublicRpgState } from '../rpg/eventHooks.js';
 import type { PublicUser, UserRecord, UserStoreData } from '../types/user.js';
+import { isAdminUsername } from '../config.js';
 
 import { getUsersFile } from './filePaths.js';
 
@@ -89,5 +90,6 @@ export function sanitizeUser(user: UserRecord | null | undefined): PublicUser | 
     return {
         ...rest,
         rpg: buildPublicRpgState(user.rpg),
+        is_admin: isAdminUsername(user.username),
     };
 }

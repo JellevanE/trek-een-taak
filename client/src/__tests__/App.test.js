@@ -37,6 +37,7 @@ const defaultQuestBoard = {
   taskLevel: 1,
   playerStats: null,
   setPlayerStats: jest.fn(),
+  isAdmin: true,
   dailyLoading: false,
   debugBusy: false,
   showDebugTools: false,
@@ -183,6 +184,19 @@ describe("App", () => {
     render(<App />);
     fireEvent.click(screen.getByLabelText("Show debug tools"));
     expect(setShowDebugTools).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  test("hides debug tools entirely for non-admin users", () => {
+    mockUseQuestBoard.mockReturnValue({
+      ...defaultQuestBoard,
+      isAdmin: false,
+      showDebugTools: true, // even if somehow toggled on, gate must hide it
+    });
+    mockUseAuth.mockReturnValue({ token: "test-token" });
+    render(<App />);
+    expect(screen.queryByLabelText("Show debug tools")).not.toBeInTheDocument();
+    expect(screen.queryByText("Debug Utilities")).not.toBeInTheDocument();
+    expect(screen.queryByText("Seed 5 Quests")).not.toBeInTheDocument();
   });
 
   test("shows and hides keyboard shortcuts", () => {
