@@ -64,22 +64,39 @@ afterAll(() => {
 });
 
 test('rate-limit exhaustion degrades to current without generating', async () => {
-    const gen = jest.fn(async () => 'should not run');
+    const gen = jest.fn(async () => 'a tale');
     __setStorylineAiForTesting(gen, async (_t, prev) => prev);
 
-    // Exhaust the daily budget for user 1.
-    for (let i = 0; i < storylineConfig.rateLimits.maxGenerationsPerDay; i++) {
+    const limit = storylineConfig.rateLimits.maxGenerationsPerDay;
+
+    // Consume the full daily budget. Each iteration starts from a fresh
+    // generate-able storyline (no updates) so determineUpdateType returns
+    // 'intro' every time and a quota slot is genuinely spent — otherwise the
+    // first generation would mark the storyline up-to-date and later iterations
+    // would short-circuit before reaching the rate limiter.
+    for (let i = 0; i < limit; i++) {
+        resetStorylineStore(files.storylines, [
+            buildStoryline({ id: 's1', campaignId: 1, updates: [] }),
+        ]);
+        __resetStorylineGenerationState();
         // eslint-disable-next-line no-await-in-loop
-        await StorylineService.checkAndGenerateUpdate('s1', 1);
-        __resetStorylineGenerationState(); // allow the next attempt to pass the in-flight guard
+        const r = await StorylineService.checkAndGenerateUpdate('s1', 1);
+        expect(r.status).toBe('generating'); // quota available → generation fired
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((res) => setTimeout(res, 20)); // drain background work
     }
 
-    // Let all background generations complete before asserting and before the
-    // next beforeEach resets the store (avoids cross-test pollution).
-    await new Promise((r) => setTimeout(r, 50));
+    expect(gen).toHaveBeenCalledTimes(limit);
+    gen.mockClear();
 
+    // Budget exhausted: a fresh generate-able storyline must NOT generate.
+    resetStorylineStore(files.storylines, [
+        buildStoryline({ id: 's1', campaignId: 1, updates: [] }),
+    ]);
+    __resetStorylineGenerationState();
     const result = await StorylineService.checkAndGenerateUpdate('s1', 1);
-    expect(result.status).toBe('current');
+    expect(result.status).toBe('current'); // degraded gracefully
+    expect(gen).not.toHaveBeenCalled(); // no generation attempted past the cap
 });
 
 test('in-flight guard prevents a second concurrent generation', async () => {
