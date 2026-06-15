@@ -71,5 +71,6 @@ export const useQuestBoard = ({ token, setToken, soundFx = null }) => {
         fetchStoryline: storylineApi.fetchStoryline,
         checkStorylineUpdate: storylineApi.checkForUpdate,
         markStorylineAsRead: storylineApi.markUpdateAsRead,
+        generateDebugStorylineUpdate: storylineApi.generateDebugUpdate,
     };
 };

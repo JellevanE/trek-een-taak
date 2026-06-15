@@ -41,6 +41,8 @@ const defaultQuestBoard = {
   dailyLoading: false,
   debugBusy: false,
   showDebugTools: false,
+  storylineIsGenerating: false,
+  generateDebugStorylineUpdate: jest.fn(),
   setShowDebugTools: jest.fn(),
   editingQuest: null,
   editingQuestInputRef: { current: null },

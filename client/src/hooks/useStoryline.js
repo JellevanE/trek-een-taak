@@ -125,6 +125,39 @@ export const useStoryline = ({
         });
     }, []);
 
+    // Admin/dev-only: force-generate a storyline update of a given type for the
+    // selected campaign via the debug endpoint (bypasses the new-day gate and
+    // daily quota) so multiple updates can be previewed on demand.
+    const generateDebugUpdate = useCallback(async (type) => {
+        if (!token) return;
+        if (typeof activeCampaignFilter !== 'number') {
+            if (pushToast) pushToast('Select a campaign first', 'error');
+            return;
+        }
+        setIsGenerating(true);
+        try {
+            const updated = await apiFetch(
+                '/api/debug/generate-storyline-update',
+                {
+                    method: 'POST',
+                    headers: getAuthHeadersUtil(token),
+                    body: JSON.stringify({ campaign_id: activeCampaignFilter, type }),
+                },
+                onUnauthorized,
+            );
+            if (updated) {
+                setCurrentStoryline(updated);
+                setHasNewUpdate(computeHasNewUpdate(updated));
+            }
+            if (pushToast) pushToast(`Generated ${type} update`, 'success');
+        } catch (err) {
+            console.error('Debug storyline generation failed', err);
+            if (pushToast) pushToast('Failed to generate story update', 'error');
+        } finally {
+            setIsGenerating(false);
+        }
+    }, [token, activeCampaignFilter, onUnauthorized, pushToast]);
+
     // Auto-fetch + check when campaign selection changes
     useEffect(() => {
         if (typeof activeCampaignFilter === 'number') {
@@ -145,5 +178,6 @@ export const useStoryline = ({
         fetchStoryline,
         checkForUpdate,
         markUpdateAsRead,
+        generateDebugUpdate,
     };
 };
