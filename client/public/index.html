@@ -10,9 +10,28 @@
         <meta name="theme-color" content="#000000" />
         <meta
             name="description"
-            content="Task Track — Neo-Retro task tracking with RPG elements"
+            content="Task Trek — gamified task tracking. Turn your to-dos into RPG quests, earn XP, and play through your own make-your-own-adventure campaigns."
         />
         <link rel="apple-touch-icon" href="%PUBLIC_URL%/quest_tracker_logo.png" />
+
+        <!-- Canonical + social sharing (Open Graph / Twitter) -->
+        <link rel="canonical" href="https://tasktrek.nl/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://tasktrek.nl/" />
+        <meta property="og:site_name" content="Task Trek" />
+        <meta property="og:title" content="Task Trek — gamified quest-based task tracking" />
+        <meta
+            property="og:description"
+            content="Turn your to-dos into RPG quests, earn XP, and play through your own make-your-own-adventure campaigns."
+        />
+        <meta property="og:image" content="https://tasktrek.nl/quest_tracker_logo.png" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Task Trek — gamified quest-based task tracking" />
+        <meta
+            name="twitter:description"
+            content="Turn your to-dos into RPG quests, earn XP, and play through your own make-your-own-adventure campaigns."
+        />
+        <meta name="twitter:image" content="https://tasktrek.nl/quest_tracker_logo.png" />
         <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -27,11 +46,25 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-        <title>Task Track — Neo‑Retro</title>
+        <title>Task Trek</title>
+        <!-- Self-hosted font (no third-party request to Google = no IP leak / GDPR concern) -->
         <link
-            href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
-            rel="stylesheet"
-        >
+            rel="preload"
+            href="%PUBLIC_URL%/fonts/press-start-2p.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <style>
+            @font-face {
+                font-family: 'Press Start 2P';
+                font-style: normal;
+                font-weight: 400;
+                font-display: swap;
+                src: url('%PUBLIC_URL%/fonts/press-start-2p.woff2')
+                    format('woff2');
+            }
+        </style>
         <script>
             (function bootstrapTheme() {
                 try {

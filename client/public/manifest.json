@@ -1,6 +1,7 @@
 {
-    "short_name": "Task Track",
-    "name": "Task Track — Neo-Retro Quest Board",
+    "short_name": "Task Trek",
+    "name": "Task Trek — Gamified Quest Board",
+    "description": "Gamified task tracking. Turn your to-dos into RPG quests, earn XP, and play through your own make-your-own-adventure campaigns.",
     "icons": [
         {
             "src": "quest_tracker_logo.png",
