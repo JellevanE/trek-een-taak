@@ -62,18 +62,43 @@ export const useStoryline = ({
         if (!token) return;
         setIsGenerating(true);
 
+        const applyStoryline = (storyline) => {
+            setCurrentStoryline((prev) =>
+                prev && prev.campaignId !== campaignId ? prev : storyline);
+            setHasNewUpdate(computeHasNewUpdate(storyline));
+        };
+
         try {
             const data = await apiFetch(
                 `/api/storylines/${campaignId}/check-update`,
                 { headers: getAuthHeadersUtil(token) },
                 onUnauthorized,
             );
-            const { updates } = data;
 
-            if (updates) {
+            const startingCount = data.updates ? data.updates.length : 0;
+
+            if (data.status === 'generating') {
+                // Poll the storyline until the new update lands (or we give up).
+                const MAX_ATTEMPTS = 10;
+                const INTERVAL_MS = 3000;
+                for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+                    // eslint-disable-next-line no-await-in-loop
+                    await new Promise((r) => setTimeout(r, INTERVAL_MS));
+                    // eslint-disable-next-line no-await-in-loop
+                    const fresh = await apiFetch(
+                        `/api/storylines/${campaignId}`,
+                        { headers: getAuthHeadersUtil(token) },
+                        onUnauthorized,
+                    );
+                    if (fresh && Array.isArray(fresh.updates) && fresh.updates.length > startingCount) {
+                        applyStoryline(fresh);
+                        break;
+                    }
+                }
+            } else if (data.updates) {
                 setCurrentStoryline((prev) => {
                     const next = prev && prev.campaignId === campaignId
-                        ? { ...prev, updates }
+                        ? { ...prev, updates: data.updates }
                         : prev;
                     setHasNewUpdate(computeHasNewUpdate(next));
                     return next;
@@ -81,7 +106,6 @@ export const useStoryline = ({
             }
             setIsGenerating(false);
         } catch (err) {
-            // 404 is expected when no storyline exists
             if (err.status !== 404) {
                 console.error('Failed to check for updates', err);
                 setError(err.message);
