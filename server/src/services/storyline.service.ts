@@ -3,10 +3,11 @@ import type { Storyline, StoryUpdate } from '../types/storyline.js';
 import { readStorylines, writeStorylines } from '../data/storylineStore.js';
 import { storylineConfig } from '../config/storyline.config.js';
 import { aiGenerationRateLimiter } from '../security/aiGenerationRateLimiter.js';
+import { readTasks } from '../data/taskStore.js';
 
 // ─── Validation ──────────────────────────────────────────────────────────────
 
-function sanitize(text: string): string {
+export function sanitize(text: string): string {
     return text
         .replace(/\{\{/g, '')
         .replace(/\}\}/g, '')
@@ -14,7 +15,7 @@ function sanitize(text: string): string {
         .trim();
 }
 
-function validateAndSanitize(
+export function validateAndSanitize(
     fields: Record<string, string | undefined>,
 ): Record<string, string> {
     const {
@@ -58,6 +59,30 @@ function computeProgress(
     if (campaignTasks.length === 0) return 0;
     const done = campaignTasks.filter((t) => t.status === 'done').length;
     return Math.round((done / campaignTasks.length) * 100);
+}
+
+// ─── Update type decision ────────────────────────────────────────────────────
+
+export type UpdateType = 'intro' | 'daily' | 'reflection' | 'completion';
+
+export function determineUpdateType(storyline: Storyline): UpdateType | null {
+    if (storyline.updates.length === 0) return 'intro';
+
+    const today = new Date().toDateString();
+    const lastVisit = new Date(storyline.lastVisitDate).toDateString();
+    if (today === lastVisit) return null;
+
+    const tasksData = readTasks();
+    const progressPercentage = computeProgress(tasksData.tasks, storyline.campaignId);
+    if (progressPercentage >= 100) return 'completion';
+
+    const completedSinceLastVisit = tasksData.tasks.filter(
+        (t) =>
+            t.campaign_id === storyline.campaignId &&
+            t.status === 'done' &&
+            new Date(t.updated_at) > new Date(storyline.lastVisitDate),
+    );
+    return completedSinceLastVisit.length > 0 ? 'daily' : 'reflection';
 }
 
 // ─── Service ─────────────────────────────────────────────────────────────────
