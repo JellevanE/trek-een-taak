@@ -1,7 +1,7 @@
 export const storylineConfig = {
     claude: {
-        model: 'claude-haiku-4-5-20251001',
-        extractorModel: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-6', // story text
+        extractorModel: 'claude-haiku-4-5-20251001', // narrative state extraction
         maxTokens: 1000,
         temperature: 0.8,
     },
@@ -11,8 +11,10 @@ export const storylineConfig = {
         maxHistoryUpdates: 3,
     },
     rateLimits: {
+        // Per-user/day generation budget is the primary cost guard.
+        // The old maxActiveCampaignsWithStorylines cap was dropped: with lazy
+        // intro generation, an unopened storyline costs nothing.
         maxGenerationsPerDay: 10,
-        maxActiveCampaignsWithStorylines: 5,
     },
     validation: {
         maxCampaignNameLength: 200,

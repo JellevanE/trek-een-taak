@@ -3,11 +3,13 @@ import { apiFetch, getAuthHeaders as getAuthHeadersUtil } from '../utils/api.js'
 
 export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorized }) => {
     const [playerStats, setPlayerStats] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [dailyLoading, setDailyLoading] = useState(false);
 
     useEffect(() => {
         if (!token) {
             setPlayerStats(null);
+            setIsAdmin(false);
             return;
         }
 
@@ -18,8 +20,9 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorize
                     { headers: getAuthHeadersUtil(token) },
                     onUnauthorized,
                 );
-                if (data && data.user && data.user.rpg) {
-                    setPlayerStats(data.user.rpg);
+                if (data && data.user) {
+                    if (data.user.rpg) setPlayerStats(data.user.rpg);
+                    setIsAdmin(!!data.user.is_admin);
                 }
             } catch (error) {
                 console.error('Error fetching player stats:', error);
@@ -73,6 +76,7 @@ export const usePlayerStats = ({ token, getAuthHeaders, pushToast, onUnauthorize
     return {
         playerStats,
         setPlayerStats,
+        isAdmin,
         dailyLoading,
         setDailyLoading,
         handleXpPayload,

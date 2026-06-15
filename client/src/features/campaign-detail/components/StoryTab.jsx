@@ -18,7 +18,11 @@ export const StoryTab = ({
     }, [hasNewUpdate]);
 
     if (!storyline) {
-        return <div className='story-empty'>No story has begun yet.</div>;
+        return (
+            <div className='story-empty'>
+                {isGenerating ? 'Consulting the Oracle…' : 'No story has begun yet.'}
+            </div>
+        );
     }
 
     const { narrativeState, updates } = storyline;

@@ -157,6 +157,7 @@ function App() {
     taskLevel,
     playerStats,
     setPlayerStats,
+    isAdmin,
     dailyLoading,
     debugBusy,
     showDebugTools,
@@ -236,6 +237,7 @@ function App() {
     storylineIsGenerating,
     checkStorylineUpdate,
     markStorylineAsRead,
+    generateDebugStorylineUpdate,
   } = useQuestBoard({ token, setToken, soundFx: soundFxController });
 
   // Constants for item heights
@@ -654,7 +656,7 @@ function App() {
             >
               ⌨
             </button>
-            {isDebugEnabled && (
+            {isDebugEnabled && isAdmin && (
               <button
                 className="btn-ghost btn-icon"
                 data-skip-shortcuts="true"
@@ -803,7 +805,7 @@ function App() {
           />
         </div>
       )}
-      {isDebugEnabled && showDebugTools && (
+      {isDebugEnabled && isAdmin && showDebugTools && (
         <div className="debug-panel" data-skip-shortcuts="true">
           <div className="debug-title">Debug Utilities</div>
           <div className="debug-actions">
@@ -859,7 +861,28 @@ function App() {
               Reset RPG
             </button>
           </div>
-          {debugBusy && <div className="debug-status">Working…</div>}
+          <div className="debug-title">
+            Storyline{" "}
+            {typeof activeCampaignFilter === "number"
+              ? "(selected campaign)"
+              : "(select a campaign first)"}
+          </div>
+          <div className="debug-actions">
+            {["intro", "daily", "reflection", "completion"].map((type) => (
+              <button
+                key={type}
+                className="btn-ghost"
+                onClick={() => generateDebugStorylineUpdate(type)}
+                disabled={storylineIsGenerating ||
+                  typeof activeCampaignFilter !== "number"}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </button>
+            ))}
+          </div>
+          {(debugBusy || storylineIsGenerating) && (
+            <div className="debug-status">Working…</div>
+          )}
         </div>
       )}
       <div className="board-layout">

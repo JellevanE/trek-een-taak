@@ -90,6 +90,7 @@ export interface UserRecord {
 
 export type PublicUser = Omit<UserRecord, 'password_hash' | 'rpg'> & {
     rpg: PublicUserRpgState;
+    is_admin: boolean;
 };
 
 export interface UserStoreData {
