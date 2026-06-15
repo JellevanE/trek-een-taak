@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, getAuthHeaders as getAuthHeadersUtil } from '../utils/api.js';
+import {
+    computeHasNewUpdate,
+    setLastSeenUpdateId,
+} from '../utils/storylineReadState.js';
 
 export const useStoryline = ({
     token,
@@ -37,6 +41,7 @@ export const useStoryline = ({
                 onUnauthorized,
             );
             setCurrentStoryline(data);
+            setHasNewUpdate(computeHasNewUpdate(data));
             setLoading(false);
             return data;
         } catch (err) {
@@ -65,13 +70,13 @@ export const useStoryline = ({
             );
             const { updates } = data;
 
-            if (updates && updates.length > 0) {
-                setHasNewUpdate(true);
+            if (updates) {
                 setCurrentStoryline((prev) => {
-                    if (prev && prev.campaignId === campaignId) {
-                        return { ...prev, updates };
-                    }
-                    return prev;
+                    const next = prev && prev.campaignId === campaignId
+                        ? { ...prev, updates }
+                        : prev;
+                    setHasNewUpdate(computeHasNewUpdate(next));
+                    return next;
                 });
             }
             setIsGenerating(false);
@@ -87,6 +92,13 @@ export const useStoryline = ({
 
     const markUpdateAsRead = useCallback(() => {
         setHasNewUpdate(false);
+        setCurrentStoryline((prev) => {
+            if (prev && Array.isArray(prev.updates) && prev.updates.length > 0) {
+                const latest = prev.updates[prev.updates.length - 1];
+                setLastSeenUpdateId(prev.campaignId, latest.id);
+            }
+            return prev;
+        });
     }, []);
 
     // Auto-fetch + check when campaign selection changes
