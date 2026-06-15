@@ -57,24 +57,24 @@
 }
 
 .subtask-desc {
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     color: #e6f7ff;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .subtask-desc.small {
-    font-size: 12px;
+    font-size: var(--fs-label);
 }
 
 .side-quest-desc {
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-body);
     color: #e6f7ff;
-    font-size: 14px;
+    font-size: var(--fs-body);
     overflow-wrap: anywhere;
 }
 
 .side-quest-desc.small {
-    font-size: 12px;
+    font-size: var(--fs-label);
 }
 
 .task .subtask-desc.started,

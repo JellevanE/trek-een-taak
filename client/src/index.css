@@ -1,4 +1,22 @@
+/* Display (Pixelcastle) + body (RetroByte) faces are declared in public/index.html
+   so the browser can preload them before first paint. */
 :root {
+    /* Typography system
+       - display  : Pixelcastle, for titles and section headings (used with restraint)
+       - body     : RetroByte, the legible workhorse for everything else
+       Type scale is a single source of truth so sizing stays consistent. */
+    --font-display: 'Pixelcastle', 'Press Start 2P', monospace;
+    --font-body: 'RetroByte', 'Courier New', monospace;
+    --fs-display: 32px; /* hero / app title (only place the display face is used) */
+    --fs-h1: 22px;
+    --fs-h2: 19px;
+    --fs-h3: 18px;
+    --fs-body: 15px; /* default reading size */
+    --fs-label: 13px; /* eyebrows, meta, captions */
+    --fs-micro: 11px; /* smallest permissible text */
+    --lh-tight: 1.25;
+    --lh-body: 1.55;
+
     --bg-dark: #081020;
     --panel-dark: #0f1724;
     --accent-cyan: #00f0ff;
@@ -114,11 +132,49 @@ body {
         radial-gradient(ellipse at center, rgba(20, 24, 35, 1) 0%, rgba(8, 16, 32, 1) 60%)
     );
     color: var(--muted);
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--bg-dark);
     overflow-y: auto;
+}
+
+/* Headings use the legible body face by default; the decorative display face is
+   reserved for the hero title only (see .App-header h1). Sizes come from the
+   scale, not ad-hoc values. */
+h1, h2, h3, h4 {
+    font-family: var(--font-body);
+    line-height: var(--lh-tight);
+    font-weight: 400;
+}
+
+h1 {
+    font-size: var(--fs-h1);
+}
+
+h2 {
+    font-size: var(--fs-h2);
+}
+
+h3 {
+    font-size: var(--fs-h3);
+}
+
+/* Pixel-art icon set: the SVG is used as a mask so the glyph takes the
+   surrounding text colour (active/muted/etc.) and aligns with the baseline. */
+.ui-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
 }
 
 html[data-theme-ready='false'] body {

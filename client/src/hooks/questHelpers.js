@@ -27,6 +27,29 @@ export const normalizeQuest = (task) => {
 
 export const normalizeQuestList = (list) => (Array.isArray(list) ? list.map(normalizeQuest) : []);
 
+/**
+ * sortQuestsForDisplay
+ * --------------------
+ * Open quests float to the top (keeping their incoming relative order, so manual
+ * drag ordering within the open group is preserved). Completed quests sink to the
+ * bottom, most-recently-completed first — so finishing a quest drops it to the top
+ * of the "completed" group.
+ */
+export const sortQuestsForDisplay = (list) => {
+    if (!Array.isArray(list)) return [];
+    const open = [];
+    const done = [];
+    list.forEach((quest) => {
+        (getQuestStatus(quest) === 'done' ? done : open).push(quest);
+    });
+    done.sort((a, b) => {
+        const at = Date.parse(a?.updated_at) || 0;
+        const bt = Date.parse(b?.updated_at) || 0;
+        return bt - at;
+    });
+    return [...open, ...done];
+};
+
 export const getQuestStatus = (quest) => {
     if (!quest) return 'todo';
     return quest.status || (quest.completed ? 'done' : 'todo');

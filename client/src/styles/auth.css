@@ -3,11 +3,11 @@
 .auth-required-screen {
     max-width: 400px;
     padding: 32px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--panel-dark);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-left: 3px solid var(--accent-pink);
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(155, 92, 255, 0.08) inset;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     position: relative;
     z-index: 1;
 }
@@ -51,11 +51,11 @@
 .registration-wizard {
     max-width: 500px;
     margin: 0 auto;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--panel-dark);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-left: 3px solid var(--accent-pink);
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(155, 92, 255, 0.08) inset;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     overflow: hidden;
 }
 

@@ -27,15 +27,19 @@
 .App-header h1 {
     margin: 0;
     color: white;
-    letter-spacing: 1px;
-    font-size: 18px;
+    font-family: var(--font-display);
+    letter-spacing: 2px;
+    font-size: var(--fs-display);
+    line-height: var(--lh-tight);
     text-shadow: 0 0 8px rgba(0, 240, 255, 0.24), 0 0 16px rgba(255, 46, 196, 0.08);
 }
 
 .App-header .subtitle {
-    font-size: 10px;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
     color: var(--muted);
-    margin-top: 6px;
+    margin-top: 10px;
+    line-height: var(--lh-body);
 }
 
 /* Global sticky progress bar at the top of the app (always visible) */

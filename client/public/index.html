@@ -55,6 +55,20 @@
             type="font/woff2"
             crossorigin
         />
+        <link
+            rel="preload"
+            href="%PUBLIC_URL%/fonts/pixelcastle/Pixelcastle-Regular.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link
+            rel="preload"
+            href="%PUBLIC_URL%/fonts/RetroByte.ttf"
+            as="font"
+            type="font/ttf"
+            crossorigin
+        />
         <style>
             @font-face {
                 font-family: 'Press Start 2P';
@@ -63,6 +77,23 @@
                 font-display: swap;
                 src: url('%PUBLIC_URL%/fonts/press-start-2p.woff2')
                     format('woff2');
+            }
+            @font-face {
+                font-family: 'Pixelcastle';
+                font-style: normal;
+                font-weight: 400;
+                font-display: swap;
+                src: url('%PUBLIC_URL%/fonts/pixelcastle/Pixelcastle-Regular.woff2')
+                        format('woff2'),
+                    url('%PUBLIC_URL%/fonts/pixelcastle/Pixelcastle-Regular.woff')
+                        format('woff');
+            }
+            @font-face {
+                font-family: 'RetroByte';
+                font-style: normal;
+                font-weight: 400;
+                font-display: swap;
+                src: url('%PUBLIC_URL%/fonts/RetroByte.ttf') format('truetype');
             }
         </style>
         <script>

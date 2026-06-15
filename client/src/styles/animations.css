@@ -147,7 +147,7 @@
 }
 
 .level-up-burst .burst-text {
-    font-family: 'Press Start 2P', monospace;
+    font-family: var(--font-display);
 }
 
 @keyframes burst-fade {

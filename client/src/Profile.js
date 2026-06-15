@@ -12,6 +12,7 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
     const [password, setPassword] = useState('');
     const [showRegistrationWizard, setShowRegistrationWizard] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [loginError, setLoginError] = useState('');
 
     useEffect(() => {
         if (!token) {
@@ -93,21 +94,40 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
     };
 
     const handleLogin = () => {
-        if (!username || !password) return;
+        if (!username || !password) {
+            setLoginError('Enter your username and password.');
+            return;
+        }
+        setLoginError('');
         setLoading(true);
         fetch(apiUrl('/api/users/login'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
         })
-            .then((r) => r.json())
-            .then((data) => {
-                if (data.token) {
-                    if (data.user && data.user.rpg) setRpg(data.user.rpg);
-                    onLogin(data.token, data.user);
+            .then(async (r) => {
+                let data = null;
+                try {
+                    data = await r.json();
+                } catch {
+                    data = null;
                 }
+                if (!r.ok || !data || !data.token) {
+                    const message = data && data.error
+                        ? data.error
+                        : 'Incorrect username or password.';
+                    throw new Error(message);
+                }
+                if (data.user && data.user.rpg) setRpg(data.user.rpg);
+                onLogin(data.token, data.user);
             })
-            .catch(() => {})
+            .catch((error) => {
+                setLoginError(
+                    error && error.message
+                        ? error.message
+                        : "Couldn't sign in. Please try again.",
+                );
+            })
             .finally(() => setLoading(false));
     };
 
@@ -146,15 +166,26 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
                         placeholder='username'
                         autoComplete='username'
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        onChange={(e) => {
+                            setUsername(e.target.value);
+                            if (loginError) setLoginError('');
+                        }}
                     />
                     <input
                         placeholder='password'
                         type='password'
                         autoComplete='current-password'
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (loginError) setLoginError('');
+                        }}
                     />
+                    {loginError && (
+                        <div className='login-error' role='alert'>
+                            {loginError}
+                        </div>
+                    )}
                     <button type='submit' disabled={loading} className='btn-primary'>
                         {loading ? 'Signing In...' : 'Sign In'}
                     </button>

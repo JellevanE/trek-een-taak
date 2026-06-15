@@ -147,3 +147,8 @@ _CRA build stats (post-migration): main bundle 119.33 kB gzip (+16.88 kB vs prev
   - No conflicts with browser/OS shortcuts
   - Shortcuts work within edit forms (or are contextually disabled)
   - Help panel (?) is keyboard-accessible
+
+
+
+
+Icons used from https://pixeliconlibrary.com/
