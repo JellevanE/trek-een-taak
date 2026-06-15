@@ -5,6 +5,40 @@ import { storylineConfig } from '../config/storyline.config.js';
 import { aiGenerationRateLimiter } from '../security/aiGenerationRateLimiter.js';
 import { readTasks } from '../data/taskStore.js';
 
+// ─── AI seam (injectable for tests) ─────────────────────────────────────────
+
+// Injectable AI seam — defaults to the real LangChain-backed implementation.
+// Tests override this to avoid real API calls (the repo's ts-jest ESM setup
+// has no module mocking; injection is the clean alternative).
+type TextGenerator = (
+    template: string,
+    context: Record<string, unknown>,
+    systemPrompt?: string,
+) => Promise<string>;
+type StateExtractor = (
+    text: string,
+    previous: Storyline['narrativeState'],
+) => Promise<Storyline['narrativeState']>;
+
+let textGeneratorOverride: TextGenerator | null = null;
+let stateExtractorOverride: StateExtractor | null = null;
+
+export function __setStorylineAiForTesting(
+    generator: TextGenerator | null,
+    extractor: StateExtractor | null,
+): void {
+    textGeneratorOverride = generator;
+    stateExtractorOverride = extractor;
+}
+
+// Storylines currently mid-generation. Prevents polling from kicking off a
+// duplicate run before lastVisitDate is updated. In-memory: resets on restart.
+const generationInFlight = new Set<string>();
+
+export function __resetStorylineGenerationState(): void {
+    generationInFlight.clear();
+}
+
 // ─── Validation ──────────────────────────────────────────────────────────────
 
 export function sanitize(text: string): string {
@@ -134,52 +168,25 @@ export class StorylineService {
     static async checkAndGenerateUpdate(
         storylineId: string,
         userId: number,
-    ): Promise<{ status: 'generating' | 'current'; updates?: StoryUpdate[] }> {
+    ): Promise<{ status: 'generating' | 'current'; updates: StoryUpdate[] }> {
         const data = readStorylines();
         const storyline = data.storylines.find((s) => s.id === storylineId);
-
         if (!storyline) {
             throw new Error('Storyline not found');
         }
 
-        const today = new Date().toDateString();
-        const lastVisit = new Date(storyline.lastVisitDate).toDateString();
-        const isNewDay = today !== lastVisit;
-
-        // Determine what type of update is needed
-        type UpdateType = 'intro' | 'daily' | 'reflection' | 'completion';
-        let updateType: UpdateType | null = null;
-
-        if (storyline.updates.length === 0) {
-            updateType = 'intro';
-        } else if (isNewDay) {
-            const { readTasks } = await import('../data/taskStore.js');
-            const tasksData = readTasks();
-
-            const progressPercentage = computeProgress(
-                tasksData.tasks,
-                storyline.campaignId,
-            );
-            if (progressPercentage >= 100) {
-                updateType = 'completion';
-            } else {
-                const completedSinceLastVisit = tasksData.tasks.filter(
-                    (t) =>
-                        t.campaign_id === storyline.campaignId &&
-                        t.status === 'done' &&
-                        new Date(t.updated_at) > new Date(storyline.lastVisitDate),
-                );
-                updateType = completedSinceLastVisit.length > 0 ? 'daily' : 'reflection';
-            }
-        }
-
+        const updateType = determineUpdateType(storyline);
         if (!updateType) {
             return { status: 'current', updates: storyline.updates };
         }
 
-        // Enforce the per-user daily generation budget before spending an API call.
-        // When exhausted, degrade gracefully by returning the existing narrative
-        // rather than erroring — the user just doesn't get a new update today.
+        // Already generating for this storyline — let the client keep polling.
+        if (generationInFlight.has(storylineId)) {
+            return { status: 'generating', updates: storyline.updates };
+        }
+
+        // Enforce the per-user daily generation budget before spending an API
+        // call. When exhausted, degrade gracefully: return existing narrative.
         const quota = aiGenerationRateLimiter.attempt(String(userId));
         if (!quota.allowed) {
             console.warn(
@@ -189,26 +196,26 @@ export class StorylineService {
             return { status: 'current', updates: storyline.updates };
         }
 
-        try {
-            await this.generateStoryUpdate(storyline, updateType, userId);
+        // Fire generation in the background; return immediately.
+        generationInFlight.add(storylineId);
+        void this.generateStoryUpdate(storyline, updateType, userId)
+            .catch((e) => {
+                const fresh = readStorylines();
+                const sl = fresh.storylines.find((s) => s.id === storylineId);
+                if (sl) {
+                    sl.generationFailures += 1;
+                    writeStorylines(fresh);
+                }
+                console.error('Story generation failed', e);
+            })
+            .finally(() => {
+                generationInFlight.delete(storylineId);
+            });
 
-            const updatedData = readStorylines();
-            const updatedStoryline = updatedData.storylines.find((s) => s.id === storylineId);
-            return { status: 'current', updates: updatedStoryline?.updates ?? [] };
-        } catch (e) {
-            // Increment failure counter and persist
-            const freshData = readStorylines();
-            const sl = freshData.storylines.find((s) => s.id === storylineId);
-            if (sl) {
-                sl.generationFailures += 1;
-                writeStorylines(freshData);
-            }
-            console.error('Story generation failed', e);
-            return { status: 'current', updates: storyline.updates };
-        }
+        return { status: 'generating', updates: storyline.updates };
     }
 
-    private static async generateStoryUpdate(
+    static async generateStoryUpdate(
         storyline: Storyline,
         type: 'intro' | 'daily' | 'reflection' | 'completion',
         userId: number,
@@ -297,17 +304,15 @@ export class StorylineService {
         const template = PromptService.loadTemplate(storyline.theme, templateType);
         const systemPrompt = PromptService.loadSystemPrompt(storyline.theme);
 
-        const text = await langChainService.generateText(
-            template,
-            context,
-            systemPrompt,
-        );
+        const generate = textGeneratorOverride
+            ?? langChainService.generateText.bind(langChainService);
+        const extract = stateExtractorOverride
+            ?? NarrativeExtractorService.extractState.bind(NarrativeExtractorService);
+
+        const text = await generate(template, context, systemPrompt);
 
         // Extract updated narrative state; falls back to previous on failure
-        const newNarrativeState = await NarrativeExtractorService.extractState(
-            text,
-            storyline.narrativeState,
-        );
+        const newNarrativeState = await extract(text, storyline.narrativeState);
 
         const now = new Date().toISOString();
         const newUpdate: StoryUpdate = {
