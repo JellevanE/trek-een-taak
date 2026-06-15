@@ -3,6 +3,7 @@ import { assertAuthenticated } from '../utils/authGuard.js';
 import type { AuthenticatedRequest } from '../types/auth.js';
 import { sendError } from '../utils/http.js';
 import { StorylineService } from '../services/storyline.service.js';
+import { readCampaigns } from '../data/campaignStore.js';
 
 type BaseAuthedRequest = AuthenticatedRequest<{ campaignId: string }>;
 
@@ -29,9 +30,16 @@ export async function checkUpdate(req: BaseAuthedRequest, res: Response) {
     const campaignId = parseInt(req.params.campaignId, 10);
     if (isNaN(campaignId)) return sendError(res, 400, 'Invalid campaign ID');
 
-    const storyline = StorylineService.getStoryline(campaignId);
+    let storyline = StorylineService.getStoryline(campaignId);
     if (!storyline) {
-        return sendError(res, 404, 'Storyline not found');
+        // Backward-compat: campaigns created before the storyline feature (or
+        // any campaign missing a record) get one lazily on first check. Only do
+        // this for a campaign that exists and belongs to the requesting user.
+        const campaign = readCampaigns().campaigns.find((c) => c.id === campaignId);
+        if (!campaign || campaign.owner_id !== req.user.id) {
+            return sendError(res, 404, 'Storyline not found');
+        }
+        storyline = StorylineService.createStoryline(campaignId);
     }
 
     try {
