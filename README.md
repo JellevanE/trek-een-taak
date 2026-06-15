@@ -155,6 +155,53 @@ it:
 The same gate protects the `/api/debug/*` helpers. When `ADMIN_USERNAMES` is
 unset, every admin and debug request returns `403`.
 
+For convenience there is a helper that prints the stats as a table:
+
+```bash
+make stats                              # prompts for the password (hidden), then logs in
+make stats ARGS="--user jelle_admin"    # pick the account; --json for raw output
+```
+
+The **preferred** credential is a short-lived token, so no secret needs to live
+on disk. Grab one from the deployed app (DevTools → `localStorage.auth_token`)
+or a `/api/users/login` call, then:
+
+```bash
+export ADMIN_TOKEN=eyJ...                # 7-day, app-scoped; nothing stored on disk
+make stats
+```
+
+It defaults to the production host and to the first name in `server/.env`'s
+`ADMIN_USERNAMES` (username only). If you have no token it falls back to a hidden
+password prompt; for non-interactive runs you may `export ADMIN_PASSWORD=…` in
+your shell. The password is **never** read from `server/.env` — keep privileged
+credentials out of the server's config file.
+
+#### How token auth works (and why a token, not the password)
+
+`export ADMIN_TOKEN=…` sets an environment variable in the **current terminal
+session only** — nothing is written to disk, and it's gone when you close the
+shell. `make stats` reads it via `ADMIN_TOKEN`.
+
+The token is a **JWT** — a tamper-proof, server-signed badge:
+
+1. At login (after your password matches the stored hash) the server mints a
+   token containing `{ id, username }` and **signs it with `JWT_SECRET`**. Only
+   the server holds that secret, so only the server can produce a valid one.
+2. Each later request sends `Authorization: Bearer <token>` — **no password is
+   re-sent**. The `authenticate` middleware re-checks the signature against
+   `JWT_SECRET`; if anything in the token was altered (e.g. the `username`), the
+   signature fails and the request is rejected (`401`). On success it trusts the
+   claims and sets `req.user`.
+3. `ensureAdmin` then checks `req.user.username` against `ADMIN_USERNAMES`.
+
+So the server "knows it's you" because the signature proves _whoever holds this
+token logged in as that username within the last 7 days_ (tokens expire after
+`7d`). It's a **bearer** credential — anyone holding it is you until it expires —
+but it can't be forged without `JWT_SECRET`, auto-expires, is scoped to this app,
+and you can invalidate every outstanding token at once by rotating `JWT_SECRET`
+on the host. That's why it's preferable to storing the password on disk.
+
 ## To do
 
 - [x] Set up Deno automations and validations

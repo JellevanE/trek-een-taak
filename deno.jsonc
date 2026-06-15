@@ -36,6 +36,7 @@
         "build:client": "deno run --allow-env --allow-read --allow-run tools/validate.ts client:build",
         "backup": "deno run --allow-env --allow-read --allow-write tools/backup.ts",
         "backup:list": "deno run --allow-env --allow-read --allow-write tools/backup.ts --list",
-        "backup:keep": "deno run --allow-env --allow-read --allow-write tools/backup.ts --keep 10"
+        "backup:keep": "deno run --allow-env --allow-read --allow-write tools/backup.ts --keep 10",
+        "admin:stats": "deno run --allow-env --allow-net --allow-read tools/admin-stats.ts"
     }
 }

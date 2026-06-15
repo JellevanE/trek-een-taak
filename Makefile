@@ -87,10 +87,13 @@ validate: ## Run the full validation suite (server + client)
 	deno task validate
 
 # ── Admin / docs ─────────────────────────────────────────────────────────────
-.PHONY: admins docs
+.PHONY: admins stats docs
 admins: ## Show which usernames have admin access locally (server/.env)
 	@grep -E '^ADMIN_USERNAMES=' $(SERVER)/.env 2>/dev/null \
 		|| echo "ADMIN_USERNAMES not set in $(SERVER)/.env"
+
+stats: ## Fetch admin user stats from the deployed API (prompts for password; pass ARGS="--user x --json")
+	deno task admin:stats $(ARGS)
 
 docs: ## Regenerate the server OpenAPI spec
 	cd $(SERVER) && npm run docs:generate
