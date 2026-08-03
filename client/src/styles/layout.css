@@ -16,8 +16,8 @@
     max-width: var(--quest-board-frame-max-width);
     margin: 0 auto 18px;
     padding: 18px 20px;
-    background: linear-gradient(180deg, rgb(18, 14, 36), rgb(8, 6, 18));
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--surface-panel);
+    border: 1px solid var(--surface-panel-border);
     border-left: 3px solid var(--accent-pink);
     border-radius: 8px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6), 0 0 18px rgba(155, 92, 255, 0.06) inset;
@@ -26,11 +26,14 @@
 
 .App-header h1 {
     margin: 0;
-    color: white;
+    color: var(--text-primary);
     font-family: var(--font-display);
     letter-spacing: 2px;
     font-size: var(--fs-display);
     line-height: var(--lh-tight);
+    /* Hero is the one pixel-grid face — keep it crisp, not antialiased. */
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: auto;
     text-shadow: 0 0 8px rgba(0, 240, 255, 0.24), 0 0 16px rgba(255, 46, 196, 0.08);
 }
 

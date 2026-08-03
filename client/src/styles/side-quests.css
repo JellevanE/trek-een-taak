@@ -17,7 +17,7 @@
 }
 
 .quest li.selected .side-quest-desc {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .quest li.selected .task-row {
@@ -58,7 +58,7 @@
 
 .subtask-desc {
     font-family: var(--font-body);
-    color: #e6f7ff;
+    color: var(--text-primary);
     font-size: var(--fs-body);
 }
 
@@ -68,7 +68,7 @@
 
 .side-quest-desc {
     font-family: var(--font-body);
-    color: #e6f7ff;
+    color: var(--text-primary);
     font-size: var(--fs-body);
     overflow-wrap: anywhere;
 }
@@ -80,12 +80,12 @@
 .task .subtask-desc.started,
 .quest .side-quest-desc.started {
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .task .subtask-desc.in-progress,
 .quest .side-quest-desc.in-progress {
-    color: #bfe6ff;
+    color: var(--info);
 }
 
 .side-quest-scroll .completed .task-row {

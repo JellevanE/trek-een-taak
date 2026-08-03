@@ -15,21 +15,21 @@
     min-width: 200px;
     padding: 10px 14px;
     border-radius: 10px;
-    background: rgba(0, 0, 0, 0.75);
-    color: #f5f5f5;
+    background: var(--panel-dark);
+    color: var(--text-primary);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 13px;
 }
 
 .toast.success {
-    background: linear-gradient(135deg, rgba(30, 215, 96, 0.28), rgba(15, 95, 65, 0.9));
+    background: linear-gradient(135deg, var(--success-soft), var(--panel-dark));
 }
 .toast.error {
-    background: linear-gradient(135deg, rgba(255, 64, 64, 0.32), rgba(102, 16, 16, 0.88));
+    background: linear-gradient(135deg, var(--danger-soft), var(--panel-dark));
 }
 .toast.info {
-    background: linear-gradient(135deg, rgba(80, 120, 255, 0.24), rgba(20, 32, 64, 0.85));
+    background: linear-gradient(135deg, var(--info-soft), var(--panel-dark));
 }
 
 .undo-toast {
@@ -38,7 +38,7 @@
     gap: 10px;
     padding: 10px 14px;
     border-radius: 12px;
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(0, 0, 0, 0.7));
+    background: linear-gradient(135deg, var(--info-soft), var(--panel-dark));
     border: 1px solid rgba(0, 240, 255, 0.25);
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
 }
@@ -47,7 +47,7 @@
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.4px;
-    color: #eaf9ff;
+    color: var(--text-primary);
     max-width: 240px;
     white-space: nowrap;
     overflow: hidden;
@@ -62,18 +62,18 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(4, 8, 16, 0.75);
+    background: var(--overlay-scrim);
     backdrop-filter: blur(6px);
 }
 
 .shortcuts-panel {
     width: min(520px, 100%);
-    background: linear-gradient(180deg, rgba(18, 26, 40, 0.96), rgba(6, 12, 24, 0.94));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-panel);
+    border: 1px solid var(--surface-panel-border);
     border-radius: 16px;
     box-shadow: 0 28px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(0, 240, 255, 0.1);
     padding: 26px 30px;
-    color: #ffffff;
+    color: var(--text-primary);
     outline: none;
 }
 
@@ -89,7 +89,7 @@
     margin: 0;
     font-size: 18px;
     letter-spacing: 0.8px;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .shortcuts-description {
@@ -151,7 +151,7 @@
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.14);
     background: rgba(255, 255, 255, 0.08);
-    color: #f2f8ff;
+    color: var(--text-primary);
     font-size: 12px;
     letter-spacing: 0.4px;
     box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.35);
@@ -160,7 +160,7 @@
 .shortcut-description {
     flex: 1;
     text-align: left;
-    color: #dce7ff;
+    color: var(--text-primary);
     font-size: 13px;
 }
 
@@ -191,7 +191,7 @@
     padding: 12px;
     border-radius: 8px;
     min-width: 260px;
-    color: white;
+    color: var(--text-primary);
 }
 
 .profile-header {
@@ -217,10 +217,10 @@
 .error-banner {
     margin: 16px 32px 0;
     padding: 12px 16px;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: var(--danger-soft);
+    border: 1px solid var(--danger-soft);
     border-radius: 8px;
-    color: #ef4444;
+    color: var(--danger);
 }
 
 .error-content {

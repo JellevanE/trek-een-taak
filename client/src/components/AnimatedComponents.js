@@ -18,7 +18,7 @@ export const AnimatedQuestCard = ({ children, isNew = false, isCompleting = fals
 
 export const AnimatedProgressBar = ({
     percent = 0,
-    color = '#00d4ff',
+    color = 'var(--accent-cyan)',
     className = 'quest-progress-bar',
     style = {},
     ariaProps = {},
@@ -51,11 +51,12 @@ export const AnimatedProgressBar = ({
 );
 
 export const AnimatedToast = ({ message, type = 'info', onDismiss }) => {
-    const typeColors = {
-        success: '#22c55e',
-        error: '#ef4444',
-        info: '#3b82f6',
+    const typeStyles = {
+        success: { border: 'var(--success)', glow: 'var(--success-soft)' },
+        error: { border: 'var(--danger)', glow: 'var(--danger-soft)' },
+        info: { border: 'var(--info)', glow: 'var(--info-soft)' },
     };
+    const { border, glow } = typeStyles[type] ?? typeStyles.info;
 
     return (
         <motion.div
@@ -70,9 +71,8 @@ export const AnimatedToast = ({ message, type = 'info', onDismiss }) => {
                 padding: '12px 18px',
                 borderRadius: '12px',
                 marginBottom: '12px',
-                border: `1px solid ${typeColors[type] ?? typeColors.info}`,
-                boxShadow: `0 10px 30px rgba(0,0,0,0.35), 0 0 25px ${(typeColors[type] ??
-                    typeColors.info)}33`,
+                border: `1px solid ${border}`,
+                boxShadow: `0 10px 30px rgba(0,0,0,0.35), 0 0 25px ${glow}`,
                 cursor: 'pointer',
             }}
             onClick={onDismiss}

@@ -333,24 +333,24 @@ describe('questHelpers', () => {
     });
 
     describe('progressColor', () => {
-        it('should return green-teal for 80%+', () => {
-            expect(progressColor(90)).toContain('#23d160');
+        it('should return the success ramp for 80%+', () => {
+            expect(progressColor(90)).toContain('var(--success-strong), var(--success)');
         });
 
-        it('should return light green for 60-79%', () => {
-            expect(progressColor(65)).toContain('#a0e39b');
+        it('should return success-to-warning for 60-79%', () => {
+            expect(progressColor(65)).toContain('var(--success), var(--warning)');
         });
 
-        it('should return amber for 40-59%', () => {
-            expect(progressColor(45)).toContain('#ffd666');
+        it('should return the warning ramp for 40-59%', () => {
+            expect(progressColor(45)).toContain('var(--warning), var(--warning-strong)');
         });
 
-        it('should return orange for 20-39%', () => {
-            expect(progressColor(25)).toContain('#ff7a45');
+        it('should return warning-to-danger for 20-39%', () => {
+            expect(progressColor(25)).toContain('var(--warning-strong), var(--danger)');
         });
 
-        it('should return red for <20%', () => {
-            expect(progressColor(10)).toContain('#ff4d4f');
+        it('should return the danger ramp for <20%', () => {
+            expect(progressColor(10)).toContain('var(--danger), var(--danger-strong)');
         });
     });
 

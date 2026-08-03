@@ -35,9 +35,27 @@ button:disabled {
 
 /* utility classes available: .btn-primary, .btn-ghost, .btn-danger, .btn-small */
 
+/* Control buttons carry the arcade personality: pixel face on the pixel grid.
+   Scoped to real controls (NOT bare `button`, since whole quest cards are
+   buttons and their body text must stay in the legible mono face). */
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-link,
+.btn-start,
+.btn-complete,
+.btn-danger,
+.add-subtask-button,
+.add-side-quest-button {
+    font-family: var(--font-pixel);
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: auto;
+    letter-spacing: 0.3px;
+}
+
 .btn-primary {
     background: var(--accent-cyan);
-    color: #001018;
+    color: var(--text-on-accent);
     padding: 10px 14px;
     border-radius: 8px;
     border: 0;
@@ -78,7 +96,7 @@ button:disabled {
 .btn-secondary {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    color: #f2fbff;
+    color: var(--text-primary);
     padding: 8px 12px;
     border-radius: 8px;
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
@@ -86,7 +104,7 @@ button:disabled {
 
 .btn-secondary:hover {
     border-color: rgba(0, 240, 255, 0.35);
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .btn-secondary:disabled {
@@ -104,23 +122,24 @@ button:disabled {
 }
 
 .btn-link:hover {
-    color: #ffffff;
+    color: var(--text-primary);
     text-decoration: underline;
 }
 
 .btn-danger, .danger {
-    background: linear-gradient(90deg, #ff6b88, #ff2ec4);
-    color: #001018;
+    background: linear-gradient(90deg, var(--danger), var(--danger-strong));
+    color: var(--text-on-accent);
 }
 
-/* start and complete buttons distinct colors */
+/* Start = "begin/info" → stays inside the brand ramp (no off-brand blue).
+   Complete = "done" → the one tuned success green. */
 .btn-start {
-    background: linear-gradient(90deg, #3b82f6, #60a5fa);
-    color: #001018;
+    background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+    color: var(--text-on-accent);
 }
 .btn-complete {
-    background: linear-gradient(90deg, #22c55e, #16a34a);
-    color: #001018;
+    background: linear-gradient(90deg, var(--success), var(--success-strong));
+    color: var(--text-on-accent);
 }
 
 .btn-small {
@@ -168,8 +187,8 @@ button[data-loading] {
 .btn-start .btn-spinner::before,
 .btn-complete .btn-spinner::before,
 .btn-danger .btn-spinner::before {
-    border-top-color: #001018;
-    border-right-color: #001018;
+    border-top-color: var(--text-on-accent);
+    border-right-color: var(--text-on-accent);
     filter: drop-shadow(0 0 2px rgba(0, 240, 255, 0.4));
 }
 
@@ -211,7 +230,7 @@ button[data-loading] .btn-spinner:last-child {
 
 .task-controls .danger,
 .quest-controls .danger {
-    color: #ff7ea6;
+    color: var(--danger);
 }
 
 .quest-controls {
@@ -273,7 +292,7 @@ button[data-loading] .btn-spinner:last-child {
 .error-dismiss {
     background: none;
     border: none;
-    color: #ef4444;
+    color: var(--danger);
     cursor: pointer;
     font-size: 18px;
     line-height: 1;
@@ -286,8 +305,8 @@ button[data-loading] .btn-spinner:last-child {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--surface-field);
+    border: 1px solid var(--surface-field-border);
     color: var(--text-primary);
     border-radius: 10px;
     padding: 8px 12px;
@@ -297,8 +316,8 @@ button[data-loading] .btn-spinner:last-child {
 }
 
 .cycle-toggle:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.18);
+    background: var(--surface-field-hover);
+    border-color: rgba(155, 92, 255, 0.38);
 }
 
 .cycle-toggle:active {
@@ -327,7 +346,7 @@ button[data-loading] .btn-spinner:last-child {
 .add-subtask-button,
 .add-side-quest-button {
     background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
-    color: #001018;
+    color: var(--text-on-accent);
     padding: 8px 10px;
     border-radius: 8px;
     border: 0;

@@ -135,11 +135,12 @@ export const getQuestProgress = (task) => {
 };
 
 export const progressColor = (pct) => {
-    if (pct >= 80) return 'linear-gradient(90deg, #23d160, #36d7b7)'; // green-teal
-    if (pct >= 60) return 'linear-gradient(90deg, #a0e39b, #bae637)'; // light green
-    if (pct >= 40) return 'linear-gradient(90deg, #ffd666, #ffb36b)'; // amber
-    if (pct >= 20) return 'linear-gradient(90deg, #ff7a45, #ff9278)'; // orange
-    return 'linear-gradient(90deg, #ff4d4f, #ff758f)'; // red
+    // Five bands walking the semantic traffic-light ramp (tokens.css)
+    if (pct >= 80) return 'linear-gradient(90deg, var(--success-strong), var(--success))';
+    if (pct >= 60) return 'linear-gradient(90deg, var(--success), var(--warning))';
+    if (pct >= 40) return 'linear-gradient(90deg, var(--warning), var(--warning-strong))';
+    if (pct >= 20) return 'linear-gradient(90deg, var(--warning-strong), var(--danger))';
+    return 'linear-gradient(90deg, var(--danger), var(--danger-strong))';
 };
 
 export const getProgressAura = (pct) => {
