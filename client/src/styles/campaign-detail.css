@@ -8,7 +8,7 @@
     display: flex;
     align-items: stretch;
     justify-content: center;
-    background: rgba(4, 8, 16, 0.82);
+    background: var(--overlay-scrim);
     backdrop-filter: blur(8px);
     overflow-y: auto;
 }
@@ -18,7 +18,7 @@
     width: 100%;
     max-width: 720px;
     padding: 40px 28px 60px;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* ---- Header ---- */
@@ -47,7 +47,7 @@
 
 .campaign-detail-back:hover {
     border-color: rgba(0, 240, 255, 0.3);
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .campaign-detail-avatar {
@@ -60,7 +60,7 @@
     justify-content: center;
     font-weight: 700;
     font-size: 20px;
-    color: #fff;
+    color: var(--text-primary);
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -104,11 +104,11 @@
 }
 
 .campaign-detail-tab:hover {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .campaign-detail-tab.active {
-    color: #fff;
+    color: var(--text-primary);
     border-bottom-color: rgba(0, 240, 255, 0.7);
 }
 
@@ -138,7 +138,7 @@
 .story-narrative-objective {
     font-size: 15px;
     line-height: 1.5;
-    color: #f0f5ff;
+    color: var(--text-primary);
 }
 
 .story-narrative-meta {
@@ -213,23 +213,23 @@
 }
 
 .quest-log-badge.intro {
-    background: rgba(0, 240, 255, 0.15);
-    color: #6ee7ff;
+    background: var(--info-soft);
+    color: var(--info);
 }
 
 .quest-log-badge.daily {
-    background: rgba(76, 175, 80, 0.18);
-    color: #81c784;
+    background: var(--success-soft);
+    color: var(--success);
 }
 
 .quest-log-badge.reflection {
-    background: rgba(156, 39, 176, 0.18);
-    color: #ce93d8;
+    background: var(--purple-soft);
+    color: var(--accent-purple);
 }
 
 .quest-log-badge.completion {
-    background: rgba(255, 193, 7, 0.18);
-    color: #ffd54f;
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
 .quest-log-body {
@@ -240,7 +240,7 @@
 .quest-log-text {
     font-size: 13px;
     line-height: 1.45;
-    color: var(--text-secondary, #c4cfe0);
+    color: var(--text-primary);
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -274,18 +274,18 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(4, 8, 16, 0.8);
+    background: var(--overlay-scrim);
     backdrop-filter: blur(6px);
 }
 
 .story-update-panel {
     width: min(560px, 100%);
-    background: linear-gradient(180deg, rgba(18, 26, 40, 0.97), rgba(6, 12, 24, 0.95));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-panel);
+    border: 1px solid var(--surface-panel-border);
     border-radius: 16px;
     box-shadow: 0 28px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(0, 240, 255, 0.08);
     padding: 28px 30px;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .story-update-header {
@@ -309,7 +309,7 @@
 .story-update-body {
     font-size: 14px;
     line-height: 1.7;
-    color: #dce7ff;
+    color: var(--text-primary);
     min-height: 80px;
     margin-bottom: 24px;
 }
@@ -366,5 +366,5 @@
 
 .campaign-detail-button:hover {
     border-color: rgba(0, 240, 255, 0.3);
-    color: #fff;
+    color: var(--text-primary);
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Hues pulled from the app's accent palette
+// Hues pulled from the app's accent palette. Canvas fillStyle cannot resolve
+// CSS custom properties, so these stay literal (exempt from the tokens.css rule).
 const COLORS = ["#30087a", "#3b3b3b", "#e8e4e7", "#ededed", "#979498"];
 
 // Canvas extends this many pixels beyond the viewport on every side.
@@ -273,17 +274,17 @@ export default function PixelBackground({ showControls = false }) {
 
       {showControls && (
         <div
+          className="pixel-type"
           style={{
             position: "fixed",
             bottom: 16,
             right: 16,
             background: "rgba(0, 0, 0, 0.92)",
             border: "1px solid rgba(255,255,255,0.1)",
-            borderLeft: "3px solid #00f0ff",
+            borderLeft: "3px solid var(--accent-cyan)",
             borderRadius: 8,
             padding: "14px 18px",
             color: "white",
-            fontFamily: "'Press Start 2P', monospace",
             fontSize: 9,
             width: 280,
             zIndex: 2000,
@@ -302,7 +303,7 @@ export default function PixelBackground({ showControls = false }) {
               alignItems: "center",
             }}
           >
-            <span style={{ color: "#00f0ff", letterSpacing: 1 }}>PIXEL BG</span>
+            <span style={{ color: "var(--accent-cyan)", letterSpacing: 1 }}>PIXEL BG</span>
             <button
               type="button"
               onClick={() => setParams((p) => ({ ...p, enabled: !p.enabled }))}
@@ -312,12 +313,11 @@ export default function PixelBackground({ showControls = false }) {
                   ? "rgba(0, 240, 255, 0.15)"
                   : "rgba(255,255,255,0.06)",
                 border: `1px solid ${
-                  params.enabled ? "#00f0ff" : "rgba(255,255,255,0.2)"
+                  params.enabled ? "var(--accent-cyan)" : "rgba(255,255,255,0.2)"
                 }`,
                 borderRadius: 4,
-                color: params.enabled ? "#00f0ff" : "rgba(255,255,255,0.4)",
+                color: params.enabled ? "var(--accent-cyan)" : "rgba(255,255,255,0.4)",
                 cursor: "pointer",
-                fontFamily: "'Press Start 2P', monospace",
                 fontSize: 9,
               }}
             >
@@ -337,9 +337,9 @@ export default function PixelBackground({ showControls = false }) {
                   alignItems: "baseline",
                 }}
               >
-                <span style={{ color: "#9b5cff" }}>{label}</span>
+                <span style={{ color: "var(--accent-purple)" }}>{label}</span>
                 <span
-                  style={{ color: "#00f0ff", minWidth: 44, textAlign: "right" }}
+                  style={{ color: "var(--accent-cyan)", minWidth: 44, textAlign: "right" }}
                 >
                   {params[key]}
                 </span>
@@ -363,7 +363,7 @@ export default function PixelBackground({ showControls = false }) {
                 onChange={set(key)}
                 style={{
                   width: "100%",
-                  accentColor: "#00f0ff",
+                  accentColor: "var(--accent-cyan)",
                   cursor: "pointer",
                 }}
               />
@@ -380,9 +380,8 @@ export default function PixelBackground({ showControls = false }) {
                 background: "rgba(155, 92, 255, 0.15)",
                 border: "1px solid rgba(155, 92, 255, 0.4)",
                 borderRadius: 4,
-                color: "#9b5cff",
+                color: "var(--accent-purple)",
                 cursor: "pointer",
-                fontFamily: "'Press Start 2P', monospace",
                 fontSize: 8,
               }}
             >
@@ -399,7 +398,6 @@ export default function PixelBackground({ showControls = false }) {
                 borderRadius: 4,
                 color: "rgba(255,255,255,0.45)",
                 cursor: "pointer",
-                fontFamily: "'Press Start 2P', monospace",
                 fontSize: 8,
               }}
             >

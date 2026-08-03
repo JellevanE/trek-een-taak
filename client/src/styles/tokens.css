@@ -1,0 +1,138 @@
+/* TOKENS.CSS — single source of truth for colour and type.
+   Raw hex lives ONLY in this file. Everything else references var(--…).
+   Three groups: brand ramp, semantic (neon-tuned traffic light), neutral/text.
+   Theme overrides for the light/classic themes live at the bottom. */
+
+:root {
+    /* ── Type roles ──────────────────────────────────────────────
+       display : Pixelcastle — the gothic hero face, used once (app title)
+       pixel   : RetroByte   — arcade chrome: buttons, pills, badges (short strings)
+       body    : a crisp monospace — the legible workhorse for all reading text,
+                 rendered with antialiasing ON so it stays sharp at any size. */
+    --font-display: 'Pixelcastle', 'Press Start 2P', monospace;
+    --font-pixel: 'RetroByte', 'Press Start 2P', monospace;
+    --font-body: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Code',
+        'Roboto Mono', Menlo, Consolas, monospace;
+
+    /* ── Brand ramp — the neon identity ───────────────────────── */
+    --brand-cyan: #00f0ff;
+    --brand-pink: #ff2ec4;
+    --brand-purple: #9b5cff;
+
+    /* Back-compat aliases (existing stylesheets reference these names) */
+    --accent-cyan: var(--brand-cyan);
+    --accent-pink: var(--brand-pink);
+    --accent-purple: var(--brand-purple);
+
+    /* ── Semantic — traffic-light meaning, tuned to neon saturation ──
+       One value per role so done/warn/danger read as one family with
+       the brand ramp instead of borrowing an off-brand UI-kit palette.
+       Note: there is deliberately NO standalone blue — "start/info" is cyan. */
+    --success: #2fe06a;
+    --success-strong: #15c259;
+    --warning: #ffc23d;
+    --warning-strong: #ff9e2c;
+    --danger: #ff4d6d;
+    --danger-strong: var(--brand-pink);
+    --info: var(--brand-cyan);
+
+    /* Soft tints for pill backgrounds (low-chroma fills behind semantic text) */
+    --success-soft: rgba(47, 224, 106, 0.18);
+    --warning-soft: rgba(255, 194, 61, 0.2);
+    --danger-soft: rgba(255, 77, 109, 0.2);
+    --info-soft: rgba(0, 240, 255, 0.16);
+    --purple-soft: rgba(155, 92, 255, 0.18);
+
+    /* ── Neutral / text ───────────────────────────────────────────
+       Two text tokens replace the dozen ad-hoc off-whites. */
+    --text-primary: #eaf2ff;
+    --text-muted: #9aa3b2;
+    --muted: var(--text-muted); /* legacy alias */
+    --text-on-accent: #001018; /* dark ink for use on bright neon fills */
+
+    /* ── Surfaces ─────────────────────────────────────────────── */
+    --bg-dark: #081020;
+    --panel-dark: #0f1724;
+    --body-background: radial-gradient(
+        ellipse at center,
+        rgba(20, 24, 35, 1) 0%,
+        rgba(8, 16, 32, 1) 60%
+    );
+    /* Shared panel look for cards, header, and the sidebar so every raised
+       surface reads as the same material. */
+    --surface-panel: linear-gradient(180deg, rgb(18, 14, 36), rgb(8, 6, 18));
+    --surface-panel-border: rgba(155, 92, 255, 0.12);
+    /* Solid (opaque) fill for form controls — inputs, toggles, selects.
+       Sits a touch lighter than the panel it rests on so the control reads
+       as a distinct, tappable surface rather than see-through glass. */
+    --surface-field: #1a1530;
+    --surface-field-hover: #221b3c;
+    --surface-field-border: rgba(155, 92, 255, 0.22);
+    /* Dimming scrim behind full-screen overlays (campaign detail, modals) */
+    --overlay-scrim: rgba(4, 8, 16, 0.8);
+    --progress-track: rgba(255, 255, 255, 0.03);
+    --quest-progress-gradient: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
+
+    /* ── Completed side-quest state (greens tied to --success) ──── */
+    --side-quest-completed-bg: rgba(21, 60, 40, 0.65);
+    --side-quest-completed-border: rgba(47, 224, 106, 0.4);
+    --side-quest-completed-text: #d6ffe6;
+    --side-quest-completed-subtle: rgba(190, 247, 213, 0.85);
+    --side-quest-completed-handle: rgba(47, 224, 106, 0.6);
+}
+
+/* Pixel-art type utility: arcade chrome rendered on the pixel grid with
+   antialiasing OFF so the glyphs stay crisp. Apply ONLY to short display/label
+   strings — never to body copy (that's what made small text mushy). */
+.pixel-type {
+    font-family: var(--font-pixel);
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: auto;
+}
+
+/* ── Light / classic theme overrides ──────────────────────────── */
+[data-theme='light'],
+[data-theme='classic'] {
+    --brand-cyan: #0ea5e9;
+    --brand-pink: #e879f9;
+    --brand-purple: #7c3aed;
+
+    --success: #16a34a;
+    --success-strong: #15803d;
+    --warning: #d97706;
+    --warning-strong: #b45309;
+    --danger: #dc2626;
+    --danger-strong: #be185d;
+
+    --success-soft: rgba(22, 163, 74, 0.14);
+    --warning-soft: rgba(217, 119, 6, 0.16);
+    --danger-soft: rgba(220, 38, 38, 0.14);
+    --info-soft: rgba(14, 165, 233, 0.14);
+    --purple-soft: rgba(124, 58, 237, 0.14);
+
+    --text-primary: #0f1b2d;
+    --text-muted: #415161;
+    --text-on-accent: #f6fafc;
+
+    --bg-dark: #f6fafc;
+    --panel-dark: #ffffff;
+    --surface-panel: linear-gradient(180deg, #ffffff, #eef1f7);
+    --surface-panel-border: rgba(124, 58, 237, 0.18);
+    --surface-field: #eef2f9;
+    --surface-field-hover: #e3e9f4;
+    --surface-field-border: rgba(124, 58, 237, 0.28);
+    --overlay-scrim: rgba(226, 232, 244, 0.88);
+    --body-background: radial-gradient(
+        circle at top,
+        rgba(246, 250, 252, 1) 0%,
+        rgba(226, 230, 238, 1) 65%
+    );
+    --progress-track: rgba(15, 23, 42, 0.08);
+    --quest-progress-gradient: linear-gradient(90deg, #7c3aed, #f472b6);
+
+    --side-quest-completed-bg: rgba(187, 247, 208, 0.55);
+    --side-quest-completed-border: rgba(34, 197, 94, 0.35);
+    --side-quest-completed-text: #14532d;
+    --side-quest-completed-subtle: rgba(21, 128, 61, 0.85);
+    --side-quest-completed-handle: rgba(34, 197, 94, 0.55);
+}

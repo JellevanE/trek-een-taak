@@ -58,7 +58,7 @@ export const StoryTab = ({
                     {isGenerating ? 'Consulting the Oracle...' : 'Check for Updates'}
                 </button>
                 {hasNewUpdate && (
-                    <span style={{ fontSize: 12, color: 'var(--success-color, #4caf50)' }}>
+                    <span style={{ fontSize: 12, color: 'var(--success)' }}>
                         New developments available!
                     </span>
                 )}
