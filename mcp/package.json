@@ -1,0 +1,21 @@
+{
+    "name": "task-track-mcp",
+    "version": "1.0.0",
+    "description": "MCP server exposing Task Track campaigns, quests and subquests as tools",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsx src/index.ts",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/server": "^2.0.0",
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "@types/node": "^24.9.2",
+        "tsx": "^4.20.0",
+        "typescript": "^5.9.3"
+    }
+}
