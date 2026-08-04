@@ -25,6 +25,18 @@ function handle<A>(fn: (args: A) => Promise<unknown>): (args: A) => Promise<Tool
 
 const priority = z.enum(['low', 'medium', 'high']);
 
+// The API stores due_date verbatim, so the schema is the only validation layer.
+// Date.parse rejects out-of-range ISO components ("2026-13-45").
+const dueDate = z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'due_date must be YYYY-MM-DD')
+    .refine((d) => !Number.isNaN(Date.parse(d)), 'due_date must be a real calendar date');
+
+// The API accepts unbounded strings; caps here keep tool payloads sane.
+const campaignName = z.string().min(1).max(200);
+const questTitle = z.string().min(1).max(500);
+const taskLevel = z.number().int().positive().max(99);
+
 serveStdio(() => {
     const server = new McpServer({ name: 'task-track', version: '1.0.0' });
 
@@ -47,7 +59,7 @@ serveStdio(() => {
         {
             description: 'Create a new campaign (a themed collection of quests).',
             inputSchema: z.object({
-                name: z.string().min(1).describe('Campaign title'),
+                name: campaignName.describe('Campaign title'),
                 description: z.string().max(2000).optional(),
             }),
         },
@@ -61,7 +73,7 @@ serveStdio(() => {
                 'Update an existing campaign — rename it, change its description, or archive/unarchive it. Only the fields provided are changed.',
             inputSchema: z.object({
                 id: z.number().int().positive().describe('Campaign ID (see list_campaigns)'),
-                name: z.string().min(1).optional().describe('New campaign title'),
+                name: campaignName.optional().describe('New campaign title'),
                 description: z.string().max(2000).optional(),
                 archived: z.boolean().optional(),
             }),
@@ -94,10 +106,10 @@ serveStdio(() => {
         {
             description: 'Create a new quest (task). The "description" field is the quest title.',
             inputSchema: z.object({
-                description: z.string().min(1).describe('Quest title'),
+                description: questTitle.describe('Quest title'),
                 priority: priority.optional(),
-                due_date: z.string().optional().describe('Due date, YYYY-MM-DD'),
-                task_level: z.number().positive().max(99).optional().describe(
+                due_date: dueDate.optional().describe('Due date, YYYY-MM-DD'),
+                task_level: taskLevel.optional().describe(
                     'Quest difficulty level (1-99), drives XP',
                 ),
                 campaign_id: z.number().int().positive().optional().describe(
@@ -115,12 +127,12 @@ serveStdio(() => {
                 'Update an existing quest — retitle it (via "description"), change priority, due date, level, or move it to another campaign (campaign_id: null detaches it). Only the fields provided are changed.',
             inputSchema: z.object({
                 id: z.number().int().positive().describe('Quest ID (see list_quests)'),
-                description: z.string().min(1).optional().describe('New quest title'),
+                description: questTitle.optional().describe('New quest title'),
                 priority: priority.optional(),
-                due_date: z.string().nullable().optional().describe(
+                due_date: dueDate.nullable().optional().describe(
                     'Due date YYYY-MM-DD, or null to clear',
                 ),
-                task_level: z.number().positive().max(99).optional(),
+                task_level: taskLevel.optional(),
                 campaign_id: z.number().int().positive().nullable().optional(),
             }),
         },
@@ -133,7 +145,7 @@ serveStdio(() => {
             description: 'Add a subquest (subtask) to an existing quest.',
             inputSchema: z.object({
                 quest_id: z.number().int().positive().describe('Parent quest ID (see list_quests)'),
-                description: z.string().min(1).describe('Subquest title'),
+                description: questTitle.describe('Subquest title'),
             }),
         },
         handle(({ quest_id, description }) =>
@@ -149,7 +161,7 @@ serveStdio(() => {
             inputSchema: z.object({
                 quest_id: z.number().int().positive().describe('Parent quest ID'),
                 subquest_id: z.number().int().positive().describe('Subquest ID (see list_quests)'),
-                description: z.string().min(1).optional().describe('New subquest title'),
+                description: questTitle.optional().describe('New subquest title'),
                 priority: priority.optional(),
             }),
         },

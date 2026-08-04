@@ -15,6 +15,16 @@ if (existsSync(envFile)) {
 const API_URL = (process.env.TASK_TRACK_API_URL ?? 'http://localhost:4001').replace(/\/$/, '');
 
 let cachedToken: string | null = null;
+let loginPromise: Promise<string> | null = null;
+
+// Concurrent calls share one in-flight login: login is rate-limited per IP
+// (10/15min), so a cold-start burst of parallel tool calls must not stampede it.
+function sharedLogin(): Promise<string> {
+    loginPromise ??= login().finally(() => {
+        loginPromise = null;
+    });
+    return loginPromise;
+}
 
 function credentials(): { username: string; password: string } {
     const username = process.env.TASK_TRACK_USERNAME;
@@ -69,7 +79,7 @@ export async function apiRequest(
     path: string,
     body?: unknown,
 ): Promise<unknown> {
-    cachedToken ??= await login();
+    cachedToken ??= await sharedLogin();
 
     const doFetch = () =>
         fetchOrExplain(`${API_URL}${path}`, {
@@ -83,7 +93,7 @@ export async function apiRequest(
 
     let res = await doFetch();
     if (res.status === 401) {
-        cachedToken = await login();
+        cachedToken = await sharedLogin();
         res = await doFetch();
     }
 
