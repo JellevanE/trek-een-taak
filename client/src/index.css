@@ -3,6 +3,17 @@
    component/animation tokens that build on top of those colours.
    Display (Pixelcastle) + pixel (RetroByte) faces are declared in
    public/index.html so the browser can preload them before first paint. */
+
+/* Global border-box reset — padding and borders count inside an element's
+   declared width/max-width. Without this, any element that sets width/max-width
+   *and* padding (e.g. .App-header) overflows the viewport by its padding, which
+   showed up as a phantom horizontal scrollbar on narrow (mobile) screens. */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 :root {
     /* Type scale — single source of truth so sizing stays consistent.
        Floor raised to 13px: a pixel/mono face below that stops being readable. */

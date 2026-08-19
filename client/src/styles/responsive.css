@@ -16,9 +16,18 @@
         width: 100%;
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
     }
+    /* Below the drawer breakpoint the sidebar is in-flow at the top of the
+       board. Collapsed, it reads as a full-width horizontal strip of campaign
+       pills rather than a floating vertical rail. */
     .campaign-sidebar.collapsed {
-        width: auto;
-        align-self: flex-start;
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .campaign-sidebar.collapsed .campaign-sidebar-collapsed {
+        flex-direction: row;
+        flex-wrap: wrap;
     }
     .quest-card-shell {
         gap: var(--arcade-space-sm);
@@ -77,16 +86,20 @@
     .side-quest-panel {
         gap: var(--arcade-space-xs);
     }
+    /* Side-quest rows wrap to two lines and stack their actions on mobile, so
+       they're much taller than the desktop row-height the JS clamp assumes.
+       Drop the nested max-height/scroll (overriding the inline styles) and let
+       the whole page scroll — nested scroll areas are awkward under touch. */
+    .side-quest-scroll,
+    .side-quest-scroll > div {
+        max-height: none !important;
+        overflow: visible !important;
+    }
 }
 
 @media (max-width: 600px) {
     .campaign-sidebar {
         gap: 10px;
-    }
-    .campaign-sidebar.collapsed {
-        flex-direction: row;
-        justify-content: flex-start;
-        overflow-x: auto;
     }
     .campaign-select,
     .campaign-select select {
