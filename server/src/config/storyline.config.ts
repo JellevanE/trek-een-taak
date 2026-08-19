@@ -1,9 +1,10 @@
 export const storylineConfig = {
     claude: {
-        model: 'claude-sonnet-4-6', // story text
+        model: 'claude-sonnet-5', // story text
         extractorModel: 'claude-haiku-4-5-20251001', // narrative state extraction
         maxTokens: 1000,
-        temperature: 0.8,
+        // No `temperature`: Sonnet 5 rejects non-default sampling params (400).
+        // The extractor (Haiku 4.5) sets its own temperature in langchain.service.
     },
     generation: {
         retryAttempts: 3,

@@ -25,10 +25,13 @@ export class LangChainService {
             console.warn('ANTHROPIC_API_KEY is not set. AI features will not work.');
         }
 
+        // No `temperature`: Sonnet 5 rejects non-default sampling params (400).
+        // LangChain defaults `thinking` to { type: 'disabled' }, so the story
+        // model runs thinking-off — no adaptive-thinking token spend to truncate
+        // a short update against maxTokens.
         this.model = new ChatAnthropic({
             apiKey: apiKey || '',
             modelName: storylineConfig.claude.model,
-            temperature: storylineConfig.claude.temperature,
             maxTokens: storylineConfig.claude.maxTokens,
         });
     }
