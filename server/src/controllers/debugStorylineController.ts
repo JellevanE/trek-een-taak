@@ -6,6 +6,7 @@ import type { AuthenticatedRequest } from '../types/auth.js';
 import { sendError } from '../utils/http.js';
 import { readCampaigns } from '../data/campaignStore.js';
 import { StorylineService } from '../services/storyline.service.js';
+import { DAILY_UPDATE_VARIANTS } from '../services/prompt.service.js';
 
 type BaseAuthedRequest<B = unknown> = AuthenticatedRequest<ParamsDictionary, unknown, B>;
 
@@ -15,6 +16,7 @@ type UpdateType = (typeof VALID_TYPES)[number];
 interface GenerateBody {
     campaign_id?: unknown;
     type?: unknown;
+    variant?: unknown;
 }
 
 // Debug-only: force a storyline update of a chosen type for an owned campaign,
@@ -38,6 +40,19 @@ export async function generateStorylineUpdate(
         return sendError(res, 400, `type must be one of: ${VALID_TYPES.join(', ')}`);
     }
 
+    // Optional: force a specific daily-update variant (only meaningful for 'daily').
+    let variant: number | undefined;
+    if (body.variant !== undefined && body.variant !== null) {
+        variant = Number(body.variant);
+        if (!Number.isInteger(variant) || variant < 1 || variant > DAILY_UPDATE_VARIANTS) {
+            return sendError(
+                res,
+                400,
+                `variant must be an integer between 1 and ${DAILY_UPDATE_VARIANTS}`,
+            );
+        }
+    }
+
     const campaign = readCampaigns().campaigns.find((c) => c.id === campaignId);
     if (!campaign || campaign.owner_id !== req.user.id) {
         return sendError(res, 404, 'Campaign not found');
@@ -47,7 +62,12 @@ export async function generateStorylineUpdate(
         ?? StorylineService.createStoryline(campaignId);
 
     try {
-        await StorylineService.generateStoryUpdate(storyline, type as UpdateType, req.user.id);
+        await StorylineService.generateStoryUpdate(
+            storyline,
+            type as UpdateType,
+            req.user.id,
+            variant,
+        );
     } catch (error) {
         console.error('Debug storyline generation failed', error);
         return sendError(res, 502, 'Story generation failed');

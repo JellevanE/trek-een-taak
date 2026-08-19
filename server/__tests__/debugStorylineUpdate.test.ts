@@ -70,9 +70,13 @@ afterAll(() => {
     rmSync(dir, { recursive: true, force: true });
 });
 
-function generate(type?: string) {
+function generate(type?: string, variant?: number) {
     return client.post('/api/debug/generate-storyline-update', {
-        body: { campaign_id: 1, ...(type ? { type } : {}) },
+        body: {
+            campaign_id: 1,
+            ...(type ? { type } : {}),
+            ...(variant !== undefined ? { variant } : {}),
+        },
         headers: { authorization: `Bearer ${authToken}`, accept: 'application/json' },
     });
 }
@@ -131,6 +135,30 @@ test('defaults to a daily update when no type is given', async () => {
 test('rejects an invalid type', async () => {
     const res = await generate('nonsense');
     expect(res.status).toBe(400);
+});
+
+test('a chosen daily variant reaches the prompt template', async () => {
+    // Capture the template string the generator is handed to confirm the
+    // requested variant (not a random one) was loaded.
+    let seenTemplate = '';
+    __setStorylineAiForTesting(
+        async (template: string) => {
+            seenTemplate = template;
+            return 'A forced tale unfolds.';
+        },
+        async (_t, prev) => prev,
+    );
+
+    const res = await generate('daily', 2);
+    expect(res.status).toBe(200);
+    // daily-update-2.txt is the "single vivid moment" variant.
+    expect(seenTemplate).toContain('single vivid moment');
+});
+
+test('rejects an out-of-range variant', async () => {
+    const res = await generate('daily', 99);
+    expect(res.status).toBe(400);
+    expect(readStorylines().storylines).toHaveLength(0);
 });
 
 test('404s for a campaign the user does not own', async () => {

@@ -1,11 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TypewriterText } from '../../../components/TypewriterText.jsx';
+import { StoryMarkup } from '../../../components/StoryMarkup.jsx';
+import { useTypewriter } from '../../../hooks/useTypewriter.js';
+import { parseStoryMarkup } from '../../../utils/storyMarkup.js';
 
 export const StoryUpdateModal = ({ update, onDismiss }) => {
     const [canContinue, setCanContinue] = React.useState(false);
-    const [skipped, setSkipped] = React.useState(false);
-    const skipRef = React.useRef(null);
+
+    const parsed = React.useMemo(() => parseStoryMarkup(update.text), [update.text]);
+    const { visibleCount, isComplete, skip } = useTypewriter({
+        text: parsed.plainText,
+        onComplete: () => setCanContinue(true),
+    });
 
     React.useEffect(() => {
         const handleKey = (e) => {
@@ -46,28 +52,19 @@ export const StoryUpdateModal = ({ update, onDismiss }) => {
                 </div>
 
                 <div className='story-update-body'>
-                    {skipped ? update.text : (
-                        <TypewriterText
-                            text={update.text}
-                            onComplete={() => setCanContinue(true)}
-                            renderControls={({ skip: doSkip }) => {
-                                skipRef.current = doSkip;
-                                return null;
-                            }}
-                        />
-                    )}
+                    <StoryMarkup
+                        paragraphs={parsed.paragraphs}
+                        visibleCount={isComplete ? undefined : visibleCount}
+                        showCursor={!isComplete}
+                    />
                 </div>
 
                 <div className='story-update-footer'>
-                    {!canContinue && !skipped && (
+                    {!isComplete && (
                         <button
                             type='button'
                             className='btn-ghost btn-small'
-                            onClick={() => {
-                                skipRef.current?.();
-                                setSkipped(true);
-                                setCanContinue(true);
-                            }}
+                            onClick={skip}
                         >
                             Skip
                         </button>

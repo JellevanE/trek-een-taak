@@ -1,5 +1,7 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { StoryMarkup } from '../../../components/StoryMarkup.jsx';
+import { parseStoryMarkup } from '../../../utils/storyMarkup.js';
 
 const groupByDate = (updates) => {
     const groups = {};
@@ -40,36 +42,42 @@ export const QuestLog = ({ updates }) => {
                     <div className='quest-log-date-header'>{date}</div>
                     {entries
                         .sort((a, b) => new Date(b.generatedAt) - new Date(a.generatedAt))
-                        .map((entry) => (
-                            <div
-                                key={entry.id}
-                                className='quest-log-entry'
-                                onClick={() => toggleExpand(entry.id)}
-                            >
-                                <span className={`quest-log-badge ${entry.type}`}>
-                                    {entry.type}
-                                </span>
-                                <div className='quest-log-body'>
-                                    <AnimatePresence mode='wait' initial={false}>
-                                        <motion.div
-                                            key={expandedIds[entry.id] ? 'expanded' : 'collapsed'}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 0.15 }}
-                                            className={`quest-log-text ${
-                                                expandedIds[entry.id] ? 'expanded' : ''
-                                            }`}
-                                        >
-                                            {entry.text}
-                                        </motion.div>
-                                    </AnimatePresence>
-                                    <div className='quest-log-time'>
-                                        {formatTime(entry.generatedAt)}
+                        .map((entry) => {
+                            const expanded = !!expandedIds[entry.id];
+                            const parsed = parseStoryMarkup(entry.text);
+                            return (
+                                <div
+                                    key={entry.id}
+                                    className='quest-log-entry'
+                                    onClick={() => toggleExpand(entry.id)}
+                                >
+                                    <span className={`quest-log-badge ${entry.type}`}>
+                                        {entry.type}
+                                    </span>
+                                    <div className='quest-log-body'>
+                                        <AnimatePresence mode='wait' initial={false}>
+                                            <motion.div
+                                                key={expanded ? 'expanded' : 'collapsed'}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.15 }}
+                                                className={`quest-log-text ${
+                                                    expanded ? 'expanded' : ''
+                                                }`}
+                                            >
+                                                {expanded
+                                                    ? <StoryMarkup paragraphs={parsed.paragraphs} />
+                                                    : parsed.plainText}
+                                            </motion.div>
+                                        </AnimatePresence>
+                                        <div className='quest-log-time'>
+                                            {formatTime(entry.generatedAt)}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                 </React.Fragment>
             ))}
             <div ref={bottomRef} />

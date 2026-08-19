@@ -883,6 +883,21 @@ function App() {
               </button>
             ))}
           </div>
+          <div className="debug-subtitle">Daily variants</div>
+          <div className="debug-actions">
+            {/* Mirrors DAILY_UPDATE_VARIANTS in server prompt.service.ts */}
+            {[1, 2, 3].map((variant) => (
+              <button
+                key={variant}
+                className="btn-ghost"
+                onClick={() => generateDebugStorylineUpdate("daily", variant)}
+                disabled={storylineIsGenerating ||
+                  typeof activeCampaignFilter !== "number"}
+              >
+                Daily v{variant}
+              </button>
+            ))}
+          </div>
           {(debugBusy || storylineIsGenerating) && (
             <div className="debug-status">Working…</div>
           )}

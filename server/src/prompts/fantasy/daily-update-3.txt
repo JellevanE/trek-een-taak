@@ -1,0 +1,20 @@
+Campaign: {campaignName}
+Hero: {userName}, Level {userLevel} {userClass}
+
+Narrative Context:
+Summary: {narrativeSummary}
+Objective: {currentObjective}
+Locations: {locations}
+Characters: {characters}
+
+Completed Quests:
+{tasksCompleted}
+
+Write a daily story update (90-140 words) framed as an entry in the campaign's chronicle:
+- Recount the day's completed quests in the measured voice of a chronicler recording events
+- Note what was gained or learned, naming a location or companion where it fits
+- Keep the plot moving toward the current objective
+- Close with a line of anticipation for what the chronicle will record next
+
+Style: Classic fantasy RPG, chronicler's voice
+Tone: Measured and evocative

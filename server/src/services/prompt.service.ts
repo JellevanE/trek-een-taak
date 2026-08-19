@@ -6,16 +6,24 @@ import { storylineConfig } from '../config/storyline.config.js';
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = path.resolve(MODULE_DIR, '../prompts');
 
-const DAILY_UPDATE_VARIANTS = 1; // increment as more variants are added
+// Number of daily-update-N.txt variants on disk (see server/src/prompts/fantasy).
+// A test guards this against the actual file count to prevent drift.
+export const DAILY_UPDATE_VARIANTS = 3;
 
 export class PromptService {
-    static loadTemplate(theme: string, type: string): string {
+    // `variant` forces a specific daily-update-N.txt (1-based). Out-of-range or
+    // omitted → a random variant. Used by the debug endpoint to preview a chosen
+    // variant; normal generation leaves it undefined for random rotation.
+    static loadTemplate(theme: string, type: string, variant?: number): string {
         try {
             let templatePath = path.join(PROMPTS_DIR, theme, `${type}.txt`);
 
             if (!fs.existsSync(templatePath) && type === 'daily-update') {
-                const variant = Math.floor(Math.random() * DAILY_UPDATE_VARIANTS) + 1;
-                templatePath = path.join(PROMPTS_DIR, theme, `daily-update-${variant}.txt`);
+                const chosen =
+                    variant && variant >= 1 && variant <= DAILY_UPDATE_VARIANTS
+                        ? variant
+                        : Math.floor(Math.random() * DAILY_UPDATE_VARIANTS) + 1;
+                templatePath = path.join(PROMPTS_DIR, theme, `daily-update-${chosen}.txt`);
             }
 
             if (fs.existsSync(templatePath)) {

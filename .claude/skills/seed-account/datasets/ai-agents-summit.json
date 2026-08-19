@@ -1,0 +1,105 @@
+{
+  "$comment": "Real-world example: preparing an in-person event about AI agents. Due dates are relative offsets in days from the run date, so the example never goes stale. task_level drives XP (the server currently caps the effective level around 10). Subquest counts vary on purpose (0-4). Optional quest `status` and per-subquest `status` (todo|in_progress|blocked|done) seed a believable mid-prep state; marking a quest or subquest `done` awards XP once, exactly like the app.",
+  "campaigns": [
+    {
+      "name": "AI Agents Summit — Event Prep",
+      "description": "Plan and run a one-day in-person event introducing AI agents to ~80 attendees: venue, catering, budget, speakers, talks/demos, registration, and on-site logistics.",
+      "quests": [
+        {
+          "description": "Book the venue for the summit",
+          "priority": "high",
+          "task_level": 15,
+          "due_offset_days": 7,
+          "status": "in_progress",
+          "subquests": [
+            { "description": "Shortlist 3 venues that fit 80 people", "status": "done" },
+            { "description": "Check A/V setup and reliable wifi for the demo", "status": "done" },
+            { "description": "Confirm the date is available and hold it", "status": "in_progress" },
+            { "description": "Sign the rental contract", "status": "todo" }
+          ]
+        },
+        {
+          "description": "Arrange catering for ~80 people",
+          "priority": "medium",
+          "task_level": 10,
+          "due_offset_days": 19,
+          "subquests": [
+            "Collect dietary restrictions from the registration form",
+            "Pick a menu with vegetarian and vegan options",
+            "Confirm final headcount and place the order"
+          ]
+        },
+        {
+          "description": "Pay the venue deposit invoice",
+          "priority": "high",
+          "task_level": 4,
+          "due_offset_days": 9,
+          "status": "blocked",
+          "subquests": [
+            "Raise a PO and forward the invoice to finance"
+          ]
+        },
+        {
+          "description": "Prepare the opening keynote slides: \"What are AI agents?\"",
+          "priority": "high",
+          "task_level": 20,
+          "due_offset_days": 24,
+          "status": "in_progress",
+          "subquests": [
+            { "description": "Outline the story: agents vs. plain chatbots", "status": "done" },
+            { "description": "Draft the slides and add a real-world example", "status": "in_progress" },
+            "Get feedback from a colleague and revise",
+            "Rehearse to hit the 20-minute slot"
+          ]
+        },
+        {
+          "description": "Build and rehearse a live agent demo",
+          "priority": "medium",
+          "task_level": 18,
+          "due_offset_days": 26,
+          "subquests": [
+            "Pick a use case that shows tool use clearly",
+            "Test the demo on the venue's wifi",
+            "Record a fallback video in case the live demo fails"
+          ]
+        },
+        {
+          "description": "Invite speakers and lock the agenda",
+          "priority": "medium",
+          "task_level": 12,
+          "due_offset_days": 12,
+          "status": "in_progress",
+          "subquests": [
+            { "description": "Send invites and collect speaker bios and talk titles", "status": "done" },
+            "Build the run-of-show with breaks"
+          ]
+        },
+        {
+          "description": "Set up the registration page",
+          "priority": "low",
+          "task_level": 8,
+          "due_offset_days": 10,
+          "status": "done",
+          "subquests": [
+            { "description": "Create the signup form with a capacity cap", "status": "done" },
+            { "description": "Send the save-the-date to the mailing list", "status": "done" }
+          ]
+        },
+        {
+          "description": "Order badges and printed signage",
+          "priority": "low",
+          "task_level": 4,
+          "due_offset_days": 22,
+          "subquests": []
+        },
+        {
+          "description": "Send the attendee reminder email the day before",
+          "priority": "low",
+          "task_level": 3,
+          "due_offset_days": 29,
+          "subquests": []
+        }
+      ]
+    }
+  ]
+}
