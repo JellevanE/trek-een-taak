@@ -144,13 +144,18 @@ export const progressColor = (pct) => {
 };
 
 export const getProgressAura = (pct) => {
-    if (pct >= 90) return { emoji: '🌟', mood: 'Legendary focus', fillClass: 'progress-legend' };
-    if (pct >= 70) return { emoji: '🚀', mood: 'Momentum rising', fillClass: 'progress-heroic' };
-    if (pct >= 40) return { emoji: '⚔️', mood: 'Battle ready', fillClass: 'progress-ready' };
-    if (pct >= 15) {
-        return { emoji: '🛠️', mood: 'Forge in progress', fillClass: 'progress-building' };
+    // `icon` is a name from components/Icon.jsx (pixel glyphs, no emoji).
+    if (pct >= 90) return { icon: 'star', mood: 'Legendary focus', fillClass: 'progress-legend' };
+    if (pct >= 70) {
+        return { icon: 'arrow-up', mood: 'Momentum rising', fillClass: 'progress-heroic' };
     }
-    return { emoji: '💤', mood: 'Boot sequence idle', fillClass: 'progress-idle' };
+    if (pct >= 40) {
+        return { icon: 'check-circle', mood: 'Battle ready', fillClass: 'progress-ready' };
+    }
+    if (pct >= 15) {
+        return { icon: 'cog', mood: 'Forge in progress', fillClass: 'progress-building' };
+    }
+    return { icon: 'bell-mute', mood: 'Boot sequence idle', fillClass: 'progress-idle' };
 };
 
 export const useGlobalProgress = (quests) =>

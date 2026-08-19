@@ -10,6 +10,12 @@ import infoCircle from '../assets/icons/info-circle-solid.svg';
 import pencil from '../assets/icons/pencil-solid.svg';
 import user from '../assets/icons/user-solid.svg';
 import cog from '../assets/icons/cog-solid.svg';
+import eye from '../assets/icons/eye-solid.svg';
+import eyeCross from '../assets/icons/eye-cross-solid.svg';
+import star from '../assets/icons/star-solid.svg';
+import arrowUp from '../assets/icons/arrow-alt-circle-up-solid.svg';
+import checkCircle from '../assets/icons/check-circle-solid.svg';
+import bellMute from '../assets/icons/bell-mute-solid.svg';
 
 /**
  * Icon
@@ -28,6 +34,12 @@ const ICONS = {
     pencil,
     user,
     cog,
+    eye,
+    'eye-cross': eyeCross,
+    star,
+    'arrow-up': arrowUp,
+    'check-circle': checkCircle,
+    'bell-mute': bellMute,
 };
 
 export default function Icon({ name, size = 18, className = '', title }) {

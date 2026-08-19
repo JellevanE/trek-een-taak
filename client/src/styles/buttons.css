@@ -30,7 +30,14 @@ button:focus {
 
 button:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    /* stay fully opaque — mute via color, not transparency */
+    filter: saturate(0.4) brightness(0.85);
+}
+
+button:disabled:hover,
+button:disabled:active {
+    transform: none;
+    box-shadow: none;
 }
 
 /* utility classes available: .btn-primary, .btn-ghost, .btn-danger, .btn-small */
@@ -65,6 +72,16 @@ button:disabled {
 
 .btn-primary:hover {
     filter: brightness(1.08);
+}
+
+.btn-primary:disabled {
+    background: var(--surface-field);
+    color: var(--text-muted);
+    filter: none;
+}
+
+.btn-primary:disabled:hover {
+    filter: none;
 }
 
 .btn-ghost {
@@ -272,21 +289,33 @@ button[data-loading] .btn-spinner:last-child {
 
 .password-toggle {
     position: absolute;
-    right: 12px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* fixed box so the glyph swap never shifts layout */
+    width: 28px;
+    height: 28px;
     background: none;
     border: none;
     color: var(--text-muted);
     cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
+    padding: 0;
     border-radius: 4px;
     transition: color 0.2s ease;
 }
 
 .password-toggle:hover {
     color: var(--text-primary);
+    transform: translateY(-50%);
+    box-shadow: none;
+}
+
+.password-toggle:active {
+    transform: translateY(-50%);
+    box-shadow: none;
 }
 
 .error-dismiss {

@@ -111,7 +111,7 @@ const questBoard = {
   hasCampaigns: false,
   selectedCampaign: null,
   globalProgress: { percent: 0 },
-  globalAura: { fillClass: "", emoji: "", mood: "" },
+  globalAura: { fillClass: "", icon: "", mood: "" },
   globalLabel: "",
   dailyClaimed: false,
   xpPercent: 0,

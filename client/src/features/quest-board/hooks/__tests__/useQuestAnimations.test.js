@@ -51,7 +51,7 @@ describe('useQuestAnimations', () => {
         expect(result.current.pulsingQuests[1]).toBeUndefined();
     });
 
-    it('scheduleCollapseAndMove moves completed quest to bottom and collapses it', () => {
+    it('scheduleCollapseAndMove moves completed quest to top of the completed group', () => {
         let questsState = [...mockQuests];
         const setQuests = jest.fn((updater) => {
             questsState = updater(questsState);
@@ -60,8 +60,12 @@ describe('useQuestAnimations', () => {
 
         const { result } = setupHook({ setQuests, setCollapsedMap, quests: questsState });
 
-        // Mark quest 1 as done in state so logic picks it up
-        questsState = [{ id: 1, status: 'done' }, { id: 2, status: 'todo' }];
+        // Quest 1 just completed (newest updated_at); quest 3 completed earlier.
+        questsState = [
+            { id: 1, status: 'done', updated_at: '2026-08-19T12:00:00Z' },
+            { id: 2, status: 'todo' },
+            { id: 3, status: 'done', updated_at: '2026-08-18T09:00:00Z' },
+        ];
 
         act(() => {
             result.current.scheduleCollapseAndMove(1);
@@ -72,7 +76,8 @@ describe('useQuestAnimations', () => {
         });
 
         expect(setQuests).toHaveBeenCalled();
-        expect(questsState[1].id).toBe(1); // Moved to end
+        // Open quests first, then completed with the freshest completion on top.
+        expect(questsState.map((quest) => quest.id)).toEqual([2, 1, 3]);
         expect(setCollapsedMap).toHaveBeenCalledWith(expect.any(Function));
     });
 

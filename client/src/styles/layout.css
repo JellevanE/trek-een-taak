@@ -105,10 +105,10 @@
     letter-spacing: 0.6px;
 }
 
-.global-progress-mood .mood-emoji {
-    font-size: 16px;
+.global-progress-mood .mood-icon {
     opacity: 0.9;
     filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
+    flex-shrink: 0;
 }
 
 .global-progress-mood .mood-label {
@@ -260,10 +260,6 @@
     .global-progress-mood .mood-label {
         display: none;
     }
-
-    .global-progress-mood .mood-emoji {
-        font-size: 14px;
-    }
 }
 
 .board-layout {
@@ -285,7 +281,8 @@
     width: 100%;
     max-width: var(--quest-board-frame-max-width);
     margin: 0 auto;
-    padding: 0 12px;
+    /* no horizontal padding: the board shares the header's frame edges */
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 18px;

@@ -125,10 +125,6 @@ function App() {
     volumePercent: soundVolume,
     prefersReducedMotion,
   });
-  const isDarkAppearance = themeProfile?.appearance !== "light";
-  const progressTrackColor = isDarkAppearance
-    ? "rgba(255,255,255,0.12)"
-    : "rgba(0,0,0,0.08)";
   const { token, setToken, showProfile, setShowProfile } = useAuth();
   const [showShortcuts, setShowShortcuts] = React.useState(false);
   const [showPixelBgSettings, setShowPixelBgSettings] = React.useState(false);
@@ -229,7 +225,6 @@ function App() {
     globalAura,
     globalLabel,
     dailyClaimed,
-    xpPercent,
     storyline,
     storylineHasUpdate,
     storylineIsGenerating,
@@ -611,7 +606,9 @@ function App() {
             <div className="tooltip">{globalProgress.percent}%</div>
           </div>
           <div className="global-progress-mood" aria-hidden="true">
-            <span className="mood-emoji">{globalAura.emoji}</span>
+            {globalAura.icon && (
+              <Icon name={globalAura.icon} size={16} className="mood-icon" />
+            )}
             <span className="mood-label">{globalAura.mood}</span>
           </div>
           <div className="global-progress-percent">
@@ -680,120 +677,14 @@ function App() {
           </div>
         </div>
       </header>
-      {playerStats && (
-        <div
-          className="player-rpg-card"
-          style={{
-            margin: "16px 0",
-            padding: "12px 16px",
-            // Flat, fully solid panel (uniform overlay over the theme surface so it
-            // stays opaque and theme-aware without a gradient sheen).
-            background:
-              "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), var(--panel-dark)",
-            border: "1px solid rgba(255, 255, 255, 0.14)",
-            boxShadow: "0 10px 28px rgba(0, 0, 0, 0.5)",
-            borderRadius: 12,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <div
-              style={{
-                fontSize: 12,
-                textTransform: "uppercase",
-                letterSpacing: 0.6,
-                color: "var(--text-muted)",
-              }}
-            >
-              Adventurer Progress
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 12,
-                marginTop: 4,
-              }}
-            >
-              <div style={{ fontSize: 24, fontWeight: 600 }}>
-                Level {playerStats.level}
-              </div>
-              <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
-                Total XP {playerStats.xp}
-              </div>
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <div
-                style={{
-                  height: 8,
-                  borderRadius: 6,
-                  background: progressTrackColor,
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    width: `${Math.max(0, Math.min(100, xpPercent))}%`,
-                    height: "100%",
-                    background: "linear-gradient(90deg, #36d1dc, #5b86e5)",
-                    transition: "width 0.4s ease",
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                }}
-              >
-                {playerStats.xp_into_level} / {playerStats.xp_for_level}{" "}
-                XP ({xpPercent}%)
-              </div>
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: 8,
-            }}
-          >
-            <button
-              className="btn-primary"
-              onClick={claimDailyReward}
-              disabled={dailyClaimed || dailyLoading}
-              aria-expanded={!campaignSidebarCollapsed}
-            >
-              {dailyClaimed
-                ? "Daily Bonus Claimed"
-                : dailyLoading
-                ? "Claiming..."
-                : "Claim Daily Bonus"}
-            </button>
-            <div
-              style={{
-                fontSize: 11,
-                color: "var(--text-muted)",
-                textAlign: "right",
-              }}
-            >
-              {dailyClaimed
-                ? "Come back tomorrow for more XP."
-                : "Log your focus each day for bonus XP."}
-            </div>
-          </div>
-        </div>
-      )}
       {showProfile && (
         <div className="profile-modal">
           <Profile
             token={token}
+            playerStats={playerStats}
+            dailyClaimed={dailyClaimed}
+            dailyLoading={dailyLoading}
+            onClaimDaily={claimDailyReward}
             onLogin={(t, user) => {
               setToken(t);
               if (user && user.rpg) setPlayerStats(user.rpg);
@@ -923,6 +814,7 @@ function App() {
               aria-label={campaignSidebarCollapsed
                 ? "Expand campaigns panel"
                 : "Collapse campaigns panel"}
+              aria-expanded={!campaignSidebarCollapsed}
             >
               <Icon
                 name={campaignSidebarCollapsed ? "angle-right" : "angle-left"}

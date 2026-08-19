@@ -68,6 +68,11 @@
 
 .shortcuts-panel {
     width: min(520px, 100%);
+    /* never taller than the viewport (minus overlay padding) — scroll inside */
+    max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    box-sizing: border-box;
     background: var(--surface-panel);
     border: 1px solid var(--surface-panel-border);
     border-radius: 16px;
@@ -174,24 +179,100 @@
     }
     .shortcuts-panel {
         padding: 22px 20px;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
     }
 }
 
+/* Profile is an overlay drawer pinned to the right edge — the mirror image of
+   the campaigns drawer on the left: it floats over the page so the quest list
+   never shifts. */
 .profile-modal {
     position: fixed;
-    right: 18px;
-    top: 70px;
-    z-index: 2000;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1200;
+    width: 300px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    border-radius: 12px;
 }
 
 .profile-box {
-    background: var(--panel-dark);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    padding: 12px;
-    border-radius: 8px;
+    background: var(--surface-panel);
+    border: 1px solid var(--surface-panel-border);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
+    padding: 14px;
+    border-radius: 12px;
     min-width: 260px;
     color: var(--text-primary);
+    text-align: left;
+}
+
+/* Panel headings echo the campaigns drawer's small-caps titles. */
+.profile-box h3 {
+    margin: 0 0 12px;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.profile-section-title {
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+/* Adventurer progress block inside the profile drawer */
+.profile-rpg-stats {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rpg-level-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.rpg-level {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.rpg-total-xp,
+.rpg-xp-caption,
+.rpg-daily-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.rpg-xp-track {
+    height: 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.rpg-xp-fill {
+    height: 100%;
+    background: var(--quest-progress-gradient);
+    transition: width 0.4s ease;
+}
+
+.rpg-daily-hint {
+    text-align: center;
 }
 
 .profile-header {

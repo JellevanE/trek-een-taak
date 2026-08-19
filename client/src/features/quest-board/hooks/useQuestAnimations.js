@@ -5,6 +5,7 @@ import {
     getQuestStatus,
     getSideQuestStatus,
     idsMatch,
+    sortQuestsForDisplay,
 } from '../../../hooks/questHelpers.js';
 import { SOUND_EVENT_KEYS } from '../../../theme';
 import { useQuestBoardStore } from '../../../store/questBoardStore.js';
@@ -67,7 +68,7 @@ export const useQuestAnimations = ({
     }, [setPulsingQuests, setSpawnQuests]);
 
     const scheduleCollapseAndMove = useCallback((questId, delay = 600) => {
-        const ensureAtBottomCollapsed = () => {
+        const regroupAndCollapse = () => {
             let shouldCollapse = false;
             setQuests((prev) => {
                 const index = prev.findIndex((quest) => idsMatch(quest.id, questId));
@@ -75,10 +76,9 @@ export const useQuestAnimations = ({
                 const quest = prev[index];
                 if (getQuestStatus(quest) !== 'done') return prev;
                 shouldCollapse = true;
-                const next = [...prev];
-                const [item] = next.splice(index, 1);
-                next.push(item);
-                return next;
+                // Open quests stay on top; the freshly completed quest lands at
+                // the top of the completed group (sorted by updated_at desc).
+                return sortQuestsForDisplay(prev);
             });
             if (shouldCollapse && typeof setCollapsedMap === 'function') {
                 setCollapsedMap((prev) => ({ ...prev, [questId]: true }));
@@ -94,13 +94,13 @@ export const useQuestAnimations = ({
             }
             if (!completedCollapseTimersRef.current) completedCollapseTimersRef.current = {};
             completedCollapseTimersRef.current[questId] = window.setTimeout(() => {
-                ensureAtBottomCollapsed();
+                regroupAndCollapse();
                 if (completedCollapseTimersRef.current) {
                     delete completedCollapseTimersRef.current[questId];
                 }
             }, delay);
         } else {
-            ensureAtBottomCollapsed();
+            regroupAndCollapse();
         }
     }, [setCollapsedMap, setQuests]);
 
