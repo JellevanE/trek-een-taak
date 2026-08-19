@@ -12,18 +12,12 @@
 # adopt the existing service or its data. To change the LIVE service today,
 # edit Build/Start commands and env vars in the dashboard instead.
 #
-# ┌─ IMPORTANT ─────────────────────────────────────────────────────────────┐
-# │ As of today the server (server/src/app.ts) is API-ONLY — it mounts       │
-# │ /api/* routes and does NOT serve the client bundle. The build below      │
-# │ compiles client/build, but nothing serves it yet, so visiting the root   │
-# │ URL would 404 and the React app would not load.                          │
-# │                                                                          │
-# │ For this single-service blueprint to actually serve the app, the server  │
-# │ needs to (a) express.static() the client/build directory and (b) add a   │
-# │ SPA fallback that returns index.html for non-/api GET routes. That's a   │
-# │ small, known addition — ask and I'll wire it in.                         │
-# │                                                                          │
-# │ Until then this deploys a working API; the SPA won't render at the root. │
+# ┌─ NOTE ──────────────────────────────────────────────────────────────────┐
+# │ The server (server/src/app.ts) serves BOTH the API and the client:       │
+# │ it mounts /api/* routes, then express.static()s client/build with an     │
+# │ SPA fallback (any non-/api GET returns index.html). So the build below   │
+# │ compiles client/build and the same web service serves the React app at   │
+# │ the root — no separate static site or rewrite rules needed.              │
 # └──────────────────────────────────────────────────────────────────────────┘
 #
 # Render runs `make` in its native Node environment, so you *could* point the

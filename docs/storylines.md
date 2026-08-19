@@ -60,7 +60,7 @@ gitignored). Tests inject an isolated fixture through the env override.
   set, and the client polls `GET /api/storylines/:campaignId` until the new update
   appears.
 - `generateStoryUpdate(...)` — two-call pipeline:
-  1. **Story text** — Sonnet (`claude-sonnet-4-6`) via the LangChain wrapper
+  1. **Story text** — Sonnet (`claude-sonnet-5`) via the LangChain wrapper
      (`services/ai/langchain.service.ts`: retry, timeout, error classification).
   2. **Narrative-state extraction** — Haiku (`claude-haiku-4-5-20251001`) via
      `services/ai/narrative-extractor.service.ts` (Zod structured output, falls
