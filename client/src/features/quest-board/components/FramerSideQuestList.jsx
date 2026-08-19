@@ -4,7 +4,8 @@ import {
     closestCenter,
     DndContext,
     MeasuringStrategy,
-    PointerSensor,
+    MouseSensor,
+    TouchSensor,
     useSensor,
     useSensors,
 } from '@dnd-kit/core';
@@ -134,8 +135,11 @@ export const FramerSideQuestList = ({
         });
     }, [sideQuests, refreshToken, questId, isDragging]);
 
+    // Mouse drags on a 6px move; touch waits for a 200ms press-and-hold (with
+    // 8px tolerance) so a quick swipe scrolls the page instead of grabbing a row.
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+        useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
     );
 
     const itemIds = React.useMemo(
