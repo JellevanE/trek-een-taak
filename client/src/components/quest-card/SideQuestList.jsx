@@ -142,15 +142,6 @@ const SideQuestItem = ({
                         : (
                             <div
                                 className={descriptionClasses}
-                                style={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                    paddingLeft: '12px',
-                                    cursor: 'pointer',
-                                }}
                                 title={safeSideDescription}
                                 onClick={(e) => {
                                     e.stopPropagation();
