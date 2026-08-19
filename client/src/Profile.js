@@ -3,7 +3,16 @@ import { apiUrl } from './utils/api.js';
 
 const RegistrationWizard = React.lazy(() => import('./RegistrationWizard'));
 
-export default function Profile({ token, onLogin, onLogout, onClose }) {
+export default function Profile({
+    token,
+    onLogin,
+    onLogout,
+    onClose,
+    playerStats = null,
+    dailyClaimed = false,
+    dailyLoading = false,
+    onClaimDaily = null,
+}) {
     const [profile, setProfile] = useState({ display_name: '', avatar: '', class: '', bio: '' });
     const [rpg, setRpg] = useState(null);
     const [editing, setEditing] = useState(false);
@@ -204,6 +213,13 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
         );
     }
 
+    // Prefer the live app-level stats (kept fresh by XP payloads); fall back to
+    // the copy fetched with the profile.
+    const stats = playerStats || rpg;
+    const xpPercent = stats
+        ? Math.max(0, Math.min(100, Math.round((stats.xp_progress || 0) * 100)))
+        : 0;
+
     return (
         <div className='profile-box'>
             <button onClick={onClose} className='close-button'>X</button>
@@ -230,56 +246,47 @@ export default function Profile({ token, onLogin, onLogout, onClose }) {
                                 <div>
                                     <strong>Bio:</strong> {profile.bio || ''}
                                 </div>
-                                {rpg && (
-                                    <div className='profile-rpg-stats' style={{ marginTop: 12 }}>
-                                        <div style={{ marginBottom: 4 }}>
-                                            <strong>Level:</strong> {rpg.level}
+                                {stats && (
+                                    <div className='profile-rpg-stats'>
+                                        <div className='profile-section-title'>
+                                            Adventurer Progress
                                         </div>
-                                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                            {rpg.xp_into_level} / {rpg.xp_for_level}{' '}
-                                            XP toward next level
+                                        <div className='rpg-level-row'>
+                                            <span className='rpg-level'>Level {stats.level}</span>
+                                            <span className='rpg-total-xp'>
+                                                Total XP {stats.xp}
+                                            </span>
                                         </div>
-                                        <div
-                                            style={{
-                                                marginTop: 6,
-                                                height: 6,
-                                                borderRadius: 4,
-                                                background:
-                                                    'var(--border-soft, rgba(255,255,255,0.12))',
-                                                overflow: 'hidden',
-                                            }}
-                                        >
+                                        <div className='rpg-xp-track'>
                                             <div
-                                                style={{
-                                                    width: `${
-                                                        Math.max(
-                                                            0,
-                                                            Math.min(
-                                                                100,
-                                                                Math.round(
-                                                                    (rpg.xp_progress || 0) * 100,
-                                                                ),
-                                                            ),
-                                                        )
-                                                    }%`,
-                                                    height: '100%',
-                                                    background:
-                                                        'linear-gradient(90deg, #6dd5fa, #2980b9)',
-                                                }}
+                                                className='rpg-xp-fill'
+                                                style={{ width: `${xpPercent}%` }}
                                             />
                                         </div>
-                                        <div
-                                            style={{
-                                                marginTop: 6,
-                                                fontSize: 11,
-                                                color: 'var(--text-muted)',
-                                            }}
-                                        >
-                                            Last daily bonus:{' '}
-                                            {rpg.last_daily_reward_at
-                                                ? rpg.last_daily_reward_at
-                                                : '—'}
+                                        <div className='rpg-xp-caption'>
+                                            {stats.xp_into_level} / {stats.xp_for_level}{' '}
+                                            XP ({xpPercent}%)
                                         </div>
+                                        {onClaimDaily && (
+                                            <>
+                                                <button
+                                                    className='btn-primary btn-full-width'
+                                                    onClick={onClaimDaily}
+                                                    disabled={dailyClaimed || dailyLoading}
+                                                >
+                                                    {dailyClaimed
+                                                        ? 'Daily Bonus Claimed'
+                                                        : dailyLoading
+                                                        ? 'Claiming...'
+                                                        : 'Claim Daily Bonus'}
+                                                </button>
+                                                <div className='rpg-daily-hint'>
+                                                    {dailyClaimed
+                                                        ? 'Come back tomorrow for more XP.'
+                                                        : 'Log your focus each day for bonus XP.'}
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                                 <div style={{ marginTop: 8 }}>

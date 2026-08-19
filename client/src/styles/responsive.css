@@ -101,6 +101,11 @@
     .campaign-sidebar {
         gap: 10px;
     }
+    .profile-modal {
+        left: 8px;
+        right: 8px;
+        width: auto;
+    }
     .campaign-select,
     .campaign-select select {
         width: 100%;
