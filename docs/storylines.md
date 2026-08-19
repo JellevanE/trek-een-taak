@@ -170,15 +170,16 @@ the reveal animation.
   plugin** for interactive driving (see CLAUDE.md), no `@playwright/test`
   dependency, config, or CI wiring.
 
-**Work — typewriter polish (concrete, ship first):**
-1. Wire `TypewriterText` to `useReducedMotionPreference`: when reduced motion is
-   preferred, render the full text immediately (skip the per-char loop) and don't
-   show the animated cursor — call `onComplete` right away so the modal's Continue
-   enables. Accessibility win and removes motion-sickness risk.
-2. Guard the `.typewriter-cursor` blink behind
-   `@media (prefers-reduced-motion: reduce)` in `campaign-detail.css`.
-3. Optional: expose typewriter speed as a Settings preference (a `SettingsTab`
-   already exists) — defer unless wanted; not required for the pass.
+**Work — typewriter polish:**
+1. ~~Wire `TypewriterText` to `useReducedMotionPreference`~~ — **DONE.** Under
+   reduced motion it renders the full text at once, skips the cursor, and fires
+   `onComplete` immediately (so the modal's Continue enables). Covered by
+   `client/src/components/TypewriterText.test.jsx`.
+2. ~~Guard the `.typewriter-cursor` blink behind
+   `@media (prefers-reduced-motion: reduce)`~~ — **DONE** (defense-in-depth in
+   `campaign-detail.css`; the JS already omits the cursor).
+3. Optional (not started): expose typewriter speed as a Settings preference (a
+   `SettingsTab` already exists) — defer unless wanted.
 
 **Work — Markdown handling (decide one):** the model sometimes emits Markdown,
 which currently renders as literal syntax in the story panel. As of P3.2 the

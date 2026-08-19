@@ -340,6 +340,12 @@
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .typewriter-cursor {
+        animation: none;
+    }
+}
+
 /* ---- Sidebar detail button ---- */
 .campaign-detail-button {
     background: rgba(255, 255, 255, 0.04);
