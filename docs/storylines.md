@@ -116,6 +116,11 @@ driven by the `useTypewriter` hook so it can animate block-level paragraphs; the
 modal reveals progressively, the quest log shows a plain teaser collapsed and
 formatted markup expanded.
 
+The reveal cadence is dynamic (`utils/typewriterTiming.js`): a ~20ms/char base
+that varies per sentence, short pauses after clause punctuation (`,;:`), longer
+pauses after sentence ends (`.!?`), and an ~800ms hold after each paragraph. Tune
+the constants in `buildRevealDelays` to taste.
+
 ### HTTP surface
 
 | Method | Route | Purpose |
