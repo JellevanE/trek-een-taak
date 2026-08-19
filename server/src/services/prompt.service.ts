@@ -6,7 +6,9 @@ import { storylineConfig } from '../config/storyline.config.js';
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = path.resolve(MODULE_DIR, '../prompts');
 
-const DAILY_UPDATE_VARIANTS = 1; // increment as more variants are added
+// Number of daily-update-N.txt variants on disk (see server/src/prompts/fantasy).
+// A test guards this against the actual file count to prevent drift.
+export const DAILY_UPDATE_VARIANTS = 3;
 
 export class PromptService {
     static loadTemplate(theme: string, type: string): string {

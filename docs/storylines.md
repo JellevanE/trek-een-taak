@@ -86,12 +86,20 @@ old campaigns heal themselves; no migration script.
 
 Plain `.txt` templates with `{variable}` placeholders in
 `server/src/prompts/{theme}/`, resolved by `services/prompt.service.ts`. The build
-copies `src/prompts` → `dist/prompts` (production reads from `dist`).
+does a clean copy `src/prompts` → `dist/prompts` (production reads from `dist`).
 
-- `fantasy/`: `intro.txt`, `daily-update-1.txt`, `reflection.txt`,
+- `fantasy/`: `intro.txt`, `daily-update-{1,2,3}.txt`, `reflection.txt`,
   `completion.txt`; `_shared/system.txt` for the system prompt.
-- Daily updates support randomized variants via `DAILY_UPDATE_VARIANTS` in
-  `prompt.service.ts` (currently `1`; see Phase 3).
+- Daily updates rotate randomly across `DAILY_UPDATE_VARIANTS` (`prompt.service.ts`,
+  currently `3`) — variant 1 is a straight quest recap, variant 2 zooms in on a
+  single encounter, variant 3 is a chronicler's entry. A test guards the constant
+  against the on-disk file count (`server/__tests__/promptVariants.test.ts`).
+
+**Output rules** live in `_shared/system.txt` and govern every generation: plain
+prose only (no Markdown/formatting syntax), never emojis, and keep it concise —
+per-template targets were tightened to ~90–200 words. The plain-text rule pairs
+with the client rendering literal text today; revisit it if Markdown rendering
+lands (see P3.3).
 
 ### HTTP surface
 
@@ -129,43 +137,17 @@ Neither item is a blocker; the feature is production-complete. The 4am scheduled
 batch-generation endpoint (the third Phase 3 item) remains deferred and is not
 scoped here — it depends on the persistent-process hosting decision.
 
-### P3.2 — Daily-update prompt variants 2 & 3
+### P3.2 — Daily-update prompt variants 2 & 3 — DONE
 
-**Goal:** stop repeated `daily` updates from feeling samey by rotating between
-three prompt variants.
+Shipped. `daily-update-2.txt` (single-encounter lens) and `daily-update-3.txt`
+(chronicler's entry) added, `DAILY_UPDATE_VARIANTS` bumped to `3`, and
+`server/__tests__/promptVariants.test.ts` guards the constant against the on-disk
+file count and asserts every variant carries the required placeholders. The same
+change added the system-prompt output rules (plain text, no emojis, brevity),
+tightened all template word counts, and fixed the `dist/prompts` build copy (it
+was nesting under `dist/prompts/prompts` on rebuilds).
 
-**Current state:** only `daily-update-1.txt` exists; `DAILY_UPDATE_VARIANTS = 1`
-in `prompt.service.ts:9`. The selection machinery already works — `loadTemplate`
-picks `daily-update-${rand(1..N)}.txt` when called with type `daily-update`
-(`storyline.service.ts` maps update type `daily` → `daily-update`), so the only
-gap is authoring the files and bumping the constant.
-
-**Work:**
-1. Author `server/src/prompts/fantasy/daily-update-2.txt` and
-   `daily-update-3.txt`. Reuse the **exact** placeholder set from
-   `daily-update-1.txt` (`{campaignName}`, `{userName}`, `{userLevel}`,
-   `{userClass}`, `{narrativeSummary}`, `{currentObjective}`, `{locations}`,
-   `{characters}`, `{tasksCompleted}`), 150–250 words, but give each a distinct
-   narrative lens so rotation reads as variety, not repetition:
-   - **variant 2** — zoom in on a single obstacle/encounter overcome while doing
-     the quests; more kinetic, action-forward.
-   - **variant 3** — a chronicle/journal framing (or a companion's point of view)
-     recounting the day's progress.
-2. Bump `DAILY_UPDATE_VARIANTS = 3` in `prompt.service.ts`.
-3. No build change — the existing `src/prompts → dist/prompts` copy step picks up
-   the new files automatically.
-
-**Test:** add a `prompt.service` test that (a) every `daily-update-{1..3}.txt`
-loads a non-fallback template, and (b) each variant contains the required
-placeholders. Keep it deterministic — assert over all variant files rather than
-relying on the random pick. Optionally guard that `DAILY_UPDATE_VARIANTS` equals
-the on-disk variant count so the two never drift.
-
-**Size:** S. Prompt authoring + a one-line constant + one guard test. No API/schema
-change; variant selection stays non-deterministic (`Math.random`), which is fine
-in prod.
-
-### P3.3 — E2E pass + typewriter polish
+### P3.3 — E2E pass + typewriter polish (incl. Markdown handling)
 
 **Goal:** verify the full storyline journey holds up across breakpoints and tighten
 the reveal animation.
@@ -191,6 +173,20 @@ the reveal animation.
    `@media (prefers-reduced-motion: reduce)` in `campaign-detail.css`.
 3. Optional: expose typewriter speed as a Settings preference (a `SettingsTab`
    already exists) — defer unless wanted; not required for the pass.
+
+**Work — Markdown handling (decide one):** the model sometimes emits Markdown,
+which currently renders as literal syntax in the story panel. As of P3.2 the
+system prompt forbids Markdown, so output is clean plain text today — this item is
+about whether to *allow and render* it for richer effect instead.
+- **Keep plain text (default, zero-cost):** leave the system-prompt rule in place;
+  nothing more to do. Choose this unless the richer look is wanted.
+- **Render Markdown:** relax the system-prompt rule, then render safely. The catch
+  is that `TypewriterText` reveals text character-by-character; a Markdown parser
+  can't run on a half-emitted `**bold`. Practical approach: keep the typewriter for
+  the reveal, then swap to a parsed (sanitized) render on completion — or render a
+  growing subset of *already-closed* Markdown blocks. Constrain the model to a
+  tiny subset (emphasis, paragraphs) and sanitize output; still **no emojis**.
+  Non-trivial — only pursue if the effect clearly earns it.
 
 **Work — E2E pass. Pick one lane and state the choice in the PR:**
 - **Lane A (matches original intent, lighter):** a scripted **manual** MCP-driven

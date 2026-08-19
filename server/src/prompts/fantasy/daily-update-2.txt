@@ -1,0 +1,20 @@
+Campaign: {campaignName}
+Hero: {userName}, Level {userLevel} {userClass}
+
+Narrative Context:
+Summary: {narrativeSummary}
+Objective: {currentObjective}
+Locations: {locations}
+Characters: {characters}
+
+Completed Quests:
+{tasksCompleted}
+
+Write a daily story update (90-140 words) centred on a single vivid moment:
+- Zoom in on one obstacle, foe, or trial the hero faced while completing the quests above
+- Show the action and how the hero prevailed through skill or resolve
+- Tie the outcome back to the current objective
+- End on forward momentum into what comes next
+
+Style: Classic fantasy RPG
+Tone: Kinetic and vivid

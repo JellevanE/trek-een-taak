@@ -5,7 +5,7 @@ Current Objective: {currentObjective}
 Upcoming Quests:
 {tasksSummary}
 
-Create an engaging story introduction (200-300 words) that:
+Create an engaging story introduction (130-170 words) that:
 - Sets the scene and establishes the adventure's tone
 - Incorporates the hero's name and background
 - References the upcoming quests naturally
