@@ -357,31 +357,31 @@ describe('questHelpers', () => {
     describe('getProgressAura', () => {
         it('should return legendary for 90%+', () => {
             const aura = getProgressAura(95);
-            expect(aura.emoji).toBe('🌟');
+            expect(aura.icon).toBe('star');
             expect(aura.mood).toBe('Legendary focus');
         });
 
         it('should return momentum for 70-89%', () => {
             const aura = getProgressAura(75);
-            expect(aura.emoji).toBe('🚀');
+            expect(aura.icon).toBe('arrow-up');
             expect(aura.mood).toBe('Momentum rising');
         });
 
         it('should return ready for 40-69%', () => {
             const aura = getProgressAura(50);
-            expect(aura.emoji).toBe('⚔️');
+            expect(aura.icon).toBe('check-circle');
             expect(aura.mood).toBe('Battle ready');
         });
 
         it('should return building for 15-39%', () => {
             const aura = getProgressAura(20);
-            expect(aura.emoji).toBe('🛠️');
+            expect(aura.icon).toBe('cog');
             expect(aura.mood).toBe('Forge in progress');
         });
 
         it('should return idle for <15%', () => {
             const aura = getProgressAura(5);
-            expect(aura.emoji).toBe('💤');
+            expect(aura.icon).toBe('bell-mute');
             expect(aura.mood).toBe('Boot sequence idle');
         });
     });

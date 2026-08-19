@@ -45,6 +45,27 @@
     line-height: var(--lh-body);
 }
 
+/* Adventurer progress (level / XP / daily bonus) panel — same solid-panel
+   recipe as the auth screens: flat theme surface, no gradient sheen. */
+.player-rpg-card {
+    width: 100%;
+    max-width: var(--quest-board-frame-max-width);
+    margin: 16px auto;
+    padding: 12px 16px;
+    background: var(--panel-dark);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    text-align: left;
+}
+
 /* Global sticky progress bar at the top of the app (always visible) */
 .global-progress-sticky {
     position: fixed;
@@ -105,10 +126,10 @@
     letter-spacing: 0.6px;
 }
 
-.global-progress-mood .mood-emoji {
-    font-size: 16px;
+.global-progress-mood .mood-icon {
     opacity: 0.9;
     filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
+    flex-shrink: 0;
 }
 
 .global-progress-mood .mood-label {
@@ -260,10 +281,6 @@
     .global-progress-mood .mood-label {
         display: none;
     }
-
-    .global-progress-mood .mood-emoji {
-        font-size: 14px;
-    }
 }
 
 .board-layout {
@@ -285,7 +302,8 @@
     width: 100%;
     max-width: var(--quest-board-frame-max-width);
     margin: 0 auto;
-    padding: 0 12px;
+    /* no horizontal padding: the board shares the header's frame edges */
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 18px;

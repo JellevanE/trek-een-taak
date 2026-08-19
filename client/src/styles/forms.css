@@ -233,6 +233,15 @@
 
 .password-input-container {
     position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.password-input-container input {
+    width: 100%;
+    /* keep typed text clear of the visibility toggle */
+    padding-right: 44px;
+    box-sizing: border-box;
 }
 
 .password-strength {

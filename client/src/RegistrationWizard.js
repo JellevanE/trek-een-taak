@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { apiUrl } from './utils/api.js';
+import Icon from './components/Icon.jsx';
 
 // Simple progress indicator component
 function ProgressIndicator({ currentStep, totalSteps }) {
@@ -223,8 +224,9 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
                             className='password-toggle'
                             onClick={() => setShowPassword(!showPassword)}
                             aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            aria-pressed={showPassword}
                         >
-                            {showPassword ? '👁️' : '👁️‍🗨️'}
+                            <Icon name={showPassword ? 'eye-cross' : 'eye'} size={16} />
                         </button>
                     </div>
                     {errors.password && <div className='error-message'>{errors.password}</div>}
@@ -256,17 +258,28 @@ function AccountDetailsStep({ formData, setFormData, onNext, loading }) {
 
                 <div className='form-group'>
                     <label htmlFor='confirmPassword'>Confirm Password *</label>
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        id='confirmPassword'
-                        name='confirmPassword'
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        className={errors.confirmPassword ? 'error' : ''}
-                        placeholder='Confirm your password'
-                        required
-                        autoComplete='new-password'
-                    />
+                    <div className='password-input-container'>
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            id='confirmPassword'
+                            name='confirmPassword'
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            className={errors.confirmPassword ? 'error' : ''}
+                            placeholder='Confirm your password'
+                            required
+                            autoComplete='new-password'
+                        />
+                        <button
+                            type='button'
+                            className='password-toggle'
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            aria-pressed={showPassword}
+                        >
+                            <Icon name={showPassword ? 'eye-cross' : 'eye'} size={16} />
+                        </button>
+                    </div>
                     {errors.confirmPassword && (
                         <div className='error-message'>{errors.confirmPassword}</div>
                     )}

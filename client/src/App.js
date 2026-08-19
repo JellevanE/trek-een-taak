@@ -611,7 +611,9 @@ function App() {
             <div className="tooltip">{globalProgress.percent}%</div>
           </div>
           <div className="global-progress-mood" aria-hidden="true">
-            <span className="mood-emoji">{globalAura.emoji}</span>
+            {globalAura.icon && (
+              <Icon name={globalAura.icon} size={16} className="mood-icon" />
+            )}
             <span className="mood-label">{globalAura.mood}</span>
           </div>
           <div className="global-progress-percent">
@@ -681,25 +683,7 @@ function App() {
         </div>
       </header>
       {playerStats && (
-        <div
-          className="player-rpg-card"
-          style={{
-            margin: "16px 0",
-            padding: "12px 16px",
-            // Flat, fully solid panel (uniform overlay over the theme surface so it
-            // stays opaque and theme-aware without a gradient sheen).
-            background:
-              "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), var(--panel-dark)",
-            border: "1px solid rgba(255, 255, 255, 0.14)",
-            boxShadow: "0 10px 28px rgba(0, 0, 0, 0.5)",
-            borderRadius: 12,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="player-rpg-card">
           <div style={{ flex: 1, minWidth: 220 }}>
             <div
               style={{
@@ -768,7 +752,6 @@ function App() {
               className="btn-primary"
               onClick={claimDailyReward}
               disabled={dailyClaimed || dailyLoading}
-              aria-expanded={!campaignSidebarCollapsed}
             >
               {dailyClaimed
                 ? "Daily Bonus Claimed"
@@ -923,6 +906,7 @@ function App() {
               aria-label={campaignSidebarCollapsed
                 ? "Expand campaigns panel"
                 : "Collapse campaigns panel"}
+              aria-expanded={!campaignSidebarCollapsed}
             >
               <Icon
                 name={campaignSidebarCollapsed ? "angle-right" : "angle-left"}
