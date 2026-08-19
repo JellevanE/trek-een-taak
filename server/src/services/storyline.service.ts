@@ -219,6 +219,7 @@ export class StorylineService {
         storyline: Storyline,
         type: 'intro' | 'daily' | 'reflection' | 'completion',
         userId: number,
+        variant?: number,
     ): Promise<void> {
         const { readCampaigns } = await import('../data/campaignStore.js');
         const { readTasks } = await import('../data/taskStore.js');
@@ -301,7 +302,7 @@ export class StorylineService {
         };
 
         const templateType = type === 'intro' ? 'intro' : type === 'daily' ? 'daily-update' : type;
-        const template = PromptService.loadTemplate(storyline.theme, templateType);
+        const template = PromptService.loadTemplate(storyline.theme, templateType, variant);
         const systemPrompt = PromptService.loadSystemPrompt(storyline.theme);
 
         const generate = textGeneratorOverride

@@ -107,7 +107,7 @@ lands (see P3.3).
 | --- | --- | --- |
 | `GET` | `/api/storylines/:campaignId` | Fetch storyline (client polls this) |
 | `GET` | `/api/storylines/:campaignId/check-update` | Check/trigger update; lazy-creates |
-| `POST` | `/api/debug/generate-storyline-update` | Admin: force-generate by type (debug-gated) |
+| `POST` | `/api/debug/generate-storyline-update` | Admin: force-generate by `type` (+ optional `variant` for daily); debug-gated |
 
 All storyline routes sit behind `ensureAuth`.
 
@@ -146,6 +146,12 @@ file count and asserts every variant carries the required placeholders. The same
 change added the system-prompt output rules (plain text, no emojis, brevity),
 tightened all template word counts, and fixed the `dist/prompts` build copy (it
 was nesting under `dist/prompts/prompts` on rebuilds).
+
+The admin debug panel can force any specific variant: the storyline row now has a
+"Daily variants" line with `Daily v1/v2/v3` buttons. They post the optional
+`variant` field to `/api/debug/generate-storyline-update`, which
+`PromptService.loadTemplate` uses to load `daily-update-{variant}.txt` directly
+(out-of-range → random, as normal generation).
 
 ### P3.3 — E2E pass + typewriter polish (incl. Markdown handling)
 

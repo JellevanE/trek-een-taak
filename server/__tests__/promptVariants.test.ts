@@ -57,3 +57,18 @@ test('loadTemplate resolves a real daily-update template, never the fallback', (
         expect(template).not.toContain('Write a story update about {currentObjective}');
     }
 });
+
+test('loadTemplate honors an explicit daily-update variant', () => {
+    for (const n of [1, 2, 3]) {
+        const forced = PromptService.loadTemplate('fantasy', 'daily-update', n);
+        const onDisk = readFileSync(join(FANTASY_DIR, `daily-update-${n}.txt`), 'utf8');
+        expect(forced).toBe(onDisk);
+    }
+});
+
+test('loadTemplate falls back to random for an out-of-range variant', () => {
+    // 99 is out of range → should still return a valid variant, not the fallback.
+    const template = PromptService.loadTemplate('fantasy', 'daily-update', 99);
+    expect(template).toContain('{tasksCompleted}');
+    expect(template).not.toContain('Write a story update about {currentObjective}');
+});

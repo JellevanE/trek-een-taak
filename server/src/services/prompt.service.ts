@@ -11,13 +11,19 @@ const PROMPTS_DIR = path.resolve(MODULE_DIR, '../prompts');
 export const DAILY_UPDATE_VARIANTS = 3;
 
 export class PromptService {
-    static loadTemplate(theme: string, type: string): string {
+    // `variant` forces a specific daily-update-N.txt (1-based). Out-of-range or
+    // omitted → a random variant. Used by the debug endpoint to preview a chosen
+    // variant; normal generation leaves it undefined for random rotation.
+    static loadTemplate(theme: string, type: string, variant?: number): string {
         try {
             let templatePath = path.join(PROMPTS_DIR, theme, `${type}.txt`);
 
             if (!fs.existsSync(templatePath) && type === 'daily-update') {
-                const variant = Math.floor(Math.random() * DAILY_UPDATE_VARIANTS) + 1;
-                templatePath = path.join(PROMPTS_DIR, theme, `daily-update-${variant}.txt`);
+                const chosen =
+                    variant && variant >= 1 && variant <= DAILY_UPDATE_VARIANTS
+                        ? variant
+                        : Math.floor(Math.random() * DAILY_UPDATE_VARIANTS) + 1;
+                templatePath = path.join(PROMPTS_DIR, theme, `daily-update-${chosen}.txt`);
             }
 
             if (fs.existsSync(templatePath)) {

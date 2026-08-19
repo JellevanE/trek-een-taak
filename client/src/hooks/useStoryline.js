@@ -128,7 +128,7 @@ export const useStoryline = ({
     // Admin/dev-only: force-generate a storyline update of a given type for the
     // selected campaign via the debug endpoint (bypasses the new-day gate and
     // daily quota) so multiple updates can be previewed on demand.
-    const generateDebugUpdate = useCallback(async (type) => {
+    const generateDebugUpdate = useCallback(async (type, variant) => {
         if (!token) return;
         if (typeof activeCampaignFilter !== 'number') {
             if (pushToast) pushToast('Select a campaign first', 'error');
@@ -141,7 +141,11 @@ export const useStoryline = ({
                 {
                     method: 'POST',
                     headers: getAuthHeadersUtil(token),
-                    body: JSON.stringify({ campaign_id: activeCampaignFilter, type }),
+                    body: JSON.stringify({
+                        campaign_id: activeCampaignFilter,
+                        type,
+                        ...(variant ? { variant } : {}),
+                    }),
                 },
                 onUnauthorized,
             );
@@ -149,7 +153,8 @@ export const useStoryline = ({
                 setCurrentStoryline(updated);
                 setHasNewUpdate(computeHasNewUpdate(updated));
             }
-            if (pushToast) pushToast(`Generated ${type} update`, 'success');
+            const label = variant ? `${type} v${variant}` : type;
+            if (pushToast) pushToast(`Generated ${label} update`, 'success');
         } catch (err) {
             console.error('Debug storyline generation failed', err);
             if (pushToast) pushToast('Failed to generate story update', 'error');
