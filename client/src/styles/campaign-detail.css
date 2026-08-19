@@ -320,6 +320,24 @@
     gap: 10px;
 }
 
+/* ---- Story markup paragraphs (emphasis-only render) ---- */
+.story-paragraph {
+    margin: 0 0 0.9em;
+}
+
+.story-paragraph:last-child {
+    margin-bottom: 0;
+}
+
+.story-paragraph strong {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.story-paragraph em {
+    font-style: italic;
+}
+
 /* ---- Typewriter cursor ---- */
 .typewriter-cursor {
     display: inline-block;

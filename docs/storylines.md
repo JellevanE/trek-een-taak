@@ -95,11 +95,26 @@ does a clean copy `src/prompts` → `dist/prompts` (production reads from `dist`
   single encounter, variant 3 is a chronicler's entry. A test guards the constant
   against the on-disk file count (`server/__tests__/promptVariants.test.ts`).
 
-**Output rules** live in `_shared/system.txt` and govern every generation: plain
-prose only (no Markdown/formatting syntax), never emojis, and keep it concise —
-per-template targets were tightened to ~90–200 words. The plain-text rule pairs
-with the client rendering literal text today; revisit it if Markdown rendering
-lands (see P3.3).
+**Output rules** live in `_shared/system.txt` and govern every generation:
+**emphasis-only** formatting — the model may use `*italic*` / `**bold**` and
+nothing else (no headings, rules, lists, blockquotes, code), never emojis, and
+keep it concise (per-template targets ~90–200 words). The client renders that
+subset (see below); anything structural the model still emits is neutralised, not
+shown as literal Markdown.
+
+**Story model** is `claude-sonnet-5` (story text) + `claude-haiku-4-5-20251001`
+(narrative extraction). No `temperature` is sent — Sonnet 5 rejects non-default
+sampling params (400); LangChain defaults `thinking` to disabled, so there's no
+adaptive-thinking spend to truncate a short update.
+
+**Rendering (emphasis-only):** `client/src/utils/storyMarkup.js` parses story
+text into paragraphs of `{text, bold, italic}` runs — rendering `*italic*` /
+`**bold**` as `<em>`/`<strong>`, neutralising headings/rules/blockquotes to plain
+text, and never touching single `_` (usernames). `StoryMarkup.jsx` renders it
+(text nodes + `<em>`/`<strong>` only, so XSS-safe). The typewriter reveal is
+driven by the `useTypewriter` hook so it can animate block-level paragraphs; the
+modal reveals progressively, the quest log shows a plain teaser collapsed and
+formatted markup expanded.
 
 ### HTTP surface
 
@@ -181,19 +196,13 @@ the reveal animation.
 3. Optional (not started): expose typewriter speed as a Settings preference (a
    `SettingsTab` already exists) — defer unless wanted.
 
-**Work — Markdown handling (decide one):** the model sometimes emits Markdown,
-which currently renders as literal syntax in the story panel. As of P3.2 the
-system prompt forbids Markdown, so output is clean plain text today — this item is
-about whether to *allow and render* it for richer effect instead.
-- **Keep plain text (default, zero-cost):** leave the system-prompt rule in place;
-  nothing more to do. Choose this unless the richer look is wanted.
-- **Render Markdown:** relax the system-prompt rule, then render safely. The catch
-  is that `TypewriterText` reveals text character-by-character; a Markdown parser
-  can't run on a half-emitted `**bold`. Practical approach: keep the typewriter for
-  the reveal, then swap to a parsed (sanitized) render on completion — or render a
-  growing subset of *already-closed* Markdown blocks. Constrain the model to a
-  tiny subset (emphasis, paragraphs) and sanitize output; still **no emojis**.
-  Non-trivial — only pursue if the effect clearly earns it.
+**Markdown handling — DONE (emphasis-only rendering).** The model ignored a hard
+"no Markdown" instruction (confirmed on Sonnet 4.6 *and* Sonnet 5 — both still
+emit headings/emphasis), and output scrubbing was rejected as too brittle. The
+shipped approach: allow a tiny subset (`*italic*` / `**bold**`) via the system
+prompt and render it safely; neutralise everything structural. See the Prompts /
+Rendering notes above. The typewriter reveals the parsed markup progressively (no
+half-emitted markers ever shown) via the `useTypewriter` hook.
 
 **Work — E2E pass. Pick one lane and state the choice in the PR:**
 - **Lane A (matches original intent, lighter):** a scripted **manual** MCP-driven
