@@ -490,7 +490,7 @@ function App() {
           style={{ display: "flex", justifyContent: "center", marginTop: 40 }}
         >
           <div className="auth-required-screen">
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <div className="auth-intro" style={{ textAlign: "center", marginBottom: 24 }}>
               <h2>Welcome to Quest Tracker</h2>
               <p style={{ color: "var(--text-muted)", marginBottom: 32 }}>
                 Please sign in or create an account to start managing your

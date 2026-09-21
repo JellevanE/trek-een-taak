@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { apiUrl } from './utils/api.js';
+import Avatar from './components/Avatar.jsx';
+import LoadingSpinner from './components/LoadingSpinner.jsx';
 
-const RegistrationWizard = React.lazy(() => import('./RegistrationWizard'));
+const RegistrationWizard = React.lazy(() => import('./features/registration'));
 
 export default function Profile({
     token,
@@ -144,7 +146,13 @@ export default function Profile({
         // Show registration wizard
         if (showRegistrationWizard) {
             return (
-                <React.Suspense fallback={<div className='profile-box'>Loading registration…</div>}>
+                <React.Suspense
+                    fallback={
+                        <div className='profile-box'>
+                            <LoadingSpinner label='Loading registration…' />
+                        </div>
+                    }
+                >
                     <RegistrationWizard
                         onSuccess={(token, user) => {
                             if (user && user.rpg) {
@@ -231,11 +239,11 @@ export default function Profile({
                         ? (
                             <div>
                                 <div className='profile-header'>
-                                    <div className='avatar-placeholder'>
-                                        {profile.display_name
-                                            ? profile.display_name.charAt(0).toUpperCase()
-                                            : 'U'}
-                                    </div>
+                                    <Avatar
+                                        avatar={profile.avatar}
+                                        name={profile.display_name}
+                                        size={48}
+                                    />
                                     <div>
                                         <strong>Name:</strong> {profile.display_name || ''}
                                     </div>

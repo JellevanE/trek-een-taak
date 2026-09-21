@@ -12,6 +12,7 @@
 @import './styles/animations.css';
 @import './styles/modals.css';
 @import './styles/auth.css';
+@import './styles/registration.css';
 @import './styles/responsive.css';
 
 /* App-specific overrides and tweaks go below */
