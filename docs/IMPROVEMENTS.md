@@ -14,36 +14,22 @@ see git history.
 
 ## Registration flow
 
-### UX
-
-- **Real-time username availability** — Wire the frontend to the existing `/api/users/check-username/:username` endpoint with debounced calls (500ms) and visual feedback (✓ available / ✗ taken / ⏳ checking); suggest alternatives when taken.
-- **Enhanced password strength meter** — Expand the basic indicator with improvement suggestions, a character-requirement checklist, and color-coded feedback beyond weak/good/strong.
-- **Welcome step** — Intro step with app overview, feature highlights, privacy/security assurance, and a "Get Started" CTA before account details.
-- **Confirmation step** — Final step with welcome message, profile summary, next-steps guidance, and celebration elements (achievement toast).
-
-### Visual & interaction polish
-
-- **Avatar picker** — Visual avatar selection: grid layout, predefined options, hover/selection states, keyboard nav.
-- **Clickable progress indicator** — Let users click completed steps (if validation passed) to navigate the wizard.
-- **Animations & transitions** — 300ms slide between steps, 200ms focus highlights, 150ms validation color changes, 400ms progress-bar animations.
-- **Mobile / tablet optimization** — 320–768px: larger touch targets (min 44px), simplified nav, condensed progress. 768–1024px: two-column forms, side-by-side fields.
-
-### Component refactoring
-
-- **FormField component** — Reusable input with built-in validation, error/success display, consistent styling.
-- **ErrorBoundary component** — Registration-specific boundary with graceful handling, friendly messages, retry, fallback UI.
-- **LoadingSpinner component** — Centralized loading state with consistent indicators, context labels, timeout handling, cancel.
+The wizard now lives in `client/src/features/registration/` (welcome → account →
+profile → ready). Live username availability, the requirement-checklist strength
+meter, the avatar picker, clickable stepper, step transitions, tablet/mobile
+layouts, and the `FormField` / `LoadingSpinner` / `RegistrationErrorBoundary`
+components shipped with unit tests. What's left:
 
 ### Testing gaps
 
-- **Unit tests** — Components (RegistrationWizard, AccountDetailsStep, ProfileSetupStep, ProgressIndicator), validation logic, state management, API integration.
-- **Integration tests** — Full registration flow, error scenarios, mobile experience.
+- **Integration tests** — Full registration flow against a real server (Playwright), error scenarios (taken username at submit, rate limit, offline), mobile experience at 320–768px.
 - **Performance tests** — Render times, API response handling, large-dataset / slow-connection behavior.
 
 ### Advanced (future)
 
-- **Registration achievements** — Badges / XP bonuses for completing profile setup.
+- **Registration achievements** — Persist the "First Steps" achievement server-side and award XP for completing profile setup (the confirmation step currently shows it client-side only).
 - **Welcome quest tutorial** — Intro quest that guides new users through core features.
+- **Avatar uploads** — The `avatar` field already accepts URLs and `Avatar` renders them; the picker only offers presets.
 
 ## API tooling
 

@@ -16,6 +16,13 @@ import star from '../assets/icons/star-solid.svg';
 import arrowUp from '../assets/icons/arrow-alt-circle-up-solid.svg';
 import checkCircle from '../assets/icons/check-circle-solid.svg';
 import bellMute from '../assets/icons/bell-mute-solid.svg';
+import bell from '../assets/icons/bell-solid.svg';
+import bookHeart from '../assets/icons/book-heart-solid.svg';
+import shuffle from '../assets/icons/shuffle-solid.svg';
+import octagonCheck from '../assets/icons/octagon-check-solid.svg';
+import questionCircle from '../assets/icons/question-circle-solid.svg';
+import envelope from '../assets/icons/envelope-solid.svg';
+import exclaimation from '../assets/icons/exclaimation-solid.svg';
 
 /**
  * Icon
@@ -40,6 +47,13 @@ const ICONS = {
     'arrow-up': arrowUp,
     'check-circle': checkCircle,
     'bell-mute': bellMute,
+    bell,
+    'book-heart': bookHeart,
+    shuffle,
+    'octagon-check': octagonCheck,
+    'question-circle': questionCircle,
+    envelope,
+    exclaimation,
 };
 
 export default function Icon({ name, size = 18, className = '', title }) {
